@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { chapterQueryOptions } from "~/hooks/useChapters";
 import { versesByChapterQueryOptions } from "~/hooks/useVerses";
 import { verseAudioQueryOptions } from "~/hooks/useAudio";
-import { SurahHeader, Bismillah, VerseList, Pagination, ReadingToolbar } from "~/components/quran";
+import { SurahHeader, VerseList, Pagination, ReadingToolbar } from "~/components/quran";
 import { Loading } from "~/components/ui/Loading";
 import { SegmentedControl } from "~/components/ui/SegmentedControl";
 import { TOTAL_CHAPTERS } from "@mahfuz/shared/constants";
@@ -140,17 +140,37 @@ function SurahView() {
     }));
   }, [queryClient, reciterId, chapterId]);
 
+  /** Fetch Bismillah audio (verse 1:1 from Al-Fatiha) to prepend before surahs */
+  const fetchBismillahAudio = useCallback(async (): Promise<VerseAudioData | null> => {
+    if (!chapter.bismillah_pre) return null;
+    const fatihaAudio = await queryClient.fetchQuery(
+      verseAudioQueryOptions(reciterId, 1),
+    );
+    const bismillah = fatihaAudio.find((f) => f.verse_key === "1:1");
+    if (!bismillah) return null;
+    return {
+      verseKey: "bismillah",
+      url: bismillah.url,
+      segments: bismillah.segments,
+    };
+  }, [queryClient, reciterId, chapter.bismillah_pre]);
+
   const handlePlaySurah = useCallback(async () => {
     if (isPlayingThisSurah) {
       togglePlayPause();
       return;
     }
-    const audioData = await fetchAudioData();
-    playSurah(chapterId, chapter.translated_name.name, audioData);
+    const [audioData, bismillah] = await Promise.all([
+      fetchAudioData(),
+      fetchBismillahAudio(),
+    ]);
+    const playlist = bismillah ? [bismillah, ...audioData] : audioData;
+    playSurah(chapterId, chapter.translated_name.name, playlist);
   }, [
     isPlayingThisSurah,
     togglePlayPause,
     fetchAudioData,
+    fetchBismillahAudio,
     playSurah,
     chapterId,
     chapter.translated_name.name,
@@ -158,15 +178,23 @@ function SurahView() {
 
   const handlePlayFromVerse = useCallback(
     async (verseKey: string) => {
-      const audioData = await fetchAudioData();
+      const [audioData, bismillah] = await Promise.all([
+        fetchAudioData(),
+        fetchBismillahAudio(),
+      ]);
+      // Prepend Bismillah when playing from the first verse
+      const isFirstVerse = verseKey === `${chapterId}:1`;
+      const playlist =
+        bismillah && isFirstVerse ? [bismillah, ...audioData] : audioData;
+      const playKey = bismillah && isFirstVerse ? "bismillah" : verseKey;
       playVerse(
         chapterId,
         chapter.translated_name.name,
-        verseKey,
-        audioData,
+        playKey,
+        playlist,
       );
     },
-    [fetchAudioData, playVerse, chapterId, chapter.translated_name.name],
+    [fetchAudioData, fetchBismillahAudio, playVerse, chapterId, chapter.translated_name.name],
   );
 
   const hasPrev = chapterId > 1;
@@ -241,10 +269,7 @@ function SurahView() {
           </button>
         )}
 
-        {/* Bismillah */}
-        {chapter.bismillah_pre && <Bismillah />}
-
-        {/* Verses */}
+        {/* Verses (Bismillah is rendered automatically by VerseList for the first verse of a surah) */}
         <VerseList
           verses={versesData.verses}
           showTranslation={showTranslation}

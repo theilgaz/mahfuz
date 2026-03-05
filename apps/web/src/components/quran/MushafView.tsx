@@ -1,11 +1,16 @@
 import type { Verse } from "@mahfuz/shared/types";
+import { Bismillah } from "./Bismillah";
 import { usePreferencesStore, getActiveColors } from "~/stores/usePreferencesStore";
+
+/** Surahs that do NOT get a Bismillah prefix */
+const NO_BISMILLAH_SURAHS = new Set([1, 9]);
 
 interface MushafViewProps {
   verses: Verse[];
+  showBismillah?: boolean;
 }
 
-export function MushafView({ verses }: MushafViewProps) {
+export function MushafView({ verses, showBismillah = true }: MushafViewProps) {
   const colorizeWords = usePreferencesStore((s) => s.colorizeWords);
   const colorPaletteId = usePreferencesStore((s) => s.colorPaletteId);
   const colors = getActiveColors({ colorPaletteId });
@@ -40,10 +45,22 @@ export function MushafView({ verses }: MushafViewProps) {
                 dir="rtl"
               >
                 {verses.map((verse) => {
+                  const surahId = Number(verse.verse_key.split(":")[0]);
+                  const needsBismillah =
+                    showBismillah &&
+                    verse.verse_number === 1 &&
+                    !NO_BISMILLAH_SURAHS.has(surahId);
                   const words =
                     verse.words?.filter((w) => w.char_type_name === "word") ?? [];
                   return (
                     <span key={verse.id}>
+                      {needsBismillah && (
+                        <>
+                          <span className="block w-full py-2 text-[1.5rem]">
+                            بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+                          </span>
+                        </>
+                      )}
                       {colorizeWords && words.length > 0
                         ? words.map((w, i) => (
                             <span
