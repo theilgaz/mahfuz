@@ -50,7 +50,12 @@ export function WordByWord({
             {showTranslation && (
               <span
                 className="font-sans text-[var(--theme-text-tertiary)]"
-                style={{ fontSize: `calc(11px * ${translationSize})` }}
+                style={{
+                  fontSize: `calc(11px * ${translationSize})`,
+                  ...(colorizeWords && colors.length > 0 && !isActive
+                    ? { color: colors[i % colors.length] }
+                    : {}),
+                }}
               >
                 {word.translation?.text}
               </span>
@@ -58,7 +63,12 @@ export function WordByWord({
             {showTransliteration && (
               <span
                 className="font-sans text-[var(--theme-text-quaternary)]"
-                style={{ fontSize: `calc(10px * ${transliterationSize})` }}
+                style={{
+                  fontSize: `calc(10px * ${transliterationSize})`,
+                  ...(colorizeWords && colors.length > 0 && !isActive
+                    ? { color: colors[i % colors.length], opacity: 0.75 }
+                    : {}),
+                }}
               >
                 {word.transliteration?.text}
               </span>
