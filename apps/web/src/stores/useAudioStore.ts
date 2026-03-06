@@ -20,6 +20,7 @@ interface AudioStoreState {
   chapterId: number | null;
   chapterName: string | null;
   verseKeys: string[];
+  versePageMap: Record<string, number>; // verseKey -> pageNumber
 
   // Preferences (persisted)
   reciterId: number;
@@ -41,12 +42,14 @@ interface AudioStoreState {
     chapterId: number,
     chapterName: string,
     audioData: VerseAudioData[],
+    versePageMap?: Record<string, number>,
   ) => void;
   playVerse: (
     chapterId: number,
     chapterName: string,
     verseKey: string,
     audioData: VerseAudioData[],
+    versePageMap?: Record<string, number>,
   ) => void;
   play: () => void;
   pause: () => void;
@@ -82,6 +85,7 @@ export const useAudioStore = create<AudioStoreState>()(
       chapterId: null,
       chapterName: null,
       verseKeys: [],
+      versePageMap: {},
       reciterId: DEFAULT_RECITER_ID,
       speed: 1,
       volume: 1,
@@ -93,7 +97,7 @@ export const useAudioStore = create<AudioStoreState>()(
 
       setEngine: (engine) => set({ engine }),
 
-      playSurah: (chapterId, chapterName, audioData) => {
+      playSurah: (chapterId, chapterName, audioData, versePageMap = {}) => {
         const { engine, speed, volume, isMuted, repeatMode } = get();
         if (!engine || audioData.length === 0) return;
         engine.loadPlaylist(audioData);
@@ -105,13 +109,14 @@ export const useAudioStore = create<AudioStoreState>()(
           chapterId,
           chapterName,
           verseKeys: audioData.map((d) => d.verseKey),
+          versePageMap,
           isVisible: true,
           isExpanded: false,
         });
         engine.play(0);
       },
 
-      playVerse: (chapterId, chapterName, verseKey, audioData) => {
+      playVerse: (chapterId, chapterName, verseKey, audioData, versePageMap = {}) => {
         const { engine, speed, volume, isMuted, repeatMode } = get();
         if (!engine || audioData.length === 0) return;
         // Find index before loadPlaylist (which calls stop and resets state)
@@ -128,6 +133,7 @@ export const useAudioStore = create<AudioStoreState>()(
           chapterId,
           chapterName,
           verseKeys: audioData.map((d) => d.verseKey),
+          versePageMap,
           isVisible: true,
           isExpanded: false,
         });

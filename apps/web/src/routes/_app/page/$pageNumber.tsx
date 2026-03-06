@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback, useRef, useEffect, useMemo, type PointerEvent as ReactPointerEvent } from "react";
-import { versesByPageQueryOptions } from "~/hooks/useVerses";
+import { versesByPageQueryOptions, versesByChapterQueryOptions } from "~/hooks/useVerses";
 import { chaptersQueryOptions } from "~/hooks/useChapters";
 import { verseAudioQueryOptions } from "~/hooks/useAudio";
 import { Bismillah, VerseList, ReadingToolbar } from "~/components/quran";
@@ -202,19 +202,31 @@ function MushafPageView() {
     async (verseKey: string) => {
       const chapterId = Number(verseKey.split(":")[0]);
       const ch = chapters.find((c) => c.id === chapterId);
-      const audioFiles = await queryClient.fetchQuery(
-        verseAudioQueryOptions(reciterId, chapterId),
-      );
+      
+      // Fetch both audio and verses to get page information
+      const [audioFiles, chapterVerses] = await Promise.all([
+        queryClient.fetchQuery(verseAudioQueryOptions(reciterId, chapterId)),
+        queryClient.fetchQuery(versesByChapterQueryOptions(chapterId, 1)),
+      ]);
+      
       const audioData: VerseAudioData[] = audioFiles.map((f) => ({
         verseKey: f.verse_key,
         url: f.url,
         segments: f.segments,
       }));
+      
+      // Build verse page map
+      const versePageMap: Record<string, number> = {};
+      for (const verse of chapterVerses.verses) {
+        versePageMap[verse.verse_key] = verse.page_number;
+      }
+      
       playVerse(
         chapterId,
         ch?.translated_name.name || `Sure ${chapterId}`,
         verseKey,
         audioData,
+        versePageMap,
       );
     },
     [chapters, queryClient, reciterId, playVerse],
@@ -232,13 +244,30 @@ function MushafPageView() {
     const ch = firstGroup.chapter;
     const firstVerseKey = firstGroup.verses[0]?.verse_key;
     if (!firstVerseKey) return;
-    const audioFiles = await queryClient.fetchQuery(
-      verseAudioQueryOptions(reciterId, firstGroup.chapterId),
-    );
+    
+    // Fetch both audio and verses to get page information
+    const [audioFiles, chapterVerses] = await Promise.all([
+      queryClient.fetchQuery(verseAudioQueryOptions(reciterId, firstGroup.chapterId)),
+      queryClient.fetchQuery(versesByChapterQueryOptions(firstGroup.chapterId, 1)),
+    ]);
+    
     const audioData: VerseAudioData[] = audioFiles.map((f) => ({
       verseKey: f.verse_key, url: f.url, segments: f.segments,
     }));
-    playVerse(firstGroup.chapterId, ch?.translated_name.name || `Sure ${firstGroup.chapterId}`, firstVerseKey, audioData);
+    
+    // Build verse page map
+    const versePageMap: Record<string, number> = {};
+    for (const verse of chapterVerses.verses) {
+      versePageMap[verse.verse_key] = verse.page_number;
+    }
+    
+    playVerse(
+      firstGroup.chapterId, 
+      ch?.translated_name.name || `Sure ${firstGroup.chapterId}`, 
+      firstVerseKey, 
+      audioData,
+      versePageMap,
+    );
   }, [isPlayingThisPage, togglePlayPause, firstGroup, queryClient, reciterId, playVerse]);
 
   // Keyboard navigation (ArrowLeft/Right)
@@ -375,17 +404,16 @@ function MushafPageView() {
             <span className="w-8 shrink-0" />
           )}
 
-          {/* Center: unified toolbar (icon-only tabs + A ع) */}
+          {/* Center content */}
           <div className="flex min-w-0 flex-1 items-center justify-center">
-            <div className="flex items-center rounded-xl bg-[var(--theme-pill-bg)] p-1">
-              <SegmentedControl options={VIEW_MODE_OPTIONS} value={viewMode} onChange={setViewMode} iconOnlyMobile transparent />
-              <div className="mx-0.5 h-4 w-px bg-[var(--theme-border)]" />
-              <ReadingToolbar segmentStyle />
-            </div>
+            <SegmentedControl options={VIEW_MODE_OPTIONS} value={viewMode} onChange={setViewMode} />
           </div>
 
-          {/* Right group: fullscreen + arrow */}
+          {/* Right group: page info + fullscreen + reading toolbar + arrow */}
           <div className="flex shrink-0 items-center gap-0.5">
+            <span className="hidden text-[12px] tabular-nums text-[var(--theme-text-tertiary)] sm:inline">
+              Sayfa {pageNum}
+            </span>
             {viewMode === "mushaf" && (
               <button
                 type="button"
@@ -397,6 +425,7 @@ function MushafPageView() {
                 {fullscreenIcon}
               </button>
             )}
+            <ReadingToolbar />
             {pageNum < TOTAL_PAGES ? (
               <Link
                 to="/page/$pageNumber"

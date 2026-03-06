@@ -201,7 +201,14 @@ function SurahView() {
       fetchBismillahAudio(),
     ]);
     const playlist = bismillah ? [bismillah, ...audioData] : audioData;
-    playSurah(chapterId, chapter.translated_name.name, playlist);
+    
+    // Build verse page map
+    const versePageMap: Record<string, number> = {};
+    for (const verse of versesData.verses) {
+      versePageMap[verse.verse_key] = verse.page_number;
+    }
+    
+    playSurah(chapterId, chapter.translated_name.name, playlist, versePageMap);
   }, [
     isPlayingThisSurah,
     togglePlayPause,
@@ -210,6 +217,7 @@ function SurahView() {
     playSurah,
     chapterId,
     chapter.translated_name.name,
+    versesData.verses,
   ]);
 
   const handlePlayFromVerse = useCallback(
@@ -223,14 +231,22 @@ function SurahView() {
       const playlist =
         bismillah && isFirstVerse ? [bismillah, ...audioData] : audioData;
       const playKey = bismillah && isFirstVerse ? "bismillah" : verseKey;
+      
+      // Build verse page map
+      const versePageMap: Record<string, number> = {};
+      for (const verse of versesData.verses) {
+        versePageMap[verse.verse_key] = verse.page_number;
+      }
+      
       playVerse(
         chapterId,
         chapter.translated_name.name,
         playKey,
         playlist,
+        versePageMap,
       );
     },
-    [fetchAudioData, fetchBismillahAudio, playVerse, chapterId, chapter.translated_name.name],
+    [fetchAudioData, fetchBismillahAudio, playVerse, chapterId, chapter.translated_name.name, versesData.verses],
   );
 
   const hasPrev = chapterId > 1;
