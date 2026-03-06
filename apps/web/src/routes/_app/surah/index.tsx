@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { chaptersQueryOptions } from "~/hooks/useChapters";
 import { ChapterCard } from "~/components/quran";
 import { Loading } from "~/components/ui/Loading";
@@ -39,7 +39,17 @@ function SurahList() {
   const { data: chapters } = useSuspenseQuery(chaptersQueryOptions());
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
-  const [sort, setSort] = useState<SortType>("mushaf");
+  const [sort, _setSort] = useState<SortType>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("surah-sort");
+      if (saved === "mushaf" || saved === "revelation") return saved;
+    }
+    return "mushaf";
+  });
+  const setSort = useCallback((v: SortType) => {
+    _setSort(v);
+    localStorage.setItem("surah-sort", v);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
