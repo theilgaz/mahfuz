@@ -107,7 +107,7 @@ function AppLayout() {
           <div className="flex min-w-0 items-center gap-1">
             {/* Logo */}
             <Link to="/browse" className="mr-2 flex shrink-0 items-center gap-2 sm:mr-3">
-              <img src="/images/mahfuz-logo.svg" alt="Mahfuz" className="h-10 w-auto" />
+              <img src="/images/mahfuz-logo.svg" alt="Mahfuz" className="logo-invert h-10 w-auto" />
             </Link>
 
             {/* Chapter/page prev/next (surah detail) */}

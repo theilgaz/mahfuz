@@ -18,7 +18,7 @@ function LandingPage() {
       <header className="glass sticky top-0 z-20 border-b border-black/[0.06] px-6 py-3">
         <div className="mx-auto flex max-w-[980px] items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/images/mahfuz-logo.svg" alt="Mahfuz" className="h-8 w-auto" />
+            <img src="/images/mahfuz-logo.svg" alt="Mahfuz" className="logo-invert h-8 w-auto" />
           </Link>
           <nav className="flex items-center gap-1">
             {session ? (
@@ -161,7 +161,7 @@ function LandingPage() {
       <footer className="border-t border-[#d2d2d7] bg-[#f5f5f7] px-6 py-5">
         <div className="mx-auto flex max-w-[980px] flex-col items-center justify-between gap-3 sm:flex-row">
           <div className="flex items-center gap-3">
-            <img src="/images/mahfuz-logo.svg" alt="Mahfuz" className="h-6 w-auto" />
+            <img src="/images/mahfuz-logo.svg" alt="Mahfuz" className="logo-invert h-6 w-auto" />
             <span className="text-xs text-[#86868b]">Açık kaynak Kuran-ı Kerim uygulaması</span>
           </div>
           <a

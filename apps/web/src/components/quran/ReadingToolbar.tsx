@@ -5,11 +5,13 @@ import type { Theme, ViewMode, ColorPaletteId } from "~/stores/usePreferencesSto
 import type { Verse } from "@mahfuz/shared/types";
 import { SegmentedControl } from "~/components/ui/SegmentedControl";
 import { verseByKeyQueryOptions } from "~/hooks/useVerses";
+import { useAudioStore } from "~/stores/useAudioStore";
 
 const THEMES: { value: Theme; label: string; color: string; border: string }[] = [
   { value: "light", label: "Açık", color: "#ffffff", border: "#d2d2d7" },
   { value: "sepia", label: "Sepia", color: "#f5ead6", border: "#d4b882" },
   { value: "dark", label: "Koyu", color: "#1a1a1a", border: "#444" },
+  { value: "dimmed", label: "Gece", color: "#22272e", border: "#444c56" },
 ];
 
 type ToolbarTab = "boyut" | "tema" | "font";
@@ -277,7 +279,7 @@ function ThemeTabContent({ theme, setTheme, colorizeWords, setColorizeWords, col
           {THEMES.map((t) => (
             <button key={t.value} onClick={() => setTheme(t.value)} className="flex flex-col items-center gap-1.5" aria-label={t.label}>
               <span className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all ${theme === t.value ? "border-primary-600 ring-2 ring-primary-600/30" : "border-[var(--theme-divider)]"}`} style={{ backgroundColor: t.color }}>
-                {theme === t.value && <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke={t.value === "dark" ? "#e5e5e5" : "#059669"} strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                {theme === t.value && <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke={t.value === "dark" || t.value === "dimmed" ? "#e5e5e5" : "#059669"} strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
               </span>
               <span className="text-[11px] text-[var(--theme-text-tertiary)]">{t.label}</span>
             </button>
@@ -338,8 +340,10 @@ export function ReadingToolbar({ segmentStyle }: { segmentStyle?: boolean } = {}
   const popoverRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Preview verse (Bakara 45)
-  const { data: previewVerse } = useQuery(verseByKeyQueryOptions("2:45"));
+  const audioVisible = useAudioStore((s) => s.isVisible);
+
+  // Preview verse (Besmele — Fatiha 1)
+  const { data: previewVerse } = useQuery(verseByKeyQueryOptions("1:1"));
 
   // View mode
   const viewMode = usePreferencesStore((s) => s.viewMode);
@@ -426,7 +430,7 @@ export function ReadingToolbar({ segmentStyle }: { segmentStyle?: boolean } = {}
         <>
           <div className="fixed inset-0 z-40 bg-black/30 sm:hidden" onClick={() => setOpen(false)} />
           <div ref={popoverRef}
-            className="fixed inset-x-0 top-1/2 z-50 max-h-[80vh] -translate-y-1/2 overflow-y-auto overscroll-contain border-y border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] p-5 shadow-[var(--shadow-float)] sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:max-h-[70vh] sm:translate-y-0 sm:rounded-2xl sm:border sm:p-4 sm:animate-toolbar-in"
+            className={`fixed inset-x-0 z-50 max-h-[92vh] overflow-y-auto overscroll-contain rounded-t-2xl border-t border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] p-5 pb-8 shadow-[var(--shadow-float)] sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[26rem] sm:max-h-[70vh] sm:rounded-2xl sm:border sm:p-4 sm:pb-4 sm:animate-toolbar-in ${audioVisible ? "bottom-16" : "bottom-0"}`}
             style={{ backdropFilter: "saturate(180%) blur(20px)" }}
           >
             {/* Mobile header */}

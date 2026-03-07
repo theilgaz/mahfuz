@@ -57,7 +57,7 @@ export function AyahText({
       aria-label={`Ayet ${verse.verse_key}`}
       className={`animate-fade-in group px-4 py-7 transition-colors sm:px-6 ${
         isCurrentVerse && isAudioPlaying
-          ? "bg-primary-50/40"
+          ? "bg-[var(--theme-highlight-bg)]"
           : "hover:bg-[var(--theme-hover-bg)]"
       } ${!showTranslation && !revealed ? "cursor-pointer" : ""}`}
       onClick={

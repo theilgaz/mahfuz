@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type ViewMode = "normal" | "wordByWord" | "mushaf";
-export type Theme = "light" | "sepia" | "dark";
+export type Theme = "light" | "sepia" | "dark" | "dimmed";
 export type ColorPaletteId = "vivid" | "pastel" | "earth" | "ocean";
 
 export type FontGroup = "classic" | "modern" | "decorative";

@@ -45,6 +45,7 @@ const THEME_OPTIONS: { value: Theme; label: string; color: string }[] = [
   { value: "light", label: "Açık", color: "#ffffff" },
   { value: "sepia", label: "Sepia", color: "#f5ead6" },
   { value: "dark", label: "Koyu", color: "#1a1a1a" },
+  { value: "dimmed", label: "Gece", color: "#22272e" },
 ];
 
 type SettingsTab = "normal" | "wordByWord" | "mushaf";
@@ -143,7 +144,7 @@ function SettingsPage() {
                   style={{ backgroundColor: t.color }}
                 >
                   {active && (
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke={t.value === "dark" ? "#e5e5e5" : "#059669"} strokeWidth={2.5}>
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke={t.value === "dark" || t.value === "dimmed" ? "#e5e5e5" : "#059669"} strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   )}

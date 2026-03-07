@@ -37,10 +37,12 @@ export function WordByWord({
         const translationEl = showTranslation && (
           <span
             key="tr"
-            className="font-sans text-[var(--theme-text-tertiary)]"
+            className="font-sans text-[var(--theme-text-tertiary)] transition-colors"
             style={{
               fontSize: `calc(11px * ${translationSize})`,
-              ...colorStyle(i, isActive),
+              ...(isActive
+                ? { color: "var(--theme-highlight-text)" }
+                : colorStyle(i, isActive)),
             }}
           >
             {word.translation?.text}
@@ -50,10 +52,12 @@ export function WordByWord({
         const transliterationEl = showTransliteration && (
           <span
             key="tl"
-            className="font-sans text-[var(--theme-text-quaternary)]"
+            className="font-sans text-[var(--theme-text-quaternary)] transition-colors"
             style={{
               fontSize: `calc(10px * ${transliterationSize})`,
-              ...colorStyle(i, isActive, 0.75),
+              ...(isActive
+                ? { color: "var(--theme-highlight-text)" }
+                : colorStyle(i, isActive, 0.75)),
             }}
           >
             {word.transliteration?.text}
@@ -64,9 +68,7 @@ export function WordByWord({
           <div
             key={word.id}
             className={`flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors ${
-              isActive
-                ? "bg-primary-100/60"
-                : "hover:bg-[var(--theme-pill-bg)]"
+              isActive ? "" : "hover:bg-[var(--theme-pill-bg)]"
             }`}
           >
             <span

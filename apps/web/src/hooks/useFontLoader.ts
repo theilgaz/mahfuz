@@ -21,6 +21,7 @@ const THEME_META_COLORS: Record<string, string> = {
   light: "#059669",
   sepia: "#8b7332",
   dark: "#1a1a1a",
+  dimmed: "#22272e",
 };
 
 export function useFontLoader() {

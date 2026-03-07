@@ -74,6 +74,9 @@
   --theme-speed-inactive-bg: #f5f5f7;
   --theme-speed-inactive-hover: #e8e8ea;
   --theme-surah-header-glow: rgba(255, 255, 255, 0.85);
+
+  --theme-highlight-bg: rgba(0, 0, 0, 0.04);
+  --theme-highlight-text: #065f46;
 }
 
 [data-theme="sepia"] {
@@ -101,6 +104,9 @@
   --theme-speed-inactive-bg: rgba(74, 55, 40, 0.06);
   --theme-speed-inactive-hover: rgba(74, 55, 40, 0.12);
   --theme-surah-header-glow: rgba(250, 244, 232, 0.85);
+
+  --theme-highlight-bg: rgba(160, 120, 60, 0.15);
+  --theme-highlight-text: #8b7332;
 }
 
 [data-theme="dark"] {
@@ -128,6 +134,39 @@
   --theme-speed-inactive-bg: rgba(255, 255, 255, 0.06);
   --theme-speed-inactive-hover: rgba(255, 255, 255, 0.12);
   --theme-surah-header-glow: rgba(26, 26, 26, 0.85);
+
+  --theme-highlight-bg: rgba(255, 255, 255, 0.06);
+  --theme-highlight-text: #ffffff;
+}
+
+[data-theme="dimmed"] {
+  --theme-bg: #22272e;
+  --theme-bg-primary: #2d333b;
+  --theme-bg-elevated: #373e47;
+  --theme-text: #d0d7de;
+  --theme-text-secondary: #8b949e;
+  --theme-text-tertiary: #768390;
+  --theme-text-quaternary: #636e7b;
+  --theme-border: rgba(205, 217, 229, 0.08);
+  --theme-divider: rgba(205, 217, 229, 0.12);
+  --theme-pill-bg: rgba(205, 217, 229, 0.06);
+  --theme-glass-bg: rgba(34, 39, 46, 0.85);
+  --theme-glass-heavy-bg: rgba(34, 39, 46, 0.95);
+  --theme-verse-number-bg: rgba(205, 217, 229, 0.06);
+  --theme-translation-accent: rgba(52, 211, 153, 0.2);
+  --theme-hover-bg: rgba(205, 217, 229, 0.04);
+  --theme-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+
+  --theme-meta-color: #34d399;
+  --theme-scrollbar-thumb: rgba(205, 217, 229, 0.15);
+  --theme-scrollbar-thumb-hover: rgba(205, 217, 229, 0.25);
+  --theme-input-bg: rgba(205, 217, 229, 0.06);
+  --theme-speed-inactive-bg: rgba(205, 217, 229, 0.06);
+  --theme-speed-inactive-hover: rgba(205, 217, 229, 0.12);
+  --theme-surah-header-glow: rgba(34, 39, 46, 0.85);
+
+  --theme-highlight-bg: rgba(255, 255, 255, 0.05);
+  --theme-highlight-text: #ffffff;
 }
 
 @font-face {
@@ -136,6 +175,12 @@
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+}
+
+/* Logo invert for dark themes */
+[data-theme="dark"] .logo-invert,
+[data-theme="dimmed"] .logo-invert {
+  filter: invert(1);
 }
 
 /* Base */
@@ -225,6 +270,18 @@ body {
   --mushaf-lapis-light: #1a3660;
   --mushaf-vermilion: #7a2420;
   --mushaf-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.25);
+}
+[data-theme="dimmed"] {
+  --mushaf-paper: #2a2520;
+  --mushaf-ink: #d0c8b0;
+  --mushaf-gold: #9a7828;
+  --mushaf-gold-dark: #6a5018;
+  --mushaf-gold-light: #b89840;
+  --mushaf-gold-shine: #c4a850;
+  --mushaf-lapis: #152a4a;
+  --mushaf-lapis-light: #1d3862;
+  --mushaf-vermilion: #7a2420;
+  --mushaf-shadow: 0 12px 48px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2);
 }
 
 /* ── Page container ── */
@@ -400,12 +457,10 @@ body {
   padding: 2px 4px;
 }
 .word-highlight:hover {
-  color: var(--color-primary-700);
+  color: var(--theme-highlight-text);
 }
 .word-highlight.active {
-  color: var(--color-primary-700);
-  background-color: var(--color-primary-100);
-  transform: scale(1.02);
+  color: var(--theme-highlight-text);
 }
 
 /* Verse separator ornament */
