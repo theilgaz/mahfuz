@@ -3,8 +3,10 @@ import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback } from "react";
 import { recitersQueryOptions, verseAudioQueryOptions } from "~/hooks/useAudio";
 import { chaptersQueryOptions } from "~/hooks/useChapters";
+import { versesByChapterQueryOptions } from "~/hooks/useVerses";
 import { useAudioStore } from "~/stores/useAudioStore";
 import type { VerseAudioData } from "@mahfuz/audio-engine";
+import { buildVersePageMap } from "~/lib/utils";
 
 export const Route = createFileRoute("/_app/audio/")({
   loader: ({ context }) =>
@@ -42,15 +44,22 @@ function AudioPage() {
 
   const handleQuickPlay = useCallback(
     async (chapterId: number, chapterName: string) => {
-      const audioFiles = await queryClient.fetchQuery(
-        verseAudioQueryOptions(reciterId, chapterId),
-      );
+      // Fetch both audio and verses for page mapping
+      // Note: fetches page 1 only (~50 verses), sufficient for most surahs
+      const [audioFiles, chapterVerses] = await Promise.all([
+        queryClient.fetchQuery(verseAudioQueryOptions(reciterId, chapterId)),
+        queryClient.fetchQuery(versesByChapterQueryOptions(chapterId, 1)),
+      ]);
+      
       const audioData: VerseAudioData[] = audioFiles.map((f) => ({
         verseKey: f.verse_key,
         url: f.url,
         segments: f.segments,
       }));
-      playSurah(chapterId, chapterName, audioData);
+      
+      const versePageMap = buildVersePageMap(chapterVerses.verses);
+      
+      playSurah(chapterId, chapterName, audioData, versePageMap);
     },
     [queryClient, reciterId, playSurah],
   );

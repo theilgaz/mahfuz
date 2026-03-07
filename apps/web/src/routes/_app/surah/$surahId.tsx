@@ -17,6 +17,7 @@ import type { Chapter } from "@mahfuz/shared/types";
 import type { VerseAudioData } from "@mahfuz/audio-engine";
 import { useReadingHistory } from "~/stores/useReadingHistory";
 import { TOPIC_INDEX } from "~/data/topic-index";
+import { buildVersePageMap } from "~/lib/utils";
 
 export const Route = createFileRoute("/_app/surah/$surahId")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -201,7 +202,28 @@ function SurahView() {
       fetchBismillahAudio(),
     ]);
     const playlist = bismillah ? [bismillah, ...audioData] : audioData;
-    playSurah(chapterId, chapter.translated_name.name, playlist);
+    
+    // Build versePageMap from currently loaded verses
+    // For paginated surahs, this provides mappings for visible verses
+    // Note: Long surahs may have incomplete mappings beyond loaded pages
+    let allVerses = versesData.verses;
+    
+    // If we're not on page 1, try to also include page 1 from cache for better coverage
+    if (page !== 1) {
+      const page1Data = queryClient.getQueryData(
+        versesByChapterQueryOptions(chapterId, 1).queryKey
+      );
+      if (page1Data?.verses) {
+        // Merge page 1 verses with current page verses (avoid duplicates by verse_key)
+        const verseKeys = new Set(allVerses.map(v => v.verse_key));
+        const additionalVerses = page1Data.verses.filter(v => !verseKeys.has(v.verse_key));
+        allVerses = [...page1Data.verses, ...additionalVerses];
+      }
+    }
+    
+    const versePageMap = buildVersePageMap(allVerses);
+    
+    playSurah(chapterId, chapter.translated_name.name, playlist, versePageMap);
   }, [
     isPlayingThisSurah,
     togglePlayPause,
@@ -210,6 +232,9 @@ function SurahView() {
     playSurah,
     chapterId,
     chapter.translated_name.name,
+    versesData.verses,
+    page,
+    queryClient,
   ]);
 
   const handlePlayFromVerse = useCallback(
@@ -223,14 +248,34 @@ function SurahView() {
       const playlist =
         bismillah && isFirstVerse ? [bismillah, ...audioData] : audioData;
       const playKey = bismillah && isFirstVerse ? "bismillah" : verseKey;
+      
+      // Build versePageMap from currently loaded verses
+      // For paginated surahs, this provides mappings for visible verses
+      let allVerses = versesData.verses;
+      
+      // If we're not on page 1, try to also include page 1 from cache for better coverage
+      if (page !== 1) {
+        const page1Data = queryClient.getQueryData(
+          versesByChapterQueryOptions(chapterId, 1).queryKey
+        );
+        if (page1Data?.verses) {
+          const verseKeys = new Set(allVerses.map(v => v.verse_key));
+          const additionalVerses = page1Data.verses.filter(v => !verseKeys.has(v.verse_key));
+          allVerses = [...page1Data.verses, ...additionalVerses];
+        }
+      }
+      
+      const versePageMap = buildVersePageMap(allVerses);
+      
       playVerse(
         chapterId,
         chapter.translated_name.name,
         playKey,
         playlist,
+        versePageMap,
       );
     },
-    [fetchAudioData, fetchBismillahAudio, playVerse, chapterId, chapter.translated_name.name],
+    [fetchAudioData, fetchBismillahAudio, playVerse, chapterId, chapter.translated_name.name, versesData.verses, page, queryClient],
   );
 
   const hasPrev = chapterId > 1;

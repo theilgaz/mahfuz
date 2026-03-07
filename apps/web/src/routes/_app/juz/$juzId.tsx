@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { versesByJuzQueryOptions } from "~/hooks/useVerses";
+import { versesByJuzQueryOptions, versesByChapterQueryOptions } from "~/hooks/useVerses";
 import { chaptersQueryOptions } from "~/hooks/useChapters";
 import { verseAudioQueryOptions } from "~/hooks/useAudio";
 import { VerseList, Pagination, ReadingToolbar } from "~/components/quran";
@@ -14,6 +14,7 @@ import { getPagesForJuz } from "@mahfuz/shared";
 import { usePreferencesStore } from "~/stores/usePreferencesStore";
 import type { ViewMode } from "~/stores/usePreferencesStore";
 import { useReadingHistory } from "~/stores/useReadingHistory";
+import { buildVersePageMap } from "~/lib/utils";
 
 export const Route = createFileRoute("/_app/juz/$juzId")({
   loader: ({ context, params }) => {
@@ -103,16 +104,40 @@ function JuzView() {
   const handlePlayJuz = useCallback(async () => {
     if (isPlayingThisJuz) { togglePlayPause(); return; }
     if (!firstVerse || !firstChapterId) return;
-    const audioFiles = await queryClient.fetchQuery(verseAudioQueryOptions(reciterId, firstChapterId));
-    const audioData: VerseAudioData[] = audioFiles.map((f) => ({ verseKey: f.verse_key, url: f.url, segments: f.segments }));
-    playVerse(firstChapterId, `Cüz ${juzNumber}`, firstVerse.verse_key, audioData);
+    
+    // Fetch both audio and verses for page mapping
+    // Note: fetches page 1 only (~50 verses) for the first chapter in juz
+    const [audioFiles, chapterVerses] = await Promise.all([
+      queryClient.fetchQuery(verseAudioQueryOptions(reciterId, firstChapterId)),
+      queryClient.fetchQuery(versesByChapterQueryOptions(firstChapterId, 1)),
+    ]);
+    
+    const audioData: VerseAudioData[] = audioFiles.map((f) => ({ 
+      verseKey: f.verse_key, url: f.url, segments: f.segments 
+    }));
+    
+    const versePageMap = buildVersePageMap(chapterVerses.verses);
+    
+    playVerse(firstChapterId, `Cüz ${juzNumber}`, firstVerse.verse_key, audioData, versePageMap);
   }, [isPlayingThisJuz, togglePlayPause, firstVerse, firstChapterId, queryClient, reciterId, playVerse, juzNumber]);
 
   const handlePlayFromVerse = useCallback(async (verseKey: string) => {
     const chId = Number(verseKey.split(":")[0]);
-    const audioFiles = await queryClient.fetchQuery(verseAudioQueryOptions(reciterId, chId));
-    const audioData: VerseAudioData[] = audioFiles.map((f) => ({ verseKey: f.verse_key, url: f.url, segments: f.segments }));
-    playVerse(chId, `Cüz ${juzNumber}`, verseKey, audioData);
+    
+    // Fetch both audio and verses for page mapping
+    // Note: fetches page 1 only (~50 verses) for the chapter
+    const [audioFiles, chapterVerses] = await Promise.all([
+      queryClient.fetchQuery(verseAudioQueryOptions(reciterId, chId)),
+      queryClient.fetchQuery(versesByChapterQueryOptions(chId, 1)),
+    ]);
+    
+    const audioData: VerseAudioData[] = audioFiles.map((f) => ({ 
+      verseKey: f.verse_key, url: f.url, segments: f.segments 
+    }));
+    
+    const versePageMap = buildVersePageMap(chapterVerses.verses);
+    
+    playVerse(chId, `Cüz ${juzNumber}`, verseKey, audioData, versePageMap);
   }, [queryClient, reciterId, playVerse, juzNumber]);
 
   const hasPrev = juzNumber > 1;
@@ -201,7 +226,7 @@ function JuzView() {
             <span className="w-8 shrink-0" />
           )}
 
-          {/* Center: unified toolbar (icon-only tabs + A ع) */}
+          {/* Center: unified toolbar (icon-only tabs + A ⚙) */}
           <div className="flex min-w-0 flex-1 items-center justify-center">
             <div className="flex items-center rounded-xl bg-[var(--theme-pill-bg)] p-1">
               <SegmentedControl options={VIEW_MODE_OPTIONS} value={viewMode} onChange={setViewMode} iconOnlyMobile transparent />

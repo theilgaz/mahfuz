@@ -5,8 +5,10 @@ import { useAudioStore } from "~/stores/useAudioStore";
 import { ProgressLine } from "./ProgressLine";
 import { ReciterModal } from "./ReciterModal";
 import { verseAudioQueryOptions } from "~/hooks/useAudio";
+import { versesByChapterQueryOptions } from "~/hooks/useVerses";
 import type { PlaybackSpeed, RepeatMode } from "@mahfuz/shared/types";
 import type { VerseAudioData } from "@mahfuz/audio-engine";
+import { buildVersePageMap } from "~/lib/utils";
 
 const SPEEDS: PlaybackSpeed[] = [0.5, 0.75, 1, 1.25, 1.5, 2];
 const REPEAT_OPTIONS: { value: RepeatMode; label: string }[] = [
@@ -63,18 +65,23 @@ export function AudioBar() {
       if (!chapterId || !cn || ps === "idle" || ps === "ended") return;
 
       try {
-        const audioFiles = await queryClient.fetchQuery(
-          verseAudioQueryOptions(newReciterId, chapterId),
-        );
+        const [audioFiles, chapterVerses] = await Promise.all([
+          queryClient.fetchQuery(verseAudioQueryOptions(newReciterId, chapterId)),
+          queryClient.fetchQuery(versesByChapterQueryOptions(chapterId, 1)),
+        ]);
+        
         const audioData: VerseAudioData[] = audioFiles.map((f) => ({
           verseKey: f.verse_key,
           url: f.url,
           segments: f.segments,
         }));
+        
+        const versePageMap = buildVersePageMap(chapterVerses.verses);
+        
         if (vk) {
-          playVerse(chapterId, cn, vk, audioData);
+          playVerse(chapterId, cn, vk, audioData, versePageMap);
         } else {
-          playSurah(chapterId, cn, audioData);
+          playSurah(chapterId, cn, audioData, versePageMap);
         }
       } catch (err) {
         console.error("[AudioBar] Failed to change reciter:", err);
