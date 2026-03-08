@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Verse } from "@mahfuz/shared/types";
 import { WordByWord } from "./WordByWord";
+import { TranslationBlock } from "./TranslationBlock";
 import { usePreferencesStore, getActiveColors } from "~/stores/usePreferencesStore";
 import type { ViewMode } from "~/stores/usePreferencesStore";
 import { useAudioStore } from "~/stores/useAudioStore";
@@ -8,7 +9,6 @@ import { useAudioStore } from "~/stores/useAudioStore";
 interface AyahTextProps {
   verse: Verse;
   viewMode?: ViewMode;
-  showTranslation?: boolean;
   onPlayFromVerse?: (verseKey: string) => void;
   onTogglePlayPause?: () => void;
 }
@@ -16,7 +16,6 @@ interface AyahTextProps {
 export function AyahText({
   verse,
   viewMode: viewModeProp,
-  showTranslation = true,
   onPlayFromVerse,
   onTogglePlayPause,
 }: AyahTextProps) {
@@ -28,6 +27,10 @@ export function AyahText({
 
   const normalArabicFontSize = usePreferencesStore((s) => s.normalArabicFontSize);
   const normalTranslationFontSize = usePreferencesStore((s) => s.normalTranslationFontSize);
+  const normalShowTranslation = usePreferencesStore((s) => s.normalShowTranslation);
+  const normalShowWordHover = usePreferencesStore((s) => s.normalShowWordHover);
+  const wbwShowTranslation = usePreferencesStore((s) => s.wbwShowTranslation);
+  const showTranslation = viewMode === "wordByWord" ? wbwShowTranslation : normalShowTranslation;
 
   const currentVerseKey = useAudioStore((s) => s.currentVerseKey);
   const currentWordPosition = useAudioStore((s) => s.currentWordPosition);
@@ -126,10 +129,11 @@ export function AyahText({
                     .map((w, i) => {
                       const isActiveWord =
                         activeWordPos !== null && w.position === activeWordPos;
+                      const hasTooltip = normalShowWordHover && (w.translation?.text || w.transliteration?.text);
                       return (
                         <span
                           key={w.id}
-                          className={`word-highlight ${isActiveWord ? "active" : ""}`}
+                          className={`word-highlight ${isActiveWord ? "active" : ""} ${hasTooltip ? "group/word relative inline-block" : ""}`}
                           style={
                             colorizeWords && colors.length > 0
                               ? { color: isActiveWord ? undefined : colors[i % colors.length] }
@@ -137,6 +141,16 @@ export function AyahText({
                           }
                         >
                           {w.text_uthmani}{" "}
+                          {hasTooltip && (
+                            <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[var(--theme-bg-elevated)] px-2.5 py-1.5 text-center opacity-0 shadow-[var(--shadow-float)] transition-opacity group-hover/word:opacity-100 group-active/word:opacity-100" dir="ltr">
+                              {w.translation?.text && (
+                                <span className="block text-[12px] font-medium leading-snug text-[var(--theme-text)]">{w.translation.text}</span>
+                              )}
+                              {w.transliteration?.text && (
+                                <span className="block text-[11px] leading-snug text-[var(--theme-text-tertiary)]">{w.transliteration.text}</span>
+                              )}
+                            </span>
+                          )}
                         </span>
                       );
                     })
@@ -148,23 +162,12 @@ export function AyahText({
 
       {/* Translation */}
       {effectiveShowTranslation && verse.translations && verse.translations.length > 0 && (
-        <div
-          className={`border-l-2 border-[var(--theme-translation-accent)] py-1 pl-4 sm:ml-[44px] ${
-            revealed && !showTranslation ? "animate-reveal" : ""
-          }`}
-        >
-          {verse.translations.map((t) => (
-            <div key={t.id}>
-              <p
-                className="translation-text leading-[1.8] text-[var(--theme-text-secondary)]"
-                style={{ fontSize: `calc(15px * ${normalTranslationFontSize})` }}
-                dangerouslySetInnerHTML={{ __html: t.text }}
-              />
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-[var(--theme-text-quaternary)]">
-                {t.resource_name}
-              </p>
-            </div>
-          ))}
+        <div className="sm:ml-[44px]">
+          <TranslationBlock
+            translations={verse.translations}
+            fontSize={normalTranslationFontSize}
+            revealed={revealed && !showTranslation}
+          />
         </div>
       )}
 

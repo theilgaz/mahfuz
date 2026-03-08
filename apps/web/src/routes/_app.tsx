@@ -4,6 +4,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { signOut } from "~/lib/auth-client";
 import { AudioProvider, AudioBar } from "~/components/audio";
 import { useAudioStore } from "~/stores/useAudioStore";
+import { usePreferencesStore, COLOR_PALETTES, ARABIC_FONTS } from "~/stores/usePreferencesStore";
+import type { Theme, ColorPaletteId } from "~/stores/usePreferencesStore";
 import { CommandPalette } from "~/components/CommandPalette";
 import { HeaderSurahPicker } from "~/components/HeaderSurahPicker";
 import type { Chapter } from "@mahfuz/shared/types";
@@ -16,7 +18,6 @@ export const Route = createFileRoute("/_app")({
 const NAV_ITEMS = [
   { to: "/browse", label: "Mahfuz", icon: BookIcon },
   { to: "/memorize", label: "Ezberleme", icon: BrainIcon },
-  { to: "/bookmarks", label: "Yer İmleri", icon: BookmarkIcon },
   { to: "/audio", label: "Dinleme", icon: HeadphonesIcon },
 ] as const;
 
@@ -231,24 +232,19 @@ function AppLayout() {
 
           {/* Right: Search + Settings + User + Menu */}
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPaletteOpen(true)}
-              className="hidden items-center gap-1.5 rounded-lg px-2 py-1.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)] lg:flex"
-              aria-label="Ara (⌘K)"
-            >
-              <SearchIcon />
-              <kbd className="rounded bg-[var(--theme-hover-bg)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--theme-text-quaternary)]">
-                ⌘K
-              </kbd>
-            </button>
-
             <Link
-              to="/settings"
-              className="hidden rounded-lg p-1.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)] lg:flex"
-              aria-label="Ayarlar"
+              to="/bookmarks"
+              className="hidden items-center justify-center rounded-lg p-1.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)] lg:flex"
+              activeProps={{
+                className:
+                  "hidden items-center justify-center rounded-lg p-1.5 text-primary-700 bg-primary-600/10 transition-colors lg:flex",
+              }}
+              title="Yer İmleri"
             >
-              <SettingsIcon />
+              <BookmarkIcon />
             </Link>
+            <ThemePopup />
+            <FontPopup />
 
             {session ? (
               <div className="ml-1 hidden items-center gap-1 lg:flex">
@@ -463,6 +459,165 @@ function AppLayout() {
                 <span className="text-[15px] font-medium">Giriş Yap</span>
               </Link>
             )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -- Header Popup Shell --
+
+function usePopup() {
+  const [open, setOpen] = useState(false);
+  const popRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onClickOutside(e: MouseEvent) {
+      if (popRef.current && !popRef.current.contains(e.target as Node) && btnRef.current && !btnRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    function onEscape(e: KeyboardEvent) { if (e.key === "Escape") setOpen(false); }
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onEscape);
+    return () => { document.removeEventListener("mousedown", onClickOutside); document.removeEventListener("keydown", onEscape); };
+  }, [open]);
+
+  return { open, setOpen, popRef, btnRef };
+}
+
+// -- Theme Popup --
+
+const QS_THEMES: { value: Theme; label: string; color: string; border: string }[] = [
+  { value: "light", label: "Açık", color: "#ffffff", border: "#d2d2d7" },
+  { value: "sepia", label: "Sepia", color: "#f5ead6", border: "#d4b882" },
+  { value: "dark", label: "Koyu", color: "#1a1a1a", border: "#444" },
+  { value: "dimmed", label: "Gece", color: "#22272e", border: "#444c56" },
+];
+
+function ThemePopup() {
+  const { open, setOpen, popRef, btnRef } = usePopup();
+  const theme = usePreferencesStore((s) => s.theme);
+  const setTheme = usePreferencesStore((s) => s.setTheme);
+  const colorizeWords = usePreferencesStore((s) => s.colorizeWords);
+  const setColorizeWords = usePreferencesStore((s) => s.setColorizeWords);
+  const colorPaletteId = usePreferencesStore((s) => s.colorPaletteId);
+  const setColorPalette = usePreferencesStore((s) => s.setColorPalette);
+
+  const currentTheme = QS_THEMES.find((t) => t.value === theme);
+
+  return (
+    <div className="relative hidden lg:flex">
+      <button
+        ref={btnRef}
+        onClick={() => setOpen((v) => !v)}
+        className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12px] font-medium transition-colors ${open ? "bg-[var(--theme-hover-bg)] text-[var(--theme-text)]" : "text-[var(--theme-text-secondary)] hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)]"}`}
+        aria-label="Tema ayarları"
+        aria-expanded={open}
+      >
+        <span className="h-4 w-4 rounded-full border-2" style={{ backgroundColor: currentTheme?.color, borderColor: currentTheme?.border }} />
+      </button>
+
+      {open && (
+        <div ref={popRef} className="absolute right-0 top-full z-50 mt-2 w-56 animate-toolbar-in rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] p-3.5 shadow-[var(--shadow-float)]" style={{ backdropFilter: "saturate(180%) blur(20px)" }}>
+          <div className="mb-3 flex items-center gap-3">
+            {QS_THEMES.map((t) => (
+              <button key={t.value} onClick={() => setTheme(t.value)} className="flex flex-col items-center gap-1" aria-label={t.label}>
+                <span className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all ${theme === t.value ? "border-primary-600 ring-2 ring-primary-600/30" : "border-[var(--theme-divider)]"}`} style={{ backgroundColor: t.color }}>
+                  {theme === t.value && <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke={t.value === "dark" || t.value === "dimmed" ? "#e5e5e5" : "#059669"} strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                </span>
+                <span className="text-[10px] text-[var(--theme-text-tertiary)]">{t.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-2.5">
+            <span className="text-[11px] font-medium text-[var(--theme-text-secondary)]">Kelime Renklendirme</span>
+            <button onClick={() => setColorizeWords(!colorizeWords)} className={`relative h-[20px] w-[36px] rounded-full transition-colors ${colorizeWords ? "bg-primary-600" : "bg-[var(--theme-divider)]"}`} role="switch" aria-checked={colorizeWords}>
+              <span className={`absolute top-[2px] left-[2px] h-[16px] w-[16px] rounded-full bg-white shadow-sm transition-transform ${colorizeWords ? "translate-x-[16px]" : ""}`} />
+            </button>
+          </div>
+          {colorizeWords && (
+            <div className="mt-2 flex items-center gap-2">
+              {COLOR_PALETTES.map((p) => (
+                <button key={p.id} onClick={() => setColorPalette(p.id as ColorPaletteId)} className={`flex h-7 w-7 items-center justify-center rounded-full border-2 transition-all ${colorPaletteId === p.id ? "border-primary-600 ring-2 ring-primary-600/30" : "border-[var(--theme-divider)]"}`} aria-label={p.name} title={p.name}>
+                  <svg width="16" height="16" viewBox="0 0 18 18"><rect x="1" y="1" width="7" height="7" rx="1.5" fill={p.colors[0]} /><rect x="10" y="1" width="7" height="7" rx="1.5" fill={p.colors[1]} /><rect x="1" y="10" width="7" height="7" rx="1.5" fill={p.colors[2]} /><rect x="10" y="10" width="7" height="7" rx="1.5" fill={p.colors[3]} /></svg>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -- Font Popup --
+
+const FONT_SHORT_LABELS: Record<string, string> = {
+  "uthmani-hafs": "Mushaf · Klasik",
+  "scheherazade-new": "Nesih · Zarif",
+  "amiri": "Nesih · Matbaa",
+  "noto-naskh-arabic": "Modern · Temiz",
+  "rubik": "Modern · Yumuşak",
+  "zain": "Modern · İnce",
+  "reem-kufi": "Kûfi · Güçlü",
+  "playpen-sans-arabic": "El Yazısı · Samimi",
+};
+
+function FontPopup() {
+  const { open, setOpen, popRef, btnRef } = usePopup();
+  const arabicFontId = usePreferencesStore((s) => s.arabicFontId);
+  const setArabicFont = usePreferencesStore((s) => s.setArabicFont);
+
+  // Lazy-load Google Fonts when popup opens
+  useEffect(() => {
+    if (!open) return;
+    ARABIC_FONTS.forEach((f) => {
+      if (f.source === "google" && f.googleUrl) {
+        const id = `font-link-${f.id}`;
+        if (!document.getElementById(id)) {
+          const link = document.createElement("link");
+          link.id = id;
+          link.rel = "stylesheet";
+          link.href = f.googleUrl;
+          document.head.appendChild(link);
+        }
+      }
+    });
+  }, [open]);
+
+  return (
+    <div className="relative hidden lg:flex">
+      <button
+        ref={btnRef}
+        onClick={() => setOpen((v) => !v)}
+        className={`flex items-center gap-1 rounded-lg px-2 py-1.5 text-[13px] font-semibold transition-colors ${open ? "bg-[var(--theme-hover-bg)] text-[var(--theme-text)]" : "text-[var(--theme-text-secondary)] hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)]"}`}
+        aria-label="Yazı tipi"
+        aria-expanded={open}
+      >
+        <span className="arabic-text leading-none">ع</span>
+      </button>
+
+      {open && (
+        <div ref={popRef} className="absolute right-0 top-full z-50 mt-2 w-60 animate-toolbar-in rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] p-2 shadow-[var(--shadow-float)]" style={{ backdropFilter: "saturate(180%) blur(20px)" }}>
+          <div className="flex flex-col gap-0.5">
+            {ARABIC_FONTS.map((f) => {
+              const tag = FONT_SHORT_LABELS[f.id] ?? f.name;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setArabicFont(f.id)}
+                  className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition-all ${arabicFontId === f.id ? "bg-primary-600/10" : "hover:bg-[var(--theme-hover-bg)]"}`}
+                >
+                  <div className="min-w-0 text-left">
+                    <span className={`block text-[11px] font-medium leading-tight ${arabicFontId === f.id ? "text-primary-700" : "text-[var(--theme-text)]"}`}>{f.name}</span>
+                    <span className="block text-[10px] leading-tight text-[var(--theme-text-quaternary)]">{tag}</span>
+                  </div>
+                  <span className="arabic-text shrink-0 text-[16px] leading-none text-[var(--theme-text)]" style={{ fontFamily: f.family }} dir="rtl">بِسْمِ ٱللَّهِ</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

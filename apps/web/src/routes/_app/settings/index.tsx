@@ -10,6 +10,7 @@ import {
 } from "~/stores/usePreferencesStore";
 import type { ViewMode, ColorPaletteId, Theme } from "~/stores/usePreferencesStore";
 import { SegmentedControl } from "~/components/ui/SegmentedControl";
+import { TranslationPicker } from "~/components/quran/TranslationPicker";
 
 export const Route = createFileRoute("/_app/settings/")({
   component: SettingsPage,
@@ -66,9 +67,8 @@ function SettingsPage() {
   const setColorPalette = usePreferencesStore((s) => s.setColorPalette);
   const theme = usePreferencesStore((s) => s.theme);
   const setTheme = usePreferencesStore((s) => s.setTheme);
-  const showTranslation = usePreferencesStore((s) => s.showTranslation);
-  const setShowTranslation = usePreferencesStore((s) => s.setShowTranslation);
-
+  const normalShowTranslation = usePreferencesStore((s) => s.normalShowTranslation);
+  const setNormalShowTranslation = usePreferencesStore((s) => s.setNormalShowTranslation);
   // Per-mode font sizes
   const normalArabicFontSize = usePreferencesStore((s) => s.normalArabicFontSize);
   const normalTranslationFontSize = usePreferencesStore((s) => s.normalTranslationFontSize);
@@ -80,12 +80,12 @@ function SettingsPage() {
   const setMushafArabicFontSize = usePreferencesStore((s) => s.setMushafArabicFontSize);
 
   // Word-by-word settings
-  const showWordTranslation = usePreferencesStore((s) => s.showWordTranslation);
-  const showWordTransliteration = usePreferencesStore((s) => s.showWordTransliteration);
+  const wbwShowWordTranslation = usePreferencesStore((s) => s.wbwShowWordTranslation);
+  const wbwShowWordTransliteration = usePreferencesStore((s) => s.wbwShowWordTransliteration);
   const wordTranslationSize = usePreferencesStore((s) => s.wordTranslationSize);
   const wordTransliterationSize = usePreferencesStore((s) => s.wordTransliterationSize);
-  const setShowWordTranslation = usePreferencesStore((s) => s.setShowWordTranslation);
-  const setShowWordTransliteration = usePreferencesStore((s) => s.setShowWordTransliteration);
+  const setWbwShowWordTranslation = usePreferencesStore((s) => s.setWbwShowWordTranslation);
+  const setWbwShowWordTransliteration = usePreferencesStore((s) => s.setWbwShowWordTransliteration);
   const setWordTranslationSize = usePreferencesStore((s) => s.setWordTranslationSize);
   const setWordTransliterationSize = usePreferencesStore((s) => s.setWordTransliterationSize);
 
@@ -210,11 +210,22 @@ function SettingsPage() {
           <div>
             <SettingsLabel>Çeviri Göster</SettingsLabel>
             <p className="mt-0.5 text-[12px] text-[var(--theme-text-tertiary)]">
-              Ayet çevirilerini varsayılan olarak göster
+              Normal modda ayet çevirilerini göster
             </p>
           </div>
-          <ToggleSwitch checked={showTranslation} onChange={setShowTranslation} />
+          <ToggleSwitch checked={normalShowTranslation} onChange={setNormalShowTranslation} />
         </div>
+
+        {/* Translation picker — reorder/add/remove/primary */}
+        {normalShowTranslation && (
+          <div className="mt-4">
+            <SettingsLabel>Meal Seçimi</SettingsLabel>
+            <p className="mt-0.5 mb-2 text-[12px] text-[var(--theme-text-tertiary)]">
+              Sırayı değiştirin, birincil meali seçin
+            </p>
+            <TranslationPicker />
+          </div>
+        )}
       </SettingsSection>
 
       {/* ═══ FONT PICKER ═══ */}
@@ -250,12 +261,12 @@ function SettingsPage() {
               onArabicSizeChange={setWbwArabicFontSize}
               colorizeWords={colorizeWords}
               colors={activeColors}
-              showWordTranslation={showWordTranslation}
-              showWordTransliteration={showWordTransliteration}
+              showWordTranslation={wbwShowWordTranslation}
+              showWordTransliteration={wbwShowWordTransliteration}
               wordTranslationSize={wordTranslationSize}
               wordTransliterationSize={wordTransliterationSize}
-              onShowWordTranslationChange={setShowWordTranslation}
-              onShowWordTransliterationChange={setShowWordTransliteration}
+              onShowWordTranslationChange={setWbwShowWordTranslation}
+              onShowWordTransliterationChange={setWbwShowWordTransliteration}
               onWordTranslationSizeChange={setWordTranslationSize}
               onWordTransliterationSizeChange={setWordTransliterationSize}
             />
@@ -714,6 +725,32 @@ function RadioDot({ checked }: { checked: boolean }) {
   return (
     <div
       className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+        checked ? "border-primary-600 bg-primary-600" : "border-[var(--theme-divider)]"
+      }`}
+    >
+      {checked && (
+        <svg
+          className="h-3 w-3 text-white"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={3}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      )}
+    </div>
+  );
+}
+
+function CheckboxDot({ checked }: { checked: boolean }) {
+  return (
+    <div
+      className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
         checked ? "border-primary-600 bg-primary-600" : "border-[var(--theme-divider)]"
       }`}
     >

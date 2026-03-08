@@ -1,28 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { usePreferencesStore, getTranslationFontSizeForMode, getArabicFontSizeForMode, COLOR_PALETTES, ARABIC_FONTS, getActiveColors } from "~/stores/usePreferencesStore";
-import type { Theme, ViewMode, ColorPaletteId } from "~/stores/usePreferencesStore";
+import { usePreferencesStore, getTranslationFontSizeForMode, getArabicFontSizeForMode, getActiveColors } from "~/stores/usePreferencesStore";
+import type { ViewMode } from "~/stores/usePreferencesStore";
 import type { Verse } from "@mahfuz/shared/types";
 import { SegmentedControl } from "~/components/ui/SegmentedControl";
 import { verseByKeyQueryOptions } from "~/hooks/useVerses";
+import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 import { useAudioStore } from "~/stores/useAudioStore";
-
-const THEMES: { value: Theme; label: string; color: string; border: string }[] = [
-  { value: "light", label: "Açık", color: "#ffffff", border: "#d2d2d7" },
-  { value: "sepia", label: "Sepia", color: "#f5ead6", border: "#d4b882" },
-  { value: "dark", label: "Koyu", color: "#1a1a1a", border: "#444" },
-  { value: "dimmed", label: "Gece", color: "#22272e", border: "#444c56" },
-];
-
-type ToolbarTab = "boyut" | "tema" | "font";
-
-const TOOLBAR_TABS: { value: ToolbarTab; label: string }[] = [
-  { value: "boyut", label: "Boyut" },
-  { value: "tema", label: "Tema" },
-  { value: "font", label: "Yazı Tipi" },
-];
-
-const BISMILLAH_SAMPLE = "بِسْمِ ٱللَّهِ";
+import { TranslationPicker } from "./TranslationPicker";
 
 /* ─── Shared helpers ─── */
 
@@ -54,15 +39,6 @@ function SizeSlider({
   );
 }
 
-function ToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <div className="mb-3 flex items-center justify-between">
-      <span className="text-[13px] font-medium text-[var(--theme-text)]">{label}</span>
-      <ToggleSwitch checked={checked} onChange={onChange} />
-    </div>
-  );
-}
-
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button type="button" role="switch" aria-checked={checked} onClick={() => onChange(!checked)} className={`relative h-[26px] w-[44px] shrink-0 rounded-full transition-colors ${checked ? "bg-primary-600" : "bg-[var(--theme-divider)]"}`}>
@@ -71,20 +47,17 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: b
   );
 }
 
-function Divider() {
-  return <div className="my-3 border-t border-[var(--theme-divider)]" />;
-}
-
 /* ─── Live Preview ─── */
 
 function PreviewCard({ verse }: { verse: Verse }) {
   const viewMode = usePreferencesStore((s) => s.viewMode);
-  const showTranslation = usePreferencesStore((s) => s.showTranslation);
+  const normalShowTranslation = usePreferencesStore((s) => s.normalShowTranslation);
+  const wbwShowTranslation = usePreferencesStore((s) => s.wbwShowTranslation);
   const colorizeWords = usePreferencesStore((s) => s.colorizeWords);
   const colorPaletteId = usePreferencesStore((s) => s.colorPaletteId);
   const colors = getActiveColors({ colorPaletteId });
-  const showWordTranslation = usePreferencesStore((s) => s.showWordTranslation);
-  const showWordTransliteration = usePreferencesStore((s) => s.showWordTransliteration);
+  const wbwShowWordTranslation = usePreferencesStore((s) => s.wbwShowWordTranslation);
+  const wbwShowWordTransliteration = usePreferencesStore((s) => s.wbwShowWordTransliteration);
   const wbwTransliterationFirst = usePreferencesStore((s) => s.wbwTransliterationFirst);
   const wordTranslationSize = usePreferencesStore((s) => s.wordTranslationSize);
   const wordTransliterationSize = usePreferencesStore((s) => s.wordTransliterationSize);
@@ -109,12 +82,12 @@ function PreviewCard({ verse }: { verse: Verse }) {
       <div className="mb-4 overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-primary)] p-3">
         <div dir="rtl" className="flex flex-wrap justify-end gap-x-3 gap-y-2">
           {wordItems.map((word, i) => {
-            const trEl = showWordTranslation && (
+            const trEl = wbwShowWordTranslation && (
               <span key="tr" className="font-sans text-[var(--theme-text-tertiary)]" style={{ fontSize: `calc(11px * ${wordTranslationSize})`, color: colorOf(i) }}>
                 {word.translation?.text}
               </span>
             );
-            const tlEl = showWordTransliteration && (
+            const tlEl = wbwShowWordTransliteration && (
               <span key="tl" className="font-sans text-[var(--theme-text-quaternary)]" style={{ fontSize: `calc(10px * ${wordTransliterationSize})`, color: colorOf(i), opacity: colorizeWords ? 0.75 : undefined }}>
                 {word.transliteration?.text}
               </span>
@@ -129,6 +102,9 @@ function PreviewCard({ verse }: { verse: Verse }) {
             );
           })}
         </div>
+        {wbwShowTranslation && verse.translations?.[0] && (
+          <p className="mt-2 border-l-2 border-[var(--theme-translation-accent)] pl-2.5 leading-[1.7] text-[var(--theme-text-secondary)]" style={{ fontSize: `${translationPx}px` }} dangerouslySetInnerHTML={{ __html: verse.translations[0].text }} />
+        )}
       </div>
     );
   }
@@ -140,7 +116,7 @@ function PreviewCard({ verse }: { verse: Verse }) {
           <span key={w.id} style={{ color: colorOf(i) }}>{w.text_uthmani}{" "}</span>
         ))}
       </p>
-      {viewMode === "normal" && showTranslation && verse.translations?.[0] && (
+      {viewMode === "normal" && normalShowTranslation && verse.translations?.[0] && (
         <p className="mt-2 border-l-2 border-[var(--theme-translation-accent)] pl-2.5 leading-[1.7] text-[var(--theme-text-secondary)]" style={{ fontSize: `${translationPx}px` }} dangerouslySetInnerHTML={{ __html: verse.translations[0].text }} />
       )}
     </div>
@@ -200,16 +176,18 @@ function CompactSlider({ value, onChange }: { value: number; onChange: (v: numbe
 
 /* ─── Tab: Boyut ─── */
 
-function ModeTabContent({ viewMode, setViewMode, normalArabicFontSize, setNormalArabicFontSize, wbwArabicFontSize, setWbwArabicFontSize, mushafArabicFontSize, setMushafArabicFontSize, translationFontSize, setNormalTranslationFontSize, showTranslation, setShowTranslation, showWordTranslation, setShowWordTranslation, wordTranslationSize, setWordTranslationSize, showWordTransliteration, setShowWordTransliteration, wordTransliterationSize, setWordTransliterationSize, wbwTransliterationFirst, setWbwTransliterationFirst }: {
+function ModeTabContent({ viewMode, setViewMode, normalArabicFontSize, setNormalArabicFontSize, wbwArabicFontSize, setWbwArabicFontSize, mushafArabicFontSize, setMushafArabicFontSize, translationFontSize, setNormalTranslationFontSize, normalShowTranslation, setNormalShowTranslation, normalShowWordHover, setNormalShowWordHover, wbwShowTranslation, setWbwShowTranslation, wbwShowWordTranslation, setWbwShowWordTranslation, wordTranslationSize, setWordTranslationSize, wbwShowWordTransliteration, setWbwShowWordTransliteration, wordTransliterationSize, setWordTransliterationSize, wbwTransliterationFirst, setWbwTransliterationFirst }: {
   viewMode: ViewMode; setViewMode: (m: ViewMode) => void;
   normalArabicFontSize: number; setNormalArabicFontSize: (s: number) => void;
   wbwArabicFontSize: number; setWbwArabicFontSize: (s: number) => void;
   mushafArabicFontSize: number; setMushafArabicFontSize: (s: number) => void;
   translationFontSize: number; setNormalTranslationFontSize: (s: number) => void;
-  showTranslation: boolean; setShowTranslation: (v: boolean) => void;
-  showWordTranslation: boolean; setShowWordTranslation: (v: boolean) => void;
+  normalShowTranslation: boolean; setNormalShowTranslation: (v: boolean) => void;
+  normalShowWordHover: boolean; setNormalShowWordHover: (v: boolean) => void;
+  wbwShowTranslation: boolean; setWbwShowTranslation: (v: boolean) => void;
+  wbwShowWordTranslation: boolean; setWbwShowWordTranslation: (v: boolean) => void;
   wordTranslationSize: number; setWordTranslationSize: (s: number) => void;
-  showWordTransliteration: boolean; setShowWordTransliteration: (v: boolean) => void;
+  wbwShowWordTransliteration: boolean; setWbwShowWordTransliteration: (v: boolean) => void;
   wordTransliterationSize: number; setWordTransliterationSize: (s: number) => void;
   wbwTransliterationFirst: boolean; setWbwTransliterationFirst: (v: boolean) => void;
 }) {
@@ -228,31 +206,46 @@ function ModeTabContent({ viewMode, setViewMode, normalArabicFontSize, setNormal
       />
 
       {viewMode === "normal" && (
-        <SettingCard
-          icon={<svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 4h10M3 8h6M3 12h8" /></svg>}
-          iconBg="bg-blue-500" label="Çeviri" subtitle="Meal metnini göster"
-          checked={showTranslation} onChange={setShowTranslation}
-        >
-          <CompactSlider value={translationFontSize} onChange={setNormalTranslationFontSize} />
-        </SettingCard>
+        <>
+          <SettingCard
+            icon={<svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 4h10M3 8h6M3 12h8" /></svg>}
+            iconBg="bg-blue-500" label="Çeviri" subtitle="Meal metnini göster"
+            checked={normalShowTranslation} onChange={setNormalShowTranslation}
+          >
+            <CompactSlider value={translationFontSize} onChange={setNormalTranslationFontSize} />
+            <TranslationPicker compact />
+          </SettingCard>
+          <SettingCard
+            icon={<svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 12L4 3.5h1L7.5 12" /><path d="M2.8 9.5h3.4" /><path d="M14 12V8.5a2 2 0 1 0-4 0V12" /></svg>}
+            iconBg="bg-teal-500" label="Kelime Bilgisi" subtitle="Kelimeye dokununca çeviri ve okunuş"
+            checked={normalShowWordHover} onChange={setNormalShowWordHover}
+          />
+        </>
       )}
 
       {viewMode === "wordByWord" && (
         <>
           {(wbwTransliterationFirst
             ? [
-                { key: "tl", label: "Transliterasyon", subtitle: "Okunuş rehberi", checked: showWordTransliteration, onChange: setShowWordTransliteration, size: wordTransliterationSize, onSize: setWordTransliterationSize, iconBg: "bg-purple-500", icon: <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 12L4 3.5h1L7.5 12" /><path d="M2.8 9.5h3.4" /><path d="M14 12V8.5a2 2 0 1 0-4 0V12" /></svg> },
-                { key: "tr", label: "Kelime Çevirisi", subtitle: "Her kelimenin anlamı", checked: showWordTranslation, onChange: setShowWordTranslation, size: wordTranslationSize, onSize: setWordTranslationSize, iconBg: "bg-emerald-500", icon: <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"><rect x="1.5" y="2" width="5.5" height="5.5" rx="1.5" /><rect x="9" y="2" width="5.5" height="5.5" rx="1.5" /><rect x="1.5" y="9.5" width="5.5" height="5" rx="1.5" /><rect x="9" y="9.5" width="5.5" height="5" rx="1.5" /></svg> },
+                { key: "tl", label: "Transliterasyon", subtitle: "Okunuş rehberi", checked: wbwShowWordTransliteration, onChange: setWbwShowWordTransliteration, size: wordTransliterationSize, onSize: setWordTransliterationSize, iconBg: "bg-purple-500", icon: <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 12L4 3.5h1L7.5 12" /><path d="M2.8 9.5h3.4" /><path d="M14 12V8.5a2 2 0 1 0-4 0V12" /></svg> },
+                { key: "tr", label: "Kelime Çevirisi", subtitle: "Her kelimenin anlamı", checked: wbwShowWordTranslation, onChange: setWbwShowWordTranslation, size: wordTranslationSize, onSize: setWordTranslationSize, iconBg: "bg-emerald-500", icon: <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"><rect x="1.5" y="2" width="5.5" height="5.5" rx="1.5" /><rect x="9" y="2" width="5.5" height="5.5" rx="1.5" /><rect x="1.5" y="9.5" width="5.5" height="5" rx="1.5" /><rect x="9" y="9.5" width="5.5" height="5" rx="1.5" /></svg> },
               ]
             : [
-                { key: "tr", label: "Kelime Çevirisi", subtitle: "Her kelimenin anlamı", checked: showWordTranslation, onChange: setShowWordTranslation, size: wordTranslationSize, onSize: setWordTranslationSize, iconBg: "bg-emerald-500", icon: <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"><rect x="1.5" y="2" width="5.5" height="5.5" rx="1.5" /><rect x="9" y="2" width="5.5" height="5.5" rx="1.5" /><rect x="1.5" y="9.5" width="5.5" height="5" rx="1.5" /><rect x="9" y="9.5" width="5.5" height="5" rx="1.5" /></svg> },
-                { key: "tl", label: "Transliterasyon", subtitle: "Okunuş rehberi", checked: showWordTransliteration, onChange: setShowWordTransliteration, size: wordTransliterationSize, onSize: setWordTransliterationSize, iconBg: "bg-purple-500", icon: <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 12L4 3.5h1L7.5 12" /><path d="M2.8 9.5h3.4" /><path d="M14 12V8.5a2 2 0 1 0-4 0V12" /></svg> },
+                { key: "tr", label: "Kelime Çevirisi", subtitle: "Her kelimenin anlamı", checked: wbwShowWordTranslation, onChange: setWbwShowWordTranslation, size: wordTranslationSize, onSize: setWordTranslationSize, iconBg: "bg-emerald-500", icon: <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"><rect x="1.5" y="2" width="5.5" height="5.5" rx="1.5" /><rect x="9" y="2" width="5.5" height="5.5" rx="1.5" /><rect x="1.5" y="9.5" width="5.5" height="5" rx="1.5" /><rect x="9" y="9.5" width="5.5" height="5" rx="1.5" /></svg> },
+                { key: "tl", label: "Transliterasyon", subtitle: "Okunuş rehberi", checked: wbwShowWordTransliteration, onChange: setWbwShowWordTransliteration, size: wordTransliterationSize, onSize: setWordTransliterationSize, iconBg: "bg-purple-500", icon: <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 12L4 3.5h1L7.5 12" /><path d="M2.8 9.5h3.4" /><path d="M14 12V8.5a2 2 0 1 0-4 0V12" /></svg> },
               ]
           ).map((item) => (
             <SettingCard key={item.key} icon={item.icon} iconBg={item.iconBg} label={item.label} subtitle={item.subtitle} checked={item.checked} onChange={item.onChange}>
               <CompactSlider value={item.size} onChange={item.onSize} />
             </SettingCard>
           ))}
+          <SettingCard
+            icon={<svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 4h10M3 8h6M3 12h8" /></svg>}
+            iconBg="bg-blue-500" label="Çeviri" subtitle="Meal metnini göster"
+            checked={wbwShowTranslation} onChange={setWbwShowTranslation}
+          >
+            <TranslationPicker compact />
+          </SettingCard>
           <button type="button" onClick={() => setWbwTransliterationFirst(!wbwTransliterationFirst)}
             className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--theme-pill-bg)] px-3 py-2 text-[12px] font-medium text-[var(--theme-text-tertiary)] transition-colors hover:bg-[var(--theme-hover-bg)]">
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M7 4v16M7 4l-4 4M7 4l4 4M17 20V4M17 20l-4-4M17 20l4-4" /></svg>
@@ -264,86 +257,19 @@ function ModeTabContent({ viewMode, setViewMode, normalArabicFontSize, setNormal
   );
 }
 
-/* ─── Tab: Tema ─── */
-
-function ThemeTabContent({ theme, setTheme, colorizeWords, setColorizeWords, colorPaletteId, setColorPalette }: {
-  theme: Theme; setTheme: (t: Theme) => void;
-  colorizeWords: boolean; setColorizeWords: (v: boolean) => void;
-  colorPaletteId: ColorPaletteId; setColorPalette: (id: ColorPaletteId) => void;
-}) {
-  return (
-    <>
-      <div className="mb-4">
-        <span className="mb-2 block text-[12px] font-medium text-[var(--theme-text-tertiary)]">Tema</span>
-        <div className="flex items-center justify-center gap-4">
-          {THEMES.map((t) => (
-            <button key={t.value} onClick={() => setTheme(t.value)} className="flex flex-col items-center gap-1.5" aria-label={t.label}>
-              <span className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all ${theme === t.value ? "border-primary-600 ring-2 ring-primary-600/30" : "border-[var(--theme-divider)]"}`} style={{ backgroundColor: t.color }}>
-                {theme === t.value && <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke={t.value === "dark" || t.value === "dimmed" ? "#e5e5e5" : "#059669"} strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-              </span>
-              <span className="text-[11px] text-[var(--theme-text-tertiary)]">{t.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <Divider />
-      <ToggleRow label="Kelime Renklendirme" checked={colorizeWords} onChange={setColorizeWords} />
-      {colorizeWords && (
-        <div className="mb-3 flex items-center gap-2">
-          {COLOR_PALETTES.map((p) => (
-            <button key={p.id} onClick={() => setColorPalette(p.id)} className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all ${colorPaletteId === p.id ? "border-primary-600 ring-2 ring-primary-600/30" : "border-[var(--theme-divider)]"}`} aria-label={p.name} title={p.name}>
-              <svg width="18" height="18" viewBox="0 0 18 18"><rect x="1" y="1" width="7" height="7" rx="1.5" fill={p.colors[0]} /><rect x="10" y="1" width="7" height="7" rx="1.5" fill={p.colors[1]} /><rect x="1" y="10" width="7" height="7" rx="1.5" fill={p.colors[2]} /><rect x="10" y="10" width="7" height="7" rx="1.5" fill={p.colors[3]} /></svg>
-            </button>
-          ))}
-        </div>
-      )}
-    </>
-  );
-}
-
-/* ─── Tab: Yazı Tipi ─── */
-
-function FontTabContent({ arabicFontId, setArabicFont }: { arabicFontId: string; setArabicFont: (id: string) => void }) {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-
-  useEffect(() => {
-    if (fontsLoaded) return;
-    ARABIC_FONTS.filter((f) => f.source === "google" && f.googleUrl).forEach((f) => {
-      if (!document.querySelector(`link[href="${f.googleUrl}"]`)) {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = f.googleUrl!;
-        document.head.appendChild(link);
-      }
-    });
-    setFontsLoaded(true);
-  }, [fontsLoaded]);
-
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {ARABIC_FONTS.map((font) => (
-        <button key={font.id} onClick={() => setArabicFont(font.id)}
-          className={`flex flex-col items-center gap-1 rounded-xl border-2 px-2 py-3 transition-all ${arabicFontId === font.id ? "border-primary-600 bg-primary-600/5 ring-1 ring-primary-600/20" : "border-[var(--theme-divider)] hover:border-[var(--theme-text-quaternary)]"}`}>
-          <span className="arabic-text text-[22px] leading-tight text-[var(--theme-text)]" style={{ fontFamily: font.family }} dir="rtl">{BISMILLAH_SAMPLE}</span>
-          <span className={`text-[10px] font-medium ${arabicFontId === font.id ? "text-primary-700" : "text-[var(--theme-text-tertiary)]"}`}>{font.name}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
 /* ─── Main Component ─── */
 
 export function ReadingToolbar({ segmentStyle }: { segmentStyle?: boolean } = {}) {
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<ToolbarTab>("boyut");
   const popoverRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const audioVisible = useAudioStore((s) => s.isVisible);
 
   // Preview verse (Besmele — Fatiha 1)
-  const { data: previewVerse } = useQuery(verseByKeyQueryOptions("1:1"));
+  const { data: rawPreviewVerse } = useQuery(verseByKeyQueryOptions("1:1"));
+  const translatedPreview = useTranslatedVerses(rawPreviewVerse ? [rawPreviewVerse] : []);
+  const previewVerse = translatedPreview[0] ?? rawPreviewVerse;
 
   // View mode
   const viewMode = usePreferencesStore((s) => s.viewMode);
@@ -357,37 +283,26 @@ export function ReadingToolbar({ segmentStyle }: { segmentStyle?: boolean } = {}
   const setWbwArabicFontSize = usePreferencesStore((s) => s.setWbwArabicFontSize);
   const setMushafArabicFontSize = usePreferencesStore((s) => s.setMushafArabicFontSize);
 
-  // Translation
+  // Normal mode settings
   const normalTranslationFontSize = usePreferencesStore((s) => s.normalTranslationFontSize);
   const setNormalTranslationFontSize = usePreferencesStore((s) => s.setNormalTranslationFontSize);
-  const showTranslation = usePreferencesStore((s) => s.showTranslation);
-  const setShowTranslation = usePreferencesStore((s) => s.setShowTranslation);
-
-  // Colorize
-  const colorizeWords = usePreferencesStore((s) => s.colorizeWords);
-  const setColorizeWords = usePreferencesStore((s) => s.setColorizeWords);
-  const colorPaletteId = usePreferencesStore((s) => s.colorPaletteId);
-  const setColorPalette = usePreferencesStore((s) => s.setColorPalette);
-
-  // Word-by-word
-  const showWordTranslation = usePreferencesStore((s) => s.showWordTranslation);
-  const setShowWordTranslation = usePreferencesStore((s) => s.setShowWordTranslation);
+  const normalShowTranslation = usePreferencesStore((s) => s.normalShowTranslation);
+  const setNormalShowTranslation = usePreferencesStore((s) => s.setNormalShowTranslation);
+  const normalShowWordHover = usePreferencesStore((s) => s.normalShowWordHover);
+  const setNormalShowWordHover = usePreferencesStore((s) => s.setNormalShowWordHover);
+  // Word-by-word settings
+  const wbwShowTranslation = usePreferencesStore((s) => s.wbwShowTranslation);
+  const setWbwShowTranslation = usePreferencesStore((s) => s.setWbwShowTranslation);
+  const wbwShowWordTranslation = usePreferencesStore((s) => s.wbwShowWordTranslation);
+  const setWbwShowWordTranslation = usePreferencesStore((s) => s.setWbwShowWordTranslation);
   const wordTranslationSize = usePreferencesStore((s) => s.wordTranslationSize);
   const setWordTranslationSize = usePreferencesStore((s) => s.setWordTranslationSize);
-  const showWordTransliteration = usePreferencesStore((s) => s.showWordTransliteration);
-  const setShowWordTransliteration = usePreferencesStore((s) => s.setShowWordTransliteration);
+  const wbwShowWordTransliteration = usePreferencesStore((s) => s.wbwShowWordTransliteration);
+  const setWbwShowWordTransliteration = usePreferencesStore((s) => s.setWbwShowWordTransliteration);
   const wordTransliterationSize = usePreferencesStore((s) => s.wordTransliterationSize);
   const setWordTransliterationSize = usePreferencesStore((s) => s.setWordTransliterationSize);
   const wbwTransliterationFirst = usePreferencesStore((s) => s.wbwTransliterationFirst);
   const setWbwTransliterationFirst = usePreferencesStore((s) => s.setWbwTransliterationFirst);
-
-  // Theme
-  const theme = usePreferencesStore((s) => s.theme);
-  const setTheme = usePreferencesStore((s) => s.setTheme);
-
-  // Font
-  const arabicFontId = usePreferencesStore((s) => s.arabicFontId);
-  const setArabicFont = usePreferencesStore((s) => s.setArabicFont);
 
   const translationFontSize = getTranslationFontSizeForMode({ viewMode, normalTranslationFontSize });
 
@@ -445,35 +360,21 @@ export function ReadingToolbar({ segmentStyle }: { segmentStyle?: boolean } = {}
             {/* Live preview */}
             {previewVerse && <PreviewCard verse={previewVerse} />}
 
-            {/* Tab bar */}
-            <div className="mb-4">
-              <SegmentedControl options={TOOLBAR_TABS} value={activeTab} onChange={setActiveTab} stretch />
-            </div>
-
-            {/* Tab content */}
-            {activeTab === "boyut" && (
-              <ModeTabContent
-                viewMode={viewMode} setViewMode={setViewMode}
-                normalArabicFontSize={normalArabicFontSize} setNormalArabicFontSize={setNormalArabicFontSize}
-                wbwArabicFontSize={wbwArabicFontSize} setWbwArabicFontSize={setWbwArabicFontSize}
-                mushafArabicFontSize={mushafArabicFontSize} setMushafArabicFontSize={setMushafArabicFontSize}
-                translationFontSize={translationFontSize} setNormalTranslationFontSize={setNormalTranslationFontSize}
-                showTranslation={showTranslation} setShowTranslation={setShowTranslation}
-                showWordTranslation={showWordTranslation} setShowWordTranslation={setShowWordTranslation}
-                wordTranslationSize={wordTranslationSize} setWordTranslationSize={setWordTranslationSize}
-                showWordTransliteration={showWordTransliteration} setShowWordTransliteration={setShowWordTransliteration}
-                wordTransliterationSize={wordTransliterationSize} setWordTransliterationSize={setWordTransliterationSize}
-                wbwTransliterationFirst={wbwTransliterationFirst} setWbwTransliterationFirst={setWbwTransliterationFirst}
-              />
-            )}
-
-            {activeTab === "tema" && (
-              <ThemeTabContent theme={theme} setTheme={setTheme} colorizeWords={colorizeWords} setColorizeWords={setColorizeWords} colorPaletteId={colorPaletteId} setColorPalette={setColorPalette} />
-            )}
-
-            {activeTab === "font" && (
-              <FontTabContent arabicFontId={arabicFontId} setArabicFont={setArabicFont} />
-            )}
+            <ModeTabContent
+              viewMode={viewMode} setViewMode={setViewMode}
+              normalArabicFontSize={normalArabicFontSize} setNormalArabicFontSize={setNormalArabicFontSize}
+              wbwArabicFontSize={wbwArabicFontSize} setWbwArabicFontSize={setWbwArabicFontSize}
+              mushafArabicFontSize={mushafArabicFontSize} setMushafArabicFontSize={setMushafArabicFontSize}
+              translationFontSize={translationFontSize} setNormalTranslationFontSize={setNormalTranslationFontSize}
+              normalShowTranslation={normalShowTranslation} setNormalShowTranslation={setNormalShowTranslation}
+              normalShowWordHover={normalShowWordHover} setNormalShowWordHover={setNormalShowWordHover}
+              wbwShowTranslation={wbwShowTranslation} setWbwShowTranslation={setWbwShowTranslation}
+              wbwShowWordTranslation={wbwShowWordTranslation} setWbwShowWordTranslation={setWbwShowWordTranslation}
+              wordTranslationSize={wordTranslationSize} setWordTranslationSize={setWordTranslationSize}
+              wbwShowWordTransliteration={wbwShowWordTransliteration} setWbwShowWordTransliteration={setWbwShowWordTransliteration}
+              wordTransliterationSize={wordTransliterationSize} setWordTransliterationSize={setWordTransliterationSize}
+              wbwTransliterationFirst={wbwTransliterationFirst} setWbwTransliterationFirst={setWbwTransliterationFirst}
+            />
           </div>
         </>
       )}

@@ -9,7 +9,6 @@ const NO_BISMILLAH_SURAHS = new Set([1, 9]);
 
 interface VerseListProps {
   verses: Verse[];
-  showTranslation?: boolean;
   showBismillah?: boolean;
   onPlayFromVerse?: (verseKey: string) => void;
   onTogglePlayPause?: () => void;
@@ -17,7 +16,6 @@ interface VerseListProps {
 
 export function VerseList({
   verses,
-  showTranslation = true,
   showBismillah = true,
   onPlayFromVerse,
   onTogglePlayPause,
@@ -42,7 +40,6 @@ export function VerseList({
             {needsBismillah && <Bismillah />}
             <AyahText
               verse={verse}
-              showTranslation={showTranslation}
               onPlayFromVerse={onPlayFromVerse}
               onTogglePlayPause={onTogglePlayPause}
             />

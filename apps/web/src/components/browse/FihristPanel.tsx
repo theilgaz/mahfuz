@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { chaptersQueryOptions } from "~/hooks/useChapters";
 import { SegmentedControl } from "~/components/ui/SegmentedControl";
 import { TOPIC_INDEX } from "~/data/topic-index";
+import { ExpandedFihrist } from "./ExpandedFihrist";
 
 type PlaceFilter = "all" | "makkah" | "madinah";
 type JuzFilter = "all" | string;
@@ -28,6 +29,7 @@ export function FihristPanel({ initialTopic }: { initialTopic?: number }) {
   const [placeFilter, setPlaceFilter] = useState<PlaceFilter>("all");
   const [juzFilter, setJuzFilter] = useState<JuzFilter>("all");
   const [openTopic, setOpenTopic] = useState<number | null>(initialTopic ?? null);
+  const [showExpanded, setShowExpanded] = useState(false);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -59,6 +61,24 @@ export function FihristPanel({ initialTopic }: { initialTopic?: number }) {
         <TopicGrid
           openTopic={openTopic}
           onSelect={(i) => setOpenTopic(openTopic === i ? null : i)}
+          chapters={chapters}
+        />
+
+        {/* Daha Fazla Button */}
+        <button
+          type="button"
+          onClick={() => setShowExpanded(true)}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--theme-bg-primary)] px-4 py-3 text-[13px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)] active:scale-[0.99]"
+        >
+          <span>Tüm Konuları Keşfet</span>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        <ExpandedFihrist
+          open={showExpanded}
+          onClose={() => setShowExpanded(false)}
           chapters={chapters}
         />
       </section>

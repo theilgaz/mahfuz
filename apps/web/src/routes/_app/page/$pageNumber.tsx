@@ -16,6 +16,7 @@ import { useAutoScrollToVerse } from "~/hooks/useAutoScrollToVerse";
 import type { Chapter, Verse } from "@mahfuz/shared/types";
 import type { ChapterAudioData } from "@mahfuz/audio-engine";
 import { useReadingHistory } from "~/stores/useReadingHistory";
+import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 
 export const Route = createFileRoute("/_app/page/$pageNumber")({
   loader: ({ context, params }) => {
@@ -131,8 +132,6 @@ function MushafPageView() {
   const queryClient = useQueryClient();
   const viewMode = usePreferencesStore((s) => s.viewMode);
   const setViewMode = usePreferencesStore((s) => s.setViewMode);
-  const showTranslation = usePreferencesStore((s) => s.showTranslation);
-
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const reciterId = useAudioStore((s) => s.reciterId);
@@ -142,6 +141,7 @@ function MushafPageView() {
   const togglePlayPause = useAudioStore((s) => s.togglePlayPause);
 
   const { data: versesData } = useSuspenseQuery(versesByPageQueryOptions(pageNum));
+  const translatedVerses = useTranslatedVerses(versesData.verses);
   const { data: chapters } = useSuspenseQuery(chaptersQueryOptions());
 
   useAutoScrollToVerse();
@@ -154,7 +154,7 @@ function MushafPageView() {
     const groups: { chapterId: number; chapter: Chapter | undefined; verses: Verse[] }[] = [];
     let currentChapterId = -1;
 
-    for (const verse of versesData.verses) {
+    for (const verse of translatedVerses) {
       const chId = Number(verse.verse_key.split(":")[0]);
       if (chId !== currentChapterId) {
         currentChapterId = chId;
@@ -167,7 +167,7 @@ function MushafPageView() {
       groups[groups.length - 1].verses.push(verse);
     }
     return groups;
-  }, [versesData.verses, chapters]);
+  }, [translatedVerses, chapters]);
 
   const juzNumber = getJuzForPage(pageNum);
 
@@ -288,72 +288,44 @@ function MushafPageView() {
 
   return (
     <div ref={swipeContainerRef} className="mx-auto max-w-[680px] px-5 py-8 sm:px-6 sm:py-10" style={{ touchAction: "pan-y" }}>
-      {/* Page header */}
-      <div className="relative mb-10 overflow-hidden rounded-3xl bg-[var(--theme-pill-bg)] px-6 py-10 text-center">
-        <div className="relative z-10">
+      {/* Page header — compact horizontal */}
+      <div className="relative mb-6 overflow-hidden rounded-2xl bg-[var(--theme-pill-bg)] px-4 py-3.5">
+        <div className="relative z-10 flex items-center justify-between gap-3">
+          {/* Left: page info */}
           <button
             type="button"
             onClick={() => setPickerOpen(true)}
-            className="group mx-auto mb-2 flex flex-col items-center gap-0 transition-transform active:scale-[0.97]"
+            className="group min-w-0 text-left transition-transform active:scale-[0.97]"
           >
-            <span className="text-[3.5rem] font-semibold tabular-nums leading-tight text-[var(--theme-text)] sm:text-[4rem]">
-              {pageNum}
-            </span>
-            <span className="flex items-center gap-1 text-[17px] font-semibold tracking-[-0.01em] text-[var(--theme-text)]">
-              Sayfa {pageNum}
-              <svg className="h-3.5 w-3.5 text-[var(--theme-text-tertiary)] transition-transform group-hover:translate-y-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 6l4 4 4-4" />
-              </svg>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[1.75rem] font-semibold tabular-nums leading-none text-[var(--theme-text)]">{pageNum}</span>
+              <div className="flex items-center gap-1">
+                <span className="text-[15px] font-semibold text-[var(--theme-text)]">Sayfa {pageNum}</span>
+                <svg className="h-3 w-3 text-[var(--theme-text-tertiary)]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 6l4 4 4-4" />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-0.5 text-[11px] text-[var(--theme-text-tertiary)]">
+              {verseGroups[0].chapter?.translated_name.name}
+              {verseGroups.length > 1 && `–${verseGroups[verseGroups.length - 1].chapter?.translated_name.name}`}
+              {" · "}{versesData.pagination.total_records} ayet · Cüz {juzNumber}
+            </p>
           </button>
-          <div className="mx-auto mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[var(--theme-text-tertiary)]">
-            <span className="inline-flex items-center gap-1">
-              <Link
-                to="/surah/$surahId"
-                params={{ surahId: String(verseGroups[0].chapterId) }}
-                className="transition-colors hover:text-primary-600"
-              >
-                {verseGroups[0].chapter?.translated_name.name}
-              </Link>
-              {verseGroups.length > 1 && (
-                <>
-                  <span>–</span>
-                  <Link
-                    to="/surah/$surahId"
-                    params={{ surahId: String(verseGroups[verseGroups.length - 1].chapterId) }}
-                    className="transition-colors hover:text-primary-600"
-                  >
-                    {verseGroups[verseGroups.length - 1].chapter?.translated_name.name}
-                  </Link>
-                </>
-              )}
-            </span>
-            <span>·</span>
-            <span>{versesData.pagination.total_records} ayet</span>
-            <span>·</span>
-            <span>Sayfa {pageNum}</span>
-            <span>·</span>
-            <Link
-              to="/juz/$juzId"
-              params={{ juzId: String(juzNumber) }}
-              className="rounded-full bg-primary-600/10 px-2 py-0.5 text-[11px] font-medium text-primary-700 transition-colors hover:bg-primary-600/20"
-            >
-              Cüz {juzNumber}
-            </Link>
-          </div>
 
+          {/* Right: play button */}
           <button
             onClick={handlePlayPage}
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary-600 px-5 py-2 text-[13px] font-medium text-white shadow-sm transition-all hover:bg-primary-700 active:scale-[0.97]"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-600 px-3 py-1.5 text-[11px] font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
               {isPlayingThisPage ? (
                 <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
               ) : (
                 <path d="M8 5.14v14l11-7-11-7z" />
               )}
             </svg>
-            {isPlayingThisPage ? "Durakla" : "Sayfayı Dinle"}
+            {isPlayingThisPage ? "Durakla" : "Dinle"}
           </button>
         </div>
       </div>
@@ -463,7 +435,6 @@ function MushafPageView() {
               {/* Verse list for this group */}
               <VerseList
                 verses={group.verses}
-                showTranslation={showTranslation}
                 onPlayFromVerse={handlePlayFromVerse}
               />
             </div>

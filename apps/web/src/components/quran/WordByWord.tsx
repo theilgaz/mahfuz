@@ -14,8 +14,8 @@ export function WordByWord({
   colors = [],
   activeWordPosition,
 }: WordByWordProps) {
-  const showTranslation = usePreferencesStore((s) => s.showWordTranslation);
-  const showTransliteration = usePreferencesStore((s) => s.showWordTransliteration);
+  const showTranslation = usePreferencesStore((s) => s.wbwShowWordTranslation);
+  const showTransliteration = usePreferencesStore((s) => s.wbwShowWordTransliteration);
   const translationSize = usePreferencesStore((s) => s.wordTranslationSize);
   const transliterationSize = usePreferencesStore((s) => s.wordTransliterationSize);
   const transliterationFirst = usePreferencesStore((s) => s.wbwTransliterationFirst);

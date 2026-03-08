@@ -8,5 +8,7 @@ export { VerseList } from "./VerseList";
 export { ChapterCard } from "./ChapterCard";
 export { Pagination } from "./Pagination";
 export { ReadingToolbar } from "./ReadingToolbar";
+export { TranslationBlock } from "./TranslationBlock";
+export { TranslationPicker } from "./TranslationPicker";
 export { MeccaSvg } from "./MeccaSvg";
 export { MadinaSvg } from "./MadinaSvg";

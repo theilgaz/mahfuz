@@ -152,14 +152,19 @@ interface PreferencesState {
   arabicFontId: string;
   viewMode: ViewMode;
   theme: Theme;
-  showTranslation: boolean;
+  selectedTranslations: string[];
   colorizeWords: boolean;
   colorPaletteId: ColorPaletteId;
-  showWordTranslation: boolean;
-  showWordTransliteration: boolean;
   wordTranslationSize: number;
   wordTransliterationSize: number;
   wbwTransliterationFirst: boolean;
+
+  // Per-mode translation/word settings
+  normalShowTranslation: boolean;
+  normalShowWordHover: boolean;
+  wbwShowTranslation: boolean;
+  wbwShowWordTranslation: boolean;
+  wbwShowWordTransliteration: boolean;
 
   // Per-mode font sizes
   normalArabicFontSize: number;
@@ -171,11 +176,15 @@ interface PreferencesState {
   setArabicFont: (id: string) => void;
   setViewMode: (mode: ViewMode) => void;
   setTheme: (theme: Theme) => void;
-  setShowTranslation: (value: boolean) => void;
+  toggleTranslation: (id: string) => void;
+  setSelectedTranslations: (ids: string[]) => void;
   setColorizeWords: (value: boolean) => void;
   setColorPalette: (id: ColorPaletteId) => void;
-  setShowWordTranslation: (value: boolean) => void;
-  setShowWordTransliteration: (value: boolean) => void;
+  setNormalShowTranslation: (value: boolean) => void;
+  setNormalShowWordHover: (value: boolean) => void;
+  setWbwShowTranslation: (value: boolean) => void;
+  setWbwShowWordTranslation: (value: boolean) => void;
+  setWbwShowWordTransliteration: (value: boolean) => void;
   setWordTranslationSize: (size: number) => void;
   setWordTransliterationSize: (size: number) => void;
   setWbwTransliterationFirst: (value: boolean) => void;
@@ -191,14 +200,19 @@ export const usePreferencesStore = create<PreferencesState>()(
       arabicFontId: "uthmani-hafs",
       viewMode: "normal",
       theme: "light",
-      showTranslation: true,
+      selectedTranslations: ["diyanet-api"],
       colorizeWords: false,
       colorPaletteId: "pastel",
-      showWordTranslation: true,
-      showWordTransliteration: true,
       wordTranslationSize: 1,
       wordTransliterationSize: 1,
       wbwTransliterationFirst: false,
+
+      // Per-mode translation/word settings
+      normalShowTranslation: true,
+      normalShowWordHover: true,
+      wbwShowTranslation: false,
+      wbwShowWordTranslation: true,
+      wbwShowWordTransliteration: true,
 
       // Per-mode font sizes (all default to 1 = 100%)
       normalArabicFontSize: 1,
@@ -209,11 +223,23 @@ export const usePreferencesStore = create<PreferencesState>()(
       setArabicFont: (id) => set({ arabicFontId: id }),
       setViewMode: (mode) => set({ viewMode: mode }),
       setTheme: (theme) => set({ theme }),
-      setShowTranslation: (value) => set({ showTranslation: value }),
+      toggleTranslation: (id) =>
+        set((state) => {
+          const cur = state.selectedTranslations;
+          if (cur.includes(id)) {
+            if (cur.length <= 1) return state;
+            return { selectedTranslations: cur.filter((t) => t !== id) };
+          }
+          return { selectedTranslations: [...cur, id] };
+        }),
+      setSelectedTranslations: (ids) => set({ selectedTranslations: ids }),
       setColorizeWords: (value) => set({ colorizeWords: value }),
       setColorPalette: (id) => set({ colorPaletteId: id }),
-      setShowWordTranslation: (value) => set({ showWordTranslation: value }),
-      setShowWordTransliteration: (value) => set({ showWordTransliteration: value }),
+      setNormalShowTranslation: (value) => set({ normalShowTranslation: value }),
+      setNormalShowWordHover: (value) => set({ normalShowWordHover: value }),
+      setWbwShowTranslation: (value) => set({ wbwShowTranslation: value }),
+      setWbwShowWordTranslation: (value) => set({ wbwShowWordTranslation: value }),
+      setWbwShowWordTransliteration: (value) => set({ wbwShowWordTransliteration: value }),
       setWordTranslationSize: (size) => set({ wordTranslationSize: size }),
       setWordTransliterationSize: (size) => set({ wordTransliterationSize: size }),
       setWbwTransliterationFirst: (value) => set({ wbwTransliterationFirst: value }),
@@ -224,20 +250,40 @@ export const usePreferencesStore = create<PreferencesState>()(
     }),
     {
       name: "mahfuz-preferences",
-      version: 1,
+      version: 4,
       migrate: (persisted: unknown, version: number) => {
         const state = persisted as Record<string, unknown>;
         if (version === 0 || !version) {
-          // Migrate old arabicFontSize/translationFontSize to per-mode fields
           const oldArabic = typeof state.arabicFontSize === "number" ? state.arabicFontSize : 1;
           const oldTranslation = typeof state.translationFontSize === "number" ? state.translationFontSize : 1;
           state.normalArabicFontSize = oldArabic;
           state.normalTranslationFontSize = oldTranslation;
           state.wbwArabicFontSize = oldArabic;
           state.mushafArabicFontSize = oldArabic;
-          // Remove old fields
           delete state.arabicFontSize;
           delete state.translationFontSize;
+        }
+        if ((version ?? 0) < 2) {
+          state.translationId = state.translationId ?? "diyanet-api";
+        }
+        if ((version ?? 0) < 3) {
+          const oldId = typeof state.translationId === "string" ? state.translationId : "diyanet-api";
+          state.selectedTranslations = [oldId];
+          delete state.translationId;
+        }
+        if ((version ?? 0) < 4) {
+          // Migrate global booleans → per-mode
+          const oldShowTranslation = state.showTranslation !== false;
+          const oldShowWordTranslation = state.showWordTranslation !== false;
+          const oldShowWordTransliteration = state.showWordTransliteration !== false;
+          state.normalShowTranslation = oldShowTranslation;
+          state.normalShowWordHover = true;
+          state.wbwShowTranslation = false;
+          state.wbwShowWordTranslation = oldShowWordTranslation;
+          state.wbwShowWordTransliteration = oldShowWordTransliteration;
+          delete state.showTranslation;
+          delete state.showWordTranslation;
+          delete state.showWordTransliteration;
         }
         return state as PreferencesState;
       },
