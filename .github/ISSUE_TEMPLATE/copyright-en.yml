@@ -1,0 +1,99 @@
+name: "Copyright Notice"
+description: "Report a copyright infringement claim."
+title: "[Copyright] "
+labels: ["copyright", "priority"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Copyright Notice
+
+        Mahfuz is an open-source project developed to facilitate access to the Quran. All content is used with proper attribution to its sources.
+
+        If you believe any content infringes on your copyright, please fill out the form below. Your claim will be reviewed promptly.
+
+  - type: input
+    id: name
+    attributes:
+      label: "Full Name / Organization"
+      description: "Name of the claimant or the organization they represent"
+      placeholder: "e.g. John Doe / ABC Publishing"
+    validations:
+      required: true
+
+  - type: input
+    id: email
+    attributes:
+      label: "Contact Email"
+      description: "Your email address so we can follow up"
+      placeholder: "example@email.com"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: content-type
+    attributes:
+      label: "Content Type"
+      description: "The type of content subject to the copyright claim"
+      options:
+        - "Translation text"
+        - "Font / Typeface"
+        - "Audio / Recitation"
+        - "Image / Design"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: content-name
+    attributes:
+      label: "Content in Question"
+      description: "Which translation, font, or content is involved?"
+      placeholder: "e.g. Omer Celik Translation, KFGQPC Uthmani Hafs font"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: "Details of the copyright claim. What content, where it is used, and ownership information."
+      placeholder: |
+        - Which content is subject to copyright?
+        - How can ownership be verified?
+        - Where in the application is it used?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: action-requested
+    attributes:
+      label: "Requested Action"
+      description: "What would you like us to do about this content?"
+      options:
+        - "Remove the content"
+        - "Correct / add source attribution"
+        - "Update licensing terms"
+        - "Contact me first (I'd like to discuss)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "Supporting Evidence / Links"
+      description: "Documents, links, or references demonstrating your ownership (if available)"
+      placeholder: "e.g. Publisher agreement, ISBN, official website link"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: declaration
+    attributes:
+      label: "Declaration"
+      description: "Please confirm the following statements"
+      options:
+        - label: "I declare that the information provided in this notice is accurate."
+          required: true
+        - label: "I declare that I am the copyright owner or an authorized representative of the copyright owner."
+          required: true

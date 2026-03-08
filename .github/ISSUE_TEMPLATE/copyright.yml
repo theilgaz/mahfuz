@@ -1,31 +1,31 @@
-name: "Telif Hakki Bildirimi"
-description: "Telif hakki ihlali bildirimi icin bu formu kullanin."
+name: "Telif Hakkı Bildirimi"
+description: "Telif hakkı ihlali bildirimi için bu formu kullanın."
 title: "[Telif] "
-labels: ["telif", "oncelikli"]
+labels: ["telif", "öncelikli"]
 body:
   - type: markdown
     attributes:
       value: |
-        ## Telif Hakki Bildirimi
+        ## Telif Hakkı Bildirimi
 
-        Mahfuz, Kur'an-i Kerim'e erisimi kolaylastirmak amaciyla gelistirilen acik kaynakli bir projedir. Iceriklerimizin tamami, kaynaklarina atifta bulunularak kullanilmaktadir.
+        Mahfuz, Kur'an-ı Kerim'e erişimi kolaylaştırmak amacıyla geliştirilen açık kaynaklı bir projedir. İçeriklerimizin tamamı, kaynaklarına atıfta bulunularak kullanılmaktadır.
 
-        Telif hakki ihlaline konu oldugunu dusundugunuz bir icerik varsa asagidaki formu doldurarak bize bildirin. Basvurunuz en kisa surede degerlendirilecektir.
+        Telif hakkı ihlaline konu olduğunu düşündüğünüz bir içerik varsa aşağıdaki formu doldurarak bize bildirin. Başvurunuz en kısa sürede değerlendirilecektir.
 
   - type: input
     id: name
     attributes:
       label: "Ad Soyad / Kurum"
-      description: "Basvuru sahibinin adi veya temsil ettigi kurum"
-      placeholder: "orn. Prof. Dr. Ahmet Yilmaz / XYZ Yayinevi"
+      description: "Başvuru sahibinin adı veya temsil ettiği kurum"
+      placeholder: "örn. Prof. Dr. Ahmet Yılmaz / XYZ Yayınevi"
     validations:
       required: true
 
   - type: input
     id: email
     attributes:
-      label: "Iletisim E-postasi"
-      description: "Size geri donus yapabilmemiz icin e-posta adresiniz"
+      label: "İletişim E-postası"
+      description: "Size geri dönüş yapabilmemiz için e-posta adresiniz"
       placeholder: "ornek@email.com"
     validations:
       required: true
@@ -33,48 +33,48 @@ body:
   - type: dropdown
     id: content-type
     attributes:
-      label: "Icerik Turu"
-      description: "Telif hakkina konu olan icerik turu"
+      label: "İçerik Türü"
+      description: "Telif hakkına konu olan içerik türü"
       options:
-        - "Meal / Ceviri metni"
-        - "Yazi tipi / Font"
-        - "Ses / Tilavet kaydi"
-        - "Gorsel / Tasarim"
-        - "Diger"
+        - "Meal / Çeviri metni"
+        - "Yazı tipi / Font"
+        - "Ses / Tilâvet kaydı"
+        - "Görsel / Tasarım"
+        - "Diğer"
     validations:
       required: true
 
   - type: input
     id: content-name
     attributes:
-      label: "Ilgili Icerik"
-      description: "Hangi meal, yazi tipi veya icerik ile ilgili?"
-      placeholder: "orn. Omer Celik Meali, KFGQPC Uthmani Hafs fontu"
+      label: "İlgili İçerik"
+      description: "Hangi meal, yazı tipi veya içerik ile ilgili?"
+      placeholder: "örn. Ömer Çelik Meali, KFGQPC Uthmani Hafs fontu"
     validations:
       required: true
 
   - type: textarea
     id: description
     attributes:
-      label: "Aciklama"
-      description: "Telif hakki iddiasinin detaylari. Hangi icerik, nerede kullaniliyor, hak sahipligi bilgisi."
+      label: "Açıklama"
+      description: "Telif hakkı iddiasının detayları. Hangi içerik, nerede kullanılıyor, hak sahipliği bilgisi."
       placeholder: |
-        - Hangi icerik telif hakkina konu?
-        - Hak sahipligi nasil kanitlanabilir?
-        - Uygulamada nerede kullaniliyor?
+        - Hangi içerik telif hakkına konu?
+        - Hak sahipliği nasıl kanıtlanabilir?
+        - Uygulamada nerede kullanılıyor?
     validations:
       required: true
 
   - type: dropdown
     id: action-requested
     attributes:
-      label: "Talep Edilen Islem"
-      description: "Bu icerik icin ne yapilmasini istiyorsunuz?"
+      label: "Talep Edilen İşlem"
+      description: "Bu içerik için ne yapılmasını istiyorsunuz?"
       options:
-        - "Icerigin kaldirilmasi"
-        - "Kaynak atfinin duzeltilmesi / eklenmesi"
-        - "Lisans kosullarinin guncellenmesi"
-        - "Iletisime gecilmesi (oncelikle gorusmek istiyorum)"
+        - "İçeriğin kaldırılması"
+        - "Kaynak atfının düzeltilmesi / eklenmesi"
+        - "Lisans koşullarının güncellenmesi"
+        - "İletişime geçilmesi (öncelikle görüşmek istiyorum)"
     validations:
       required: true
 
@@ -82,8 +82,8 @@ body:
     id: evidence
     attributes:
       label: "Destekleyici Belge / Link"
-      description: "Hak sahipliginizi gosteren belge, link veya referans (varsa)"
-      placeholder: "orn. Yayinevi sozlesmesi, ISBN, resmi web sitesi linki"
+      description: "Hak sahipliğinizi gösteren belge, link veya referans (varsa)"
+      placeholder: "örn. Yayınevi sözleşmesi, ISBN, resmî web sitesi linki"
     validations:
       required: false
 
@@ -91,9 +91,9 @@ body:
     id: declaration
     attributes:
       label: "Beyan"
-      description: "Asagidaki beyanlari onaylayin"
+      description: "Aşağıdaki beyanları onaylayın"
       options:
-        - label: "Bu bildirimde yer alan bilgilerin dogru oldugunu beyan ederim."
+        - label: "Bu bildirimde yer alan bilgilerin doğru olduğunu beyan ederim."
           required: true
-        - label: "Ilgili icerik uzerinde telif hakki sahibi veya yetkili temsilcisi oldugumu beyan ederim."
+        - label: "İlgili içerik üzerinde telif hakkı sahibi veya yetkili temsilcisi olduğumu beyan ederim."
           required: true

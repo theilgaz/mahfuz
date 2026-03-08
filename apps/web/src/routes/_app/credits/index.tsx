@@ -122,18 +122,32 @@ function CreditsPage() {
         <p className="text-[13px] leading-relaxed text-[var(--theme-text-tertiary)]">
           Meal metinleri, ilgili yazarlarına ve yayıncılarına aittir. Bu uygulama, Kur'an-ı Kerim'e erişimi kolaylaştırmak amacıyla bu kaynakları bir araya getirmektedir.
         </p>
-        <a
-          href="https://github.com/theilgaz/mahfuz/issues/new?template=copyright.yml"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[var(--theme-border)] px-3 py-2 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-        >
-          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-            <line x1="4" y1="22" x2="4" y2="15" />
-          </svg>
-          Telif Hakkı Bildirimi
-        </a>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a
+            href="https://github.com/theilgaz/mahfuz/issues/new?template=copyright.yml"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--theme-border)] px-3 py-2 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+              <line x1="4" y1="22" x2="4" y2="15" />
+            </svg>
+            Telif Hakkı Bildirimi
+          </a>
+          <a
+            href="https://github.com/theilgaz/mahfuz/issues/new?template=copyright-en.yml"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--theme-border)] px-3 py-2 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+              <line x1="4" y1="22" x2="4" y2="15" />
+            </svg>
+            Copyright Notice (EN)
+          </a>
+        </div>
       </div>
     </div>
   );
