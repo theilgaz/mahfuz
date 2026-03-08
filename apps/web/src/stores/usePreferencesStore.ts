@@ -30,7 +30,7 @@ export const FONT_GROUPS: { id: FontGroup; label: string }[] = [
 ];
 
 export const ARABIC_FONTS: ArabicFont[] = [
-  // ── Klasik & Mushaf ──
+  // Klasik & Mushaf
   {
     id: "uthmani-hafs",
     name: "Uthmani Hafs",
@@ -59,7 +59,7 @@ export const ARABIC_FONTS: ArabicFont[] = [
     group: "classic",
     desc: "Mısır Bulak matbaasının ruhunu taşıyan klasik bir Nesih yorumu. Asalet ve sadelik bir arada.",
   },
-  // ── Modern & Temiz ──
+  // Modern & Temiz
   {
     id: "noto-naskh-arabic",
     name: "Noto Naskh Arabic",
@@ -100,7 +100,7 @@ export const ARABIC_FONTS: ArabicFont[] = [
     group: "modern",
     desc: "Kûfi geleneğini çağdaş çizgilerle yorumlayan güçlü bir karakter. Başlıklarda etkileyici.",
   },
-  // ── Hat & Dekoratif ──
+  // Hat & Dekoratif
   {
     id: "playpen-sans-arabic",
     name: "Playpen Sans Arabic",
@@ -172,6 +172,10 @@ interface PreferencesState {
   wbwArabicFontSize: number;
   mushafArabicFontSize: number;
 
+  // Tab visibility
+  showLearnTab: boolean;
+  showMemorizeTab: boolean;
+
   // Setters
   setArabicFont: (id: string) => void;
   setViewMode: (mode: ViewMode) => void;
@@ -192,6 +196,8 @@ interface PreferencesState {
   setNormalTranslationFontSize: (size: number) => void;
   setWbwArabicFontSize: (size: number) => void;
   setMushafArabicFontSize: (size: number) => void;
+  setShowLearnTab: (v: boolean) => void;
+  setShowMemorizeTab: (v: boolean) => void;
 }
 
 export const usePreferencesStore = create<PreferencesState>()(
@@ -220,6 +226,10 @@ export const usePreferencesStore = create<PreferencesState>()(
       wbwArabicFontSize: 1,
       mushafArabicFontSize: 1,
 
+      // Tab visibility
+      showLearnTab: true,
+      showMemorizeTab: true,
+
       setArabicFont: (id) => set({ arabicFontId: id }),
       setViewMode: (mode) => set({ viewMode: mode }),
       setTheme: (theme) => set({ theme }),
@@ -247,10 +257,12 @@ export const usePreferencesStore = create<PreferencesState>()(
       setNormalTranslationFontSize: (size) => set({ normalTranslationFontSize: size }),
       setWbwArabicFontSize: (size) => set({ wbwArabicFontSize: size }),
       setMushafArabicFontSize: (size) => set({ mushafArabicFontSize: size }),
+      setShowLearnTab: (v) => set({ showLearnTab: v }),
+      setShowMemorizeTab: (v) => set({ showMemorizeTab: v }),
     }),
     {
       name: "mahfuz-preferences",
-      version: 4,
+      version: 5,
       migrate: (persisted: unknown, version: number) => {
         const state = persisted as Record<string, unknown>;
         if (version === 0 || !version) {
@@ -284,6 +296,10 @@ export const usePreferencesStore = create<PreferencesState>()(
           delete state.showTranslation;
           delete state.showWordTranslation;
           delete state.showWordTransliteration;
+        }
+        if ((version ?? 0) < 5) {
+          state.showLearnTab = state.showLearnTab ?? true;
+          state.showMemorizeTab = state.showMemorizeTab ?? true;
         }
         return state as PreferencesState;
       },

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { signOut } from "~/lib/auth-client";
 import { AudioProvider, AudioBar } from "~/components/audio";
+import { BottomTabBar } from "~/components/BottomTabBar";
 import { useAudioStore } from "~/stores/useAudioStore";
 import { usePreferencesStore, COLOR_PALETTES, ARABIC_FONTS } from "~/stores/usePreferencesStore";
 import type { Theme, ColorPaletteId } from "~/stores/usePreferencesStore";
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/_app")({
 
 const NAV_ITEMS = [
   { to: "/browse", labelKey: "mahfuz" as const, icon: BookIcon },
+  { to: "/learn", labelKey: "learn" as const, icon: GraduationIcon },
   { to: "/memorize", labelKey: "memorization" as const, icon: BrainIcon },
   { to: "/audio", labelKey: "audio" as const, icon: HeadphonesIcon },
 ] as const;
@@ -29,7 +31,6 @@ const NAV_ITEMS = [
 function AppLayout() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const { session } = Route.useRouteContext();
   const router = useRouter();
   const audioVisible = useAudioStore((s) => s.isVisible);
@@ -110,18 +111,6 @@ function AppLayout() {
   const scrollToTop = useCallback(() => {
     mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
-
-  // Lock body scroll when menu is open
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -313,17 +302,13 @@ function AppLayout() {
               </Link>
             )}
 
-            {/* Mobile hamburger — rightmost */}
+            {/* Mobile search button */}
             <button
-              onClick={() => setMenuOpen((v) => !v)}
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)] lg:hidden"
-              aria-label={menuOpen ? t.nav.closeMenu : t.nav.openMenu}
+              onClick={() => setPaletteOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)] lg:hidden"
+              aria-label={t.nav.search}
             >
-              <span className="flex h-4 w-5 flex-col justify-between">
-                <span className={`h-[2px] w-full rounded-full bg-current transition-all duration-300 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
-                <span className={`h-[2px] w-full rounded-full bg-current transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-                <span className={`h-[2px] w-full rounded-full bg-current transition-all duration-300 ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
-              </span>
+              <SearchIcon />
             </button>
           </div>
         </div>
@@ -360,7 +345,7 @@ function AppLayout() {
       )}
 
       {/* Page content */}
-      <main ref={mainRef} className={`relative flex-1 overflow-y-auto ${audioVisible ? "pb-16 lg:pb-0" : ""}`}>
+      <main ref={mainRef} className={`relative flex-1 overflow-y-auto ${audioVisible ? "pb-[136px]" : "pb-[76px]"} lg:pb-0`}>
         <Outlet />
 
         {/* Footer */}
@@ -383,7 +368,7 @@ function AppLayout() {
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-18 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--theme-bg-primary)] shadow-[var(--shadow-elevated)] transition-all hover:shadow-[var(--shadow-modal)] active:scale-95 lg:bottom-6 lg:right-6"
+            className="fixed bottom-[140px] right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--theme-bg-primary)] shadow-[var(--shadow-elevated)] transition-all hover:shadow-[var(--shadow-modal)] active:scale-95 lg:bottom-6 lg:right-6"
             aria-label={t.nav.scrollToTop}
           >
             <svg className="h-5 w-5 text-[var(--theme-text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -396,145 +381,7 @@ function AppLayout() {
       {/* Audio engine + player bar */}
       <AudioProvider />
       <AudioBar />
-
-      {/* Mobile fullscreen menu */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-40 flex flex-col bg-[var(--theme-bg)] lg:hidden">
-          {/* Menu header */}
-          <div className="flex h-[88px] items-center justify-between border-b border-[var(--theme-border)] px-4 sm:px-6">
-            <span className="text-lg font-semibold text-[var(--theme-text)]">{t.nav.menu}</span>
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-              aria-label={t.nav.closeMenu}
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Menu items */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
-            {/* Navigation items */}
-            <div className="space-y-1">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-                  activeProps={{
-                    className:
-                      "flex items-center gap-3 rounded-xl px-4 py-3.5 bg-primary-600/10 text-primary-700 transition-colors",
-                  }}
-                >
-                  <item.icon />
-                  <span className="text-[15px] font-medium">{t.nav[item.labelKey]}</span>
-                </Link>
-              ))}
-            </div>
-
-            {/* Divider */}
-            <div className="my-4 border-t border-[var(--theme-border)]" />
-
-            {/* Utility items */}
-            <div className="space-y-1">
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  setPaletteOpen(true);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-              >
-                <SearchIcon />
-                <span className="text-[15px] font-medium">{t.nav.search}</span>
-              </button>
-              <Link
-                to="/settings"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-                activeProps={{
-                  className:
-                    "flex items-center gap-3 rounded-xl px-4 py-3.5 bg-primary-600/10 text-primary-700 transition-colors",
-                }}
-              >
-                <SettingsIcon />
-                <span className="text-[15px] font-medium">{t.nav.settings}</span>
-              </Link>
-              <Link
-                to="/credits"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-                activeProps={{
-                  className:
-                    "flex items-center gap-3 rounded-xl px-4 py-3.5 bg-primary-600/10 text-primary-700 transition-colors",
-                }}
-              >
-                <CreditsIcon />
-                <span className="text-[15px] font-medium">{t.nav.credits}</span>
-              </Link>
-              <button
-                onClick={() => {
-                  const next = useI18nStore.getState().locale === "tr" ? "en" : "tr";
-                  useI18nStore.getState().setLocale(next);
-                }}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-              >
-                <GlobeIcon />
-                <span className="text-[15px] font-medium">{t.settings.language}</span>
-                <span className="ml-auto text-[13px] text-[var(--theme-text-tertiary)]">{locale === "tr" ? "TR → EN" : "EN → TR"}</span>
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div className="my-4 border-t border-[var(--theme-border)]" />
-
-            {/* Auth section */}
-            {session ? (
-              <div className="space-y-1">
-                <Link
-                  to="/profile"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-                >
-                  {session.user.image ? (
-                    <img
-                      src={session.user.image}
-                      alt={session.user.name}
-                      className="h-6 w-6 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-100 text-[10px] font-semibold text-primary-700">
-                      {session.user.name?.charAt(0)?.toUpperCase() || "?"}
-                    </span>
-                  )}
-                  <span className="text-[15px] font-medium">{session.user.name || t.nav.profile}</span>
-                </Link>
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleSignOut();
-                  }}
-                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/20"
-                >
-                  <LogOutIcon />
-                  <span className="text-[15px] font-medium">{t.nav.signOut}</span>
-                </button>
-              </div>
-            ) : (
-              <Link
-                to="/auth/login"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-primary-600 transition-colors hover:bg-[var(--theme-hover-bg)]"
-              >
-                <UserIcon />
-                <span className="text-[15px] font-medium">{t.nav.login}</span>
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
+      <BottomTabBar />
     </div>
   );
 }
@@ -815,6 +662,14 @@ function GlobeIcon() {
   return (
     <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A8.966 8.966 0 003 12c0-1.264.26-2.466.732-3.559" />
+    </svg>
+  );
+}
+
+function GraduationIcon() {
+  return (
+    <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342M12 13.489V21m0 0a7.5 7.5 0 003.75-6.488M12 21a7.5 7.5 0 01-3.75-6.488" />
     </svg>
   );
 }
