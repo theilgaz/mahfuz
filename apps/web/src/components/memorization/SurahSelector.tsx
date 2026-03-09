@@ -1,11 +1,9 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { chaptersQueryOptions } from "~/hooks/useChapters";
-import type { MemorizationCardEntry } from "@mahfuz/db";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { memorizationRepository } from "@mahfuz/db";
-import type { ConfidenceLevel, VerseKey } from "@mahfuz/shared/types";
-import { SM2_DEFAULTS } from "@mahfuz/shared/constants";
+import type { ConfidenceLevel } from "@mahfuz/shared/types";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAddVerses } from "~/hooks/useMemorization";
 
@@ -185,66 +183,7 @@ export function SurahSelector({ userId }: SurahSelectorProps) {
     setHasAutoSwitched(true);
   }, [progress.size, inProgressChapters.length, completedChapters.length, hasAutoSwitched]);
 
-  const [markingId, setMarkingId] = useState<number | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
-
-  const markAsMastered = useCallback(
-    async (ch: (typeof chapters)[number]) => {
-      setMarkingId(ch.id);
-      try {
-        const existing = await memorizationRepository.getCardsBySurah(userId, ch.id);
-        const existingKeys = new Set(existing.map((c) => c.verseKey));
-        const now = Date.now();
-
-        for (const card of existing) {
-          if (card.confidence !== "mastered") {
-            await memorizationRepository.upsertCard({
-              ...card,
-              confidence: "mastered",
-              updatedAt: now,
-            });
-          }
-        }
-
-        const newCards: MemorizationCardEntry[] = [];
-        for (let v = 1; v <= ch.verses_count; v++) {
-          const key = `${ch.id}:${v}` as VerseKey;
-          if (!existingKeys.has(key)) {
-            newCards.push({
-              id: crypto.randomUUID(),
-              userId,
-              verseKey: key,
-              easeFactor: SM2_DEFAULTS.INITIAL_EASE_FACTOR,
-              repetition: 5,
-              interval: 30,
-              nextReviewDate: now + 30 * 24 * 60 * 60 * 1000,
-              confidence: "mastered",
-              totalReviews: 5,
-              correctReviews: 5,
-              createdAt: now,
-              updatedAt: now,
-            });
-          }
-        }
-        if (newCards.length > 0) {
-          await memorizationRepository.createCards(newCards);
-        }
-
-        setProgress((prev) => {
-          const next = new Map(prev);
-          next.set(ch.id, {
-            total: ch.verses_count,
-            byConfidence: { mastered: ch.verses_count },
-          });
-          return next;
-        });
-        setExpandedId(null);
-      } finally {
-        setMarkingId(null);
-      }
-    },
-    [userId],
-  );
 
   const removeMemorization = useCallback(
     async (ch: (typeof chapters)[number]) => {
@@ -379,19 +318,16 @@ export function SurahSelector({ userId }: SurahSelectorProps) {
               {t.memorize.surahSelector.add}
             </Link>
 
-            <button
-              type="button"
-              disabled={markingId === ch.id}
-              onClick={() => markAsMastered(ch)}
-              className="flex items-center gap-1.5 rounded-xl bg-[var(--theme-hover-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-pill-bg)] disabled:opacity-50 cursor-pointer"
+            <Link
+              to="/memorize/verify/$surahId"
+              params={{ surahId: String(ch.id) }}
+              className="flex items-center gap-1.5 rounded-xl bg-[var(--theme-hover-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-pill-bg)]"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {markingId === ch.id
-                ? t.common.loading
-                : t.memorize.surahSelector.markMastered}
-            </button>
+              {t.memorize.surahSelector.markMastered}
+            </Link>
           </div>
         )}
       </div>
@@ -499,32 +435,16 @@ export function SurahSelector({ userId }: SurahSelectorProps) {
               </Link>
             )}
 
-            {p.total === ch.verses_count && (
-              <Link
-                to="/memorize/verify/$surahId"
-                params={{ surahId: String(ch.id) }}
-                className="flex items-center gap-1.5 rounded-xl bg-[var(--theme-hover-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-pill-bg)]"
-              >
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {t.memorize.surahSelector.verify}
-              </Link>
-            )}
-
-            <button
-              type="button"
-              disabled={markingId === ch.id}
-              onClick={() => markAsMastered(ch)}
-              className="flex items-center gap-1.5 rounded-xl bg-[var(--theme-hover-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-pill-bg)] disabled:opacity-50 cursor-pointer"
+            <Link
+              to="/memorize/verify/$surahId"
+              params={{ surahId: String(ch.id) }}
+              className="flex items-center gap-1.5 rounded-xl bg-[var(--theme-hover-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-pill-bg)]"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {markingId === ch.id
-                ? t.common.loading
-                : t.memorize.surahSelector.markMastered}
-            </button>
+              {t.memorize.surahSelector.markMastered}
+            </Link>
 
             <button
               type="button"
