@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { Translation } from "@mahfuz/shared/types";
 
 interface TranslationBlockProps {
@@ -8,7 +8,7 @@ interface TranslationBlockProps {
   onExpandedChange?: (expandedIndices: Set<number>) => void;
 }
 
-export function TranslationBlock({
+export const TranslationBlock = memo(function TranslationBlock({
   translations,
   fontSize,
   revealed,
@@ -112,4 +112,4 @@ export function TranslationBlock({
       })}
     </div>
   );
-}
+});

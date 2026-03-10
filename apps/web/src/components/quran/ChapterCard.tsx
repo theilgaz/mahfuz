@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import type { Chapter } from "@mahfuz/shared/types";
 
@@ -5,7 +6,7 @@ interface ChapterCardProps {
   chapter: Chapter;
 }
 
-export function ChapterCard({ chapter }: ChapterCardProps) {
+export const ChapterCard = memo(function ChapterCard({ chapter }: ChapterCardProps) {
   const isMakkah = chapter.revelation_place === "makkah";
 
   return (
@@ -56,4 +57,4 @@ export function ChapterCard({ chapter }: ChapterCardProps) {
       </div>
     </Link>
   );
-}
+});

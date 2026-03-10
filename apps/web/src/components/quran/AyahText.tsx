@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import type { Verse } from "@mahfuz/shared/types";
 import { WordByWord } from "./WordByWord";
 import { TranslationBlock } from "./TranslationBlock";
@@ -6,6 +6,7 @@ import { usePreferencesStore, getActiveColors } from "~/stores/usePreferencesSto
 import type { ViewMode } from "~/stores/usePreferencesStore";
 import { useAudioStore } from "~/stores/useAudioStore";
 import { useTranslation } from "~/hooks/useTranslation";
+import { useShallow } from "zustand/react/shallow";
 
 interface AyahTextProps {
   verse: Verse;
@@ -14,34 +15,44 @@ interface AyahTextProps {
   onTogglePlayPause?: () => void;
 }
 
-export function AyahText({
+export const AyahText = memo(function AyahText({
   verse,
   viewMode: viewModeProp,
   onPlayFromVerse,
   onTogglePlayPause,
 }: AyahTextProps) {
   const { t } = useTranslation();
-  const storeViewMode = usePreferencesStore((s) => s.viewMode);
-  const colorizeWords = usePreferencesStore((s) => s.colorizeWords);
-  const colorPaletteId = usePreferencesStore((s) => s.colorPaletteId);
-  const colors = getActiveColors({ colorPaletteId });
-  const viewMode = viewModeProp ?? storeViewMode;
 
-  const normalArabicFontSize = usePreferencesStore((s) => s.normalArabicFontSize);
-  const normalTranslationFontSize = usePreferencesStore((s) => s.normalTranslationFontSize);
-  const normalShowTranslation = usePreferencesStore((s) => s.normalShowTranslation);
-  const normalShowWordHover = usePreferencesStore((s) => s.normalShowWordHover);
-  const wbwShowTranslation = usePreferencesStore((s) => s.wbwShowTranslation);
-  const showTranslation = viewMode === "wordByWord" ? wbwShowTranslation : normalShowTranslation;
+  // Consolidated preferences selector — single subscription instead of 8
+  const prefs = usePreferencesStore(useShallow((s) => ({
+    viewMode: s.viewMode,
+    colorizeWords: s.colorizeWords,
+    colorPaletteId: s.colorPaletteId,
+    normalArabicFontSize: s.normalArabicFontSize,
+    normalTranslationFontSize: s.normalTranslationFontSize,
+    normalShowTranslation: s.normalShowTranslation,
+    normalShowWordHover: s.normalShowWordHover,
+    wbwShowTranslation: s.wbwShowTranslation,
+  })));
 
-  const currentVerseKey = useAudioStore((s) => s.currentVerseKey);
-  const currentWordPosition = useAudioStore((s) => s.currentWordPosition);
-  const playbackState = useAudioStore((s) => s.playbackState);
+  const colors = getActiveColors({ colorPaletteId: prefs.colorPaletteId });
+  const viewMode = viewModeProp ?? prefs.viewMode;
+  const showTranslation = viewMode === "wordByWord" ? prefs.wbwShowTranslation : prefs.normalShowTranslation;
 
-  const isCurrentVerse = currentVerseKey === verse.verse_key;
-  const isAudioPlaying = playbackState === "playing" || playbackState === "paused";
-  const activeWordPos =
-    isCurrentVerse && playbackState === "playing" ? currentWordPosition : null;
+  // Audio selectors — only re-render when THIS verse's audio state changes
+  const isCurrentVerse = useAudioStore((s) => s.currentVerseKey === verse.verse_key);
+  const activeWordPos = useAudioStore((s) =>
+    s.currentVerseKey === verse.verse_key && s.playbackState === "playing"
+      ? s.currentWordPosition
+      : null
+  );
+  const isAudioPlaying = useAudioStore((s) =>
+    s.currentVerseKey === verse.verse_key &&
+    (s.playbackState === "playing" || s.playbackState === "paused")
+  );
+  const playbackState = useAudioStore((s) =>
+    s.currentVerseKey === verse.verse_key ? s.playbackState : null
+  );
 
   // Tap-to-reveal: local state for temporarily showing translation
   const [revealed, setRevealed] = useState(false);
@@ -174,25 +185,25 @@ export function AyahText({
           {viewMode === "wordByWord" && verse.words ? (
             <WordByWord
               words={verse.words}
-              colorizeWords={colorizeWords}
+              colorizeWords={prefs.colorizeWords}
               colors={colors}
               activeWordPosition={activeWordPos}
             />
           ) : (
-            <p className="arabic-text leading-[2.6] text-[var(--theme-text)]" style={{ fontSize: `calc(1.65rem * ${normalArabicFontSize})` }}>
+            <p className="arabic-text leading-[2.6] text-[var(--theme-text)]" style={{ fontSize: `calc(1.65rem * ${prefs.normalArabicFontSize})` }}>
               {verse.words
                 ? verse.words
                     .filter((w) => w.char_type_name === "word")
                     .map((w, i) => {
                       const isActiveWord =
                         activeWordPos !== null && w.position === activeWordPos;
-                      const hasTooltip = normalShowWordHover && (w.translation?.text || w.transliteration?.text);
+                      const hasTooltip = prefs.normalShowWordHover && (w.translation?.text || w.transliteration?.text);
                       return (
                         <span
                           key={w.id}
                           className={`word-highlight ${isActiveWord ? "active" : ""} ${hasTooltip ? "group/word relative inline-block" : ""}`}
                           style={
-                            colorizeWords && colors.length > 0
+                            prefs.colorizeWords && colors.length > 0
                               ? { color: isActiveWord ? undefined : colors[i % colors.length] }
                               : undefined
                           }
@@ -222,7 +233,7 @@ export function AyahText({
         <div className="sm:ml-[44px]">
           <TranslationBlock
             translations={verse.translations}
-            fontSize={normalTranslationFontSize}
+            fontSize={prefs.normalTranslationFontSize}
             revealed={revealed && !showTranslation}
             onExpandedChange={setExpandedTranslations}
           />
@@ -231,4 +242,4 @@ export function AyahText({
 
     </div>
   );
-}
+});

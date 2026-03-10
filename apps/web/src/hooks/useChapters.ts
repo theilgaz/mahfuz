@@ -5,6 +5,7 @@ export const chaptersQueryOptions = () =>
   queryOptions({
     queryKey: ["chapters"],
     queryFn: () => quranApi.chapters.list(),
+    gcTime: Infinity, // Chapters list never changes — keep in memory permanently
   });
 
 export const chapterQueryOptions = (chapterId: number) =>

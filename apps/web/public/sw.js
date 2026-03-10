@@ -1,5 +1,5 @@
 /// @ts-nocheck
-const CACHE_NAME = "mahfuz-v1";
+const CACHE_NAME = "mahfuz-v2";
 
 const APP_SHELL = [
   "/",
@@ -35,9 +35,9 @@ self.addEventListener("fetch", (event) => {
   // Skip non-GET requests
   if (request.method !== "GET") return;
 
-  // API calls: network-first, cache fallback
-  if (url.hostname === "api.quran.com") {
-    event.respondWith(networkFirst(request));
+  // API calls: stale-while-revalidate (Quran data is static, serve from cache instantly)
+  if (url.hostname === "api.quran.com" || url.hostname === "api.qurancdn.com") {
+    event.respondWith(staleWhileRevalidate(request));
     return;
   }
 
@@ -56,6 +56,22 @@ self.addEventListener("fetch", (event) => {
   // Default: network-first
   event.respondWith(networkFirst(request));
 });
+
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+
+  const fetchPromise = fetch(request)
+    .then((response) => {
+      if (response.ok) {
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+      }
+      return response;
+    })
+    .catch(() => cached || new Response("Offline", { status: 503 }));
+
+  // Return cached immediately if available, otherwise wait for network
+  return cached || fetchPromise;
+}
 
 async function cacheFirst(request) {
   const cached = await caches.match(request);

@@ -1,5 +1,7 @@
+import { memo } from "react";
 import type { Word } from "@mahfuz/shared/types";
 import { usePreferencesStore } from "~/stores/usePreferencesStore";
+import { useShallow } from "zustand/react/shallow";
 
 interface WordByWordProps {
   words: Word[];
@@ -8,18 +10,21 @@ interface WordByWordProps {
   activeWordPosition?: number | null;
 }
 
-export function WordByWord({
+export const WordByWord = memo(function WordByWord({
   words,
   colorizeWords = false,
   colors = [],
   activeWordPosition,
 }: WordByWordProps) {
-  const showTranslation = usePreferencesStore((s) => s.wbwShowWordTranslation);
-  const showTransliteration = usePreferencesStore((s) => s.wbwShowWordTransliteration);
-  const translationSize = usePreferencesStore((s) => s.wordTranslationSize);
-  const transliterationSize = usePreferencesStore((s) => s.wordTransliterationSize);
-  const transliterationFirst = usePreferencesStore((s) => s.wbwTransliterationFirst);
-  const wbwArabicFontSize = usePreferencesStore((s) => s.wbwArabicFontSize);
+  // Consolidated preferences selector — single subscription instead of 6
+  const prefs = usePreferencesStore(useShallow((s) => ({
+    showTranslation: s.wbwShowWordTranslation,
+    showTransliteration: s.wbwShowWordTransliteration,
+    translationSize: s.wordTranslationSize,
+    transliterationSize: s.wordTransliterationSize,
+    transliterationFirst: s.wbwTransliterationFirst,
+    wbwArabicFontSize: s.wbwArabicFontSize,
+  })));
 
   const wordItems = words.filter((w) => w.char_type_name === "word");
 
@@ -34,12 +39,12 @@ export function WordByWord({
         const isActive =
           activeWordPosition != null && word.position === activeWordPosition;
 
-        const translationEl = showTranslation && (
+        const translationEl = prefs.showTranslation && (
           <span
             key="tr"
             className="font-sans text-[var(--theme-text-tertiary)] transition-colors"
             style={{
-              fontSize: `calc(11px * ${translationSize})`,
+              fontSize: `calc(11px * ${prefs.translationSize})`,
               ...(isActive
                 ? { color: "var(--theme-highlight-text)" }
                 : colorStyle(i, isActive)),
@@ -49,12 +54,12 @@ export function WordByWord({
           </span>
         );
 
-        const transliterationEl = showTransliteration && (
+        const transliterationEl = prefs.showTransliteration && (
           <span
             key="tl"
             className="font-sans text-[var(--theme-text-quaternary)] transition-colors"
             style={{
-              fontSize: `calc(10px * ${transliterationSize})`,
+              fontSize: `calc(10px * ${prefs.transliterationSize})`,
               ...(isActive
                 ? { color: "var(--theme-highlight-text)" }
                 : colorStyle(i, isActive, 0.75)),
@@ -74,7 +79,7 @@ export function WordByWord({
             <span
               className={`word-highlight arabic-text cursor-pointer ${isActive ? "active" : ""}`}
               style={{
-                fontSize: `calc(1.5rem * ${wbwArabicFontSize})`,
+                fontSize: `calc(1.5rem * ${prefs.wbwArabicFontSize})`,
                 ...(colorizeWords && colors.length > 0 && !isActive
                   ? { color: colors[i % colors.length] }
                   : isActive
@@ -84,7 +89,7 @@ export function WordByWord({
             >
               {word.text_uthmani}
             </span>
-            {transliterationFirst ? (
+            {prefs.transliterationFirst ? (
               <>{transliterationEl}{translationEl}</>
             ) : (
               <>{translationEl}{transliterationEl}</>
@@ -98,11 +103,11 @@ export function WordByWord({
           <span
             key={w.id}
             className="arabic-text self-start text-[var(--theme-text-quaternary)]"
-            style={{ fontSize: `calc(1.5rem * ${wbwArabicFontSize})` }}
+            style={{ fontSize: `calc(1.5rem * ${prefs.wbwArabicFontSize})` }}
           >
             {w.text}
           </span>
         ))}
     </div>
   );
-}
+});

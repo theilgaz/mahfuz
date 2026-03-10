@@ -17,7 +17,7 @@ import type { Chapter } from "@mahfuz/shared/types";
 import type { ChapterAudioData } from "@mahfuz/audio-engine";
 import { useReadingHistory } from "~/stores/useReadingHistory";
 import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
-import { TOPIC_INDEX } from "~/data/topic-index";
+import type { TopicEntry } from "~/data/topic-index";
 import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/_app/surah/$surahId")({
@@ -105,24 +105,17 @@ function SurahView() {
 
   useAutoScrollToVerse();
 
-  // Scroll to verse from ?verse= search param (e.g. from CommandPalette)
+  // Scroll to verse from ?verse= search param is handled by VerseList's scrollToVerse prop
+
+  // Lazy-load TOPIC_INDEX only when topicParam is present (saves ~5-10KB from bundle)
+  const [topicData, setTopicData] = useState<TopicEntry[] | null>(null);
   useEffect(() => {
-    if (!verseParam) return;
-    const verseKey = `${chapterId}:${verseParam}`;
-    // Wait for DOM to render verses
-    const timer = setTimeout(() => {
-      const el = document.getElementById(`verse-${verseKey}`);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        // Brief highlight
-        el.classList.add("ring-2", "ring-primary-400/50", "rounded-xl");
-        setTimeout(() => {
-          el.classList.remove("ring-2", "ring-primary-400/50", "rounded-xl");
-        }, 2000);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [chapterId, verseParam]);
+    if (topicParam !== undefined) {
+      import("~/data/topic-index").then((m) => setTopicData(m.TOPIC_INDEX));
+    } else {
+      setTopicData(null);
+    }
+  }, [topicParam]);
 
   const visitSurah = useReadingHistory((s) => s.visitSurah);
   useEffect(() => { visitSurah(chapterId, chapter.translated_name.name); }, [chapterId, chapter.translated_name.name, visitSurah]);
@@ -229,8 +222,8 @@ function SurahView() {
   return (
     <div className="mx-auto max-w-[680px] px-5 py-8 sm:px-6 sm:py-10">
       {/* Topic navigation bar (when coming from Fihrist) */}
-      {topicParam !== undefined && TOPIC_INDEX[topicParam] && (
-        <TopicNavBar topicIndex={topicParam} currentSurahId={chapterId} t={t} />
+      {topicParam !== undefined && topicData && topicData[topicParam] && (
+        <TopicNavBar topic={topicData[topicParam]} topicIndex={topicParam} currentSurahId={chapterId} t={t} />
       )}
 
       {/* Surah header, standard picker pattern */}
@@ -369,6 +362,7 @@ function SurahView() {
           verses={translatedVerses}
           onPlayFromVerse={handlePlayFromVerse}
           onTogglePlayPause={togglePlayPause}
+          scrollToVerse={verseParam}
         />
       </div>
 
@@ -557,8 +551,7 @@ function SurahPicker({
 
 // -- Topic Navigation Bar (when coming from Fihrist) --
 
-function TopicNavBar({ topicIndex, currentSurahId, t }: { topicIndex: number; currentSurahId: number; t: ReturnType<typeof useTranslation>["t"] }) {
-  const topic = TOPIC_INDEX[topicIndex];
+function TopicNavBar({ topic, topicIndex, currentSurahId, t }: { topic: TopicEntry; topicIndex: number; currentSurahId: number; t: ReturnType<typeof useTranslation>["t"] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to active ref
