@@ -75,7 +75,7 @@
   --theme-speed-inactive-hover: #e8e8ea;
   --theme-surah-header-glow: rgba(255, 255, 255, 0.85);
 
-  --theme-highlight-bg: rgba(0, 0, 0, 0.04);
+  --theme-highlight-bg: rgba(5, 150, 105, 0.07);
   --theme-highlight-text: #065f46;
 }
 
@@ -105,7 +105,7 @@
   --theme-speed-inactive-hover: rgba(74, 55, 40, 0.12);
   --theme-surah-header-glow: rgba(250, 244, 232, 0.85);
 
-  --theme-highlight-bg: rgba(160, 120, 60, 0.15);
+  --theme-highlight-bg: rgba(160, 120, 60, 0.18);
   --theme-highlight-text: #8b7332;
 }
 
@@ -135,7 +135,7 @@
   --theme-speed-inactive-hover: rgba(255, 255, 255, 0.12);
   --theme-surah-header-glow: rgba(26, 26, 26, 0.85);
 
-  --theme-highlight-bg: rgba(255, 255, 255, 0.06);
+  --theme-highlight-bg: rgba(52, 211, 153, 0.10);
   --theme-highlight-text: #ffffff;
 }
 
@@ -165,13 +165,29 @@
   --theme-speed-inactive-hover: rgba(205, 217, 229, 0.12);
   --theme-surah-header-glow: rgba(34, 39, 46, 0.85);
 
-  --theme-highlight-bg: rgba(255, 255, 255, 0.05);
+  --theme-highlight-bg: rgba(52, 211, 153, 0.08);
   --theme-highlight-text: #ffffff;
 }
 
 @font-face {
   font-family: "KFGQPC Uthmani Hafs";
   src: url("/fonts/KFGQPCUthmanicScriptHAFS.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "me_quran";
+  src: url("/fonts/me_quran.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Scheherazade New";
+  src: url("/fonts/ScheherazadeNew-Regular.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -225,6 +241,9 @@ body {
   line-height: 2.2;
   letter-spacing: 0;
   word-spacing: 4px;
+  /* Scheherazade New: lower kasra when combined with shadda (cv62) */
+  /* Amiri Quran: kasra below shadda (ss05) */
+  font-feature-settings: "cv62" 1, "ss05" 1;
 }
 
 /* Translation/transliteration text scale */
@@ -461,6 +480,7 @@ body {
 }
 .word-highlight.active {
   color: var(--theme-highlight-text);
+  background-color: var(--theme-highlight-bg);
 }
 
 /* Verse separator ornament */
@@ -474,6 +494,16 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--theme-scrollbar-thumb); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--theme-scrollbar-thumb-hover); }
+
+/* Hide horizontal scrollbar for carousels */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { scrollbar-width: none; }
+
+/* Mobile: prevent 300ms tap delay, enable smooth momentum */
+@media (max-width: 1023px) {
+  html { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  main { -webkit-overflow-scrolling: touch; }
+}
 
 /* Animations: Apple spring-like */
 @keyframes fade-in {
@@ -574,4 +604,24 @@ body {
 .animate-reveal {
   animation: reveal-fade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   overflow: hidden;
+}
+
+/* Skeleton loading pulse */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.skeleton {
+  background-color: var(--theme-hover-bg);
+  border-radius: 8px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* Page enter transition */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-page-enter {
+  animation: page-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }

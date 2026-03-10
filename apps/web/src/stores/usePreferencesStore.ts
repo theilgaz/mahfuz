@@ -5,7 +5,7 @@ export type ViewMode = "normal" | "wordByWord" | "mushaf";
 export type Theme = "light" | "sepia" | "dark" | "dimmed";
 export type ColorPaletteId = "vivid" | "pastel" | "earth" | "ocean";
 
-export type FontGroup = "classic" | "modern" | "decorative";
+export type FontGroup = "mushaf" | "naskh" | "modern" | "kufi" | "handwriting";
 
 export interface ArabicFont {
   id: string;
@@ -23,30 +23,49 @@ export interface ColorPalette {
   colors: string[];
 }
 
-export const FONT_GROUPS: { id: FontGroup; label: string }[] = [
-  { id: "classic", label: "Klasik & Mushaf" },
-  { id: "modern", label: "Modern & Temiz" },
-  { id: "decorative", label: "Hat & Dekoratif" },
+export const FONT_GROUPS: { id: FontGroup; labelKey: string }[] = [
+  { id: "mushaf", labelKey: "mushaf" },
+  { id: "naskh", labelKey: "naskh" },
+  { id: "modern", labelKey: "modern" },
+  { id: "kufi", labelKey: "kufi" },
+  { id: "handwriting", labelKey: "handwriting" },
 ];
 
 export const ARABIC_FONTS: ArabicFont[] = [
-  // Klasik & Mushaf
+  // Mushaf
   {
     id: "uthmani-hafs",
     name: "Uthmani Hafs",
     family: '"KFGQPC Uthmani Hafs"',
     source: "local",
-    group: "classic",
+    group: "mushaf",
     desc: "Mushaf geleneğine sadık dijital bir hat. Tecvid renkleri ve hareke desteğiyle zenginleştirilmiş.",
   },
+  {
+    id: "amiri-quran",
+    name: "Amiri Quran",
+    family: '"Amiri Quran"',
+    source: "google",
+    googleUrl:
+      "https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap",
+    group: "mushaf",
+    desc: "Mushaf baskılarına uygun özel tasarım. Geleneksel hat sanatının dijital yansıması.",
+  },
+  {
+    id: "me-quran",
+    name: "Me Quran",
+    family: '"me_quran"',
+    source: "local",
+    group: "mushaf",
+    desc: "Medine Mushafı'na sadık özel bir tasarım. Geleneksel Mushaf baskısının dijital karşılığı.",
+  },
+  // Nesih / Naskh
   {
     id: "scheherazade-new",
     name: "Scheherazade New",
     family: '"Scheherazade New"',
-    source: "google",
-    googleUrl:
-      "https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap",
-    group: "classic",
+    source: "local",
+    group: "naskh",
     desc: "Nesih geleneğinden beslenen zarif bir tasarım. Uzun tilavetlerde göze huzur verir.",
   },
   {
@@ -56,10 +75,20 @@ export const ARABIC_FONTS: ArabicFont[] = [
     source: "google",
     googleUrl:
       "https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap",
-    group: "classic",
+    group: "naskh",
     desc: "Mısır Bulak matbaasının ruhunu taşıyan klasik bir Nesih yorumu. Asalet ve sadelik bir arada.",
   },
-  // Modern & Temiz
+  {
+    id: "lateef",
+    name: "Lateef",
+    family: '"Lateef"',
+    source: "google",
+    googleUrl:
+      "https://fonts.googleapis.com/css2?family=Lateef:wght@400;700&display=swap",
+    group: "naskh",
+    desc: "Nastaliq etkili zarif bir Nesih hattı. Yumuşak çizgileriyle huzurlu bir okuma sunar.",
+  },
+  // Modern
   {
     id: "noto-naskh-arabic",
     name: "Noto Naskh Arabic",
@@ -71,25 +100,36 @@ export const ARABIC_FONTS: ArabicFont[] = [
     desc: "Dünya dillerini kucaklayan geniş bir ailenin Arapça üyesi. Berrak ve tutarlı bir okuma deneyimi sunar.",
   },
   {
-    id: "rubik",
-    name: "Rubik",
-    family: '"Rubik"',
+    id: "noto-sans-arabic",
+    name: "Noto Sans Arabic",
+    family: '"Noto Sans Arabic"',
     source: "google",
     googleUrl:
-      "https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap",
     group: "modern",
-    desc: "Yumuşak hatlarıyla göze dost, çağdaş bir tasarım. Ekranda ferah ve akıcı.",
+    desc: "Sans-serif Arapça tasarımı. Ekran okumalarında mükemmel netlik ve okunabilirlik sunar.",
   },
   {
-    id: "zain",
-    name: "Zain",
-    family: '"Zain"',
+    id: "cairo",
+    name: "Cairo",
+    family: '"Cairo"',
     source: "google",
     googleUrl:
-      "https://fonts.googleapis.com/css2?family=Zain:wght@300;400;700;800&display=swap",
+      "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap",
     group: "modern",
-    desc: "Sadeliğin zarafete dönüştüğü ince bir çizgi. Dijital okumalar için göz yormayan bir tercih.",
+    desc: "Çağdaş Mısır tasarımı. Temiz çizgileri ve modern havası ile öne çıkar.",
   },
+  {
+    id: "tajawal",
+    name: "Tajawal",
+    family: '"Tajawal"',
+    source: "google",
+    googleUrl:
+      "https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap",
+    group: "modern",
+    desc: "Minimal ve şık. Arayüz ve okuma arasında köprü kuran çok yönlü bir tasarım.",
+  },
+  // Kûfi
   {
     id: "reem-kufi",
     name: "Reem Kufi",
@@ -97,10 +137,20 @@ export const ARABIC_FONTS: ArabicFont[] = [
     source: "google",
     googleUrl:
       "https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&display=swap",
-    group: "modern",
+    group: "kufi",
     desc: "Kûfi geleneğini çağdaş çizgilerle yorumlayan güçlü bir karakter. Başlıklarda etkileyici.",
   },
-  // Hat & Dekoratif
+  {
+    id: "noto-kufi-arabic",
+    name: "Noto Kufi Arabic",
+    family: '"Noto Kufi Arabic"',
+    source: "google",
+    googleUrl:
+      "https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap",
+    group: "kufi",
+    desc: "Google'ın kapsamlı font ailesinden Kûfi varyantı. Geometrik ve dengeli.",
+  },
+  // El Yazısı / Handwriting
   {
     id: "playpen-sans-arabic",
     name: "Playpen Sans Arabic",
@@ -108,8 +158,38 @@ export const ARABIC_FONTS: ArabicFont[] = [
     source: "google",
     googleUrl:
       "https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic:wght@400;500;600;700&display=swap",
-    group: "decorative",
+    group: "handwriting",
     desc: "El yazısının sıcaklığını dijitale taşıyan samimi bir hat. Günlük okumaları keyifli kılar.",
+  },
+  {
+    id: "mada",
+    name: "Mada",
+    family: '"Mada"',
+    source: "google",
+    googleUrl:
+      "https://fonts.googleapis.com/css2?family=Mada:wght@400;500;600;700&display=swap",
+    group: "handwriting",
+    desc: "Yumuşak hatları ve doğal akışıyla rahat bir okuma deneyimi sunan el yazısı stili.",
+  },
+  {
+    id: "gulzar",
+    name: "Gulzar",
+    family: '"Gulzar"',
+    source: "google",
+    googleUrl:
+      "https://fonts.googleapis.com/css2?family=Gulzar&display=swap",
+    group: "handwriting",
+    desc: "Nastaliq geleneğinden ilham alan zarif bir hat. İnce detaylarıyla göz alıcı.",
+  },
+  {
+    id: "mirza",
+    name: "Mirza",
+    family: '"Mirza"',
+    source: "google",
+    googleUrl:
+      "https://fonts.googleapis.com/css2?family=Mirza:wght@400;700&display=swap",
+    group: "handwriting",
+    desc: "Nastaliq etkili dekoratif bir hat. Sanatsal ifadesiyle dikkat çeken bir tasarım.",
   },
 ];
 
@@ -172,6 +252,9 @@ interface PreferencesState {
   wbwArabicFontSize: number;
   mushafArabicFontSize: number;
 
+  // Text type
+  textType: "uthmani" | "simple";
+
   // Tab visibility
   showLearnTab: boolean;
   showMemorizeTab: boolean;
@@ -196,6 +279,7 @@ interface PreferencesState {
   setNormalTranslationFontSize: (size: number) => void;
   setWbwArabicFontSize: (size: number) => void;
   setMushafArabicFontSize: (size: number) => void;
+  setTextType: (t: "uthmani" | "simple") => void;
   setShowLearnTab: (v: boolean) => void;
   setShowMemorizeTab: (v: boolean) => void;
 }
@@ -203,10 +287,10 @@ interface PreferencesState {
 export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
-      arabicFontId: "uthmani-hafs",
+      arabicFontId: "scheherazade-new",
       viewMode: "normal",
-      theme: "light",
-      selectedTranslations: ["diyanet-api"],
+      theme: "sepia",
+      selectedTranslations: ["omer-celik"],
       colorizeWords: false,
       colorPaletteId: "pastel",
       wordTranslationSize: 1,
@@ -225,6 +309,9 @@ export const usePreferencesStore = create<PreferencesState>()(
       normalTranslationFontSize: 1,
       wbwArabicFontSize: 1,
       mushafArabicFontSize: 1,
+
+      // Text type
+      textType: "uthmani" as const,
 
       // Tab visibility
       showLearnTab: true,
@@ -257,12 +344,13 @@ export const usePreferencesStore = create<PreferencesState>()(
       setNormalTranslationFontSize: (size) => set({ normalTranslationFontSize: size }),
       setWbwArabicFontSize: (size) => set({ wbwArabicFontSize: size }),
       setMushafArabicFontSize: (size) => set({ mushafArabicFontSize: size }),
+      setTextType: (t) => set({ textType: t }),
       setShowLearnTab: (v) => set({ showLearnTab: v }),
       setShowMemorizeTab: (v) => set({ showMemorizeTab: v }),
     }),
     {
       name: "mahfuz-preferences",
-      version: 5,
+      version: 7,
       migrate: (persisted: unknown, version: number) => {
         const state = persisted as Record<string, unknown>;
         if (version === 0 || !version) {
@@ -300,6 +388,21 @@ export const usePreferencesStore = create<PreferencesState>()(
         if ((version ?? 0) < 5) {
           state.showLearnTab = state.showLearnTab ?? true;
           state.showMemorizeTab = state.showMemorizeTab ?? true;
+        }
+        if ((version ?? 0) < 6) {
+          state.textType = state.textType ?? "uthmani";
+          // Migrate diyanet-api → diyanet (now local JSON)
+          const sel = state.selectedTranslations as string[] | undefined;
+          if (sel) {
+            state.selectedTranslations = sel.map((id: string) => id === "diyanet-api" ? "diyanet" : id);
+          }
+        }
+        if ((version ?? 0) < 7) {
+          // Rubik & Zain removed — fall back to default
+          const fontId = state.arabicFontId as string | undefined;
+          if (fontId === "rubik" || fontId === "zain") {
+            state.arabicFontId = "uthmani-hafs";
+          }
         }
         return state as PreferencesState;
       },

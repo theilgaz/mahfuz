@@ -1,5 +1,5 @@
 /// @ts-nocheck
-const CACHE_NAME = "mahfuz-v2";
+const CACHE_NAME = "mahfuz-v3";
 
 const APP_SHELL = [
   "/",
@@ -38,6 +38,12 @@ self.addEventListener("fetch", (event) => {
   // API calls: stale-while-revalidate (Quran data is static, serve from cache instantly)
   if (url.hostname === "api.quran.com" || url.hostname === "api.qurancdn.com") {
     event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  // Static Quran text + translations: cache-first (immutable files)
+  if (url.pathname.startsWith("/quran/") || url.pathname.startsWith("/translations/")) {
+    event.respondWith(cacheFirst(request));
     return;
   }
 

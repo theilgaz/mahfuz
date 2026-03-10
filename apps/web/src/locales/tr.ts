@@ -65,29 +65,47 @@ export const tr = {
   fonts: {
     title: "Yazı Tipi",
     groups: {
-      classic: "Klasik & Mushaf",
-      modern: "Modern & Temiz",
-      decorative: "Hat & Dekoratif",
+      mushaf: "Mushaf",
+      naskh: "Nesih",
+      modern: "Modern",
+      kufi: "Kûfi",
+      handwriting: "El Yazısı",
     },
     shortLabels: {
       "uthmani-hafs": "Mushaf · Klasik",
+      "amiri-quran": "Mushaf · Geleneksel",
+      "me-quran": "Mushaf · Medine",
       "scheherazade-new": "Nesih · Zarif",
       amiri: "Nesih · Matbaa",
+      lateef: "Nesih · Nastaliq",
       "noto-naskh-arabic": "Modern · Temiz",
-      rubik: "Modern · Yumuşak",
-      zain: "Modern · İnce",
+      "noto-sans-arabic": "Modern · Sans",
+      cairo: "Modern · Mısır",
+      tajawal: "Modern · Minimal",
       "reem-kufi": "Kûfi · Güçlü",
+      "noto-kufi-arabic": "Kûfi · Geometrik",
       "playpen-sans-arabic": "El Yazısı · Samimi",
+      mada: "El Yazısı · Yumuşak",
+      gulzar: "El Yazısı · Nastaliq",
+      mirza: "El Yazısı · Dekoratif",
     },
     descriptions: {
       "uthmani-hafs": "Mushaf geleneğine sadık dijital bir hat. Tecvid renkleri ve hareke desteğiyle zenginleştirilmiş.",
+      "amiri-quran": "Mushaf baskılarına uygun özel tasarım. Geleneksel hat sanatının dijital yansıması.",
+      "me-quran": "Medine Mushafı'na sadık özel bir tasarım. Geleneksel Mushaf baskısının dijital karşılığı.",
       "scheherazade-new": "Nesih geleneğinden beslenen zarif bir tasarım. Uzun tilavetlerde göze huzur verir.",
       amiri: "Mısır Bulak matbaasının ruhunu taşıyan klasik bir Nesih yorumu. Asalet ve sadelik bir arada.",
+      lateef: "Nastaliq etkili zarif bir Nesih hattı. Yumuşak çizgileriyle huzurlu bir okuma sunar.",
       "noto-naskh-arabic": "Dünya dillerini kucaklayan geniş bir ailenin Arapça üyesi. Berrak ve tutarlı bir okuma deneyimi sunar.",
-      rubik: "Yumuşak hatlarıyla göze dost, çağdaş bir tasarım. Ekranda ferah ve akıcı.",
-      zain: "Sadeliğin zarafete dönüştüğü ince bir çizgi. Dijital okumalar için göz yormayan bir tercih.",
+      "noto-sans-arabic": "Sans-serif Arapça tasarımı. Ekran okumalarında mükemmel netlik ve okunabilirlik sunar.",
+      cairo: "Çağdaş Mısır tasarımı. Temiz çizgileri ve modern havası ile öne çıkar.",
+      tajawal: "Minimal ve şık. Arayüz ve okuma arasında köprü kuran çok yönlü bir tasarım.",
       "reem-kufi": "Kûfi geleneğini çağdaş çizgilerle yorumlayan güçlü bir karakter. Başlıklarda etkileyici.",
+      "noto-kufi-arabic": "Google'ın kapsamlı font ailesinden Kûfi varyantı. Geometrik ve dengeli.",
       "playpen-sans-arabic": "El yazısının sıcaklığını dijitale taşıyan samimi bir hat. Günlük okumaları keyifli kılar.",
+      mada: "Yumuşak hatları ve doğal akışıyla rahat bir okuma deneyimi sunan el yazısı stili.",
+      gulzar: "Nastaliq geleneğinden ilham alan zarif bir hat. İnce detaylarıyla göz alıcı.",
+      mirza: "Nastaliq etkili dekoratif bir hat. Sanatsal ifadesiyle dikkat çeken bir tasarım.",
     },
   },
 
@@ -183,6 +201,26 @@ export const tr = {
     versesCount: "ayet",
   },
 
+  // Continue Reading
+  continueReading: {
+    title: "Okumaya Devam",
+    emptyHint: "Takip ettiğiniz sureler burada görünecek",
+    follow: "Takip Et",
+    following: "Takip Ediliyor",
+    remove: "Kaldır",
+    justNow: "Az önce",
+    minutesAgo: "{n} dk önce",
+    hoursAgo: "{n} saat önce",
+    yesterday: "Dün",
+    daysAgo: "{n} gün önce",
+    surahLabel: "Sure",
+    juzLabel: "Cüz",
+    pageLabel: "Sayfa",
+    greetingMorning: "Hayırlı Sabahlar",
+    greetingAfternoon: "Hayırlı Öğleler",
+    greetingEvening: "Hayırlı Akşamlar",
+  },
+
   // Settings
   settings: {
     title: "Ayarlar",
@@ -208,6 +246,9 @@ export const tr = {
     },
     language: "Dil",
     languageDesc: "Arayüz dilini değiştirin",
+    textType: "Metin Tipi",
+    textTypeUthmani: "Osmani",
+    textTypeSimple: "Basit",
     sampleTranslation: "Rahmân ve Rahîm olan Allah'ın adıyla",
     tabBar: "Gezinme Çubuğu",
     tabBarDesc: "Alt gezinme çubuğunda hangi sekmelerin görüneceğini seçin",
@@ -219,6 +260,15 @@ export const tr = {
     reciter: "Kârî",
     reciterDesc: "Kuran dinlerken kullanılacak kârîyi seçin",
     changeReciter: "Değiştir",
+    sectionFont: "Yazı Tipi",
+    sectionWordColor: "Yazı Rengi",
+    sectionScript: "Hat Stili",
+    sectionReciter: "Kârî",
+    sectionTheme: "Renk & Tema",
+    sectionReadingMode: "Okuma Modu",
+    sectionLangNav: "Dil & Gezinme",
+    saved: "Kaydedildi",
+    colorOff: "Kapalı",
   },
 
   // Reading / Toolbar
@@ -283,7 +333,7 @@ export const tr = {
     },
     fontCredits: {
       kfgqpc: "King Fahd Glorious Quran Printing Complex tarafından geliştirilen Mushaf yazı tipi.",
-      googleFonts: "Scheherazade New, Amiri, Noto Naskh Arabic, Rubik, Zain, Reem Kufi ve Playpen Sans Arabic yazı tipleri.",
+      googleFonts: "Amiri Quran, Amiri, Lateef, Noto Naskh Arabic, Noto Sans Arabic, Cairo, Tajawal, Reem Kufi, Noto Kufi Arabic, Playpen Sans Arabic, Mada, Gulzar ve Mirza yazı tipleri.",
     },
     issueLinks: {
       featureRequest: "Geliştirme Talebi",
@@ -893,6 +943,15 @@ export const tr = {
     "s14.l7.tip": "ط zorunlu duruş, ج caiz duruş, لا geçilmesi gereken yer demektir.",
     "s14.l8.title": "Final Tekrarı",
     "s14.l8.intro": "Tüm tecvid kurallarını kapsayan son tekrar dersi. Öğrendiğiniz her kuralı karışık örneklerle pekiştirin ve sertifikanızı kazanın.",
+  },
+
+  // UI
+  ui: {
+    retry: "Tekrar Dene",
+    goHome: "Ana Sayfaya Dön",
+    errorTitle: "Bir Şeyler Ters Gitti",
+    errorDefault: "Bir hata oluştu. Lütfen tekrar deneyin.",
+    noData: "Henüz bir şey yok",
   },
 
   // Offline

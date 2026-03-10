@@ -1,4 +1,5 @@
 import { useTranslation } from "~/hooks/useTranslation";
+import { Button } from "~/components/ui/Button";
 
 interface QuestResultsProps {
   totalExercises: number;
@@ -65,18 +66,12 @@ export function QuestResults({
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button
-          onClick={onRetry}
-          className="flex-1 rounded-xl border-2 border-[var(--theme-border)] px-4 py-3 text-[14px] font-medium text-[var(--theme-text-secondary)] transition-all hover:bg-[var(--theme-hover-bg)] active:scale-[0.97]"
-        >
+        <Button variant="secondary" fullWidth onClick={onRetry}>
           {t.learn.retry}
-        </button>
-        <button
-          onClick={onContinue}
-          className="flex-1 rounded-xl bg-primary-600 px-4 py-3 text-[14px] font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
-        >
+        </Button>
+        <Button fullWidth onClick={onContinue}>
           {t.memorize.results.continue}
-        </button>
+        </Button>
       </div>
     </div>
   );

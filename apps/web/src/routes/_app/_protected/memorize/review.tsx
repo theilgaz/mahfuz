@@ -5,6 +5,8 @@ import { ReviewCard, SessionResults } from "~/components/memorization";
 import { GoalCelebration } from "~/components/memorization/GoalCelebration";
 import { useMemorizationStore } from "~/stores/useMemorizationStore";
 import { useTranslation } from "~/hooks/useTranslation";
+import { Button } from "~/components/ui/Button";
+import { EmptyState } from "~/components/ui/EmptyState";
 
 interface ReviewSearch {
   surahId?: number;
@@ -99,21 +101,16 @@ function ReviewPage() {
   if (phase === "reviewing" && !currentCard) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-8">
-        <div className="animate-scale-in rounded-2xl bg-[var(--theme-bg-primary)] p-8 text-center shadow-[var(--shadow-card)]">
-          <p className="mb-1 text-3xl">✓</p>
-          <p className="mb-2 text-lg font-semibold text-[var(--theme-text)]">
-            {t.memorize.congratulations}
-          </p>
-          <p className="mb-6 text-[var(--theme-text-tertiary)]">
-            {t.memorize.allCardsDone}
-          </p>
-          <button
-            onClick={() => navigate({ to: "/memorize" })}
-            className="rounded-xl bg-primary-600 px-6 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-all hover:bg-primary-700"
-          >
-            {t.memorize.backToPanel}
-          </button>
-        </div>
+        <EmptyState
+          icon={
+            <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          title={t.memorize.congratulations}
+          description={t.memorize.allCardsDone}
+          action={{ label: t.memorize.backToPanel, onClick: () => navigate({ to: "/memorize" }) }}
+        />
       </div>
     );
   }

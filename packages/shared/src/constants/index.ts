@@ -25,7 +25,7 @@ export const TURKISH_TRANSLATIONS = {
 
 /** Local translation registry */
 export const LOCAL_TRANSLATIONS = [
-  { id: "diyanet-api", name: "Diyanet İşleri", author: "Diyanet İşleri Başkanlığı", source: "api" as const, apiId: 77 },
+  { id: "diyanet", name: "Diyanet İşleri", author: "Diyanet İşleri Başkanlığı", source: "local" as const },
   { id: "omer-celik", name: "Ömer Çelik", author: "Prof. Dr. Ömer Çelik", source: "local" as const },
   { id: "omer-nasuhi-bilmen", name: "Ömer Nasuhi Bilmen", author: "Ömer Nasuhi Bilmen", source: "local" as const },
   { id: "ali-fikri-yavuz", name: "Ali Fikri Yavuz", author: "Ali Fikri Yavuz", source: "local" as const },

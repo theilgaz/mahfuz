@@ -67,29 +67,47 @@ export const en = {
   fonts: {
     title: "Font",
     groups: {
-      classic: "Classic & Mushaf",
-      modern: "Modern & Clean",
-      decorative: "Calligraphy & Decorative",
+      mushaf: "Mushaf",
+      naskh: "Naskh",
+      modern: "Modern",
+      kufi: "Kufi",
+      handwriting: "Handwriting",
     },
     shortLabels: {
       "uthmani-hafs": "Mushaf · Classic",
+      "amiri-quran": "Mushaf · Traditional",
+      "me-quran": "Mushaf · Medina",
       "scheherazade-new": "Naskh · Elegant",
       amiri: "Naskh · Print",
+      lateef: "Naskh · Nastaliq",
       "noto-naskh-arabic": "Modern · Clean",
-      rubik: "Modern · Soft",
-      zain: "Modern · Thin",
+      "noto-sans-arabic": "Modern · Sans",
+      cairo: "Modern · Cairo",
+      tajawal: "Modern · Minimal",
       "reem-kufi": "Kufic · Bold",
+      "noto-kufi-arabic": "Kufic · Geometric",
       "playpen-sans-arabic": "Handwriting · Warm",
+      mada: "Handwriting · Soft",
+      gulzar: "Handwriting · Nastaliq",
+      mirza: "Handwriting · Decorative",
     },
     descriptions: {
       "uthmani-hafs": "A digital typeface faithful to Mushaf tradition. Enriched with tajweed colors and diacritical marks.",
+      "amiri-quran": "A special design for Mushaf printing. The digital reflection of traditional calligraphy.",
+      "me-quran": "A special design faithful to the Medina Mushaf. The digital equivalent of traditional Mushaf printing.",
       "scheherazade-new": "An elegant design rooted in Naskh tradition. Easy on the eyes for extended recitation.",
       amiri: "A classic Naskh interpretation carrying the spirit of the Egyptian Bulaq press. Nobility and simplicity combined.",
+      lateef: "An elegant Naskh typeface with Nastaliq influence. Offers a peaceful reading experience with soft strokes.",
       "noto-naskh-arabic": "The Arabic member of a global font family. Offers a clear and consistent reading experience.",
-      rubik: "A contemporary design with soft curves. Comfortable and fluid on screen.",
-      zain: "Fine lines where simplicity meets elegance. A gentle choice for digital reading.",
+      "noto-sans-arabic": "Sans-serif Arabic design. Excellent clarity and readability for screen reading.",
+      cairo: "Contemporary Egyptian design. Stands out with clean lines and a modern feel.",
+      tajawal: "Minimal and elegant. A versatile design bridging interface and reading.",
       "reem-kufi": "A bold character that interprets Kufic tradition with modern lines. Striking in headings.",
+      "noto-kufi-arabic": "Kufic variant from Google's comprehensive font family. Geometric and balanced.",
       "playpen-sans-arabic": "A warm typeface bringing the warmth of handwriting to digital. Makes daily reading enjoyable.",
+      mada: "A handwriting style offering a comfortable reading experience with soft lines and natural flow.",
+      gulzar: "An elegant typeface inspired by Nastaliq tradition. Eye-catching with its fine details.",
+      mirza: "A decorative typeface with Nastaliq influence. A design that draws attention with its artistic expression.",
     },
   },
 
@@ -185,6 +203,26 @@ export const en = {
     versesCount: "verses",
   },
 
+  // Continue Reading
+  continueReading: {
+    title: "Continue Reading",
+    emptyHint: "Surahs you follow will appear here",
+    follow: "Follow",
+    following: "Following",
+    remove: "Remove",
+    justNow: "Just now",
+    minutesAgo: "{n}m ago",
+    hoursAgo: "{n}h ago",
+    yesterday: "Yesterday",
+    daysAgo: "{n}d ago",
+    surahLabel: "Surah",
+    juzLabel: "Juz",
+    pageLabel: "Page",
+    greetingMorning: "Good Morning",
+    greetingAfternoon: "Good Afternoon",
+    greetingEvening: "Good Evening",
+  },
+
   // Settings
   settings: {
     title: "Settings",
@@ -210,6 +248,9 @@ export const en = {
     },
     language: "Language",
     languageDesc: "Change interface language",
+    textType: "Text Type",
+    textTypeUthmani: "Uthmani",
+    textTypeSimple: "Simple",
     sampleTranslation: "In the name of Allah, the Most Gracious, the Most Merciful",
     tabBar: "Navigation Bar",
     tabBarDesc: "Choose which tabs appear in the bottom navigation bar",
@@ -221,6 +262,15 @@ export const en = {
     reciter: "Reciter",
     reciterDesc: "Choose the reciter for Quran audio",
     changeReciter: "Change",
+    sectionFont: "Font",
+    sectionWordColor: "Word Color",
+    sectionScript: "Script Style",
+    sectionReciter: "Reciter",
+    sectionTheme: "Color & Theme",
+    sectionReadingMode: "Reading Mode",
+    sectionLangNav: "Language & Navigation",
+    saved: "Saved",
+    colorOff: "Off",
   },
 
   // Reading / Toolbar
@@ -285,7 +335,7 @@ export const en = {
     },
     fontCredits: {
       kfgqpc: "Mushaf typeface developed by the King Fahd Glorious Quran Printing Complex.",
-      googleFonts: "Scheherazade New, Amiri, Noto Naskh Arabic, Rubik, Zain, Reem Kufi and Playpen Sans Arabic fonts.",
+      googleFonts: "Amiri Quran, Amiri, Lateef, Noto Naskh Arabic, Noto Sans Arabic, Cairo, Tajawal, Reem Kufi, Noto Kufi Arabic, Playpen Sans Arabic, Mada, Gulzar and Mirza fonts.",
     },
     issueLinks: {
       featureRequest: "Feature Request",
@@ -895,6 +945,15 @@ export const en = {
     "s14.l7.tip": "ط means obligatory stop, ج means permissible stop, لا means you should continue.",
     "s14.l8.title": "Final Review",
     "s14.l8.intro": "A comprehensive final review covering all tajweed rules. Reinforce everything you have learned with mixed examples and earn your certificate.",
+  },
+
+  // UI
+  ui: {
+    retry: "Retry",
+    goHome: "Go Home",
+    errorTitle: "Something Went Wrong",
+    errorDefault: "An error occurred. Please try again.",
+    noData: "Nothing here yet",
   },
 
   // Offline

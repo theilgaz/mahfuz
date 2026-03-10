@@ -7,6 +7,7 @@ import { useQuestDashboard } from "~/hooks/useQuest";
 import { StageCard, ProgressMap, QuestCard } from "~/components/learn";
 import { SegmentedControl } from "~/components/ui/SegmentedControl";
 import { useTranslation } from "~/hooks/useTranslation";
+import { Skeleton } from "~/components/ui/Skeleton";
 
 export const Route = createFileRoute("/_app/learn/")({
   component: LearnDashboard,
@@ -127,8 +128,10 @@ function LearnDashboard() {
 
           {/* Stage list */}
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} variant="card" className="h-20" />
+              ))}
             </div>
           ) : (
             <div className="space-y-3">

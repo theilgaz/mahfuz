@@ -104,7 +104,7 @@ export const AyahText = memo(function AyahText({
       id={`verse-${verse.verse_key}`}
       role="article"
       aria-label={`${t.quranReader.verseLabel} ${verse.verse_key}`}
-      className={`animate-fade-in group px-4 py-7 transition-colors sm:px-6 ${
+      className={`animate-fade-in group px-4 py-5 transition-colors sm:px-6 sm:py-7 ${
         isCurrentVerse && isAudioPlaying
           ? "bg-[var(--theme-highlight-bg)]"
           : "hover:bg-[var(--theme-hover-bg)]"
@@ -210,7 +210,7 @@ export const AyahText = memo(function AyahText({
                         >
                           {w.text_uthmani}{" "}
                           {hasTooltip && (
-                            <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[var(--theme-bg-elevated)] px-2.5 py-1.5 text-center opacity-0 shadow-[var(--shadow-float)] transition-opacity group-hover/word:opacity-100 group-active/word:opacity-100" dir="ltr">
+                            <span className={`pointer-events-none absolute bottom-full left-1/2 z-30 mb-1 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[var(--theme-bg-elevated)] px-2.5 py-1.5 text-center shadow-[var(--shadow-float)] transition-opacity ${isActiveWord ? "opacity-100" : "opacity-0 group-hover/word:opacity-100 group-active/word:opacity-100"}`} dir="ltr">
                               {w.translation?.text && (
                                 <span className="block text-[12px] font-medium leading-snug text-[var(--theme-text)]">{w.translation.text}</span>
                               )}

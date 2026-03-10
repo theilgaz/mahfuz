@@ -352,7 +352,7 @@ export function ReadingToolbar({ segmentStyle }: { segmentStyle?: boolean } = {}
         <>
           <div className="fixed inset-0 z-40 bg-black/30 sm:hidden" onClick={() => setOpen(false)} />
           <div ref={popoverRef}
-            className={`fixed inset-x-0 z-50 max-h-[92vh] overflow-y-auto overscroll-contain rounded-t-2xl border-t border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] p-5 pb-8 shadow-[var(--shadow-float)] sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[26rem] sm:max-h-[70vh] sm:rounded-2xl sm:border sm:p-4 sm:pb-4 sm:animate-toolbar-in ${audioVisible ? "bottom-16" : "bottom-0"}`}
+            className={`fixed inset-x-0 z-50 max-h-[92vh] overflow-y-auto overscroll-contain rounded-t-2xl border-t border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] p-5 pb-20 shadow-[var(--shadow-float)] sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[26rem] sm:max-h-[70vh] sm:rounded-2xl sm:border sm:p-4 sm:pb-4 sm:animate-toolbar-in ${audioVisible ? "bottom-16" : "bottom-0"}`}
             style={{ backdropFilter: "saturate(180%) blur(20px)" }}
           >
             {/* Mobile header */}

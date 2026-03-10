@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { chapterQueryOptions, chaptersQueryOptions } from "~/hooks/useChapters";
 import { versesByChapterQueryOptions } from "~/hooks/useVerses";
+import { wbwByChapterQueryOptions } from "~/hooks/useWbwData";
+import { mergeWbwIntoVerses } from "~/lib/quran-data";
 import { chapterAudioQueryOptions } from "~/hooks/useAudio";
-import { VerseList, Pagination, ReadingToolbar } from "~/components/quran";
+import { VerseList, ReadingToolbar } from "~/components/quran";
 import { Loading } from "~/components/ui/Loading";
-import { SegmentedControl } from "~/components/ui/SegmentedControl";
+import { Skeleton } from "~/components/ui/Skeleton";
 import { TOTAL_CHAPTERS, TOTAL_PAGES } from "@mahfuz/shared/constants";
 import { getJuzForPage } from "@mahfuz/shared";
 import { usePreferencesStore } from "~/stores/usePreferencesStore";
@@ -16,6 +18,8 @@ import { useAutoScrollToVerse } from "~/hooks/useAutoScrollToVerse";
 import type { Chapter } from "@mahfuz/shared/types";
 import type { ChapterAudioData } from "@mahfuz/audio-engine";
 import { useReadingHistory } from "~/stores/useReadingHistory";
+import { useReadingListStore } from "~/stores/useReadingListStore";
+import { AddToReadingListButton } from "~/components/browse/AddToReadingListButton";
 import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 import type { TopicEntry } from "~/data/topic-index";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -35,7 +39,23 @@ export const Route = createFileRoute("/_app/surah/$surahId")({
       context.queryClient.ensureQueryData(chaptersQueryOptions()),
     ]);
   },
-  pendingComponent: () => <Loading text="Sure yükleniyor..." />,
+  pendingComponent: () => (
+    <div className="mx-auto max-w-[680px] px-5 py-5 sm:px-6 sm:py-10">
+      <div className="mb-6 text-center">
+        <Skeleton className="mx-auto mb-2 h-6 w-32" />
+        <Skeleton className="mx-auto h-4 w-24" />
+      </div>
+      <Skeleton className="mx-auto mb-8 h-8 w-64" />
+      <div className="space-y-6">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="rounded-xl p-4">
+            <Skeleton className="mb-3 h-6 w-full" />
+            <Skeleton lines={2} />
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
   head: ({ loaderData }) => {
     const chapter = loaderData?.[0];
     if (!chapter) return {};
@@ -78,8 +98,9 @@ function SurahView() {
   const chapterId = Number(surahId);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [modeOpen, setModeOpen] = useState(false);
+  const modeRef = useRef<HTMLDivElement>(null);
   const viewMode = usePreferencesStore((s) => s.viewMode);
   const setViewMode = usePreferencesStore((s) => s.setViewMode);
   const { t } = useTranslation();
@@ -99,9 +120,15 @@ function SurahView() {
   const { data: chapter } = useSuspenseQuery(chapterQueryOptions(chapterId));
   const { data: chapters } = useSuspenseQuery(chaptersQueryOptions());
   const { data: versesData } = useSuspenseQuery(
-    versesByChapterQueryOptions(chapterId, page)
+    versesByChapterQueryOptions(chapterId)
   );
-  const translatedVerses = useTranslatedVerses(versesData.verses);
+  // Lazy-load WBW word data (translation, transliteration, positions) for tooltips + audio word sync
+  const { data: wbwData } = useQuery(wbwByChapterQueryOptions(chapterId));
+  const versesWithWords = useMemo(
+    () => mergeWbwIntoVerses(versesData.verses, wbwData),
+    [versesData.verses, wbwData],
+  );
+  const translatedVerses = useTranslatedVerses(versesWithWords);
 
   useAutoScrollToVerse();
 
@@ -118,7 +145,11 @@ function SurahView() {
   }, [topicParam]);
 
   const visitSurah = useReadingHistory((s) => s.visitSurah);
-  useEffect(() => { visitSurah(chapterId, chapter.translated_name.name); }, [chapterId, chapter.translated_name.name, visitSurah]);
+  const touchItem = useReadingListStore((s) => s.touchItem);
+  useEffect(() => {
+    visitSurah(chapterId, chapter.translated_name.name);
+    touchItem("surah", chapterId);
+  }, [chapterId, chapter.translated_name.name, visitSurah, touchItem]);
 
   const juzNumber = getJuzForPage(chapter.pages[0]);
 
@@ -220,16 +251,22 @@ function SurahView() {
   );
 
   return (
-    <div className="mx-auto max-w-[680px] px-5 py-8 sm:px-6 sm:py-10">
+    <div className="mx-auto max-w-[680px] px-4 py-5 sm:px-6 sm:py-10">
       {/* Topic navigation bar (when coming from Fihrist) */}
       {topicParam !== undefined && topicData && topicData[topicParam] && (
         <TopicNavBar topic={topicData[topicParam]} topicIndex={topicParam} currentSurahId={chapterId} t={t} />
       )}
 
-      {/* Surah header, standard picker pattern */}
-      <div className="relative mb-6 overflow-hidden rounded-2xl bg-[var(--theme-pill-bg)] px-4 py-3.5">
-        <div className="relative z-10 flex items-center justify-between gap-3">
-          {/* Left: surah name */}
+      {/* Surah header */}
+      <div className="relative mb-4 rounded-2xl bg-[var(--theme-pill-bg)] px-4 py-3.5 sm:mb-6">
+        {/* Top-right: bookmark + A ع */}
+        <div className="absolute top-2.5 right-3 flex items-center gap-0.5">
+          <AddToReadingListButton type="surah" id={chapterId} iconOnly />
+          <ReadingToolbar segmentStyle />
+        </div>
+
+        <div className="relative">
+          {/* Surah name */}
           <button
             type="button"
             onClick={() => setPickerOpen(true)}
@@ -251,8 +288,8 @@ function SurahView() {
             </p>
           </button>
 
-          {/* Right: action buttons */}
-          <div className="flex shrink-0 items-center gap-1.5">
+          {/* Action row */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               onClick={handlePlaySurah}
               className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-3 py-1.5 text-[11px] font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
@@ -266,6 +303,48 @@ function SurahView() {
               </svg>
               {isPlayingThisSurah ? t.quranReader.pause : t.quranReader.listen}
             </button>
+
+            {/* View mode picker */}
+            <div className="relative" ref={modeRef}>
+              <button
+                type="button"
+                onClick={() => setModeOpen((v) => !v)}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition-all active:scale-[0.97] ${
+                  modeOpen
+                    ? "bg-[var(--theme-text)] text-[var(--theme-bg)]"
+                    : "bg-[var(--theme-hover-bg)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-pill-bg)]"
+                }`}
+              >
+                {VIEW_MODE_ICONS[viewMode]}
+                {viewModeOptions.find((o) => o.value === viewMode)?.label}
+              </button>
+              {modeOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setModeOpen(false)} />
+                  <div className="absolute left-0 z-50 mt-1.5 w-40 overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] py-1 shadow-[var(--shadow-float)]">
+                    {viewModeOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => { setViewMode(opt.value); setModeOpen(false); }}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] font-medium transition-colors ${
+                          viewMode === opt.value
+                            ? "bg-primary-600/10 text-primary-600"
+                            : "text-[var(--theme-text-secondary)] hover:bg-[var(--theme-hover-bg)]"
+                        }`}
+                      >
+                        {opt.icon}
+                        {opt.label}
+                        {viewMode === opt.value && (
+                          <svg className="ml-auto h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
             <Link
               to="/verse"
               search={{ surah: chapterId, verse: 1 }}
@@ -281,40 +360,33 @@ function SurahView() {
         </div>
       </div>
 
-      {/* View mode controls + Reading toolbar, sticky band */}
-      <div className="sticky top-0 z-20 -mx-5 mb-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg)] px-1 py-2 sm:-mx-6 sm:px-2">
+      {/* Sticky nav: prev/next arrows only */}
+      <div className="sticky top-0 z-20 -mx-4 mb-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg)] px-1 py-1 sm:-mx-6 sm:mb-6 sm:px-2">
         <div className="flex items-center justify-between">
-          {/* Left arrow: prev surah */}
           {chapterId > 1 ? (
             <Link
               to="/surah/$surahId"
               params={{ surahId: String(chapterId - 1) }}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--theme-text-tertiary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)]"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--theme-text-tertiary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)]"
               aria-label={t.nav.prevSurah}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </Link>
           ) : (
-            <span className="w-8 shrink-0" />
+            <span className="w-7 shrink-0" />
           )}
 
-          {/* Center: unified toolbar (icon-only tabs + A ع) */}
-          <div className="flex min-w-0 flex-1 items-center justify-center">
-            <div className="flex items-center rounded-xl bg-[var(--theme-pill-bg)] p-1">
-              <SegmentedControl options={viewModeOptions} value={viewMode} onChange={setViewMode} iconOnlyMobile transparent />
-              <div className="mx-0.5 h-4 w-px bg-[var(--theme-border)]" />
-              <ReadingToolbar segmentStyle />
-            </div>
-          </div>
+          <span className="text-[11px] font-medium tabular-nums text-[var(--theme-text-quaternary)]">
+            {chapter.translated_name.name}
+          </span>
 
-          {/* Right group: fullscreen + arrow */}
           <div className="flex shrink-0 items-center gap-0.5">
             {viewMode === "mushaf" && (
               <button
                 type="button"
                 onClick={toggleFullscreen}
                 aria-label={t.quranReader.fullscreen}
-                className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-[var(--theme-hover-bg)]"
+                className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors hover:bg-[var(--theme-hover-bg)]"
                 style={{ color: "var(--theme-text-tertiary)" }}
               >
                 {fullscreenIcon}
@@ -324,13 +396,13 @@ function SurahView() {
               <Link
                 to="/surah/$surahId"
                 params={{ surahId: String(chapterId + 1) }}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--theme-text-tertiary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)]"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--theme-text-tertiary)] transition-colors hover:bg-[var(--theme-hover-bg)] hover:text-[var(--theme-text)]"
                 aria-label={t.nav.nextSurah}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
               </Link>
             ) : (
-              <span className="w-8 shrink-0" />
+              <span className="w-7 shrink-0" />
             )}
           </div>
         </div>
@@ -366,9 +438,6 @@ function SurahView() {
         />
       </div>
 
-      {/* Pagination */}
-      <Pagination pagination={versesData.pagination} onPageChange={setPage} />
-
       {/* Prev/Next surah navigation */}
       <div className="mt-10 flex items-center justify-between border-t border-[var(--theme-divider)]/40 pt-6">
         {hasPrev ? (
@@ -376,7 +445,7 @@ function SurahView() {
             to="/surah/$surahId"
             params={{ surahId: String(chapterId - 1) }}
             className="text-[15px] font-medium text-primary-600 transition-colors hover:text-primary-700"
-            onClick={() => setPage(1)}
+
           >
             ← {t.quranReader.prevSurah}
           </Link>
@@ -388,7 +457,7 @@ function SurahView() {
             to="/surah/$surahId"
             params={{ surahId: String(chapterId + 1) }}
             className="text-[15px] font-medium text-primary-600 transition-colors hover:text-primary-700"
-            onClick={() => setPage(1)}
+
           >
             {t.quranReader.nextSurah} →
           </Link>
@@ -405,7 +474,6 @@ function SurahView() {
           t={t}
           onSelect={(id) => {
             setPickerOpen(false);
-            setPage(1);
             navigate({ to: "/surah/$surahId", params: { surahId: String(id) } });
           }}
           onClose={() => setPickerOpen(false)}

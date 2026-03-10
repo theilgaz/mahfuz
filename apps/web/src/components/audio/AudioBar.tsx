@@ -252,7 +252,7 @@ export function AudioBar() {
           thin
         />
 
-        <div className="border-t border-[var(--theme-border)] px-3 py-2">
+        <div className="border-t border-[var(--theme-border)] px-3 py-1.5">
           <div className="flex items-center gap-3">
             {/* Info: tap to navigate to surah */}
             <Link
@@ -272,28 +272,28 @@ export function AudioBar() {
             <div className="flex items-center gap-1">
               <button
                 onClick={prevVerse}
-                className="rounded-full p-1.5 text-[var(--theme-text)] transition-colors hover:bg-[var(--theme-hover-bg)]"
+                className="rounded-full p-1 text-[var(--theme-text)] transition-colors hover:bg-[var(--theme-hover-bg)]"
                 aria-label="Önceki ayet"
               >
-                <PrevIcon size={16} />
+                <PrevIcon size={14} />
               </button>
               <button
                 onClick={togglePlayPause}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-600 text-white transition-transform active:scale-95"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white transition-transform active:scale-95"
                 aria-label={isPlaying ? "Durakla" : "Oynat"}
               >
                 {isPlaying ? (
-                  <PauseIcon size={16} />
+                  <PauseIcon size={14} />
                 ) : (
-                  <PlayIcon size={16} />
+                  <PlayIcon size={14} />
                 )}
               </button>
               <button
                 onClick={nextVerse}
-                className="rounded-full p-1.5 text-[var(--theme-text)] transition-colors hover:bg-[var(--theme-hover-bg)]"
+                className="rounded-full p-1 text-[var(--theme-text)] transition-colors hover:bg-[var(--theme-hover-bg)]"
                 aria-label="Sonraki ayet"
               >
-                <NextIcon size={16} />
+                <NextIcon size={14} />
               </button>
             </div>
 

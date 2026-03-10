@@ -140,6 +140,7 @@ export function QuestExerciseCard({
               key={word.id}
               onClick={() => handleSelect(word)}
               disabled={answered}
+              aria-label={`${word.arabic} — ${word.meaning}`}
               className={`rounded-xl border-2 ${border} ${bg} px-4 py-3 text-center ${textColor} transition-all ${!answered ? "active:scale-[0.97]" : ""}`}
             >
               <span className="arabic-text text-xl leading-relaxed" dir="rtl">

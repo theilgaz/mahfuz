@@ -1,5 +1,6 @@
 import type { SessionResult } from "~/stores/useMemorizationStore";
 import { useTranslation } from "~/hooks/useTranslation";
+import { Button } from "~/components/ui/Button";
 
 interface SessionResultsProps {
   results: SessionResult[];
@@ -65,12 +66,9 @@ export function SessionResults({ results, onContinue }: SessionResultsProps) {
         ))}
       </div>
 
-      <button
-        onClick={onContinue}
-        className="w-full rounded-xl bg-primary-600 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-primary-700 active:scale-[0.98]"
-      >
+      <Button size="lg" fullWidth onClick={onContinue}>
         {t.memorize.results.continue}
-      </button>
+      </Button>
     </div>
   );
 }

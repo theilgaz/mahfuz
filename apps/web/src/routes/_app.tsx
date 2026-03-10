@@ -1,12 +1,12 @@
-import { createFileRoute, Outlet, Link, useRouter, useMatches } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useRouter, useMatches, useLocation } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { signOut } from "~/lib/auth-client";
 import { AudioProvider, AudioBar } from "~/components/audio";
 import { BottomTabBar } from "~/components/BottomTabBar";
 import { useAudioStore } from "~/stores/useAudioStore";
-import { usePreferencesStore, COLOR_PALETTES, ARABIC_FONTS } from "~/stores/usePreferencesStore";
-import type { Theme, ColorPaletteId } from "~/stores/usePreferencesStore";
+import { usePreferencesStore, COLOR_PALETTES, ARABIC_FONTS, FONT_GROUPS, getArabicFont } from "~/stores/usePreferencesStore";
+import type { Theme, ColorPaletteId, FontGroup } from "~/stores/usePreferencesStore";
 import { CommandPalette } from "~/components/CommandPalette";
 import { HeaderSurahPicker } from "~/components/HeaderSurahPicker";
 import { SyncIndicator } from "~/components/ui/SyncIndicator";
@@ -37,6 +37,7 @@ function AppLayout() {
   const matches = useMatches();
   const queryClient = useQueryClient();
   const { t, locale } = useTranslation();
+  const location = useLocation();
 
   // Global Cmd+K / Ctrl+K shortcut
   useEffect(() => {
@@ -121,13 +122,13 @@ function AppLayout() {
   return (
     <div className="flex h-screen flex-col bg-[var(--theme-bg)]">
       {/* Header */}
-      <header className="glass sticky top-0 z-30 h-[88px] border-b border-[var(--theme-border)] px-4 sm:px-6">
+      <header className="glass sticky top-0 z-30 h-[56px] border-b border-[var(--theme-border)] px-3 sm:px-6 lg:h-[88px]">
         <div className="relative flex h-full items-center justify-between">
           {/* Left: Logo + Chapter/page context */}
           <div className="flex min-w-0 items-center gap-1">
             {/* Logo */}
-            <Link to="/browse" className="mr-2 flex shrink-0 items-center gap-2 sm:mr-3">
-              <img src="/images/mahfuz-logo.svg" alt="Mahfuz" className="logo-invert h-10 w-auto" />
+            <Link to="/browse" className="mr-1.5 flex shrink-0 items-center gap-2 sm:mr-3">
+              <img src="/images/mahfuz-logo.svg" alt="Mahfuz" className="logo-invert h-8 w-auto lg:h-10" />
             </Link>
 
             {/* Chapter/page prev/next (surah detail) */}
@@ -345,8 +346,10 @@ function AppLayout() {
       )}
 
       {/* Page content */}
-      <main ref={mainRef} className={`relative flex-1 overflow-y-auto ${audioVisible ? "pb-[136px]" : "pb-[76px]"} lg:pb-0`}>
-        <Outlet />
+      <main ref={mainRef} className={`relative flex-1 overflow-y-auto ${audioVisible ? "pb-[124px]" : "pb-[76px]"} lg:pb-0`}>
+        <div key={location.pathname} className="animate-page-enter">
+          <Outlet />
+        </div>
 
         {/* Footer */}
         <footer className="border-t border-[var(--theme-border)] px-6 py-6">
@@ -368,7 +371,7 @@ function AppLayout() {
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-[140px] right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--theme-bg-primary)] shadow-[var(--shadow-elevated)] transition-all hover:shadow-[var(--shadow-modal)] active:scale-95 lg:bottom-6 lg:right-6"
+            className="fixed bottom-[128px] right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--theme-bg-primary)] shadow-[var(--shadow-elevated)] transition-all hover:shadow-[var(--shadow-modal)] active:scale-95 lg:bottom-6 lg:right-6"
             aria-label={t.nav.scrollToTop}
           >
             <svg className="h-5 w-5 text-[var(--theme-text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -503,23 +506,32 @@ function FontPopup() {
   const arabicFontId = usePreferencesStore((s) => s.arabicFontId);
   const setArabicFont = usePreferencesStore((s) => s.setArabicFont);
   const { t } = useTranslation();
+  const currentFont = getArabicFont(arabicFontId);
+  const [activeTab, setActiveTab] = useState<FontGroup>(currentFont.group);
 
-  // Lazy-load Google Fonts when popup opens
+  // Lazy-load Google Fonts for current tab only
   useEffect(() => {
     if (!open) return;
-    ARABIC_FONTS.forEach((f) => {
-      if (f.source === "google" && f.googleUrl) {
+    ARABIC_FONTS
+      .filter((f) => f.group === activeTab && f.source === "google" && f.googleUrl)
+      .forEach((f) => {
         const id = `font-link-${f.id}`;
         if (!document.getElementById(id)) {
           const link = document.createElement("link");
           link.id = id;
           link.rel = "stylesheet";
-          link.href = f.googleUrl;
+          link.href = f.googleUrl!;
           document.head.appendChild(link);
         }
-      }
-    });
-  }, [open]);
+      });
+  }, [open, activeTab]);
+
+  // Reset tab to current font's group when popup opens
+  useEffect(() => {
+    if (open) setActiveTab(currentFont.group);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const tabFonts = ARABIC_FONTS.filter((f) => f.group === activeTab);
 
   return (
     <div className="relative hidden lg:flex">
@@ -534,21 +546,40 @@ function FontPopup() {
       </button>
 
       {open && (
-        <div ref={popRef} className="absolute right-0 top-full z-50 mt-2 w-60 animate-toolbar-in rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] p-2 shadow-[var(--shadow-float)]" style={{ backdropFilter: "saturate(180%) blur(20px)" }}>
-          <div className="flex flex-col gap-0.5">
-            {ARABIC_FONTS.map((f) => {
-              const tag = (t.fonts.shortLabels as Record<string, string>)[f.id] ?? f.name;
+        <div ref={popRef} className="absolute right-0 top-full z-50 mt-2 w-72 animate-toolbar-in rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] p-3 shadow-[var(--shadow-float)]" style={{ backdropFilter: "saturate(180%) blur(20px)" }}>
+          {/* Tabs */}
+          <div className="scrollbar-none mb-2.5 flex gap-1 overflow-x-auto pb-0.5">
+            {FONT_GROUPS.map((g) => (
+              <button
+                key={g.id}
+                onClick={() => setActiveTab(g.id)}
+                className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium transition-all ${activeTab === g.id ? "bg-primary-600 text-white" : "bg-[var(--theme-pill-bg)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-hover-bg)]"}`}
+              >
+                {(t.fonts.groups as Record<string, string>)[g.labelKey]}
+              </button>
+            ))}
+          </div>
+
+          {/* Font cards — 2-col grid */}
+          <div className="grid grid-cols-2 gap-1.5">
+            {tabFonts.map((f) => {
+              const isSelected = f.id === arabicFontId;
               return (
                 <button
                   key={f.id}
                   onClick={() => setArabicFont(f.id)}
-                  className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition-all ${arabicFontId === f.id ? "bg-primary-600/10" : "hover:bg-[var(--theme-hover-bg)]"}`}
+                  className={`flex flex-col items-center gap-1 rounded-lg border px-2 py-2.5 transition-all ${isSelected ? "border-primary-500 bg-primary-600/10" : "border-[var(--theme-border)] hover:border-[var(--theme-divider)] hover:bg-[var(--theme-hover-bg)]"}`}
                 >
-                  <div className="min-w-0 text-left">
-                    <span className={`block text-[11px] font-medium leading-tight ${arabicFontId === f.id ? "text-primary-700" : "text-[var(--theme-text)]"}`}>{f.name}</span>
-                    <span className="block text-[10px] leading-tight text-[var(--theme-text-quaternary)]">{tag}</span>
-                  </div>
-                  <span className="arabic-text shrink-0 text-[16px] leading-none text-[var(--theme-text)]" style={{ fontFamily: f.family }} dir="rtl">بِسْمِ ٱللَّهِ</span>
+                  <span
+                    className="arabic-text block text-[18px] leading-[1.6] text-[var(--theme-text)]"
+                    style={{ fontFamily: f.family }}
+                    dir="rtl"
+                  >
+                    بِسْمِ ٱللَّهِ
+                  </span>
+                  <span className={`text-[10px] font-medium leading-tight ${isSelected ? "text-primary-700" : "text-[var(--theme-text-tertiary)]"}`}>
+                    {f.name}
+                  </span>
                 </button>
               );
             })}

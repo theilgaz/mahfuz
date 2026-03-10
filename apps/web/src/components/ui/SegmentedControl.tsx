@@ -44,6 +44,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div
       ref={containerRef}
+      role="tablist"
       className={`relative flex ${transparent ? "" : "rounded-xl bg-[var(--theme-pill-bg)] p-1"}`}
     >
       <div
@@ -56,6 +57,8 @@ export function SegmentedControl<T extends string>({
           <button
             key={opt.value}
             data-segment
+            role="tab"
+            aria-selected={active}
             onClick={() => onChange(opt.value)}
             className={`relative z-[1] flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-[12px] font-medium transition-colors duration-200 ${
               iconOnlyMobile && opt.icon ? "px-2.5 sm:px-3.5" : "px-3.5"

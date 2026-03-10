@@ -1,26 +1,46 @@
+import { useTranslation } from "~/hooks/useTranslation";
+import { Button } from "./Button";
+
 interface ErrorViewProps {
   message?: string;
   onRetry?: () => void;
+  onGoHome?: () => void;
 }
 
-export function ErrorView({
-  message = "Bir hata oluştu. Lütfen tekrar deneyin.",
-  onRetry,
-}: ErrorViewProps) {
+export function ErrorView({ message, onRetry, onGoHome }: ErrorViewProps) {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex flex-col items-center justify-center py-28">
-      <h2 className="mb-1 text-[17px] font-semibold text-[#1d1d1f]">
-        Bir Şeyler Ters Gitti
+    <div className="animate-fade-in flex flex-col items-center justify-center py-28">
+      <svg
+        className="mb-4 h-12 w-12 text-red-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+        />
+      </svg>
+      <h2 className="mb-1 text-[17px] font-semibold text-[var(--theme-text)]">
+        {t.ui.errorTitle}
       </h2>
-      <p className="mb-6 text-[15px] text-[#6e6e73]">{message}</p>
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          className="rounded-full bg-primary-600 px-6 py-2.5 text-[15px] font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
-        >
-          Tekrar Dene
-        </button>
-      )}
+      <p className="mb-6 text-[15px] text-[var(--theme-text-tertiary)]">
+        {message || t.ui.errorDefault}
+      </p>
+      <div className="flex gap-3">
+        {onGoHome && (
+          <Button variant="secondary" onClick={onGoHome}>
+            {t.ui.goHome}
+          </Button>
+        )}
+        {onRetry && (
+          <Button onClick={onRetry}>{t.ui.retry}</Button>
+        )}
+      </div>
     </div>
   );
 }

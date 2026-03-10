@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { versesByJuzQueryOptions } from "~/hooks/useVerses";
 import { chaptersQueryOptions } from "~/hooks/useChapters";
 import { chapterAudioQueryOptions } from "~/hooks/useAudio";
-import { VerseList, Pagination, ReadingToolbar } from "~/components/quran";
+import { VerseList, ReadingToolbar } from "~/components/quran";
 import { useAudioStore } from "~/stores/useAudioStore";
 import type { ChapterAudioData } from "@mahfuz/audio-engine";
 import { SegmentedControl } from "~/components/ui/SegmentedControl";
@@ -14,6 +14,8 @@ import { getPagesForJuz } from "@mahfuz/shared";
 import { usePreferencesStore } from "~/stores/usePreferencesStore";
 import type { ViewMode } from "~/stores/usePreferencesStore";
 import { useReadingHistory } from "~/stores/useReadingHistory";
+import { useReadingListStore } from "~/stores/useReadingListStore";
+import { AddToReadingListButton } from "~/components/browse/AddToReadingListButton";
 import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 import { useTranslation } from "~/hooks/useTranslation";
 
@@ -58,7 +60,6 @@ function JuzView() {
   const { juzId } = Route.useParams();
   const juzNumber = Number(juzId);
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
   const [pickerOpen, setPickerOpen] = useState(false);
   const viewMode = usePreferencesStore((s) => s.viewMode);
   const setViewMode = usePreferencesStore((s) => s.setViewMode);
@@ -77,9 +78,13 @@ function JuzView() {
   const togglePlayPause = useAudioStore((s) => s.togglePlayPause);
 
   const visitJuz = useReadingHistory((s) => s.visitJuz);
-  useEffect(() => { visitJuz(juzNumber); }, [juzNumber, visitJuz]);
+  const touchItem = useReadingListStore((s) => s.touchItem);
+  useEffect(() => {
+    visitJuz(juzNumber);
+    touchItem("juz", juzNumber);
+  }, [juzNumber, visitJuz, touchItem]);
 
-  const { data } = useSuspenseQuery(versesByJuzQueryOptions(juzNumber, page));
+  const { data } = useSuspenseQuery(versesByJuzQueryOptions(juzNumber));
   const translatedVerses = useTranslatedVerses(data.verses);
   const { data: chapters } = useSuspenseQuery(chaptersQueryOptions());
   const [pageStart, pageEnd] = getPagesForJuz(juzNumber);
@@ -157,16 +162,19 @@ function JuzView() {
             </p>
           </button>
 
-          {/* Right: play button */}
-          <button
-            onClick={handlePlayJuz}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-600 px-3 py-1.5 text-[11px] font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
-          >
-            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-              {isPlayingThisJuz ? <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /> : <path d="M8 5.14v14l11-7-11-7z" />}
-            </svg>
-            {isPlayingThisJuz ? t.quranReader.pause : t.quranReader.listen}
-          </button>
+          {/* Right: action buttons */}
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              onClick={handlePlayJuz}
+              className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-3 py-1.5 text-[11px] font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
+            >
+              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                {isPlayingThisJuz ? <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /> : <path d="M8 5.14v14l11-7-11-7z" />}
+              </svg>
+              {isPlayingThisJuz ? t.quranReader.pause : t.quranReader.listen}
+            </button>
+            <AddToReadingListButton type="juz" id={juzNumber} />
+          </div>
         </div>
       </div>
 
@@ -217,15 +225,12 @@ function JuzView() {
         onPlayFromVerse={handlePlayFromVerse}
       />
 
-      <Pagination pagination={data.pagination} onPageChange={setPage} />
-
       <div className="mt-10 flex items-center justify-between border-t border-[var(--theme-divider)]/40 pt-6">
         {hasPrev ? (
           <Link
             to="/juz/$juzId"
             params={{ juzId: String(juzNumber - 1) }}
             className="text-[15px] font-medium text-primary-600 transition-colors hover:text-primary-700"
-            onClick={() => setPage(1)}
           >
             ← {t.quranReader.prevJuz}
           </Link>
@@ -237,7 +242,6 @@ function JuzView() {
             to="/juz/$juzId"
             params={{ juzId: String(juzNumber + 1) }}
             className="text-[15px] font-medium text-primary-600 transition-colors hover:text-primary-700"
-            onClick={() => setPage(1)}
           >
             {t.quranReader.nextJuz} →
           </Link>
@@ -253,7 +257,6 @@ function JuzView() {
           t={t}
           onSelect={(juz) => {
             setPickerOpen(false);
-            setPage(1);
             navigate({ to: "/juz/$juzId", params: { juzId: String(juz) } });
           }}
           onClose={() => setPickerOpen(false)}

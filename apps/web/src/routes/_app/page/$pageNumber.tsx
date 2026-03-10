@@ -16,6 +16,8 @@ import { useAutoScrollToVerse } from "~/hooks/useAutoScrollToVerse";
 import type { Chapter, Verse } from "@mahfuz/shared/types";
 import type { ChapterAudioData } from "@mahfuz/audio-engine";
 import { useReadingHistory } from "~/stores/useReadingHistory";
+import { useReadingListStore } from "~/stores/useReadingListStore";
+import { AddToReadingListButton } from "~/components/browse/AddToReadingListButton";
 import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 import { useTranslation } from "~/hooks/useTranslation";
 
@@ -143,7 +145,11 @@ function MushafPageView() {
   useAutoScrollToVerse();
 
   const visitPage = useReadingHistory((s) => s.visitPage);
-  useEffect(() => { visitPage(pageNum); }, [pageNum, visitPage]);
+  const touchItem = useReadingListStore((s) => s.touchItem);
+  useEffect(() => {
+    visitPage(pageNum);
+    touchItem("page", pageNum);
+  }, [pageNum, visitPage, touchItem]);
 
   // Group verses by chapter_id (derived from verse_key)
   const verseGroups = useMemo(() => {
@@ -309,20 +315,23 @@ function MushafPageView() {
             </p>
           </button>
 
-          {/* Right: play button */}
-          <button
-            onClick={handlePlayPage}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-600 px-3 py-1.5 text-[11px] font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
-          >
-            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-              {isPlayingThisPage ? (
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-              ) : (
-                <path d="M8 5.14v14l11-7-11-7z" />
-              )}
-            </svg>
-            {isPlayingThisPage ? t.quranReader.pause : t.quranReader.listen}
-          </button>
+          {/* Right: action buttons */}
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              onClick={handlePlayPage}
+              className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-3 py-1.5 text-[11px] font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
+            >
+              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                {isPlayingThisPage ? (
+                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                ) : (
+                  <path d="M8 5.14v14l11-7-11-7z" />
+                )}
+              </svg>
+              {isPlayingThisPage ? t.quranReader.pause : t.quranReader.listen}
+            </button>
+            <AddToReadingListButton type="page" id={pageNum} />
+          </div>
         </div>
       </div>
 

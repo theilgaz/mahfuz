@@ -13,6 +13,7 @@ import { getSession } from "~/lib/auth-session";
 import type { Session } from "~/lib/auth";
 import { useFontLoader } from "~/hooks/useFontLoader";
 import { useTranslation } from "~/hooks/useTranslation";
+import { Button } from "~/components/ui/Button";
 import { useI18nStore } from "~/stores/useI18nStore";
 
 interface RouterContext {
@@ -76,9 +77,21 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       {
         children: `(function(){try{var p=JSON.parse(localStorage.getItem('mahfuz-preferences')||'{}');var s=p.state||{};var fonts={
 'uthmani-hafs':'"KFGQPC Uthmani Hafs"',
+'amiri-quran':'"Amiri Quran"',
+'me-quran':'"me_quran"',
 'scheherazade-new':'"Scheherazade New"',
 'amiri':'"Amiri"',
-'noto-naskh-arabic':'"Noto Naskh Arabic"'};var f=fonts[s.arabicFontId]||fonts['uthmani-hafs'];var h=document.documentElement;h.style.setProperty('--font-arabic',f+',"Traditional Arabic",serif');if(s.arabicFontSize)h.style.setProperty('--arabic-font-scale',s.arabicFontSize);if(s.translationFontSize)h.style.setProperty('--translation-font-scale',s.translationFontSize);if(s.theme)h.setAttribute('data-theme',s.theme);}catch(e){}})()`,
+'lateef':'"Lateef"',
+'noto-naskh-arabic':'"Noto Naskh Arabic"',
+'noto-sans-arabic':'"Noto Sans Arabic"',
+'cairo':'"Cairo"',
+'tajawal':'"Tajawal"',
+'reem-kufi':'"Reem Kufi"',
+'noto-kufi-arabic':'"Noto Kufi Arabic"',
+'playpen-sans-arabic':'"Playpen Sans Arabic"',
+'mada':'"Mada"',
+'gulzar':'"Gulzar"',
+'mirza':'"Mirza"'};var f=fonts[s.arabicFontId]||fonts['scheherazade-new'];var h=document.documentElement;h.style.setProperty('--font-arabic',f+',"Traditional Arabic",serif');if(s.arabicFontSize)h.style.setProperty('--arabic-font-scale',s.arabicFontSize);if(s.translationFontSize)h.style.setProperty('--translation-font-scale',s.translationFontSize);h.setAttribute('data-theme',s.theme||'sepia');}catch(e){}})()`,
       },
       {
         children: `if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); }); }`,
@@ -127,11 +140,10 @@ function NotFound() {
         {t.error.notFound}
       </h1>
       <p className="text-[var(--theme-text-secondary)]">{t.error.notFoundDesc}</p>
-      <a
-        href="/"
-        className="mt-8 inline-flex rounded-full bg-primary-600 px-7 py-3 text-sm font-medium text-white transition-all hover:bg-primary-700 active:scale-[0.97]"
-      >
-        {t.error.goHome}
+      <a href="/">
+        <Button size="lg" className="mt-8">
+          {t.error.goHome}
+        </Button>
       </a>
     </div>
   );

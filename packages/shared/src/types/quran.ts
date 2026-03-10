@@ -163,3 +163,44 @@ export interface SearchTranslation {
 
 /** Verse key helper type "surahId:verseNumber" */
 export type VerseKey = `${number}:${number}`;
+
+/** Text script type for static Tanzil data */
+export type TextType = "uthmani" | "simple";
+
+/** Static chapter metadata from meta.json */
+export interface StaticChapter {
+  id: number;
+  name_arabic: string;
+  name_simple: string;
+  name_translation: string;
+  revelation_place: string;
+  revelation_order: number;
+  bismillah_pre: boolean;
+  verses_count: number;
+  pages: [number, number];
+}
+
+/** Per-surah Tanzil JSON shape */
+export interface TanzilSurahData {
+  bismillah?: string;
+  verses: TanzilVerse[];
+}
+
+/** Compact verse entry from Tanzil JSON */
+export interface TanzilVerse {
+  v: number;   // verse number
+  t: string;   // text
+  p: number;   // page number
+  j: number;   // juz number
+  h: number;   // hizb quarter number
+  rk: number;  // ruku number
+  m: number;   // manzil number
+  sj?: number; // sajdah (1=recommended, 2=obligatory)
+}
+
+/** meta.json shape */
+export interface QuranMeta {
+  chapters: StaticChapter[];
+  pageToSurahs: Record<number, number[]>;
+  juzBoundaries: Record<number, { start: string; end: string }>;
+}

@@ -41,13 +41,6 @@ export function BottomTabBar() {
       visible: showMemorizeTab,
     },
     {
-      to: "/audio",
-      label: t.nav.listen,
-      icon: (active) => <HeadphonesIcon active={active} />,
-      matchPatterns: ["/audio"],
-      visible: true,
-    },
-    {
       to: "/settings",
       label: t.nav.settings,
       icon: (active) => <SettingsIcon active={active} />,
@@ -62,7 +55,7 @@ export function BottomTabBar() {
     patterns.some((p) => currentPath === p || currentPath.startsWith(p));
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--theme-border)] bg-[var(--theme-bg-primary)]/80 backdrop-blur-xl backdrop-saturate-150 lg:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--theme-border)] bg-[var(--theme-bg-primary)]/80 backdrop-blur-xl backdrop-saturate-150 lg:hidden" role="navigation" aria-label="Main navigation" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <div className="flex h-[60px] items-center justify-around px-2">
         {visibleTabs.map((tab) => {
           const active = isActive(tab.matchPatterns);
@@ -70,11 +63,17 @@ export function BottomTabBar() {
             <Link
               key={tab.to}
               to={tab.to}
-              className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-1"
+              aria-label={tab.label}
+              className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-1 transition-transform active:scale-90"
             >
-              {tab.icon(active)}
+              <div className="relative">
+                {tab.icon(active)}
+                {active && (
+                  <span className="absolute -bottom-1 left-1/2 h-[3px] w-[3px] -translate-x-1/2 rounded-full bg-primary-600" />
+                )}
+              </div>
               <span
-                className={`text-[10px] font-medium leading-tight ${
+                className={`text-[11px] font-medium leading-tight ${
                   active
                     ? "text-primary-600"
                     : "text-[var(--theme-text-tertiary)]"

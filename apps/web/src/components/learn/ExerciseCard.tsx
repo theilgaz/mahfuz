@@ -101,6 +101,7 @@ export function ExerciseCard({ exercise, onAnswer, exerciseNumber, totalExercise
               key={index}
               onClick={() => handleSelect(index)}
               disabled={answered}
+              aria-label={option.text}
               className={`rounded-xl border-2 ${border} ${bg} px-4 py-3 text-center text-[14px] font-medium ${textColor} transition-all ${!answered ? "active:scale-[0.97]" : ""}`}
             >
               {option.text}

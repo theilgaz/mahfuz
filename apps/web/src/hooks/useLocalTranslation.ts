@@ -9,14 +9,12 @@ interface LocalTranslationData {
 
 /**
  * Fetches and caches multiple local translation JSON files in parallel.
- * Returns a Map<translationId, Map<verseKey, text>> for all non-API ids.
- * API ids ("diyanet-api") are skipped. They come from the verse response.
+ * Returns a Map<translationId, Map<verseKey, text>> for all ids.
+ * All translations are now local JSON files.
  */
 export function useLocalTranslations(ids: string[]) {
-  const localIds = ids.filter((id) => id !== "diyanet-api");
-
   const results = useQueries({
-    queries: localIds.map((id) => ({
+    queries: ids.map((id) => ({
       queryKey: ["local-translation", id],
       queryFn: async () => {
         const resp = await fetch(`/translations/${id}.json`);
@@ -29,7 +27,7 @@ export function useLocalTranslations(ids: string[]) {
     })),
   });
 
-  const allLoaded = localIds.length === 0 || results.every((r) => r.isSuccess);
+  const allLoaded = ids.length === 0 || results.every((r) => r.isSuccess);
 
   const localMap = useMemo(() => {
     const map = new Map<string, Map<string, string>>();

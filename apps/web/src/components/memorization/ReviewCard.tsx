@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { MemorizationCard, QualityGrade } from "@mahfuz/shared/types";
 import { verseByKeyQueryOptions } from "~/hooks/useVerses";
 import { useTranslation } from "~/hooks/useTranslation";
+import { Button } from "~/components/ui/Button";
 
 const GRADE_COLORS: Record<QualityGrade, string> = {
   0: "bg-red-500 hover:bg-red-600",
@@ -115,22 +116,17 @@ export function ReviewCard({
       {!isFullyRevealed ? (
         <div className="flex flex-col items-center gap-3">
           <div className="flex gap-3">
-            <button
-              onClick={onRevealNext}
-              className="rounded-xl bg-primary-600 px-5 py-2.5 text-[14px] font-medium text-white shadow-sm transition-all hover:bg-primary-700 active:scale-[0.97]"
-            >
+            <Button onClick={onRevealNext} aria-label={t.memorize.review.nextWord}>
               {t.memorize.review.nextWord}
-            </button>
-            <button
-              onClick={onRevealAll}
-              className="rounded-xl bg-[var(--theme-hover-bg)] px-5 py-2.5 text-[14px] font-medium text-[var(--theme-text-secondary)] transition-all hover:bg-[var(--theme-pill-bg)]"
-            >
+            </Button>
+            <Button variant="ghost" onClick={onRevealAll} aria-label={t.memorize.review.revealAll}>
               {t.memorize.review.revealAll}
-            </button>
+            </Button>
           </div>
           <button
             onClick={() => onGrade(5)}
             className="text-[13px] text-[var(--theme-text-tertiary)] transition-colors hover:text-emerald-600"
+            aria-label={t.memorize.review.memorized}
           >
             {t.memorize.review.memorized}
           </button>
@@ -187,6 +183,7 @@ function GradeButtons({ onGrade }: { onGrade: (grade: QualityGrade) => void }) {
             <button
               key={grade}
               onClick={() => onGrade(grade)}
+              aria-label={`${label} (${grade}/5)`}
               className={`rounded-xl px-2 py-3 text-[14px] font-medium text-white transition-all active:scale-[0.97] ${color}`}
             >
               {label}
@@ -199,6 +196,7 @@ function GradeButtons({ onGrade }: { onGrade: (grade: QualityGrade) => void }) {
             <button
               key={grade}
               onClick={() => onGrade(grade)}
+              aria-label={`${DETAILED_GRADE_LABELS[grade]} (${grade}/5)`}
               className={`rounded-xl px-2 py-2.5 text-[13px] font-medium text-white transition-all active:scale-[0.97] ${GRADE_COLORS[grade]}`}
             >
               <span className="block text-[16px]">{grade}</span>
