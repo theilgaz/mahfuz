@@ -135,13 +135,16 @@ function AppLayout() {
   return (
     <div className="flex h-screen flex-col bg-[var(--theme-bg)]">
       {/* Header */}
-      <header className="glass sticky top-0 z-30 h-[56px] border-b border-[var(--theme-border)] px-3 sm:px-6 lg:h-[88px]">
+      <header className="glass sticky top-0 z-30 h-[56px] border-b border-[var(--theme-border)] px-3 sm:px-6 lg:h-[64px]">
         <div className="relative flex h-full items-center justify-between">
           {/* Left: Logo + Chapter/page context */}
           <div className="flex min-w-0 items-center gap-1">
             {/* Logo */}
             <Link to="/browse" className="mr-1.5 flex shrink-0 items-center gap-2 sm:mr-3">
-              <img src="/images/mahfuz-logo.png" alt="Mahfuz" className="h-16 w-auto lg:h-20 -my-3" />
+              <img src="/images/mahfuz-logo.png" alt="Mahfuz" className="h-10 w-auto lg:h-11" />
+              <span className="hidden text-[17px] font-semibold tracking-tight text-[var(--theme-text)] sm:inline">
+                Mahfuz
+              </span>
             </Link>
 
             {/* Chapter/page prev/next (surah detail) */}

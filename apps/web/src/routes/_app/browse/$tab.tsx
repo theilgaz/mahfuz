@@ -21,7 +21,7 @@ type TabType = (typeof VALID_TABS)[number];
 
 export const Route = createFileRoute("/_app/browse/$tab")({
   validateSearch: (search: Record<string, unknown>) => ({
-    topic: typeof search.topic === "number" ? search.topic : undefined,
+    topic: typeof search.topic === "string" ? search.topic : undefined,
   }),
   beforeLoad: ({ params }) => {
     if (!VALID_TABS.includes(params.tab as TabType)) {

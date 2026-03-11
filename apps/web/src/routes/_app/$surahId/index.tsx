@@ -21,14 +21,15 @@ import { useReadingHistory } from "~/stores/useReadingHistory";
 import { useReadingListStore } from "~/stores/useReadingListStore";
 import { AddToReadingListButton } from "~/components/browse/AddToReadingListButton";
 import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
-import type { TopicEntry } from "~/data/topic-index";
+import type { TopicEntry } from "~/data/topic-index-expanded";
+import { EXPANDED_TOPIC_INDEX } from "~/data/topic-index-expanded";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-name";
 
 export const Route = createFileRoute("/_app/$surahId/")({
   validateSearch: (search: Record<string, unknown>) => ({
     verse: search.verse ? Number(search.verse) : undefined,
-    topic: typeof search.topic === "number" ? search.topic : undefined,
+    topic: typeof search.topic === "string" ? search.topic : undefined,
   }),
   loader: ({ context, params }) => {
     const chapterId = Number(params.surahId);
@@ -135,14 +136,14 @@ function SurahView() {
 
   // Scroll to verse from ?verse= search param is handled by VerseList's scrollToVerse prop
 
-  // Lazy-load TOPIC_INDEX only when topicParam is present (saves ~5-10KB from bundle)
-  const [topicData, setTopicData] = useState<TopicEntry[] | null>(null);
-  useEffect(() => {
-    if (topicParam !== undefined) {
-      import("~/data/topic-index").then((m) => setTopicData(m.TOPIC_INDEX));
-    } else {
-      setTopicData(null);
-    }
+  // Lookup topic by composite key (e.g. "inanc:3")
+  const resolvedTopic = useMemo(() => {
+    if (!topicParam) return null;
+    const [catId, idxStr] = topicParam.split(":");
+    const cat = EXPANDED_TOPIC_INDEX.find((c) => c.id === catId);
+    if (!cat) return null;
+    const idx = Number(idxStr);
+    return cat.topics[idx] ?? null;
   }, [topicParam]);
 
   const visitSurah = useReadingHistory((s) => s.visitSurah);
@@ -254,8 +255,8 @@ function SurahView() {
   return (
     <div className="mx-auto max-w-[680px] lg:max-w-[960px] px-4 py-5 sm:px-6 sm:py-10 lg:max-w-[960px]">
       {/* Topic navigation bar (when coming from Fihrist) */}
-      {topicParam !== undefined && topicData && topicData[topicParam] && (
-        <TopicNavBar topic={topicData[topicParam]} topicIndex={topicParam} currentSurahId={chapterId} t={t} />
+      {topicParam && resolvedTopic && (
+        <TopicNavBar topic={resolvedTopic} topicKey={topicParam} currentSurahId={chapterId} t={t} locale={locale} />
       )}
 
       {/* Surah header */}
@@ -623,7 +624,7 @@ function SurahPicker({
 
 // -- Topic Navigation Bar (when coming from Fihrist) --
 
-function TopicNavBar({ topic, topicIndex, currentSurahId, t }: { topic: TopicEntry; topicIndex: number; currentSurahId: number; t: ReturnType<typeof useTranslation>["t"] }) {
+function TopicNavBar({ topic, topicKey, currentSurahId, t, locale }: { topic: TopicEntry; topicKey: string; currentSurahId: number; t: ReturnType<typeof useTranslation>["t"]; locale: "tr" | "en" }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to active ref
@@ -632,16 +633,18 @@ function TopicNavBar({ topic, topicIndex, currentSurahId, t }: { topic: TopicEnt
     if (el) el.scrollIntoView({ inline: "center", block: "nearest" });
   }, [currentSurahId]);
 
+  const topicName = locale === "en" ? topic.topicEn : topic.topic;
+
   return (
     <div className="mb-6 rounded-2xl bg-[var(--theme-bg-primary)] p-3">
       {/* Header row */}
       <div className="mb-2.5 flex items-center gap-2">
         <span className="text-[18px] leading-none">{topic.icon}</span>
-        <span className="flex-1 text-[13px] font-semibold text-[var(--theme-text)]">{topic.topic}</span>
+        <span className="flex-1 text-[13px] font-semibold text-[var(--theme-text)]">{topicName}</span>
         <Link
           to="/browse/$tab"
           params={{ tab: "index" }}
-          search={{ topic: topicIndex }}
+          search={{ topic: topicKey }}
           className="text-[11px] font-medium text-primary-600 hover:text-primary-700"
         >
           {t.quranReader.backToIndex}
@@ -659,7 +662,7 @@ function TopicNavBar({ topic, topicIndex, currentSurahId, t }: { topic: TopicEnt
               key={ref}
               to="/$surahId"
               params={{ surahId: surah }}
-              search={{ topic: topicIndex, verse: firstVerse ? Number(firstVerse) : undefined }}
+              search={{ topic: topicKey, verse: firstVerse ? Number(firstVerse) : undefined }}
               {...(isActive ? { "data-active": true } : {})}
               className={`shrink-0 rounded-lg px-2.5 py-1 text-[12px] font-medium tabular-nums transition-colors ${
                 isActive
