@@ -14,8 +14,9 @@ COPY packages/gamification/package.json packages/gamification/
 COPY packages/memorization/package.json packages/memorization/
 COPY packages/sdk/package.json packages/sdk/
 COPY packages/shared/package.json packages/shared/
-COPY tooling/tailwind-config/package.json tooling/tailwind-config/
-COPY tooling/typescript-config/package.json tooling/typescript-config/
+COPY tooling/tailwind/package.json tooling/tailwind/
+COPY tooling/typescript/package.json tooling/typescript/
+COPY tooling/eslint/package.json tooling/eslint/
 RUN pnpm install --frozen-lockfile
 
 # ── Stage 3: Build ─────────────────────────────────────
