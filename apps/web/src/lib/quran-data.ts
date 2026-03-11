@@ -25,6 +25,7 @@ const loadJsonFile = createIsomorphicFn()
     return resp.json();
   })
   .server(async (publicPath: string) => {
+    // 1. Try reading from disk (works in local dev)
     const { readFile } = await import("node:fs/promises");
     const { join } = await import("node:path");
     const candidates = [
@@ -38,6 +39,12 @@ const loadJsonFile = createIsomorphicFn()
       } catch {
         continue;
       }
+    }
+    // 2. Fallback: fetch from CDN (Netlify — Lambda has no access to static files)
+    const siteUrl = process.env.URL || process.env.DEPLOY_PRIME_URL;
+    if (siteUrl) {
+      const resp = await fetch(`${siteUrl}${publicPath}`);
+      if (resp.ok) return resp.json();
     }
     throw new Error(`[quran-data] Failed to load ${publicPath} from disk`);
   });

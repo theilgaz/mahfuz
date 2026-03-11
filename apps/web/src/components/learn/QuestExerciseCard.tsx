@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import type { QuestWord } from "@mahfuz/shared/types";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLearnAudio } from "~/hooks/useLearnAudio";
+import { playSuccessChime } from "~/lib/learn-audio";
 import type { QuestExercise } from "~/lib/quest-exercises";
 
 interface QuestExerciseCardProps {
@@ -23,6 +24,7 @@ export function QuestExerciseCard({
   const [answered, setAnswered] = useState(false);
   const { t } = useTranslation();
   const { playAudioRef, isPlaying } = useLearnAudio();
+  const hasAutoPlayed = useRef(false);
 
   const shuffledOptions = useMemo(() => {
     const arr = [...exercise.options];
@@ -31,6 +33,19 @@ export function QuestExerciseCard({
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  }, [exercise.word.id]);
+
+  // Auto-play audio when exercise changes (new question)
+  useEffect(() => {
+    hasAutoPlayed.current = false;
+    // Small delay to let the UI settle before playing
+    const timer = setTimeout(() => {
+      if (!hasAutoPlayed.current) {
+        hasAutoPlayed.current = true;
+        playAudioRef(exercise.word.audioRef);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [exercise.word.id]);
 
   const handlePlay = () => {
@@ -43,6 +58,10 @@ export function QuestExerciseCard({
     setAnswered(true);
 
     const isCorrect = word.id === exercise.word.id;
+
+    if (isCorrect) {
+      playSuccessChime();
+    }
 
     setTimeout(() => {
       onAnswer(word.id, isCorrect);

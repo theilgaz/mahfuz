@@ -57,6 +57,36 @@ export function buildWordAudioUrl(
   return `https://audio.qurancdn.com/wbw/${paddedChapter}_${paddedVerse}_${paddedWord}.mp3`;
 }
 
+/** Play a short success chime using Web Audio API */
+export function playSuccessChime(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const ctx = new AudioContext();
+    const now = ctx.currentTime;
+
+    // Two-note ascending chime (C5 → E5)
+    const notes = [523.25, 659.25];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.18, now + i * 0.12 + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + i * 0.12);
+      osc.stop(now + i * 0.12 + 0.3);
+    });
+
+    // Clean up context after sounds finish
+    setTimeout(() => ctx.close(), 600);
+  } catch {
+    // Web Audio not available, skip silently
+  }
+}
+
 /** Pre-fetch audio URLs into browser/service worker cache */
 export function prefetchAudioUrls(urls: string[]): void {
   if (typeof window === "undefined") return;
