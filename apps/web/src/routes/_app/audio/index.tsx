@@ -10,6 +10,8 @@ import {
 } from "@mahfuz/shared/constants";
 import type { CuratedReciter } from "@mahfuz/shared/constants";
 import type { ChapterAudioData } from "@mahfuz/audio-engine";
+import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 export const Route = createFileRoute("/_app/audio/")({
   loader: ({ context }) =>
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/_app/audio/")({
 function AudioPage() {
   const { data: chapters } = useSuspenseQuery(chaptersQueryOptions());
   const queryClient = useQueryClient();
+  const { locale } = useTranslation();
 
   const reciterId = useAudioStore((s) => s.reciterId);
   const setReciter = useAudioStore((s) => s.setReciter);
@@ -41,7 +44,7 @@ function AudioPage() {
     return chapters.filter(
       (c) =>
         c.name_simple.toLowerCase().includes(q) ||
-        c.translated_name.name.toLowerCase().includes(q) ||
+        getSurahName(c.id, c.translated_name.name, locale).toLowerCase().includes(q) ||
         c.name_arabic.includes(chapterSearch) ||
         String(c.id).startsWith(q),
     );
@@ -152,7 +155,7 @@ function AudioPage() {
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
                     <span className="text-[14px] font-medium text-[var(--theme-text)]">
-                      {c.translated_name.name}
+                      {getSurahName(c.id, c.translated_name.name, locale)}
                     </span>
                     <span className="arabic-text text-[13px] text-[var(--theme-text-tertiary)]" dir="rtl">
                       {c.name_arabic}
@@ -163,13 +166,13 @@ function AudioPage() {
                   </span>
                 </span>
                 <button
-                  onClick={() => handleQuickPlay(c.id, c.translated_name.name)}
+                  onClick={() => handleQuickPlay(c.id, getSurahName(c.id, c.translated_name.name, locale))}
                   className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-all active:scale-95 ${
                     isPlaying
                       ? "bg-primary-600 text-white shadow-sm"
                       : "bg-[var(--theme-hover-bg)] text-[var(--theme-text-secondary)] hover:bg-primary-600 hover:text-white"
                   }`}
-                  aria-label={`${c.translated_name.name} ${isPlaying ? "durakla" : "dinle"}`}
+                  aria-label={`${getSurahName(c.id, c.translated_name.name, locale)} ${isPlaying ? "durakla" : "dinle"}`}
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
                     {isPlaying ? (

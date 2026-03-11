@@ -6,6 +6,7 @@ import { SegmentedControl } from "~/components/ui/SegmentedControl";
 import { TOPIC_INDEX } from "~/data/topic-index";
 import { ExpandedFihrist } from "./ExpandedFihrist";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 type PlaceFilter = "all" | "makkah" | "madinah";
 type JuzFilter = "all" | string;
@@ -19,7 +20,7 @@ function PngIcon({ src }: { src: string }) {
 }
 
 export function FihristPanel({ initialTopic }: { initialTopic?: number }) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const PLACE_OPTIONS = useMemo(() => [
     { value: "all" as PlaceFilter, label: t.browse.all },
@@ -48,7 +49,7 @@ export function FihristPanel({ initialTopic }: { initialTopic?: number }) {
       return (
         ch.name_simple.toLowerCase().includes(q) ||
         ch.name_arabic.includes(q) ||
-        ch.translated_name.name.toLowerCase().includes(q) ||
+        getSurahName(ch.id, ch.translated_name.name, locale).toLowerCase().includes(q) ||
         String(ch.id).startsWith(q)
       );
     });
@@ -158,7 +159,7 @@ export function FihristPanel({ initialTopic }: { initialTopic?: number }) {
                         </span>
                       </Link>
                     </td>
-                    <td className="px-3 py-2 text-[var(--theme-text-secondary)]">{ch.translated_name.name}</td>
+                    <td className="px-3 py-2 text-[var(--theme-text-secondary)]">{getSurahName(ch.id, ch.translated_name.name, locale)}</td>
                     <td className="px-3 py-2">
                       <span className="inline-flex items-center gap-1.5 text-[var(--theme-text-tertiary)]">
                         {ch.revelation_place === "makkah" ? t.browse.makkah : t.browse.madinah}

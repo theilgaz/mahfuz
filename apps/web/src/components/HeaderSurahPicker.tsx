@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import type { Chapter } from "@mahfuz/shared/types";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 export function HeaderSurahPicker({
   currentChapterId,
@@ -13,7 +14,7 @@ export function HeaderSurahPicker({
   onSelect: (chapterId: number) => void;
   onClose: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const currentRef = useRef<HTMLButtonElement>(null);
@@ -26,7 +27,7 @@ export function HeaderSurahPicker({
       (ch) =>
         ch.name_simple.toLowerCase().includes(q) ||
         ch.name_arabic.includes(q) ||
-        ch.translated_name.name.toLowerCase().includes(q) ||
+        getSurahName(ch.id, ch.translated_name.name, locale).toLowerCase().includes(q) ||
         String(ch.id).startsWith(q),
     );
   }, [chapters, search]);
@@ -131,7 +132,7 @@ export function HeaderSurahPicker({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[12px] font-medium text-[var(--theme-text)]">
-                    {ch.translated_name.name}
+                    {getSurahName(ch.id, ch.translated_name.name, locale)}
                   </span>
                   <span className="text-[10px] text-[var(--theme-text-quaternary)]">
                     {ch.name_simple}

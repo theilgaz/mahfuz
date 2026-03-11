@@ -1,5 +1,6 @@
 import type { Chapter } from "@mahfuz/shared/types";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 interface SurahHeaderProps {
   chapter: Chapter;
@@ -8,7 +9,7 @@ interface SurahHeaderProps {
 }
 
 export function SurahHeader({ chapter, onPlay, isPlaying }: SurahHeaderProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const isMakkah = chapter.revelation_place === "makkah";
 
   return (
@@ -54,7 +55,7 @@ export function SurahHeader({ chapter, onPlay, isPlaying }: SurahHeaderProps) {
           {chapter.name_arabic}
         </h1>
         <p className="text-[17px] font-semibold tracking-[-0.01em] text-[var(--theme-text)]">
-          {chapter.translated_name.name}
+          {getSurahName(chapter.id, chapter.translated_name.name, locale)}
         </p>
         <p className="mt-1 text-[13px] text-[var(--theme-text-tertiary)]">{chapter.name_simple}</p>
         <div className="mx-auto mt-4 flex items-center justify-center gap-1.5 text-[12px] text-[var(--theme-text-tertiary)]">

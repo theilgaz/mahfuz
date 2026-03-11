@@ -17,6 +17,7 @@ import { SyncEngine } from "~/lib/sync-engine";
 import type { Chapter } from "@mahfuz/shared/types";
 import { TOTAL_PAGES } from "@mahfuz/shared/constants";
 import { QUERY_KEYS } from "~/lib/query-keys";
+import { getSurahName } from "~/lib/surah-name";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -162,7 +163,7 @@ function AppLayout() {
                     ))}
                   </span>
                   <span className="hidden truncate text-[13px] font-medium text-[var(--theme-text-secondary)] sm:inline">
-                    {chapter.translated_name.name}
+                    {getSurahName(chapter.id, chapter.translated_name.name, locale)}
                   </span>
                   <svg
                     className={`h-3 w-3 shrink-0 text-[var(--theme-text-tertiary)] transition-transform ${pickerOpen ? "rotate-180" : ""}`}

@@ -11,6 +11,7 @@ import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 import { TranslationBlock } from "~/components/quran/TranslationBlock";
 import { TOTAL_CHAPTERS } from "@mahfuz/shared/constants";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 import type { ChapterAudioData } from "@mahfuz/audio-engine";
 
@@ -98,7 +99,7 @@ function VerseReaderView() {
   const { surah, verse: verseNum } = Route.useSearch();
   const navigate = useNavigate();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: chapter } = useSuspenseQuery(chapterQueryOptions(surah));
@@ -234,8 +235,8 @@ function VerseReaderView() {
       return;
     }
     const audioData = await fetchChapterAudio();
-    playVerseAction(surah, chapter.translated_name.name, verseKey, audioData);
-  }, [isPlaying, isPaused, togglePlayPause, fetchChapterAudio, playVerseAction, surah, chapter.translated_name.name, verseKey]);
+    playVerseAction(surah, getSurahName(chapter.id, chapter.translated_name.name, locale), verseKey, audioData);
+  }, [isPlaying, isPaused, togglePlayPause, fetchChapterAudio, playVerseAction, surah, getSurahName(chapter.id, chapter.translated_name.name, locale), verseKey]);
 
   // Copy to clipboard
   const [expandedTranslations, setExpandedTranslations] = useState<Set<number>>(
@@ -251,7 +252,7 @@ function VerseReaderView() {
           .join(" ")
       : displayVerse.text_uthmani;
 
-    const parts = [`${chapter.translated_name.name} ${verseKey}`, "", arabicText];
+    const parts = [`${getSurahName(chapter.id, chapter.translated_name.name, locale)} ${verseKey}`, "", arabicText];
 
     if (displayVerse.translations) {
       const expanded = displayVerse.translations.length === 1
@@ -267,7 +268,7 @@ function VerseReaderView() {
     await navigator.clipboard.writeText(parts.join("\n"));
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-  }, [displayVerse, chapter.translated_name.name, verseKey, expandedTranslations]);
+  }, [displayVerse, getSurahName(chapter.id, chapter.translated_name.name, locale), verseKey, expandedTranslations]);
 
   const progress = Math.round((verseNum / totalVerses) * 100);
 
@@ -290,7 +291,7 @@ function VerseReaderView() {
         </button>
         <div className="text-center">
           <p className="text-[14px] font-semibold text-[var(--theme-text)]">
-            {chapter.translated_name.name}
+            {getSurahName(chapter.id, chapter.translated_name.name, locale)}
           </p>
         </div>
         <span className="text-[13px] tabular-nums text-[var(--theme-text-tertiary)]">

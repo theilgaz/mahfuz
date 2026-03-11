@@ -2,14 +2,16 @@ import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import type { Chapter } from "@mahfuz/shared/types";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 interface ChapterCardProps {
   chapter: Chapter;
 }
 
 export const ChapterCard = memo(function ChapterCard({ chapter }: ChapterCardProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const isMakkah = chapter.revelation_place === "makkah";
+  const surahName = getSurahName(chapter.id, chapter.translated_name.name, locale);
 
   return (
     <Link
@@ -49,7 +51,7 @@ export const ChapterCard = memo(function ChapterCard({ chapter }: ChapterCardPro
       {/* Bottom: names + meta */}
       <div className="relative">
         <h3 className="truncate text-[14px] font-semibold leading-snug text-[var(--theme-text)]">
-          {chapter.translated_name.name}
+          {surahName}
         </h3>
         <p className="mt-0.5 text-[11px] leading-normal text-[var(--theme-text-tertiary)]">
           {chapter.name_simple}

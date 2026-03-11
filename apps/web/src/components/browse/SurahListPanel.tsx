@@ -4,6 +4,7 @@ import { chaptersQueryOptions } from "~/hooks/useChapters";
 import { ChapterCard } from "~/components/quran";
 import { SegmentedControl } from "~/components/ui/SegmentedControl";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 type FilterType = "all" | "makkah" | "madinah";
 type SortType = "mushaf" | "revelation";
@@ -17,7 +18,7 @@ function PngIcon({ src }: { src: string }) {
 }
 
 export function SurahListPanel() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const FILTER_OPTIONS = [
     { value: "all" as FilterType, label: t.browse.all },
@@ -53,7 +54,7 @@ export function SurahListPanel() {
       return (
         ch.name_simple.toLowerCase().includes(q) ||
         ch.name_arabic.includes(q) ||
-        ch.translated_name.name.toLowerCase().includes(q) ||
+        getSurahName(ch.id, ch.translated_name.name, locale).toLowerCase().includes(q) ||
         String(ch.id).startsWith(q)
       );
     });

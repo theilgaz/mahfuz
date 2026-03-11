@@ -18,6 +18,7 @@ import { useReadingListStore } from "~/stores/useReadingListStore";
 import { AddToReadingListButton } from "~/components/browse/AddToReadingListButton";
 import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 export const Route = createFileRoute("/_app/juz/$juzId")({
   loader: ({ context, params }) => {
@@ -63,7 +64,7 @@ function JuzView() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const viewMode = usePreferencesStore((s) => s.viewMode);
   const setViewMode = usePreferencesStore((s) => s.setViewMode);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const viewModeOptions = useMemo(() => ([
     { value: "normal" as ViewMode, label: t.quranReader.viewModes.normal, icon: VIEW_MODE_ICONS.normal },
@@ -153,8 +154,8 @@ function JuzView() {
             <p className="mt-0.5 text-[11px] text-[var(--theme-text-tertiary)]">
               {firstSurah && (
                 <>
-                  {firstSurah.translated_name.name}
-                  {lastSurah && lastSurah.id !== firstSurah.id && `–${lastSurah.translated_name.name}`}
+                  {getSurahName(firstSurah.id, firstSurah.translated_name.name, locale)}
+                  {lastSurah && lastSurah.id !== firstSurah.id && `–${getSurahName(lastSurah.id, lastSurah.translated_name.name, locale)}`}
                   {" · "}
                 </>
               )}

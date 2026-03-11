@@ -3,7 +3,7 @@ import type { ReadingListItem } from "~/stores/useReadingListStore";
 import { useReadingListStore } from "~/stores/useReadingListStore";
 import { formatRelativeTime } from "~/lib/format-relative-time";
 import { useTranslation } from "~/hooks/useTranslation";
-import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
+import { getSurahName } from "~/lib/surah-name";
 import type { Chapter } from "@mahfuz/shared/types";
 
 interface ReadingListCardProps {
@@ -23,10 +23,9 @@ export function ReadingListCard({ item, chapters }: ReadingListCardProps) {
 
   const chapter = item.type === "surah" ? chapters.find((c) => c.id === item.id) : undefined;
 
-  const surahName =
-    locale === "tr"
-      ? SURAH_NAMES_TR[item.id] ?? chapter?.translated_name.name
-      : chapter?.translated_name.name;
+  const surahName = chapter
+    ? getSurahName(chapter.id, chapter.translated_name.name, locale)
+    : undefined;
 
   const label =
     item.type === "surah"

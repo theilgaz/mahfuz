@@ -20,6 +20,7 @@ import { useReadingListStore } from "~/stores/useReadingListStore";
 import { AddToReadingListButton } from "~/components/browse/AddToReadingListButton";
 import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 export const Route = createFileRoute("/_app/page/$pageNumber")({
   loader: ({ context, params }) => {
@@ -123,7 +124,7 @@ function MushafPageView() {
   const queryClient = useQueryClient();
   const viewMode = usePreferencesStore((s) => s.viewMode);
   const setViewMode = usePreferencesStore((s) => s.setViewMode);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const viewModeOptions = useMemo(() => ([
     { value: "normal" as ViewMode, label: t.quranReader.viewModes.normal, icon: VIEW_MODE_ICONS.normal },
@@ -219,7 +220,7 @@ function MushafPageView() {
       const audioData = await buildChapterAudio(chapterId);
       playVerse(
         chapterId,
-        ch?.translated_name.name || `Sure ${chapterId}`,
+        ch ? getSurahName(ch.id, ch.translated_name.name, locale) : `Sure ${chapterId}`,
         verseKey,
         audioData,
       );
@@ -240,7 +241,7 @@ function MushafPageView() {
     const firstVerseKey = firstGroup.verses[0]?.verse_key;
     if (!firstVerseKey) return;
     const audioData = await buildChapterAudio(firstGroup.chapterId);
-    playVerse(firstGroup.chapterId, ch?.translated_name.name || `Sure ${firstGroup.chapterId}`, firstVerseKey, audioData);
+    playVerse(firstGroup.chapterId, ch ? getSurahName(ch.id, ch.translated_name.name, locale) : `Sure ${firstGroup.chapterId}`, firstVerseKey, audioData);
   }, [isPlayingThisPage, togglePlayPause, firstGroup, buildChapterAudio, playVerse]);
 
   // Keyboard navigation (ArrowLeft/Right)
@@ -309,8 +310,8 @@ function MushafPageView() {
               </div>
             </div>
             <p className="mt-0.5 text-[11px] text-[var(--theme-text-tertiary)]">
-              {verseGroups[0].chapter?.translated_name.name}
-              {verseGroups.length > 1 && `–${verseGroups[verseGroups.length - 1].chapter?.translated_name.name}`}
+              {verseGroups[0].chapter ? getSurahName(verseGroups[0].chapter.id, verseGroups[0].chapter.translated_name.name, locale) : ""}
+              {verseGroups.length > 1 && verseGroups[verseGroups.length - 1].chapter && `–${getSurahName(verseGroups[verseGroups.length - 1].chapter!.id, verseGroups[verseGroups.length - 1].chapter!.translated_name.name, locale)}`}
               {" · "}{versesData.pagination.total_records} {t.quranReader.versesUnit} · {t.common.juz} {juzNumber}
             </p>
           </button>
@@ -428,7 +429,7 @@ function MushafPageView() {
                       {group.chapter.name_arabic}
                     </span>
                     <span className="text-[13px] font-medium text-[var(--theme-text-secondary)]">
-                      {group.chapter.translated_name.name}
+                      {getSurahName(group.chapter.id, group.chapter.translated_name.name, locale)}
                     </span>
                   </Link>
                 </div>

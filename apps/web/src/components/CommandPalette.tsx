@@ -7,6 +7,7 @@ import { TOTAL_PAGES, TOTAL_JUZ, TOTAL_CHAPTERS } from "@mahfuz/shared/constants
 import type { Chapter } from "@mahfuz/shared/types";
 import { useTranslation } from "~/hooks/useTranslation";
 import { QUERY_KEYS } from "~/lib/query-keys";
+import { getSurahName } from "~/lib/surah-name";
 
 // Turkish character normalization for fuzzy matching
 function normalize(s: string): string {
@@ -33,6 +34,7 @@ function parseStructuralResults(
   query: string,
   chapters: Chapter[],
   t: ReturnType<typeof useTranslation>["t"],
+  locale: "tr" | "en",
 ): NavResult[] {
   const q = query.trim();
   if (!q) return [];
@@ -50,7 +52,7 @@ function parseStructuralResults(
     if (ch && verseNum >= 1 && verseNum <= ch.verses_count) {
       results.push({
         type: "verse",
-        label: `${ch.translated_name.name} ${verseNum}`,
+        label: `${getSurahName(ch.id, ch.translated_name.name, locale)} ${verseNum}`,
         sublabel: `${ch.name_simple} · ${surahNum}:${verseNum}`,
         to: "/surah/$surahId",
         params: { surahId: String(surahNum) },
@@ -103,13 +105,13 @@ function parseStructuralResults(
     const matched = chapters.find(
       (ch) =>
         normalize(ch.name_simple) === namePart ||
-        normalize(ch.translated_name.name) === namePart ||
+        normalize(getSurahName(ch.id, ch.translated_name.name, locale)) === namePart ||
         ch.name_arabic === verseMatch[1].trim(),
     );
     if (matched && verseNum >= 1 && verseNum <= matched.verses_count) {
       results.push({
         type: "verse",
-        label: `${matched.translated_name.name} ${verseNum}`,
+        label: `${getSurahName(matched.id, matched.translated_name.name, locale)} ${verseNum}`,
         sublabel: `${matched.name_simple} · ${matched.id}:${verseNum}`,
         to: "/surah/$surahId",
         params: { surahId: String(matched.id) },
@@ -118,7 +120,7 @@ function parseStructuralResults(
       // Also show the surah itself
       results.push({
         type: "surah",
-        label: `${matched.translated_name.name}`,
+        label: `${getSurahName(matched.id, matched.translated_name.name, locale)}`,
         sublabel: `${matched.id}. ${t.commandPalette.surahUnit} · ${matched.verses_count} ${t.common.verse}`,
         to: "/surah/$surahId",
         params: { surahId: String(matched.id) },
@@ -136,7 +138,7 @@ function parseStructuralResults(
       if (ch) {
         results.push({
           type: "surah",
-          label: ch.translated_name.name,
+          label: getSurahName(ch.id, ch.translated_name.name, locale),
           sublabel: `${ch.id}. ${t.commandPalette.surahUnit} · ${ch.name_simple} · ${ch.verses_count} ${t.common.verse}`,
           to: "/surah/$surahId",
           params: { surahId: String(n) },
@@ -167,7 +169,7 @@ function parseStructuralResults(
   // Pattern: surah name search (fuzzy)
   const matchedChapters = chapters.filter((ch) => {
     const nameSimple = normalize(ch.name_simple);
-    const nameTr = normalize(ch.translated_name.name);
+    const nameTr = normalize(getSurahName(ch.id, ch.translated_name.name, locale));
     return (
       nameSimple.includes(qNorm) ||
       nameTr.includes(qNorm) ||
@@ -177,7 +179,7 @@ function parseStructuralResults(
   for (const ch of matchedChapters.slice(0, 6)) {
     results.push({
       type: "surah",
-      label: ch.translated_name.name,
+      label: getSurahName(ch.id, ch.translated_name.name, locale),
       sublabel: `${ch.id}. ${t.commandPalette.surahUnit} · ${ch.name_simple} · ${ch.verses_count} ${t.common.verse}`,
       to: "/surah/$surahId",
       params: { surahId: String(ch.id) },
@@ -219,7 +221,7 @@ function TypeIcon({ type }: { type: NavResult["type"] }) {
 }
 
 export function CommandPalette({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -233,8 +235,8 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 
   // Structural (instant) results
   const navResults = useMemo(
-    () => parseStructuralResults(query, chapters, t),
-    [query, chapters, t],
+    () => parseStructuralResults(query, chapters, t, locale),
+    [query, chapters, t, locale],
   );
 
   // Debounce for API search

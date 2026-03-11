@@ -23,6 +23,7 @@ import { AddToReadingListButton } from "~/components/browse/AddToReadingListButt
 import { useTranslatedVerses } from "~/hooks/useTranslatedVerses";
 import type { TopicEntry } from "~/data/topic-index";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-name";
 
 export const Route = createFileRoute("/_app/surah/$surahId")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -103,7 +104,7 @@ function SurahView() {
   const modeRef = useRef<HTMLDivElement>(null);
   const viewMode = usePreferencesStore((s) => s.viewMode);
   const setViewMode = usePreferencesStore((s) => s.setViewMode);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const viewModeOptions = useMemo(() => ([
     { value: "normal" as ViewMode, label: t.quranReader.viewModes.normal, icon: VIEW_MODE_ICONS.normal },
@@ -147,9 +148,9 @@ function SurahView() {
   const visitSurah = useReadingHistory((s) => s.visitSurah);
   const touchItem = useReadingListStore((s) => s.touchItem);
   useEffect(() => {
-    visitSurah(chapterId, chapter.translated_name.name);
+    visitSurah(chapterId, getSurahName(chapter.id, chapter.translated_name.name, locale));
     touchItem("surah", chapterId);
-  }, [chapterId, chapter.translated_name.name, visitSurah, touchItem]);
+  }, [chapterId, getSurahName(chapter.id, chapter.translated_name.name, locale), visitSurah, touchItem]);
 
   const juzNumber = getJuzForPage(chapter.pages[0]);
 
@@ -206,14 +207,14 @@ function SurahView() {
       return;
     }
     const audioData = await fetchChapterAudio();
-    playSurah(chapterId, chapter.translated_name.name, audioData);
+    playSurah(chapterId, getSurahName(chapter.id, chapter.translated_name.name, locale), audioData);
   }, [
     isPlayingThisSurah,
     togglePlayPause,
     fetchChapterAudio,
     playSurah,
     chapterId,
-    chapter.translated_name.name,
+    getSurahName(chapter.id, chapter.translated_name.name, locale),
   ]);
 
   const handlePlayFromVerse = useCallback(
@@ -221,12 +222,12 @@ function SurahView() {
       const audioData = await fetchChapterAudio();
       playVerse(
         chapterId,
-        chapter.translated_name.name,
+        getSurahName(chapter.id, chapter.translated_name.name, locale),
         verseKey,
         audioData,
       );
     },
-    [fetchChapterAudio, playVerse, chapterId, chapter.translated_name.name],
+    [fetchChapterAudio, playVerse, chapterId, getSurahName(chapter.id, chapter.translated_name.name, locale)],
   );
 
   const hasPrev = chapterId > 1;
@@ -277,7 +278,7 @@ function SurahView() {
                 {chapter.name_arabic}
               </h1>
               <div className="flex items-center gap-1">
-                <span className="text-[15px] font-semibold text-[var(--theme-text)]">{chapter.translated_name.name}</span>
+                <span className="text-[15px] font-semibold text-[var(--theme-text)]">{getSurahName(chapter.id, chapter.translated_name.name, locale)}</span>
                 <svg className="h-3 w-3 text-[var(--theme-text-tertiary)]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 6l4 4 4-4" />
                 </svg>
@@ -377,7 +378,7 @@ function SurahView() {
           )}
 
           <span className="text-[11px] font-medium tabular-nums text-[var(--theme-text-quaternary)]">
-            {chapter.translated_name.name}
+            {getSurahName(chapter.id, chapter.translated_name.name, locale)}
           </span>
 
           <div className="flex shrink-0 items-center gap-0.5">
@@ -472,6 +473,7 @@ function SurahView() {
           currentChapterId={chapterId}
           chapters={chapters}
           t={t}
+          locale={locale}
           onSelect={(id) => {
             setPickerOpen(false);
             navigate({ to: "/surah/$surahId", params: { surahId: String(id) } });
@@ -491,12 +493,14 @@ function SurahPicker({
   onSelect,
   onClose,
   t,
+  locale,
 }: {
   currentChapterId: number;
   chapters: Chapter[];
   onSelect: (chapterId: number) => void;
   onClose: () => void;
   t: ReturnType<typeof useTranslation>["t"];
+  locale: "tr" | "en";
 }) {
   const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -509,7 +513,7 @@ function SurahPicker({
       (ch) =>
         ch.name_simple.toLowerCase().includes(q) ||
         ch.name_arabic.includes(q) ||
-        ch.translated_name.name.toLowerCase().includes(q) ||
+        getSurahName(ch.id, ch.translated_name.name, locale).toLowerCase().includes(q) ||
         String(ch.id).startsWith(q),
     );
   }, [chapters, search]);
@@ -588,7 +592,7 @@ function SurahPicker({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-[13px] font-medium text-[var(--theme-text)]">
-                      {ch.translated_name.name}
+                      {getSurahName(ch.id, ch.translated_name.name, locale)}
                     </span>
                     <span className="text-[11px] text-[var(--theme-text-quaternary)]">
                       {ch.name_simple}
