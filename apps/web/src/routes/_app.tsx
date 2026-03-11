@@ -402,9 +402,7 @@ function AppLayout() {
         </button>
       )}
       <main ref={mainRef} className={`relative flex-1 overflow-y-auto ${audioVisible ? "pb-[124px]" : "pb-[76px]"} lg:pb-0`}>
-        <div key={location.pathname} className="animate-page-enter">
-          <Outlet />
-        </div>
+        <Outlet />
 
         {/* Footer */}
         <footer className="border-t border-[var(--theme-border)] px-6 py-6">
