@@ -9,6 +9,7 @@ import {
 import type { Theme, ColorPaletteId } from "~/stores/usePreferencesStore";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useI18nStore } from "~/stores/useI18nStore";
+import { getAllLocaleConfigs } from "~/locales/registry";
 import { useAudioStore } from "~/stores/useAudioStore";
 import { CURATED_RECITERS } from "@mahfuz/shared/constants";
 import { ReciterModal } from "~/components/audio/ReciterModal";
@@ -171,18 +172,15 @@ export function Onboarding() {
                 ))}
               </div>
               <div className="flex items-center justify-center gap-2 rounded-xl bg-[var(--theme-pill-bg)] p-1">
-                <button
-                  onClick={() => setLocale("tr")}
-                  className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-all ${locale === "tr" ? "bg-primary-600 text-white" : "text-[var(--theme-text-secondary)]"}`}
-                >
-                  {"Türkçe"}
-                </button>
-                <button
-                  onClick={() => setLocale("en")}
-                  className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-all ${locale === "en" ? "bg-primary-600 text-white" : "text-[var(--theme-text-secondary)]"}`}
-                >
-                  English
-                </button>
+                {getAllLocaleConfigs().map(({ code, config }) => (
+                  <button
+                    key={code}
+                    onClick={() => setLocale(code)}
+                    className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-all ${locale === code ? "bg-primary-600 text-white" : "text-[var(--theme-text-secondary)]"}`}
+                  >
+                    {config.displayName}
+                  </button>
+                ))}
               </div>
 
               {/* Advanced Settings Toggle */}

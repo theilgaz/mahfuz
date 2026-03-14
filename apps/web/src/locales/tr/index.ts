@@ -20,4 +20,3 @@ export const tr = {
   ...settingsMessages,
 } as const;
 
-export type Messages = typeof tr;

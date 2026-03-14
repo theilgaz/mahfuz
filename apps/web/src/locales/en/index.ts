@@ -1,4 +1,4 @@
-import type { Messages } from "../tr";
+import type { Messages } from "../types";
 import { core } from "./core";
 import { themeMessages } from "./theme";
 import { pages } from "./pages";
