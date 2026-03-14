@@ -25,6 +25,8 @@ export const ChapterCard = memo(function ChapterCard({ chapter }: ChapterCardPro
         alt=""
         aria-hidden="true"
         draggable={false}
+        width={90}
+        height={90}
         className="pointer-events-none absolute -bottom-3 -right-3 h-[90px] w-[90px] object-contain opacity-[0.06] transition-opacity duration-300 group-hover:opacity-[0.18]"
       />
 

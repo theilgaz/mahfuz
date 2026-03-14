@@ -29,6 +29,8 @@ export function SurahHeader({ chapter, onPlay, isPlaying }: SurahHeaderProps) {
           alt=""
           aria-hidden="true"
           draggable={false}
+          width={isMakkah ? 420 : 400}
+          height={isMakkah ? 420 : 400}
           className={`object-contain opacity-[0.28] ${
             isMakkah
               ? "h-[420px] w-[420px]"

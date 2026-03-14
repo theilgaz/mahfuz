@@ -442,6 +442,8 @@ function AppLayout() {
                     <img
                       src={session.user.image}
                       alt={session.user.name}
+                      width={32}
+                      height={32}
                       className="h-full w-full object-cover"
                     />
                   ) : (

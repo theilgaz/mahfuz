@@ -8,6 +8,8 @@ export function MeccaSvg({ className }: MeccaSvgProps) {
       src="/images/kaaba.png"
       alt=""
       aria-hidden="true"
+      width={420}
+      height={420}
       className={className}
       draggable={false}
     />
