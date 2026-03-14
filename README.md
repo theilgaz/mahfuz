@@ -143,15 +143,15 @@ React Components (Zustand for UI state)
 
 | Translation | Author | Source |
 |-------------|--------|--------|
-| Diyanet Isleri Baskanligi Meali | Diyanet Isleri Baskanligi | [quran.com](https://quran.com) API |
-| Omer Celik Meali | Prof. Dr. Omer Celik | [kuranvemeali.com](https://www.kuranvemeali.com) |
-| Omer Nasuhi Bilmen Meali | Omer Nasuhi Bilmen | [kuranayetleri.net](https://kuranayetleri.net) |
+| Diyanet İşleri Başkanlığı Meali | Diyanet İşleri Başkanlığı | [quran.com](https://quran.com) API |
+| Ömer Çelik Meali | Prof. Dr. Ömer Çelik | [kuranvemeali.com](https://www.kuranvemeali.com) |
+| Ömer Nasuhi Bilmen Meali | Ömer Nasuhi Bilmen | [kuranayetleri.net](https://kuranayetleri.net) |
 | Ali Fikri Yavuz Meali | Ali Fikri Yavuz | [kuranayetleri.net](https://kuranayetleri.net) |
 
 ### Data Sources
 
 - **[Quran.com API](https://quran.com).** Verse text, word-by-word data, transliteration, and Diyanet translation.
-- **[Kuran Meali Ebook Olusturucu](https://github.com/alialparslan/Kuran-Meali-Ebook-Olusturucu)** by alialparslan. Ali Fikri Yavuz and Omer Nasuhi Bilmen translations in JSON format.
+- **[Kuran Meali Ebook Oluşturucu](https://github.com/alialparslan/Kuran-Meali-Ebook-Olusturucu)** by alialparslan. Ali Fikri Yavuz and Ömer Nasuhi Bilmen translations in JSON format.
 
 ### Fonts
 
