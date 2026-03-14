@@ -69,7 +69,7 @@ export const pages = {
     feature_listen: "Listen",
     feature_learn: "Learn",
     feature_memorize: "Memorize",
-    prefsTitle: "Choose Your Preferences",
+    prefsTitle: "Personalize",
     prefsSubtitle: "You can change theme and language anytime in Settings",
     readyTitle: "You're Ready!",
     readySubtitle: "Let's begin with Bismillah",

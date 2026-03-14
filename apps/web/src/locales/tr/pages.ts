@@ -69,7 +69,7 @@ export const pages = {
     feature_listen: "Dinle",
     feature_learn: "Öğren",
     feature_memorize: "Ezberle",
-    prefsTitle: "Tercihinizi Seçin",
+    prefsTitle: "Kişiselleştirin",
     prefsSubtitle: "Tema ve dil ayarlarını istediğiniz zaman değiştirebilirsiniz",
     readyTitle: "Hazırsınız!",
     readySubtitle: "Bismillah ile başlayalım",

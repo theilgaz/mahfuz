@@ -132,7 +132,7 @@ export function Onboarding() {
               <p className="mb-6 text-[14px] text-[var(--theme-text-secondary)]">
                 {t.onboarding.prefsSubtitle}
               </p>
-              <div className="mb-5 flex items-center justify-center gap-4">
+              <div className="mb-5 grid grid-cols-4 justify-items-center gap-x-2 gap-y-3">
                 {THEMES.map((th) => (
                   <button
                     key={th.value}
