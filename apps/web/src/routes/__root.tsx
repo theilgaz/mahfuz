@@ -58,6 +58,8 @@ function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="tr">
       <head>
+        {/* Inline critical CSS: hide body until Tailwind stylesheet loads to prevent FOUC */}
+        <style dangerouslySetInnerHTML={{ __html: "body{opacity:0}" }} />
         <HeadContent />
       </head>
       <body>

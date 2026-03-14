@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* FOUC guard: body starts hidden (inline <style> sets opacity:0),
+   this rule overrides it once Tailwind CSS has loaded */
+body { opacity: 1; }
+
 @theme {
   --color-primary-50: #ecfdf5;
   --color-primary-100: #d1fae5;
