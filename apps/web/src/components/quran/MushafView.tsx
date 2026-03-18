@@ -240,7 +240,7 @@ function ArabicPage({
       style={{ fontSize: `calc(1.65rem * ${fontSize})` }}
       dir="rtl"
     >
-      {verses.map((verse) => {
+      {verses.map((verse, idx) => {
         const surahId = Number(verse.verse_key.split(":")[0]);
         const needsBismillah =
           showBismillah &&
@@ -248,9 +248,16 @@ function ArabicPage({
           !NO_BISMILLAH_SURAHS.has(surahId);
         const words =
           verse.words?.filter((w) => w.char_type_name === "word") ?? [];
+        const prevJuz = idx > 0 ? verses[idx - 1].juz_number : null;
+        const isNewJuz = prevJuz !== null && verse.juz_number !== prevJuz;
 
         return (
           <span key={verse.id}>
+            {isNewJuz && (
+              <span className="mushaf-juz-marker" dir="rtl">
+                الجزء {toArabicNumeral(verse.juz_number)}
+              </span>
+            )}
             {needsBismillah && (
               <span className="block w-full py-2 text-[1.5rem]">
                 بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
@@ -311,32 +318,42 @@ function MealPage({
     }
   }, [selectedWord?.verseKey]);
 
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-4">
-      {verses.map((verse) => {
+      {verses.map((verse, idx) => {
         const isHighlighted = selectedWord?.verseKey === verse.verse_key;
+        const prevJuz = idx > 0 ? verses[idx - 1].juz_number : null;
+        const isNewJuz = prevJuz !== null && verse.juz_number !== prevJuz;
         return (
-          <div
-            key={verse.id}
-            ref={isHighlighted ? highlightedRef : undefined}
-            className={isHighlighted ? "mushaf-verse-highlight" : ""}
-          >
-            <span className="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--theme-verse-number-bg)] text-[10px] font-semibold tabular-nums text-[var(--theme-text-tertiary)]">
-              {verse.verse_number}
-            </span>
-            {verse.translations?.map((tr, i) => (
-              <p
-                key={i}
-                className={`mt-1 font-sans leading-[1.8] text-[var(--theme-text-secondary)] ${isHighlighted && selectedWord?.translation ? "mushaf-word-match" : ""}`}
-                style={{ fontSize: `calc(15px * ${fontSize})` }}
-                dangerouslySetInnerHTML={{
-                  __html:
-                    isHighlighted && selectedWord?.translation
-                      ? highlightTranslationWord(tr.text, selectedWord.translation)
-                      : tr.text,
-                }}
-              />
-            ))}
+          <div key={verse.id}>
+            {isNewJuz && (
+              <div className="mushaf-juz-marker mushaf-juz-marker--meal">
+                {t.common.juz} {verse.juz_number}
+              </div>
+            )}
+            <div
+              ref={isHighlighted ? highlightedRef : undefined}
+              className={isHighlighted ? "mushaf-verse-highlight" : ""}
+            >
+              <span className="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--theme-verse-number-bg)] text-[10px] font-semibold tabular-nums text-[var(--theme-text-tertiary)]">
+                {verse.verse_number}
+              </span>
+              {verse.translations?.map((tr, i) => (
+                <p
+                  key={i}
+                  className={`mt-1 font-sans leading-[1.8] text-[var(--theme-text-secondary)] ${isHighlighted && selectedWord?.translation ? "mushaf-word-match" : ""}`}
+                  style={{ fontSize: `calc(15px * ${fontSize})` }}
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      isHighlighted && selectedWord?.translation
+                        ? highlightTranslationWord(tr.text, selectedWord.translation)
+                        : tr.text,
+                  }}
+                />
+              ))}
+            </div>
           </div>
         );
       })}
