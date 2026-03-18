@@ -89,7 +89,7 @@ export function ImmersiveContent({ surahId, verses, onVerseChange, onComplete }:
       {/* Arabic text */}
       <div className="text-center" dir="rtl">
         <p className="arabic-text text-[32px] font-semibold leading-[2.2] text-white sm:text-[42px]">
-          {verse.text_uthmani || words.map((w) => w.text_uthmani || w.text).join(" ")}
+          {verse.text_imlaei || words.map((w) => w.text_imlaei || w.text).join(" ")}
         </p>
       </div>
 

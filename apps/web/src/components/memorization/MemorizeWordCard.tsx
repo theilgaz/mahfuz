@@ -40,7 +40,7 @@ export function MemorizeWordCard({
         }`}
         dir="rtl"
       >
-        {word.text_uthmani || word.text}
+        {word.text_imlaei || word.text}
       </span>
 
       {/* Transliteration */}

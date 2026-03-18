@@ -92,7 +92,7 @@ export function TestMode({ surahId, verses, onVerseChange, onComplete }: TestMod
           wordIdx: wIdx,
           verseKey: verse.verse_key,
           wordPosition: w.position,
-          text: w.text_uthmani || w.text,
+          text: w.text_imlaei || w.text,
         });
       });
     });
@@ -335,7 +335,7 @@ export function TestMode({ surahId, verses, onVerseChange, onComplete }: TestMod
                 if (!isBlank) {
                   return (
                     <span key={w.id} className="inline-block">
-                      {w.text_uthmani || w.text}{" "}
+                      {w.text_imlaei || w.text}{" "}
                     </span>
                   );
                 }
@@ -368,11 +368,11 @@ export function TestMode({ surahId, verses, onVerseChange, onComplete }: TestMod
                   >
                     {isAnswered ? (
                       answer.correct ? (
-                        <span className="text-emerald-500">{w.text_uthmani || w.text}</span>
+                        <span className="text-emerald-500">{w.text_imlaei || w.text}</span>
                       ) : (
                         <span>
                           <span className="text-red-400 line-through">{answer.selected}</span>
-                          <span className="mx-0.5 text-emerald-500">{w.text_uthmani || w.text}</span>
+                          <span className="mx-0.5 text-emerald-500">{w.text_imlaei || w.text}</span>
                         </span>
                       )
                     ) : (

@@ -190,7 +190,7 @@ export function TypeMode({ surahId, verses, onVerseChange, onComplete }: TypeMod
       <div className="mb-6 rounded-2xl bg-[var(--theme-bg-primary)] p-6 text-center shadow-[var(--shadow-card)]">
         {/* Arabic */}
         <p className="arabic-text mb-1 text-[36px] font-semibold leading-relaxed text-[var(--theme-text)]" dir="rtl">
-          {currentWord.text_uthmani || currentWord.text}
+          {currentWord.text_imlaei || currentWord.text}
         </p>
 
         {/* Faint transliteration hint */}
@@ -285,7 +285,7 @@ export function TypeMode({ surahId, verses, onVerseChange, onComplete }: TypeMod
                     : "text-[var(--theme-text-quaternary)] blur-sm"
               }`}
             >
-              {w.text_uthmani || w.text}{" "}
+              {w.text_imlaei || w.text}{" "}
             </span>
           ))}
         </div>
