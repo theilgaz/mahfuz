@@ -12,10 +12,8 @@ interface AddToReadingListButtonProps {
 export function AddToReadingListButton({ type, id, iconOnly }: AddToReadingListButtonProps) {
   const addItem = useReadingListStore((s) => s.addItem);
   const removeItem = useReadingListStore((s) => s.removeItem);
-  const isInList = useReadingListStore((s) => s.isInList);
+  const active = useReadingListStore((s) => s.items.some((i) => i.type === type && i.id === id));
   const { t } = useTranslation();
-
-  const active = isInList(type, id);
   const [animating, setAnimating] = useState(false);
   const prevActive = useRef(active);
 
