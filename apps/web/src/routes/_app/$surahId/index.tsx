@@ -28,6 +28,7 @@ import { EXPANDED_TOPIC_INDEX } from "~/data/topic-index-expanded";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-name";
 import { FocusModeIcon } from "~/components/focus/FocusIcons";
+import { AddToReadingListButton } from "~/components/browse/AddToReadingListButton";
 
 export const Route = createFileRoute("/_app/$surahId/")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -312,6 +313,8 @@ function SurahView() {
               <FocusModeIcon width={14} height={14} />
               Focus
             </Link>
+
+            <AddToReadingListButton type="surah" id={chapterId} />
 
             {/* View mode picker */}
             <Popover open={modeOpen} onOpenChange={setModeOpen}>
