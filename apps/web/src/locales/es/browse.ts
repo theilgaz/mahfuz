@@ -20,6 +20,7 @@ export const browseMessages = {
     categoryStats: "{categories} categorías · {topics} temas",
     resultCount: "{count} resultados",
     noResultsHint: "Prueba con otro filtro o término de búsqueda",
+    favorites: "Favoritos",
     dailyVerse: "Aleya del día",
     shareVerse: "Compartir",
     quickAccess: "Acceso rápido",
@@ -68,6 +69,11 @@ export const browseMessages = {
     verse: "Aleya",
     goToVerse: "Ir a la aleya",
   },
+
+  favorites: "Favoritos",
+  addFavorite: "Añadir a favoritos",
+  removeFavorite: "Quitar de favoritos",
+  lastRead: "Última lectura",
 
   surahPicker: {
     placeholder: "Buscar sura...",

@@ -70,6 +70,27 @@ export const settingsMessages = {
     error: "Senkronizasyon başarısız",
     errorDesc: "Verileriniz yerel olarak kaydedildi. Kısa süre içinde tekrar denenecek.",
     retry: "Şimdi Dene",
+    offline: "Çevrimdışı",
+  },
+
+  presets: {
+    title: "Hızlı Ayar",
+    nightReading: "Gece Okuma",
+    nightReadingDesc: "Koyu tema, büyük yazı",
+    studyMode: "Çalışma Modu",
+    studyModeDesc: "Kelime kelime, tüm bilgiler",
+    mushafMode: "Mushaf Modu",
+    mushafModeDesc: "Matbu sayfa, çeviri kapalı",
+    default: "Varsayılan",
+    defaultDesc: "Fabrika ayarları",
+  },
+  stats: {
+    khatamProgress: "Hatim İlerlemesi",
+    pagesRead: "sayfa",
+    streak: "gün serisi",
+    today: "Bugün",
+    khatamComplete: "Hatim tamamlandı!",
+    khatamCount: "hatim",
   },
 
   offline: {

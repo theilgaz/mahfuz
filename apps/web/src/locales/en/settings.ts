@@ -70,6 +70,27 @@ export const settingsMessages = {
     error: "Sync failed",
     errorDesc: "Your data is saved locally. It will retry shortly.",
     retry: "Retry Now",
+    offline: "Offline",
+  },
+
+  presets: {
+    title: "Quick Presets",
+    nightReading: "Night Reading",
+    nightReadingDesc: "Dark theme, large text",
+    studyMode: "Study Mode",
+    studyModeDesc: "Word by word, all info",
+    mushafMode: "Mushaf Mode",
+    mushafModeDesc: "Print page, no translation",
+    default: "Default",
+    defaultDesc: "Factory settings",
+  },
+  stats: {
+    khatamProgress: "Khatam Progress",
+    pagesRead: "pages",
+    streak: "day streak",
+    today: "Today",
+    khatamComplete: "Khatam complete!",
+    khatamCount: "khatam",
   },
 
   offline: {

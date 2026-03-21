@@ -82,6 +82,8 @@ export const readingMessages = {
     fontScaleReset: "Sıfırla",
     fontScaleIncrease: "Büyüt",
     fontScaleDecrease: "Küçült",
+    themeCategory: "Tema",
+    reciterCategory: "Kari",
   },
 
   translationPicker: {

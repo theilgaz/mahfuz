@@ -70,6 +70,27 @@ export const settingsMessages = {
     error: "Error de sincronización",
     errorDesc: "Tus datos se guardan localmente. Se reintentará en breve.",
     retry: "Reintentar ahora",
+    offline: "Sin conexión",
+  },
+
+  presets: {
+    title: "Ajustes rápidos",
+    nightReading: "Lectura nocturna",
+    nightReadingDesc: "Tema oscuro, texto grande",
+    studyMode: "Modo estudio",
+    studyModeDesc: "Palabra por palabra",
+    mushafMode: "Modo Mushaf",
+    mushafModeDesc: "Página impresa, sin traducción",
+    default: "Predeterminado",
+    defaultDesc: "Configuración de fábrica",
+  },
+  stats: {
+    khatamProgress: "Progreso del Jatma",
+    pagesRead: "páginas",
+    streak: "racha de días",
+    today: "Hoy",
+    khatamComplete: "¡Jatma completado!",
+    khatamCount: "jatma",
   },
 
   offline: {

@@ -20,6 +20,7 @@ export const browseMessages = {
     categoryStats: "{categories} kategori · {topics} konu",
     resultCount: "{count} sonuç",
     noResultsHint: "Farklı bir filtre veya arama terimi deneyin",
+    favorites: "Favoriler",
     dailyVerse: "Günün Ayeti",
     shareVerse: "Paylaş",
     quickAccess: "Hızlı Erişim",
@@ -68,6 +69,11 @@ export const browseMessages = {
     verse: "Ayet",
     goToVerse: "Ayete git",
   },
+
+  favorites: "Favoriler",
+  addFavorite: "Favorilere ekle",
+  removeFavorite: "Favorilerden çıkar",
+  lastRead: "Son okunan",
 
   surahPicker: {
     placeholder: "Sure ara...",

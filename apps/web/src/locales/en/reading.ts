@@ -82,6 +82,8 @@ export const readingMessages = {
     fontScaleReset: "Reset",
     fontScaleIncrease: "Increase",
     fontScaleDecrease: "Decrease",
+    themeCategory: "Theme",
+    reciterCategory: "Reciter",
   },
 
   translationPicker: {
