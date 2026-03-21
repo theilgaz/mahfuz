@@ -100,6 +100,6 @@ export const READING_PRESETS: ReadingPreset[] = [
   },
   {
     id: "default",
-    overrides: { theme: "sepia", viewMode: "normal", arabicFontSize: 1, showTranslation: true },
+    overrides: { theme: "sepia", viewMode: "normal", arabicFontSize: 1.65, showTranslation: true },
   },
 ];

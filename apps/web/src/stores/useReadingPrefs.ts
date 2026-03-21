@@ -4,7 +4,7 @@ import type { PageLayout } from "@mahfuz/shared/constants";
 
 export const useReadingPrefs = createPreferenceStore("mahfuz-reading-prefs", {
   viewMode: "normal" as ViewMode,
-  pageLayout: "medine" as PageLayout,
+  pageLayout: "berkenar" as PageLayout,
   selectedTranslations: ["omer-celik"] as string[],
 
   // Per-mode show/hide
@@ -18,10 +18,10 @@ export const useReadingPrefs = createPreferenceStore("mahfuz-reading-prefs", {
   mushafShowTranslation: true,
 
   // Per-mode font sizes
-  normalArabicFontSize: 1,
-  normalTranslationFontSize: 1,
-  wbwArabicFontSize: 1,
-  mushafArabicFontSize: 1,
+  normalArabicFontSize: 1.65,
+  normalTranslationFontSize: 0.8,
+  wbwArabicFontSize: 1.75,
+  mushafArabicFontSize: 1.6,
 
   // WBW sub-text sizes
   wordTranslationSize: 1,
