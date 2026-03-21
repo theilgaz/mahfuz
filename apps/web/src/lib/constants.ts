@@ -5,9 +5,9 @@ export const THEME_OPTIONS: { value: Theme; color: string; border: string }[] = 
   { value: "light", color: "#ffffff", border: "#d2d2d7" },
   { value: "crystal", color: "#ffffff", border: "#007AFF" },
   { value: "sepia", color: "#f5ead6", border: "#d4b882" },
-  { value: "dark", color: "#1a1a1a", border: "#444" },
-  { value: "dimmed", color: "#22272e", border: "#444c56" },
   { value: "teal", color: "#1c3f44", border: "#2a5a60" },
+  { value: "dimmed", color: "#22272e", border: "#444c56" },
+  { value: "dark", color: "#1a1a1a", border: "#444" },
   { value: "black", color: "#000000", border: "#333" },
 ];
 

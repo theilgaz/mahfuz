@@ -6,9 +6,9 @@ const THEME_OPTIONS: { value: Theme; color: string; ring?: string }[] = [
   { value: "light", color: "#ffffff" },
   { value: "crystal", color: "#ffffff", ring: "#007AFF" },
   { value: "sepia", color: "#f5ead6" },
-  { value: "dark", color: "#1a1a1a" },
-  { value: "dimmed", color: "#22272e" },
   { value: "teal", color: "#1c3f44" },
+  { value: "dimmed", color: "#22272e" },
+  { value: "dark", color: "#1a1a1a" },
   { value: "black", color: "#000000" },
 ];
 
