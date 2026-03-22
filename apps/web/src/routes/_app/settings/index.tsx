@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
 import {
   usePreferencesStore,
   ARABIC_FONTS,
@@ -28,7 +28,6 @@ import { LanguageSection } from "~/components/settings/LanguageSection";
 import { PageLayoutSection } from "~/components/settings/PageLayoutSection";
 import { PresetSection } from "~/components/settings/PresetSection";
 import { getLocaleConfig } from "~/locales/registry";
-import { SPECIAL_THANKS } from "~/lib/constants";
 import { useReadingPrefs } from "~/stores/useReadingPrefs";
 
 export const Route = createFileRoute("/_app/settings/")({
@@ -71,10 +70,6 @@ function SettingsPage() {
     setSelectedTranslations([match.id, ...selectedTranslations]);
   };
 
-  const randomThanks = useMemo(() => {
-    const shuffled = [...SPECIAL_THANKS].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 3);
-  }, []);
 
   const arabicFontId = usePreferencesStore((s) => s.arabicFontId);
   const viewMode = usePreferencesStore((s) => s.viewMode);
@@ -325,47 +320,6 @@ function SettingsPage() {
         >
           {t.onboarding.showAgain}
         </button>
-      </div>
-
-      {/* Credits */}
-      <div className="mt-8 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-primary)] p-5">
-        <h2 className="mb-1 text-sm font-semibold text-[var(--theme-text)]">
-          {t.settings.credits}
-        </h2>
-        <p className="mb-4 text-xs text-[var(--theme-text-tertiary)]">
-          {t.settings.creditsDesc}
-        </p>
-        <div className="space-y-3">
-          {randomThanks.map((person) => (
-            <div key={person.github} className="flex items-center gap-3">
-              <img
-                src={`https://github.com/${person.github}.png`}
-                alt={person.name}
-                className="h-10 w-10 rounded-full ring-2 ring-[var(--theme-border)]"
-              />
-              <div>
-                <a
-                  href={`https://github.com/${person.github}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-[var(--theme-text)] hover:text-primary-600 transition-colors"
-                >
-                  {person.name}
-                </a>
-                <p className="text-xs text-[var(--theme-text-tertiary)]">@{person.github}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <Link
-          to="/credits"
-          className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--theme-pill-bg)] px-4 py-2.5 text-[12px] font-medium text-[var(--theme-text-secondary)] transition-colors hover:bg-[var(--theme-hover-bg)]"
-        >
-          {t.settings.creditsSeeAll}
-          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </Link>
       </div>
 
       <SaveStatusBar visible={showSaved} label={t.settings.saved} />
