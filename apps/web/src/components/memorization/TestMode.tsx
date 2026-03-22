@@ -322,7 +322,7 @@ export function TestMode({ source, verses, onVerseChange, onComplete }: TestMode
       <div
         className="flex-1 overflow-y-auto rounded-2xl bg-[var(--theme-bg-primary)] p-4 shadow-[var(--shadow-card)] sm:p-6"
         dir="rtl"
-        style={{ paddingBottom: showBottomPanel ? "calc(220px + env(safe-area-inset-bottom, 0px))" : undefined }}
+        style={{ paddingBottom: showBottomPanel ? "calc(280px + env(safe-area-inset-bottom, 0px))" : undefined }}
       >
         {verses.map((verse, vIdx) => {
           const words =
@@ -399,8 +399,8 @@ export function TestMode({ source, verses, onVerseChange, onComplete }: TestMode
       {/* MCQ options — fixed bottom panel */}
       {currentBlank && !answers.has(currentBlank.flatIdx) && !pendingAdvance && (
         <div
-          className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--theme-border)] bg-[var(--theme-bg-primary)] px-4 pt-3 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
-          style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))" }}
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--theme-border)] bg-[var(--theme-bg-primary)] px-4 pt-3 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
+          style={{ paddingBottom: "calc(68px + env(safe-area-inset-bottom, 0px))" }}
         >
           <p className="mb-2.5 text-center text-[12px] font-medium text-[var(--theme-text-tertiary)]">
             {t.memorize.verification.pickWord}
@@ -422,8 +422,8 @@ export function TestMode({ source, verses, onVerseChange, onComplete }: TestMode
       {/* Feedback flash — fixed bottom panel */}
       {currentBlank && answers.has(currentBlank.flatIdx) && (
         <div
-          className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--theme-border)] bg-[var(--theme-bg-primary)] px-4 py-5 text-center shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
-          style={{ paddingBottom: "calc(20px + env(safe-area-inset-bottom, 0px))" }}
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--theme-border)] bg-[var(--theme-bg-primary)] px-4 py-5 text-center shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
+          style={{ paddingBottom: "calc(68px + env(safe-area-inset-bottom, 0px))" }}
         >
           {answers.get(currentBlank.flatIdx)!.correct ? (
             <p className="text-[17px] font-semibold text-emerald-600">
