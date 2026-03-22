@@ -105,7 +105,7 @@ export const useAudioStore = create<AudioStoreState>()(
       isMuted: false,
       repeatMode: "none",
       autoContinue: true,
-      featuredReciterIds: [7, 129], // Alafasy + Al-Banna
+      featuredReciterIds: [7, 129, 170, 134], // Alafasy + Al-Banna + Khalid Al-Jalil + Fatih Seferagic
       isVisible: false,
       isExpanded: false,
       engine: null,
