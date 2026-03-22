@@ -23,6 +23,7 @@ const STYLE_LABELS: Record<string, string> = {
   Murattal: "Murattal",
   Mujawwad: "Mujawwad",
   Muallim: "Muallim",
+  "Çocuk Tekrarı": "Çocuk Tekrarı",
 };
 
 export function ReciterModal({ open, onClose, onSelect }: ReciterModalProps) {
@@ -36,6 +37,7 @@ export function ReciterModal({ open, onClose, onSelect }: ReciterModalProps) {
     const q = search.toLowerCase();
     return CURATED_RECITERS.filter((r) =>
       r.name.toLowerCase().includes(q) ||
+      r.country.toLowerCase().includes(q) ||
       r.style.toLowerCase().includes(q),
     );
   }, [search]);
