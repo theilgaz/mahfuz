@@ -124,16 +124,18 @@ function LetterDetail() {
   return (
     <div className="relative mx-auto max-w-lg px-4 pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center gap-3 bg-gradient-to-b from-orange-50/95 to-orange-50/80 py-3 backdrop-blur-sm">
+      <div className="sticky top-0 z-10 flex items-center gap-3 py-3 backdrop-blur-sm" style={{ background: "linear-gradient(to bottom, rgba(255,247,237,0.95), rgba(255,247,237,0.8))" }}>
         <Link
           to="/kids/letters"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm active:scale-95"
         >
-          <span className="text-lg">←</span>
+          <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
         </Link>
-        <div className="flex-1 text-center">
-          <span className="font-arabic text-2xl text-gray-800" dir="rtl">{letter.arabic}</span>
-          <span className="ml-2 text-[14px] font-semibold text-gray-500">{letter.name}</span>
+        <div className="flex-1 text-center" dir="rtl">
+          <span className="font-arabic text-2xl text-gray-800">{letter.arabic}</span>
+          <span className="mr-2 text-[14px] font-bold text-gray-500" dir="ltr">{letter.name}</span>
         </div>
         <div className="w-10" /> {/* Spacer for symmetry */}
       </div>

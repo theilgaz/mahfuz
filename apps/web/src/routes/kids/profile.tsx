@@ -344,7 +344,7 @@ function AddChildForm({ onSave, onCancel }: { onSave: () => void; onCancel: () =
 
   const [name, setName] = useState("");
   const [birthYear, setBirthYear] = useState(2018);
-  const [selectedAvatar, setSelectedAvatar] = useState(BASE_AVATARS[0]);
+  const [selectedAvatar, setSelectedAvatar] = useState<string>(BASE_AVATARS[0]);
 
   const handleCreate = () => {
     if (!name.trim()) return;

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useKidsProgressStore } from "~/stores/useKidsProgressStore";
 import { KIDS_SURAHS } from "~/lib/kids-constants";
@@ -24,9 +24,9 @@ function KidsSurahs() {
     <div className="mx-auto max-w-lg px-4 py-6">
       {/* Header */}
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-purple-700">{t.kids.surahs.title}</h1>
-        <p className="mt-1 text-[14px] text-purple-500">{t.kids.surahs.subtitle}</p>
-        <p className="mt-2 text-[13px] font-semibold text-purple-400">
+        <h1 className="kids-heading text-2xl font-extrabold text-purple-700">{t.kids.surahs.title}</h1>
+        <p className="mt-1 text-[14px] font-semibold text-purple-500">{t.kids.surahs.subtitle}</p>
+        <p className="mt-2 text-[13px] font-bold text-purple-400">
           {completedCount}/{KIDS_SURAHS.length}
         </p>
       </div>
@@ -39,7 +39,7 @@ function KidsSurahs() {
         return (
           <div key={difficulty} className="mb-6">
             <h2
-              className={`mb-3 text-[14px] font-bold ${
+              className={`mb-3 text-[14px] font-extrabold ${
                 difficulty === "easy"
                   ? "text-emerald-600"
                   : difficulty === "medium"
@@ -62,23 +62,27 @@ function KidsSurahs() {
                 ].filter(Boolean).length;
 
                 return (
-                  <button
+                  <Link
                     key={kidsSurah.id}
-                    className={`flex w-full items-center gap-3 rounded-2xl p-4 text-left shadow-sm transition-transform active:scale-[0.97] ${
+                    to="/$surahId"
+                    params={{ surahId: String(kidsSurah.id) }}
+                    search={{ verse: undefined, topic: undefined, lock: undefined }}
+                    className={`flex w-full items-center gap-3 rounded-2xl p-4 text-left transition-transform active:scale-[0.97] ${
                       progress?.memorized
                         ? "bg-emerald-50 ring-2 ring-emerald-200"
                         : "bg-white"
                     }`}
+                    style={{ boxShadow: "var(--kids-card-shadow, 0 2px 8px rgba(0,0,0,0.06))" }}
                   >
                     {/* Surah number */}
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-[14px] font-bold text-purple-600">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-[14px] font-extrabold text-purple-600">
                       {kidsSurah.id}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[15px] font-semibold text-gray-800">
+                        <span className="text-[15px] font-bold text-gray-800">
                           {chapter?.name_simple ?? `Sure ${kidsSurah.id}`}
                         </span>
                         {progress?.certificateAt && (
@@ -101,7 +105,12 @@ function KidsSurahs() {
                         />
                       ))}
                     </div>
-                  </button>
+
+                    {/* Chevron */}
+                    <svg className="h-4 w-4 shrink-0 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </Link>
                 );
               })}
             </div>

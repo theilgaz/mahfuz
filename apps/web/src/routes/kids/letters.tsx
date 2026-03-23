@@ -17,15 +17,15 @@ function KidsLetters() {
     <div className="mx-auto max-w-lg px-4 py-6">
       {/* Header */}
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-blue-700">{t.kids.letters.title}</h1>
-        <p className="mt-1 text-[14px] text-blue-500">{t.kids.letters.subtitle}</p>
-        <p className="mt-2 text-[13px] font-semibold text-blue-400">
+        <h1 className="kids-heading text-2xl font-extrabold text-blue-700">{t.kids.letters.title}</h1>
+        <p className="mt-1 text-[14px] font-semibold text-blue-500">{t.kids.letters.subtitle}</p>
+        <p className="mt-2 text-[13px] font-bold text-blue-400">
           {completedCount}/{ARABIC_LETTERS.length}
         </p>
       </div>
 
-      {/* Letter Grid */}
-      <div className="grid grid-cols-4 gap-3">
+      {/* Letter Grid — RTL for Arabic letter order */}
+      <div className="grid grid-cols-4 gap-3" dir="rtl">
         {ARABIC_LETTERS.map((letter) => {
           const progress = letters[letter.id];
           const completed = progress?.completed ?? false;
@@ -43,16 +43,16 @@ function KidsLetters() {
                     ? "bg-blue-50 ring-1 ring-blue-200"
                     : "bg-white"
               }`}
+              style={{ boxShadow: "var(--kids-card-shadow, 0 2px 8px rgba(0,0,0,0.06))" }}
             >
               <span
-                className={`font-arabic text-3xl leading-none ${
-                  completed ? "text-emerald-600" : "text-gray-700"
-                }`}
+                className="font-arabic text-3xl leading-none"
+                style={{ color: completed ? "#059669" : "#374151" }}
                 dir="rtl"
               >
                 {letter.arabic}
               </span>
-              <span className="text-[11px] font-semibold text-gray-500">
+              <span className="text-[11px] font-bold text-gray-500" dir="ltr">
                 {letter.name}
               </span>
               {completed && <span className="text-[10px]">⭐ {progress?.stars ?? 0}</span>}

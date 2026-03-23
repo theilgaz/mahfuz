@@ -27,8 +27,8 @@ function KidsQuests() {
     <div className="mx-auto max-w-lg px-4 py-6">
       {/* Header */}
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-amber-700">{t.kids.quests.title}</h1>
-        <p className="mt-1 text-[14px] text-amber-500">{t.kids.quests.daily}</p>
+        <h1 className="kids-heading text-2xl font-extrabold text-amber-700">{t.kids.quests.title}</h1>
+        <p className="mt-1 text-[14px] font-semibold text-amber-500">{t.kids.quests.daily}</p>
       </div>
 
       {/* Quest Cards */}

@@ -49,7 +49,7 @@ function KidsQuizzes() {
   return (
     <div className="mx-auto max-w-lg px-4 py-6">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-emerald-700">{t.kids.quizzes.title}</h1>
+        <h1 className="kids-heading text-2xl font-extrabold text-emerald-700">{t.kids.quizzes.title}</h1>
       </div>
 
       <div className="space-y-3">

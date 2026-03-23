@@ -394,6 +394,57 @@
   --theme-watermark-filter: brightness(0) invert(1);
 }
 
+/* ═══ Kids Zone: Playful theme for /kids/ routes ═══ */
+
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap");
+
+.kids-zone {
+  --font-kids: "Nunito", "Comic Sans MS", "Chalkboard SE", sans-serif;
+  font-family: var(--font-kids);
+}
+
+.kids-zone * {
+  font-family: inherit;
+}
+
+/* Keep Arabic text in Arabic font */
+.kids-zone .font-arabic,
+.kids-zone [dir="rtl"] {
+  font-family: var(--font-arabic);
+}
+
+/* Crayon-style card borders */
+.kids-card {
+  border: 2.5px solid transparent;
+  border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M0 6 Q3 2 6 6 Q9 10 12 6' stroke='%2334d399' fill='none' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 6 round;
+  border-radius: 20px;
+  background-clip: padding-box;
+}
+
+/* Kids zone warm backgrounds */
+.kids-zone {
+  --kids-bg: linear-gradient(135deg, #fff7ed 0%, #ecfdf5 50%, #fef3c7 100%);
+  --kids-header-bg: rgba(255, 255, 255, 0.92);
+  --kids-card-bg: #ffffff;
+  --kids-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+/* Kids button bounce */
+.kids-zone button:active,
+.kids-zone a:active {
+  transition: transform 0.1s ease;
+}
+
+/* Wobbly heading animation */
+@keyframes kids-wobble {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+.kids-heading {
+  animation: kids-wobble 3s ease-in-out infinite;
+  display: inline-block;
+}
+
 @font-face {
   font-family: "KFGQPC Uthmani Hafs";
   src: url("/fonts/KFGQPCUthmanicScriptHAFS.woff2") format("woff2");
