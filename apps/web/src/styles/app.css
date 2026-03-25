@@ -1,1484 +1,205 @@
-@import url("https://fonts.googleapis.com/css2?family=Schoolbell&family=Nunito:wght@400;600;700;800;900&display=swap");
 @import "tailwindcss";
 
-/* Only scan src/ for Tailwind classes — skip public/ (24MB JSON data) */
-@source "../../src/**/*.{tsx,ts,jsx,js}";
-@source not "../../public/**";
+/* ── Tema: Papirüs (varsayılan) ─────────────────────── */
 
-/* FOUC guard: splash overlay covers unstyled content;
-   hide it once Tailwind CSS has loaded */
-.mahfuz-splash { display: none !important; }
-
-@theme {
-  --color-primary-50: #ecfdf5;
-  --color-primary-100: #d1fae5;
-  --color-primary-200: #a7f3d0;
-  --color-primary-300: #6ee7b7;
-  --color-primary-400: #34d399;
-  --color-primary-500: #10b981;
-  --color-primary-600: #059669;
-  --color-primary-700: #047857;
-  --color-primary-800: #065f46;
-  --color-primary-900: #064e3b;
-  --color-primary-950: #022c22;
-
-  --color-gold-50: #fffbeb;
-  --color-gold-100: #fef3c7;
-  --color-gold-200: #fde68a;
-  --color-gold-300: #fcd34d;
-  --color-gold-400: #fbbf24;
-  --color-gold-500: #f59e0b;
-  --color-gold-600: #d97706;
-  --color-gold-700: #b45309;
-  --color-gold-800: #92400e;
-  --color-gold-900: #78350f;
-
-  /* Apple's exact color tokens */
-  --color-apple-black: #1d1d1f;
-  --color-apple-gray: #6e6e73;
-  --color-apple-gray2: #86868b;
-  --color-apple-gray3: #aeaeb2;
-  --color-apple-bg: #f5f5f7;
-  --color-apple-divider: #d2d2d7;
-
-  --color-surface: #f5f5f7;
-  --color-surface-raised: #ffffff;
-  --color-border: rgba(0, 0, 0, 0.06);
-  --color-border-light: rgba(0, 0, 0, 0.04);
-
-  --font-arabic: "KFGQPC Uthmani Hafs", "Scheherazade New", "Traditional Arabic", serif;
-  --font-sans: "Figtree", "SF Pro Display", "SF Pro Text", -apple-system, system-ui, sans-serif;
-
-  /* Apple depth system */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-elevated: 0 2px 12px rgba(0, 0, 0, 0.08);
-  --shadow-float: 0 8px 30px rgba(0, 0, 0, 0.12);
-  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.06);
-}
-
-/* === Theme semantic tokens === */
 :root,
-[data-theme="light"] {
-  --theme-bg: #f5f5f7;
-  --theme-bg-primary: #ffffff;
-  --theme-bg-elevated: #ffffff;
-  --theme-text: #1d1d1f;
-  --logo-g1: #484848;
-  --logo-g2: #2c2c2c;
-  --logo-g3: #1d1d1f;
-  --logo-g4: #111111;
-  --logo-hl: #555555;
-  --theme-text-secondary: #6e6e73;
-  --theme-text-tertiary: #86868b;
-  --theme-text-quaternary: #aeaeb2;
-  --theme-border: rgba(0, 0, 0, 0.06);
-  --theme-divider: #d2d2d7;
-  --theme-pill-bg: #f5f5f7;
-  --theme-glass-bg: rgba(255, 255, 255, 0.8);
-  --theme-glass-heavy-bg: rgba(255, 255, 255, 0.92);
-  --theme-verse-number-bg: #f5f5f7;
-  --theme-translation-accent: rgba(5, 150, 105, 0.2);
-  --theme-hover-bg: rgba(255, 255, 255, 0.6);
-  --theme-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+[data-theme="papyrus"] {
+  --color-bg: #f5efe0;
+  --color-surface: #ece4d0;
+  --color-text-primary: #2c2416;
+  --color-text-secondary: #7a6e5a;
+  --color-text-translation: #5c5040;
+  --color-border: #d9d0bc;
+  --color-accent: #8b6914;
+  --color-word-hover: rgba(139, 105, 20, 0.12);
+  --color-word-hover-text: #6b4c00;
 
-  --theme-meta-color: #059669;
-  --theme-scrollbar-thumb: rgba(0, 0, 0, 0.15);
-  --theme-scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
-  --theme-input-bg: #f5f5f7;
-  --theme-speed-inactive-bg: #f5f5f7;
-  --theme-speed-inactive-hover: #e8e8ea;
-  --theme-surah-header-glow: rgba(255, 255, 255, 0.85);
+  /* Logo — altın amber gradient */
+  --logo-g1: #d4a24e;
+  --logo-g2: #b8860b;
+  --logo-g3: #8b6914;
+  --logo-g4: #6b4c00;
+  --logo-hl: #f0d590;
 
-  --theme-highlight-bg: rgba(5, 150, 105, 0.07);
-  --theme-highlight-text: #065f46;
-
-  --theme-hero-bg: rgba(5, 150, 105, 0.06);
-  --theme-hero-border: rgba(5, 150, 105, 0.12);
-  --theme-hero-motif: rgba(5, 150, 105, 0.55);
-  --theme-hero-search-bg: rgba(255, 255, 255, 0.8);
-  --theme-hero-search-hover: rgba(255, 255, 255, 0.95);
-  --theme-hero-pill-bg: rgba(255, 255, 255, 0.7);
-  --theme-hero-pill-border: rgba(5, 150, 105, 0.15);
-
-  --theme-watermark-opacity: 0.06;
-  --theme-watermark-hover-opacity: 0.18;
-  --theme-watermark-header-opacity: 0.28;
-  --theme-watermark-filter: none;
+  /* Tipografi */
+  --font-arabic: "Scheherazade New", serif;
+  --font-ui: system-ui, -apple-system, sans-serif;
+  --font-size-arabic: clamp(1.5rem, 3vw, 2.2rem);
+  --line-height-arabic: 2.8;
+  --font-size-translation: 0.95rem;
+  --line-height-translation: 1.7;
 }
 
-[data-theme="crystal"] {
-  /* Primary palette: Apple Blue */
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #007AFF;
-  --color-primary-700: #0063d1;
-  --color-primary-800: #004da3;
-  --color-primary-900: #003775;
-  --color-primary-950: #001d40;
+/* ── Tema: Deniz ─────────────────────────────────────── */
 
-  /* Logo: blue gradient */
-  --logo-g1: #60a5fa;
-  --logo-g2: #3b82f6;
-  --logo-g3: #007AFF;
-  --logo-g4: #0063d1;
-  --logo-hl: #bfdbfe;
+[data-theme="sea"] {
+  --color-bg: #eef3f2;
+  --color-surface: #e0eae6;
+  --color-text-primary: #1a2c28;
+  --color-text-secondary: #5a7a70;
+  --color-text-translation: #3d5c52;
+  --color-border: #c4d8d0;
+  --color-accent: #0d7377;
+  --color-word-hover: rgba(13, 115, 119, 0.12);
+  --color-word-hover-text: #065a5e;
 
-  --theme-bg: #ffffff;
-  --theme-bg-primary: #ffffff;
-  --theme-bg-elevated: #ffffff;
-  --theme-text: #1d1d1f;
-  --theme-text-secondary: #8e8e93;
-  --theme-text-tertiary: #aeaeb2;
-  --theme-text-quaternary: #c7c7cc;
-  --theme-border: rgba(0, 0, 0, 0.04);
-  --theme-divider: rgba(0, 0, 0, 0.08);
-  --theme-pill-bg: #f2f2f7;
-  --theme-glass-bg: rgba(255, 255, 255, 0.72);
-  --theme-glass-heavy-bg: rgba(255, 255, 255, 0.90);
-  --theme-verse-number-bg: #f2f2f7;
-  --theme-translation-accent: rgba(0, 122, 255, 0.12);
-  --theme-hover-bg: rgba(0, 0, 0, 0.025);
-  --theme-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.04), 0 0 1px rgba(0, 0, 0, 0.06);
-
-  --theme-meta-color: #007AFF;
-  --theme-scrollbar-thumb: rgba(0, 0, 0, 0.12);
-  --theme-scrollbar-thumb-hover: rgba(0, 0, 0, 0.22);
-  --theme-input-bg: #f2f2f7;
-  --theme-speed-inactive-bg: #f2f2f7;
-  --theme-speed-inactive-hover: #e5e5ea;
-  --theme-surah-header-glow: rgba(255, 255, 255, 0.90);
-
-  --theme-highlight-bg: rgba(0, 122, 255, 0.08);
-  --theme-highlight-text: #003d99;
-
-  --theme-hero-bg: rgba(0, 122, 255, 0.04);
-  --theme-hero-border: rgba(0, 122, 255, 0.10);
-  --theme-hero-motif: rgba(0, 122, 255, 0.45);
-  --theme-hero-search-bg: rgba(255, 255, 255, 0.85);
-  --theme-hero-search-hover: rgba(255, 255, 255, 0.96);
-  --theme-hero-pill-bg: rgba(255, 255, 255, 0.75);
-  --theme-hero-pill-border: rgba(0, 122, 255, 0.12);
+  /* Logo — teal gradient */
+  --logo-g1: #2dd4bf;
+  --logo-g2: #14b8a6;
+  --logo-g3: #0d9488;
+  --logo-g4: #0d7377;
+  --logo-hl: #99f6e4;
 }
 
-[data-theme="sepia"] {
-  --theme-bg: #f5ead6;
-  --theme-bg-primary: #faf4e8;
-  --theme-bg-elevated: #fdf8f0;
-  --theme-text: #4a3728;
-  --logo-g1: #7a6652;
-  --logo-g2: #5c4a36;
-  --logo-g3: #4a3728;
-  --logo-g4: #3a2a1c;
-  --logo-hl: #96836e;
-  --theme-text-secondary: #7a6652;
-  --theme-text-tertiary: #96836e;
-  --theme-text-quaternary: #b5a48f;
-  --theme-border: rgba(74, 55, 40, 0.1);
-  --theme-divider: rgba(74, 55, 40, 0.15);
-  --theme-pill-bg: rgba(74, 55, 40, 0.06);
-  --theme-glass-bg: rgba(250, 244, 232, 0.85);
-  --theme-glass-heavy-bg: rgba(250, 244, 232, 0.95);
-  --theme-verse-number-bg: rgba(74, 55, 40, 0.06);
-  --theme-translation-accent: rgba(160, 120, 60, 0.25);
-  --theme-hover-bg: rgba(253, 248, 240, 0.6);
-  --theme-card-shadow: 0 1px 3px rgba(74, 55, 40, 0.06);
+/* ── Tema: Gece ──────────────────────────────────────── */
 
-  --theme-meta-color: #8b7332;
-  --theme-scrollbar-thumb: rgba(74, 55, 40, 0.15);
-  --theme-scrollbar-thumb-hover: rgba(74, 55, 40, 0.25);
-  --theme-input-bg: rgba(74, 55, 40, 0.06);
-  --theme-speed-inactive-bg: rgba(74, 55, 40, 0.06);
-  --theme-speed-inactive-hover: rgba(74, 55, 40, 0.12);
-  --theme-surah-header-glow: rgba(250, 244, 232, 0.85);
+[data-theme="night"] {
+  --color-bg: #0f0e0c;
+  --color-surface: #1a1814;
+  --color-text-primary: #f0ece4;
+  --color-text-secondary: #9a9080;
+  --color-text-translation: #c4bdb0;
+  --color-border: #2a2820;
+  --color-accent: #7aad4a;
+  --color-word-hover: rgba(122, 173, 74, 0.15);
+  --color-word-hover-text: #a4d470;
 
-  --theme-highlight-bg: rgba(160, 120, 60, 0.18);
-  --theme-highlight-text: #8b7332;
-
-  --theme-hero-bg: rgba(74, 55, 40, 0.08);
-  --theme-hero-border: rgba(74, 55, 40, 0.12);
-  --theme-hero-motif: rgba(74, 55, 40, 0.45);
-  --theme-hero-search-bg: rgba(253, 248, 240, 0.7);
-  --theme-hero-search-hover: rgba(253, 248, 240, 0.9);
-  --theme-hero-pill-bg: rgba(253, 248, 240, 0.6);
-  --theme-hero-pill-border: rgba(74, 55, 40, 0.12);
+  /* Logo — yeşil ışıltı gradient */
+  --logo-g1: #a4d470;
+  --logo-g2: #7aad4a;
+  --logo-g3: #5a8c2a;
+  --logo-g4: #3d6b14;
+  --logo-hl: #d4f0a8;
 }
 
-[data-theme="dark"] {
-  --theme-bg: #1a1a1a;
-  --theme-bg-primary: #2a2a2a;
-  --theme-bg-elevated: #333333;
-  --theme-text: #e5e5e5;
-  --logo-g1: #f0e6d4;
-  --logo-g2: #d4c4a8;
-  --logo-g3: #c0ad8e;
-  --logo-g4: #a89478;
-  --logo-hl: #f5efe3;
-  --theme-text-secondary: #a0a0a0;
-  --theme-text-tertiary: #808080;
-  --theme-text-quaternary: #666666;
-  --theme-border: rgba(255, 255, 255, 0.08);
-  --theme-divider: rgba(255, 255, 255, 0.1);
-  --theme-pill-bg: rgba(255, 255, 255, 0.06);
-  --theme-glass-bg: rgba(30, 30, 30, 0.85);
-  --theme-glass-heavy-bg: rgba(30, 30, 30, 0.95);
-  --theme-verse-number-bg: rgba(255, 255, 255, 0.06);
-  --theme-translation-accent: rgba(52, 211, 153, 0.2);
-  --theme-hover-bg: rgba(255, 255, 255, 0.04);
-  --theme-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-
-  --theme-meta-color: #34d399;
-  --theme-scrollbar-thumb: rgba(255, 255, 255, 0.15);
-  --theme-scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
-  --theme-input-bg: rgba(255, 255, 255, 0.06);
-  --theme-speed-inactive-bg: rgba(255, 255, 255, 0.06);
-  --theme-speed-inactive-hover: rgba(255, 255, 255, 0.12);
-  --theme-surah-header-glow: rgba(26, 26, 26, 0.85);
-
-  --theme-highlight-bg: rgba(52, 211, 153, 0.10);
-  --theme-highlight-text: #ffffff;
-
-  --theme-hero-bg: rgba(255, 255, 255, 0.04);
-  --theme-hero-border: rgba(255, 255, 255, 0.06);
-  --theme-hero-motif: rgba(255, 255, 255, 0.25);
-  --theme-hero-search-bg: rgba(255, 255, 255, 0.06);
-  --theme-hero-search-hover: rgba(255, 255, 255, 0.1);
-  --theme-hero-pill-bg: rgba(255, 255, 255, 0.06);
-  --theme-hero-pill-border: rgba(255, 255, 255, 0.08);
-
-  --theme-watermark-opacity: 0.12;
-  --theme-watermark-hover-opacity: 0.25;
-  --theme-watermark-header-opacity: 0.20;
-  --theme-watermark-filter: brightness(0) invert(1);
-}
-
-[data-theme="dimmed"] {
-  --theme-bg: #22272e;
-  --theme-bg-primary: #2d333b;
-  --theme-bg-elevated: #373e47;
-  --theme-text: #d0d7de;
-  --logo-g1: #a8b2bc;
-  --logo-g2: #8b949e;
-  --logo-g3: #768390;
-  --logo-g4: #636e7b;
-  --logo-hl: #bec6ce;
-  --theme-text-secondary: #8b949e;
-  --theme-text-tertiary: #768390;
-  --theme-text-quaternary: #636e7b;
-  --theme-border: rgba(205, 217, 229, 0.08);
-  --theme-divider: rgba(205, 217, 229, 0.12);
-  --theme-pill-bg: rgba(205, 217, 229, 0.06);
-  --theme-glass-bg: rgba(34, 39, 46, 0.85);
-  --theme-glass-heavy-bg: rgba(34, 39, 46, 0.95);
-  --theme-verse-number-bg: rgba(205, 217, 229, 0.06);
-  --theme-translation-accent: rgba(52, 211, 153, 0.2);
-  --theme-hover-bg: rgba(205, 217, 229, 0.04);
-  --theme-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-
-  --theme-meta-color: #34d399;
-  --theme-scrollbar-thumb: rgba(205, 217, 229, 0.15);
-  --theme-scrollbar-thumb-hover: rgba(205, 217, 229, 0.25);
-  --theme-input-bg: rgba(205, 217, 229, 0.06);
-  --theme-speed-inactive-bg: rgba(205, 217, 229, 0.06);
-  --theme-speed-inactive-hover: rgba(205, 217, 229, 0.12);
-  --theme-surah-header-glow: rgba(34, 39, 46, 0.85);
-
-  --theme-highlight-bg: rgba(52, 211, 153, 0.08);
-  --theme-highlight-text: #ffffff;
-
-  --theme-hero-bg: rgba(205, 217, 229, 0.05);
-  --theme-hero-border: rgba(205, 217, 229, 0.08);
-  --theme-hero-motif: rgba(205, 217, 229, 0.3);
-  --theme-hero-search-bg: rgba(205, 217, 229, 0.06);
-  --theme-hero-search-hover: rgba(205, 217, 229, 0.1);
-  --theme-hero-pill-bg: rgba(205, 217, 229, 0.06);
-  --theme-hero-pill-border: rgba(205, 217, 229, 0.1);
-
-  --theme-watermark-opacity: 0.10;
-  --theme-watermark-hover-opacity: 0.22;
-  --theme-watermark-header-opacity: 0.18;
-  --theme-watermark-filter: brightness(0) invert(1);
-}
-
-[data-theme="teal"] {
-  --theme-bg: #1c3f44;
-  --theme-bg-primary: #244e54;
-  --theme-bg-elevated: #2d5d64;
-  --theme-text: #d1e7dd;
-  --logo-g1: #8ecfc0;
-  --logo-g2: #6bb8a8;
-  --logo-g3: #4fa090;
-  --logo-g4: #3a8878;
-  --logo-hl: #b0e0d4;
-  --theme-text-secondary: #9cc5b8;
-  --theme-text-tertiary: #7aad9e;
-  --theme-text-quaternary: #5a9486;
-  --theme-border: rgba(209, 231, 221, 0.10);
-  --theme-divider: rgba(209, 231, 221, 0.14);
-  --theme-pill-bg: rgba(209, 231, 221, 0.08);
-  --theme-glass-bg: rgba(28, 63, 68, 0.85);
-  --theme-glass-heavy-bg: rgba(28, 63, 68, 0.95);
-  --theme-verse-number-bg: rgba(209, 231, 221, 0.08);
-  --theme-translation-accent: rgba(52, 211, 153, 0.2);
-  --theme-hover-bg: rgba(209, 231, 221, 0.06);
-  --theme-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --theme-meta-color: #6ee7b7;
-  --theme-scrollbar-thumb: rgba(209, 231, 221, 0.15);
-  --theme-scrollbar-thumb-hover: rgba(209, 231, 221, 0.25);
-  --theme-input-bg: rgba(209, 231, 221, 0.08);
-  --theme-speed-inactive-bg: rgba(209, 231, 221, 0.08);
-  --theme-speed-inactive-hover: rgba(209, 231, 221, 0.14);
-  --theme-surah-header-glow: rgba(28, 63, 68, 0.85);
-  --theme-highlight-bg: rgba(52, 211, 153, 0.12);
-  --theme-highlight-text: #ffffff;
-
-  --theme-hero-bg: rgba(209, 231, 221, 0.06);
-  --theme-hero-border: rgba(209, 231, 221, 0.08);
-  --theme-hero-motif: rgba(209, 231, 221, 0.35);
-  --theme-hero-search-bg: rgba(209, 231, 221, 0.08);
-  --theme-hero-search-hover: rgba(209, 231, 221, 0.12);
-  --theme-hero-pill-bg: rgba(209, 231, 221, 0.08);
-  --theme-hero-pill-border: rgba(209, 231, 221, 0.1);
-
-  --theme-watermark-opacity: 0.10;
-  --theme-watermark-hover-opacity: 0.22;
-  --theme-watermark-header-opacity: 0.18;
-  --theme-watermark-filter: brightness(0) invert(1);
-}
-
-[data-theme="black"] {
-  --theme-bg: #000000;
-  --theme-bg-primary: #0a0a0a;
-  --theme-bg-elevated: #161616;
-  --theme-text: #f0f0f0;
-  --logo-g1: #ffffff;
-  --logo-g2: #e0e0e0;
-  --logo-g3: #c0c0c0;
-  --logo-g4: #a0a0a0;
-  --logo-hl: #ffffff;
-  --theme-text-secondary: #a0a0a0;
-  --theme-text-tertiary: #787878;
-  --theme-text-quaternary: #585858;
-  --theme-border: rgba(255, 255, 255, 0.08);
-  --theme-divider: rgba(255, 255, 255, 0.10);
-  --theme-pill-bg: rgba(255, 255, 255, 0.06);
-  --theme-glass-bg: rgba(0, 0, 0, 0.90);
-  --theme-glass-heavy-bg: rgba(0, 0, 0, 0.96);
-  --theme-verse-number-bg: rgba(255, 255, 255, 0.06);
-  --theme-translation-accent: rgba(52, 211, 153, 0.2);
-  --theme-hover-bg: rgba(255, 255, 255, 0.04);
-  --theme-card-shadow: none;
-  --theme-meta-color: #34d399;
-  --theme-scrollbar-thumb: rgba(255, 255, 255, 0.12);
-  --theme-scrollbar-thumb-hover: rgba(255, 255, 255, 0.22);
-  --theme-input-bg: rgba(255, 255, 255, 0.06);
-  --theme-speed-inactive-bg: rgba(255, 255, 255, 0.06);
-  --theme-speed-inactive-hover: rgba(255, 255, 255, 0.12);
-  --theme-surah-header-glow: rgba(0, 0, 0, 0.90);
-  --theme-highlight-bg: rgba(52, 211, 153, 0.10);
-  --theme-highlight-text: #ffffff;
-
-  --theme-hero-bg: rgba(255, 255, 255, 0.03);
-  --theme-hero-border: rgba(255, 255, 255, 0.06);
-  --theme-hero-motif: rgba(255, 255, 255, 0.2);
-  --theme-hero-search-bg: rgba(255, 255, 255, 0.06);
-  --theme-hero-search-hover: rgba(255, 255, 255, 0.1);
-  --theme-hero-pill-bg: rgba(255, 255, 255, 0.06);
-  --theme-hero-pill-border: rgba(255, 255, 255, 0.08);
-
-  --theme-watermark-opacity: 0.12;
-  --theme-watermark-hover-opacity: 0.25;
-  --theme-watermark-header-opacity: 0.20;
-  --theme-watermark-filter: brightness(0) invert(1);
-}
-
-/* ═══ Kids Zone: Playful theme for /kids/ routes ═══ */
-
-.kids-zone {
-  --font-kids: "Schoolbell", "Comic Sans MS", "Chalkboard SE", cursive;
-  --font-kids-body: "Nunito", "Comic Sans MS", sans-serif;
-  font-family: var(--font-kids);
-}
-
-.kids-zone * {
-  font-family: inherit;
-}
-
-/* Body text uses Nunito for readability, headings use Bubblegum Sans */
-.kids-zone p,
-.kids-zone span,
-.kids-zone input,
-.kids-zone label {
-  font-family: var(--font-kids-body);
-}
-
-.kids-zone h1,
-.kids-zone h2,
-.kids-zone h3,
-.kids-zone button,
-.kids-zone a {
-  font-family: var(--font-kids);
-}
-
-/* Keep Arabic text in Arabic font */
-.kids-zone .font-arabic,
-.kids-zone [dir="rtl"] {
-  font-family: var(--font-arabic);
-}
-
-/* Crayon-style card borders */
-.kids-card {
-  border: 2.5px solid transparent;
-  border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M0 6 Q3 2 6 6 Q9 10 12 6' stroke='%2334d399' fill='none' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 6 round;
-  border-radius: 20px;
-  background-clip: padding-box;
-}
-
-/* Kids zone warm backgrounds */
-.kids-zone {
-  --kids-bg: linear-gradient(135deg, #fff7ed 0%, #ecfdf5 50%, #fef3c7 100%);
-  --kids-header-bg: rgba(255, 255, 255, 0.92);
-  --kids-card-bg: #ffffff;
-  --kids-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
-}
-
-/* Kids button bounce */
-.kids-zone button:active,
-.kids-zone a:active {
-  transition: transform 0.1s ease;
-}
-
-/* Wobbly heading animation */
-@keyframes kids-wobble {
-  0%, 100% { transform: rotate(-1deg); }
-  50% { transform: rotate(1deg); }
-}
-.kids-heading {
-  animation: kids-wobble 3s ease-in-out infinite;
-  display: inline-block;
-}
-
-/* ── Animated background elements ── */
-
-/* Rainbow arc */
-.kids-rainbow {
-  position: absolute;
-  top: -120px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 500px;
-  height: 250px;
-  border-radius: 0 0 250px 250px;
-  background: conic-gradient(
-    from 180deg at 50% 0%,
-    #ff6b6b00 0deg,
-    #ff6b6b33 30deg,
-    #ffa50033 60deg,
-    #ffd93d33 90deg,
-    #6bcb7733 120deg,
-    #4ecdc433 150deg,
-    #45b7d133 180deg,
-    #a78bfa33 210deg,
-    #f472b633 240deg,
-    #ff6b6b00 270deg
-  );
-  opacity: 0.6;
-  animation: kids-rainbow-pulse 6s ease-in-out infinite;
-}
-
-@keyframes kids-rainbow-pulse {
-  0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
-  50% { opacity: 0.7; transform: translateX(-50%) scale(1.05); }
-}
-
-/* Floating stars */
-.kids-float-star {
-  position: absolute;
-  pointer-events: none;
-  animation: kids-star-float linear infinite;
-  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.3));
-}
-
-@keyframes kids-star-float {
-  0%   { transform: translateY(0) rotate(0deg) scale(1); }
-  25%  { transform: translateY(-12px) rotate(15deg) scale(1.1); }
-  50%  { transform: translateY(-6px) rotate(-10deg) scale(0.95); }
-  75%  { transform: translateY(-18px) rotate(8deg) scale(1.05); }
-  100% { transform: translateY(0) rotate(0deg) scale(1); }
-}
-
-/* Ground scenery: trees sway */
-.kids-ground-sway {
-  position: absolute;
-  animation: kids-sway ease-in-out infinite;
-  transform-origin: bottom center;
-}
-
-@keyframes kids-sway {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
-}
-
-/* Ground scenery: flowers bounce */
-.kids-ground-bounce {
-  position: absolute;
-  animation: kids-flower-bounce ease-in-out infinite;
-  transform-origin: bottom center;
-}
-
-@keyframes kids-flower-bounce {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-6px) scale(1.08); }
-}
-
-/* Crawling bugs */
-.kids-ground-crawl {
-  position: absolute;
-  animation: kids-crawl linear infinite;
-}
-
-@keyframes kids-crawl {
-  0%   { transform: translateX(0) scaleX(1); }
-  45%  { transform: translateX(30px) scaleX(1); }
-  50%  { transform: translateX(30px) scaleX(-1); }
-  95%  { transform: translateX(0) scaleX(-1); }
-  100% { transform: translateX(0) scaleX(1); }
-}
-
-/* Butterflies / bees */
-.kids-butterfly {
-  position: absolute;
-  animation: kids-flutter ease-in-out infinite;
-}
-
-@keyframes kids-flutter {
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  25%  { transform: translate(20px, -15px) rotate(8deg); }
-  50%  { transform: translate(5px, -25px) rotate(-5deg); }
-  75%  { transform: translate(-15px, -10px) rotate(3deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-/* Rocket flying up */
-.kids-rocket {
-  position: absolute;
-  right: 8%;
-  font-size: 28px;
-  animation: kids-rocket-fly 12s ease-in-out infinite;
-  filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.4));
-}
-
-@keyframes kids-rocket-fly {
-  0%   { bottom: -40px; opacity: 0; transform: rotate(-35deg) scale(0.7); }
-  10%  { opacity: 1; transform: rotate(-35deg) scale(1); }
-  70%  { bottom: 90%; opacity: 1; transform: rotate(-35deg) scale(1); }
-  80%  { bottom: 105%; opacity: 0; transform: rotate(-35deg) scale(0.6); }
-  81%  { bottom: -40px; opacity: 0; }
-  100% { bottom: -40px; opacity: 0; }
-}
-
-/* Reduce motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .kids-float-star,
-  .kids-ground-sway,
-  .kids-ground-bounce,
-  .kids-ground-crawl,
-  .kids-butterfly,
-  .kids-rocket,
-  .kids-rainbow {
-    animation: none !important;
+/* Sistem karanlık modu → tema seçilmediyse gece teması */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #0f0e0c;
+    --color-surface: #1a1814;
+    --color-text-primary: #f0ece4;
+    --color-text-secondary: #9a9080;
+    --color-text-translation: #c4bdb0;
+    --color-border: #2a2820;
+    --color-accent: #7aad4a;
+    --color-word-hover: rgba(122, 173, 74, 0.15);
+    --color-word-hover-text: #a4d470;
+    --logo-g1: #a4d470;
+    --logo-g2: #7aad4a;
+    --logo-g3: #5a8c2a;
+    --logo-g4: #3d6b14;
+    --logo-hl: #d4f0a8;
   }
 }
 
-@font-face {
-  font-family: "KFGQPC Uthmani Hafs";
-  src: url("/fonts/KFGQPCUthmanicScriptHAFS.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+/* ── Tecvid renkleri (16 kural) ───────────────────────── */
 
-@font-face {
-  font-family: "me_quran";
-  src: url("/fonts/me_quran.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+/* Med kuralları — mavi tonları */
+.tajweed-madda_normal { color: #1a6fa8; }
+.tajweed-madda_permissible { color: #4a9fd4; }
+.tajweed-madda_necessary { color: #0d4f7a; }
+.tajweed-madda_obligatory { color: #2858a0; }
 
-@font-face {
-  font-family: "Scheherazade New";
-  src: url("/fonts/ScheherazadeNew-Regular.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+/* Kalkale — turuncu */
+.tajweed-qalaqah { color: #c17f00; }
 
-@font-face {
-  font-family: "KFGQPC Uthman Taha Naskh";
-  src: url("/fonts/KFGQPCUthmanTahaNaskh.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+/* İhfâ — yeşil tonları */
+.tajweed-ikhafa { color: #2e7d46; }
+.tajweed-ikhafa_shafawi { color: #3a9058; }
 
+/* İdğam — yeşil/kahve */
+.tajweed-idgham_ghunnah { color: #1a5c35; }
+.tajweed-idgham_wo_ghunnah { color: #7a5230; }
+.tajweed-idgham_shafawi { color: #2a7040; }
+.tajweed-idgham_mutajanisayn { color: #5a6830; }
 
-/* Base */
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* İklâb — mor */
+.tajweed-iqlab { color: #7a1a6b; }
+
+/* Ğunne — kırmızı */
+.tajweed-ghunnah { color: #b32020; }
+
+/* Hemze/Lâm — gri */
+.tajweed-ham_wasl { color: #8a8a8a; }
+.tajweed-laam_shamsiyah { color: #8a8a8a; }
+
+/* Sessiz harf */
+.tajweed-slnt { color: #8a8a8a; opacity: 0.5; }
+
+/* ── Tecvid karanlık tema ────────────────────────────── */
+
+[data-theme="night"] .tajweed-madda_normal,
+:root:not([data-theme]) .tajweed-madda_normal { color: #5ab0e0; }
+[data-theme="night"] .tajweed-madda_permissible,
+:root:not([data-theme]) .tajweed-madda_permissible { color: #7ac4e8; }
+[data-theme="night"] .tajweed-madda_necessary,
+:root:not([data-theme]) .tajweed-madda_necessary { color: #3a8fc0; }
+[data-theme="night"] .tajweed-madda_obligatory,
+:root:not([data-theme]) .tajweed-madda_obligatory { color: #4a90d0; }
+[data-theme="night"] .tajweed-qalaqah,
+:root:not([data-theme]) .tajweed-qalaqah { color: #e0aa30; }
+[data-theme="night"] .tajweed-ikhafa,
+:root:not([data-theme]) .tajweed-ikhafa { color: #4ebd6a; }
+[data-theme="night"] .tajweed-ikhafa_shafawi,
+:root:not([data-theme]) .tajweed-ikhafa_shafawi { color: #60c880; }
+[data-theme="night"] .tajweed-idgham_ghunnah,
+:root:not([data-theme]) .tajweed-idgham_ghunnah { color: #3a9c5a; }
+[data-theme="night"] .tajweed-idgham_wo_ghunnah,
+:root:not([data-theme]) .tajweed-idgham_wo_ghunnah { color: #b07a50; }
+[data-theme="night"] .tajweed-idgham_shafawi,
+:root:not([data-theme]) .tajweed-idgham_shafawi { color: #50b870; }
+[data-theme="night"] .tajweed-idgham_mutajanisayn,
+:root:not([data-theme]) .tajweed-idgham_mutajanisayn { color: #90a050; }
+[data-theme="night"] .tajweed-iqlab,
+:root:not([data-theme]) .tajweed-iqlab { color: #b04aa0; }
+[data-theme="night"] .tajweed-ghunnah,
+:root:not([data-theme]) .tajweed-ghunnah { color: #e04040; }
+[data-theme="night"] .tajweed-ham_wasl,
+:root:not([data-theme]) .tajweed-ham_wasl { color: #aaaaaa; }
+[data-theme="night"] .tajweed-laam_shamsiyah,
+:root:not([data-theme]) .tajweed-laam_shamsiyah { color: #aaaaaa; }
+[data-theme="night"] .tajweed-slnt,
+:root:not([data-theme]) .tajweed-slnt { color: #aaaaaa; opacity: 0.5; }
+
+/* ── Base ─────────────────────────────────────────────── */
 
 body {
-  background: var(--theme-bg);
-  color: var(--theme-text);
-  letter-spacing: -0.01em;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: var(--font-ui);
 }
 
-/* Glass surfaces: Apple vibrancy */
-.glass {
-  background: var(--theme-glass-bg);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-}
-
-.glass-heavy {
-  background: var(--theme-glass-heavy-bg);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-}
-
-.glass-dark {
-  background: rgba(29, 29, 31, 0.82);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-}
-
-/* Chapter card watermark — theme-aware opacity & filter */
-.chapter-watermark {
-  opacity: var(--theme-watermark-opacity);
-  filter: var(--theme-watermark-filter);
-}
-.group:hover .chapter-watermark {
-  opacity: var(--theme-watermark-hover-opacity);
-}
-
-/* Arabic text */
-[dir="rtl"],
-.arabic-text {
-  direction: rtl;
+[dir="rtl"] {
   font-family: var(--font-arabic);
-  font-size: calc(1em * var(--arabic-font-scale, 1));
-  line-height: 2.2;
-  letter-spacing: 0;
-  word-spacing: 4px;
-  /* Scheherazade New: lower kasra when combined with shadda (cv62) */
-  /* Amiri Quran: kasra below shadda (ss05) */
-  font-feature-settings: "cv62" 1, "ss05" 1;
+  font-size: var(--font-size-arabic);
+  line-height: var(--line-height-arabic);
 }
 
-/* Translation/transliteration text scale + font */
-.translation-text {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: calc(1em * var(--translation-font-scale, 1));
-}
+/* ── Range slider ────────────────────────────────────── */
 
-/* ═══ Mushaf: Ottoman Imperial Tezhip (Karahisari Style) ═══ */
-
-/* Mushaf palette tokens: per theme */
-:root, [data-theme="light"] {
-  --mushaf-paper: #faf5ea;
-  --mushaf-ink: #2c1810;
-  --mushaf-gold: #c9a55a;
-  --mushaf-gold-dark: #8a6510;
-  --mushaf-gold-light: #e6d49e;
-  --mushaf-gold-shine: #f0e4c0;
-  --mushaf-lapis: #1b3a6b;
-  --mushaf-lapis-light: #2a4f8a;
-  --mushaf-vermilion: #a83028;
-  --mushaf-shadow: 0 12px 48px rgba(60, 40, 10, 0.14), 0 2px 8px rgba(0,0,0,0.06);
-}
-[data-theme="crystal"] {
-  --mushaf-paper: #fcfaf5;
-  --mushaf-ink: #2c1810;
-  --mushaf-gold: #c9a55a;
-  --mushaf-gold-dark: #8a6510;
-  --mushaf-gold-light: #e6d49e;
-  --mushaf-gold-shine: #f0e4c0;
-  --mushaf-lapis: #1b3a6b;
-  --mushaf-lapis-light: #2a4f8a;
-  --mushaf-vermilion: #a83028;
-  --mushaf-shadow: 0 12px 48px rgba(60, 40, 10, 0.10), 0 2px 8px rgba(0,0,0,0.04);
-}
-[data-theme="sepia"] {
-  --mushaf-paper: #efe3ca;
-  --mushaf-ink: #3e2c1a;
-  --mushaf-gold: #b8923e;
-  --mushaf-gold-dark: #7a5a0e;
-  --mushaf-gold-light: #d4be80;
-  --mushaf-gold-shine: #e0d0a0;
-  --mushaf-lapis: #1a345a;
-  --mushaf-lapis-light: #264878;
-  --mushaf-vermilion: #8e2820;
-  --mushaf-shadow: 0 12px 48px rgba(40, 28, 8, 0.18), 0 2px 8px rgba(0,0,0,0.08);
-}
-[data-theme="dark"] {
-  --mushaf-paper: #262018;
-  --mushaf-ink: #d4c8a8;
-  --mushaf-gold: #9a7828;
-  --mushaf-gold-dark: #6a5018;
-  --mushaf-gold-light: #b89840;
-  --mushaf-gold-shine: #c4a850;
-  --mushaf-lapis: #12284a;
-  --mushaf-lapis-light: #1a3660;
-  --mushaf-vermilion: #7a2420;
-  --mushaf-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.25);
-}
-[data-theme="dimmed"] {
-  --mushaf-paper: #2a2520;
-  --mushaf-ink: #d0c8b0;
-  --mushaf-gold: #9a7828;
-  --mushaf-gold-dark: #6a5018;
-  --mushaf-gold-light: #b89840;
-  --mushaf-gold-shine: #c4a850;
-  --mushaf-lapis: #152a4a;
-  --mushaf-lapis-light: #1d3862;
-  --mushaf-vermilion: #7a2420;
-  --mushaf-shadow: 0 12px 48px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2);
-}
-[data-theme="teal"] {
-  --mushaf-paper: #1a3438;
-  --mushaf-ink: #c8d8d0;
-  --mushaf-gold: #9a7828;
-  --mushaf-gold-dark: #6a5018;
-  --mushaf-gold-light: #b89840;
-  --mushaf-gold-shine: #c4a850;
-  --mushaf-lapis: #122a3a;
-  --mushaf-lapis-light: #1a3650;
-  --mushaf-vermilion: #7a2420;
-  --mushaf-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.25);
-}
-[data-theme="black"] {
-  --mushaf-paper: #0a0a08;
-  --mushaf-ink: #d4c8a8;
-  --mushaf-gold: #9a7828;
-  --mushaf-gold-dark: #6a5018;
-  --mushaf-gold-light: #b89840;
-  --mushaf-gold-shine: #c4a850;
-  --mushaf-lapis: #0a1830;
-  --mushaf-lapis-light: #122848;
-  --mushaf-vermilion: #7a2420;
-  --mushaf-shadow: none;
-}
-
-/* Page container */
-.mushaf-page {
-  max-width: 640px;
-  margin: 0 auto;
-  border-radius: 3px;
-  box-shadow: var(--mushaf-shadow);
-  /* Outermost gold edge */
-  background: linear-gradient(
-    145deg,
-    var(--mushaf-gold-light),
-    var(--mushaf-gold) 30%,
-    var(--mushaf-gold-dark) 50%,
-    var(--mushaf-gold) 70%,
-    var(--mushaf-gold-light)
-  );
-  padding: 3px;
-}
-/* Mobile full-bleed: mushaf fills the screen edge-to-edge */
-@media (max-width: 639px) {
-  .mushaf-page {
-    max-width: none;
-    border-radius: 0;
-    box-shadow: none;
-  }
-}
-
-/* Outer cetvel: triple gold ruling */
-.mushaf-cetvel-outer {
-  border: 1px solid var(--mushaf-gold-dark);
-  background: var(--mushaf-gold);
-  padding: 1.5px;
-  box-shadow: inset 0 0 0 1px var(--mushaf-gold-shine);
-}
-
-/* Tezhip band: lapis lazuli illumination border */
-.mushaf-tezhip-band {
-  position: relative;
-  padding: 16px;
-  background: var(--mushaf-lapis);
-  border: 1.5px solid var(--mushaf-gold);
-  box-shadow:
-    inset 0 0 12px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px var(--mushaf-gold-dark);
-  overflow: hidden;
-}
-@media (min-width: 640px) {
-  .mushaf-tezhip-band { padding: 22px; }
-}
-
-/* Hatayi floral pattern: CSS arabesque on lapis */
-.mushaf-hatayi-pattern {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.12;
-  background-image:
-    /* Diamond lattice */
-    repeating-linear-gradient(
-      60deg,
-      transparent,
-      transparent 6px,
-      var(--mushaf-gold-light) 6px,
-      var(--mushaf-gold-light) 7px
-    ),
-    repeating-linear-gradient(
-      -60deg,
-      transparent,
-      transparent 6px,
-      var(--mushaf-gold-light) 6px,
-      var(--mushaf-gold-light) 7px
-    ),
-    /* Cross-hatch fill */
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 12px,
-      var(--mushaf-gold) 12px,
-      var(--mushaf-gold) 12.5px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 12px,
-      var(--mushaf-gold) 12px,
-      var(--mushaf-gold) 12.5px
-    );
-}
-
-/* Faint inner glow along tezhip band edges */
-.mushaf-tezhip-band::before {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border: 1px solid var(--mushaf-gold);
-  opacity: 0.25;
-  pointer-events: none;
-}
-.mushaf-tezhip-band::after {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 0.5px solid var(--mushaf-gold-light);
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-/* Köşelik: corner ornament SVG */
-.mushaf-koselik {
-  width: 56px;
-  height: 56px;
-  z-index: 2;
-  pointer-events: none;
-  filter: drop-shadow(0 0 2px rgba(201, 165, 90, 0.3));
-}
-@media (min-width: 640px) {
-  .mushaf-koselik { width: 64px; height: 64px; }
-}
-
-/* Inner cetvel: double gold ruling around text */
-.mushaf-cetvel-inner {
-  position: relative;
-  background: var(--mushaf-paper);
-  border: 2px solid var(--mushaf-gold);
-  /* Double-line effect via inset box-shadow */
-  box-shadow:
-    inset 0 0 0 4px var(--mushaf-paper),
-    inset 0 0 0 5px var(--mushaf-gold-light),
-    0 0 8px rgba(0, 0, 0, 0.08);
-  min-height: 380px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Content area */
-.mushaf-content {
-  width: 100%;
-  padding: 1.25rem 1.25rem;
-}
-@media (min-width: 640px) {
-  .mushaf-content { padding: 2rem 2.5rem; }
-}
-
-/* ═══ QCF V2: Per-page font Mushaf rendering ═══ */
-
-.mushaf-qcf-content {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1rem 0.75rem;
-  min-height: 380px;
-}
-@media (min-width: 640px) {
-  .mushaf-qcf-content { padding: 1.5rem 1.5rem; }
-}
-
-.mushaf-qcf-line {
-  text-align: center;
-  direction: rtl;
-  font-size: clamp(1.4rem, 4.5vw, 2rem);
-  line-height: 2.4;
-  margin: 0;
-  padding: 0;
-  white-space: nowrap;
-  color: var(--mushaf-ink);
-}
-
-.mushaf-qcf-word {
-  cursor: pointer;
-  padding: 2px 1px;
-  border-radius: 4px;
-  transition: background 150ms ease, color 150ms ease;
-}
-.mushaf-qcf-word:hover {
-  background: color-mix(in srgb, var(--mushaf-gold) 18%, transparent);
-}
-
-.mushaf-qcf-word-active {
-  background: color-mix(in srgb, var(--mushaf-gold) 30%, transparent);
-  border-radius: 4px;
-}
-
-.mushaf-qcf-line-skeleton {
-  height: 1.8rem;
-  margin: 0.5rem 1.5rem;
-}
-
-/* QCF surah divider between surahs on same page */
-.mushaf-qcf-surah-divider {
-  text-align: center;
-  padding: 0.25rem 0;
-}
-.mushaf-qcf-surah-badge {
-  display: inline-block;
-  font-family: var(--font-arabic), "Traditional Arabic", serif;
-  font-size: clamp(0.85rem, 2.5vw, 1.1rem);
-  color: var(--mushaf-gold, #8B7355);
-  letter-spacing: 0.02em;
-}
-
-/* Desktop two-page QCF spread */
-.mushaf-qcf-spread {
-  display: flex;
-  gap: 1rem;
-  max-width: 1300px;
-  margin: 0 auto;
-  align-items: flex-start;
-}
-.mushaf-qcf-spread > * {
-  flex: 1 1 50%;
-  min-width: 0;
-}
-/* In spread, each page is ~half viewport → scale font-size down */
-.mushaf-qcf-spread .mushaf-qcf-line {
-  font-size: clamp(0.85rem, 2.2vw, 1.35rem);
-  line-height: 2.2;
-}
-.mushaf-qcf-spread .mushaf-qcf-content {
-  padding: 0.75rem 0.5rem;
-}
-@media (max-width: 1023px) {
-  .mushaf-qcf-spread {
-    flex-direction: column;
-  }
-  .mushaf-qcf-spread > * {
-    flex: 1 1 100%;
-  }
-  /* Back to normal size when stacked */
-  .mushaf-qcf-spread .mushaf-qcf-line {
-    font-size: clamp(1.4rem, 4.5vw, 2rem);
-    line-height: 2.4;
-  }
-  .mushaf-qcf-spread .mushaf-qcf-content {
-    padding: 1rem 0.75rem;
-  }
-}
-
-/* Desktop QCF spread with meal panel */
-.mushaf-qcf-spread-with-meal {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  align-items: start;
-}
-.mushaf-qcf-spread-with-meal .mushaf-qcf-line {
-  font-size: clamp(0.85rem, 2.2vw, 1.35rem);
-  line-height: 2.2;
-}
-.mushaf-qcf-spread-with-meal .mushaf-qcf-content {
-  padding: 0.75rem 0.5rem;
-}
-@media (max-width: 1023px) {
-  .mushaf-qcf-spread-with-meal {
-    grid-template-columns: 1fr;
-  }
-  .mushaf-qcf-spread-with-meal .mushaf-qcf-line {
-    font-size: clamp(1.4rem, 4.5vw, 2rem);
-    line-height: 2.4;
-  }
-  .mushaf-qcf-spread-with-meal .mushaf-qcf-content {
-    padding: 1rem 0.75rem;
-  }
-}
-/* Meal panel within QCF spread */
-.mushaf-qcf-meal-panel {
-  padding: 1rem;
-  max-height: 85vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-/* ═══ Mushaf Spread: Two-page layout (Arabic + Meal) ═══ */
-
-.mushaf-spread {
-  display: flex;
-  max-width: 1200px;
-  margin: 0 auto;
-  min-height: 400px;
-  gap: 0;
-}
-
-.mushaf-spread-page {
-  flex: 1 1 50%;
-  min-width: 0;
-}
-
-/* Inside spread, mushaf-page fills its column instead of being 640px centered */
-.mushaf-page--spread {
-  max-width: none;
-  margin: 0;
-}
-
-/* Desktop (≥768px): Arabic right (order:1), Meal left (order:0) */
-@media (min-width: 768px) {
-  .mushaf-spread-arabic { order: 1; }
-  .mushaf-spread-meal { order: 0; }
-}
-
-/* Mobile (<768px): horizontal scroll-snap, each page full width */
-@media (max-width: 767px) {
-  .mushaf-spread {
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    max-width: none;
-  }
-  .mushaf-spread-page {
-    flex: 0 0 100%;
-    scroll-snap-align: start;
-  }
-  /* Arabic first, Meal second on mobile */
-  .mushaf-spread-arabic { order: 0; }
-  .mushaf-spread-meal { order: 1; }
-}
-
-/* Spine divider between the two pages */
-.mushaf-spread-spine {
-  display: none;
-}
-@media (min-width: 768px) {
-  .mushaf-spread-spine {
-    display: block;
-    width: 1px;
-    background: linear-gradient(
-      to bottom,
-      transparent,
-      var(--mushaf-gold-light) 15%,
-      var(--mushaf-gold) 50%,
-      var(--mushaf-gold-light) 85%,
-      transparent
-    );
-    flex-shrink: 0;
-  }
-}
-
-/* Hide scrollbar on mushaf spread for mobile swipe */
-.mushaf-spread::-webkit-scrollbar { display: none; }
-.mushaf-spread { scrollbar-width: none; }
-
-/* Durak: verse-end marker (Ottoman rosette style) */
-.mushaf-durak {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  margin: 0 4px;
-  vertical-align: middle;
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--mushaf-gold-dark);
-  background:
-    radial-gradient(circle, var(--mushaf-gold-shine) 0%, transparent 70%);
-  border: 1.5px solid var(--mushaf-gold);
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 2px var(--mushaf-paper),
-    0 0 0 3px var(--mushaf-gold-light),
-    0 0 6px rgba(201, 165, 90, 0.2);
-}
-
-/* Word highlight for audio sync */
-.word-highlight {
-  transition: color 200ms ease, background-color 200ms ease, transform 150ms ease;
-  border-radius: 6px;
-  padding: 2px 4px;
-}
-.word-highlight:hover {
-  color: var(--theme-highlight-text);
-}
-.word-highlight.active {
-  color: var(--theme-highlight-text);
-  background-color: var(--theme-highlight-bg);
-}
-
-/* Verse separator ornament */
-.verse-end {
-  font-family: var(--font-arabic);
-  color: var(--color-gold-500);
-}
-
-/* End-of-ayah marker: decorative inline glyph */
-.verse-end-marker {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  width: 36px;
-  height: 36px;
-  margin: 0 2px;
-  vertical-align: middle;
-  font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: var(--theme-text-tertiary);
-  border: 1.5px solid var(--theme-divider);
-  border-radius: 50%;
-}
-.verse-end-number {
-  position: relative;
-  z-index: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Smooth scrollbar: Apple style */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--theme-scrollbar-thumb); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--theme-scrollbar-thumb-hover); }
-
-/* Hide horizontal scrollbar for carousels */
-.scrollbar-none::-webkit-scrollbar { display: none; }
-.scrollbar-none { scrollbar-width: none; }
-
-/* Mobile: prevent 300ms tap delay, enable smooth momentum */
-@media (max-width: 1023px) {
-  html { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-  main { -webkit-overflow-scrolling: touch; }
-}
-
-/* Animations: Apple spring-like */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-  animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-slide-up {
-  animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-.animate-scale-in {
-  animation: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Audio bar slide-up animation */
-@keyframes audio-bar-in {
-  from { opacity: 0; transform: translateY(100%); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.audio-bar-in {
-  animation: audio-bar-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Audio progress track: clickable area */
-.audio-progress-track {
-  position: relative;
-}
-
-/* Speed button active state */
-.speed-btn-active {
-  box-shadow: 0 1px 4px rgba(5, 150, 105, 0.3);
-}
-[data-theme="crystal"] .speed-btn-active {
-  box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
-}
-
-/* Volume slider thumb */
-.audio-volume-slider::-webkit-slider-thumb {
+.settings-range {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+}
+
+.settings-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: var(--color-primary-600);
-  cursor: pointer;
-  border: none;
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
 }
-.audio-volume-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+
+.settings-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: var(--color-primary-600);
-  cursor: pointer;
-  border: none;
-}
-
-/* Focus ring: Apple style */
-:focus-visible {
-  outline: 4px solid rgba(5, 150, 105, 0.4);
-  outline-offset: 1px;
-  border-radius: 12px;
-}
-[data-theme="crystal"] :focus-visible {
-  outline-color: rgba(0, 122, 255, 0.4);
-}
-
-/* Reading toolbar popover animation */
-@keyframes toolbar-in {
-  from { opacity: 0; transform: scale(0.92) translateY(-4px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.animate-toolbar-in {
-  animation: toolbar-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: top right;
-}
-
-/* Reading toolbar flyout drawer (desktop) */
-@keyframes slide-in-right {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-}
-@keyframes slide-out-right {
-  from { transform: translateX(0); }
-  to { transform: translateX(100%); }
-}
-.animate-slide-in-right {
-  animation: slide-in-right 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.animate-slide-out-right {
-  animation: slide-out-right 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* Accordion animation: grid-template-rows for smooth height */
-.accordion-grid {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.accordion-grid[data-open="true"],
-.accordion-grid[data-state="open"] {
-  grid-template-rows: 1fr;
-}
-
-/* Tap-to-reveal fade animation */
-@keyframes reveal-fade {
-  from { opacity: 0; max-height: 0; }
-  to { opacity: 1; max-height: 200px; }
-}
-.animate-reveal {
-  animation: reveal-fade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  overflow: hidden;
-}
-
-/* Skeleton loading pulse */
-@keyframes skeleton-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-.skeleton {
-  background-color: var(--theme-hover-bg);
-  border-radius: 8px;
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
-}
-
-/* Page enter transition — subtle opacity only, no layout shift */
-@keyframes page-enter {
-  from { opacity: 0.6; }
-  to { opacity: 1; }
-}
-.animate-page-enter {
-  animation: page-enter 0.15s ease-out;
-}
-
-/* Micro-interaction: bookmark pop */
-@keyframes bookmark-pop {
-  0% { transform: scale(0); }
-  40% { transform: scale(1.25); }
-  60% { transform: scale(0.95); }
-  80% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-.animate-bookmark-pop {
-  animation: bookmark-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Micro-interaction: copy flash */
-@keyframes copy-flash {
-  0% { transform: scale(0.5); opacity: 0; }
-  50% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-.animate-copy-flash {
-  animation: copy-flash 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Focus toolbar slide-in animation */
-@keyframes focus-toolbar-in {
-  from { opacity: 0; transform: translateY(100%); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.focus-toolbar-in {
-  animation: focus-toolbar-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Safe area bottom padding for Focus toolbar */
-.safe-area-pb {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/* Focus canvas cursor styles */
-.focus-canvas-drawing {
-  cursor: crosshair;
-}
-
-/* Micro-interaction: pulse ring for playing verse */
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
-  70% { box-shadow: 0 0 0 6px rgba(5, 150, 105, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
-}
-@keyframes pulse-ring-blue {
-  0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.4); }
-  70% { box-shadow: 0 0 0 6px rgba(0, 122, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0); }
-}
-.animate-pulse-ring {
-  animation: pulse-ring 1.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-}
-[data-theme="crystal"] .animate-pulse-ring {
-  animation-name: pulse-ring-blue;
-}
-
-/* ═══ Mushaf juz boundary marker ═══ */
-.mushaf-juz-marker {
-  display: block;
-  width: 100%;
-  text-align: center;
-  color: var(--mushaf-gold-dark);
-  font-family: var(--font-arabic);
-  font-size: 0.85em;
-  padding: 0.75rem 0;
-  margin: 0.5rem 0;
-  letter-spacing: 0.05em;
-}
-.mushaf-juz-marker::before,
-.mushaf-juz-marker::after {
-  content: "───";
-  color: var(--mushaf-gold-light);
-  margin: 0 0.5rem;
-}
-/* Meal side: use sans-serif and slightly smaller */
-.mushaf-juz-marker--meal {
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  color: var(--mushaf-gold-dark);
-}
-
-/* ═══ Mushaf word interaction (kelime-meal eşleştirme) ═══ */
-.mushaf-word-interactive {
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background 150ms ease;
-}
-.mushaf-word-interactive:hover {
-  background: color-mix(in srgb, var(--mushaf-gold) 15%, transparent);
-}
-.mushaf-word-selected {
-  background: color-mix(in srgb, var(--mushaf-gold) 30%, transparent);
-  border-radius: 4px;
-}
-.mushaf-verse-highlight {
-  background: color-mix(in srgb, var(--mushaf-gold-light) 12%, transparent);
-  border-radius: 8px;
-  padding: 4px 8px;
-  transition: background 300ms ease;
-}
-.mushaf-word-match mark {
-  background: color-mix(in srgb, var(--mushaf-gold) 35%, transparent);
-  color: inherit;
-  border-radius: 2px;
-  padding: 0 2px;
-}
-
-/* Mushaf tooltip */
-.mushaf-tooltip {
-  position: fixed;
-  transform: translate(-50%, -100%);
-  pointer-events: none;
-  z-index: 9999;
-  white-space: nowrap;
-  padding: 8px 16px;
-  border-radius: 10px;
-  background: var(--theme-bg-elevated);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.14);
-  border: 1px solid var(--theme-border);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  text-align: center;
-  line-height: 1.5;
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-.mushaf-tooltip-visible {
-  opacity: 1;
-}
-
-/* Lock mode: progress ring animation */
-@keyframes lock-progress {
-  from { stroke-dashoffset: 157; }
-  to { stroke-dashoffset: 0; }
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
 }

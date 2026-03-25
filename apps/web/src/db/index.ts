@@ -1,9 +1,7 @@
-import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
-import * as schema from "./schema";
-import * as memorizationSchema from "./memorization-schema";
-import * as syncSchema from "./sync-schema";
-import * as kidsSchema from "./kids-schema";
+import { createClient } from "@libsql/client";
+import * as authSchema from "./schema";
+import * as quranSchema from "./quran-schema";
 
 const client = createClient({
   url: process.env.TURSO_DATABASE_URL || "file:./local.db",
@@ -11,5 +9,10 @@ const client = createClient({
 });
 
 export const db = drizzle(client, {
-  schema: { ...schema, ...memorizationSchema, ...syncSchema, ...kidsSchema },
+  schema: { ...authSchema, ...quranSchema },
 });
+
+export type Database = typeof db;
+
+export * from "./schema";
+export * from "./quran-schema";

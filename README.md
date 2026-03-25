@@ -2,7 +2,7 @@
 
 <br>
 
-<img src="apps/web/public/icons/mahfuz-logo-organic-gold.svg" width="80" alt="Mahfuz">
+<img src="apps/legacy/public/icons/mahfuz-logo-organic-gold.svg" width="80" alt="Mahfuz">
 
 # Mahfuz / محفوظ
 
@@ -63,7 +63,7 @@ Mahfuz is a Quran companion designed around simplicity. No clutter, no ads. Just
 git clone https://github.com/theilgaz/mahfuz.git
 cd mahfuz/mahfuz-app
 npx pnpm@9 install
-cp apps/web/.env.example apps/web/.env
+cp apps/legacy/.env.example apps/legacy/.env
 npx pnpm@9 dev
 ```
 

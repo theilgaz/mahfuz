@@ -1,13 +1,14 @@
 import type { tr } from "./tr";
 
-/** Full message shape — derived from the Turkish (source) locale. */
-export type Messages = typeof tr;
+/** Recursively widen string literal types to string. */
+type Widen<T> = T extends string
+  ? string
+  : { [K in keyof T]: Widen<T[K]> };
 
-/**
- * Makes every nested key optional while keeping leaf `Record<string, string>`
- * maps (e.g. surah name dictionaries) atomic — they're either provided in full
- * or omitted entirely.
- */
+/** Full message shape — derived from the Turkish (source) locale. */
+export type Messages = Widen<typeof tr>;
+
+/** Makes every nested key optional while keeping leaf string maps atomic. */
 export type DeepPartial<T> = T extends Record<string, string>
   ? T
   : { [K in keyof T]?: DeepPartial<T[K]> };
@@ -15,15 +16,10 @@ export type DeepPartial<T> = T extends Record<string, string>
 /** Partial translation bundle — used by incomplete locales that fall back to Turkish. */
 export type PartialMessages = DeepPartial<Messages>;
 
-/** Text direction hint for the locale. */
-export type Direction = "ltr" | "rtl";
-
 /** Metadata for a registered locale. */
 export interface LocaleConfig {
   messages: Messages | PartialMessages;
   displayName: string;
-  dir: Direction;
+  dir: "ltr" | "rtl";
   bcp47: string;
-  /** True when every key in Messages is present (no fallback needed). */
-  complete: boolean;
 }

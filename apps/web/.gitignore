@@ -1,5 +1,11 @@
-# Database
-local.db
+# TanStack generated
+.tanstack/
 
-# Environment
-.env
+# Copied data (regenerated from web/public via import scripts)
+public/quran/
+public/translations/
+public/fonts/
+
+# Local DB
+*.db
+*.db-journal

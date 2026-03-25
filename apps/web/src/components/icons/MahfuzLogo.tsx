@@ -1,7 +1,6 @@
 /**
  * Organic Meem (م) — Mahfuz lettermark logo.
- * Uses theme-aware gradient via CSS variables (--logo-g1..g4, --logo-hl).
- * Pass `branded` for the fixed brand-green version (OG images, marketing).
+ * Tema-uyumlu gradient: CSS variables (--logo-g1..g4, --logo-hl) ile.
  */
 
 import { useId } from "react";
@@ -9,7 +8,6 @@ import { useId } from "react";
 interface MahfuzLogoProps {
   className?: string;
   size?: number;
-  branded?: boolean;
 }
 
 const MEEM_PATH =
@@ -18,20 +16,13 @@ const MEEM_PATH =
 const VIEW_BOX = "118 152 93 138";
 const ASPECT = 93 / 138;
 
-export function MahfuzLogo({ className, size, branded = false }: MahfuzLogoProps) {
+export function MahfuzLogo({ className, size }: MahfuzLogoProps) {
   const uid = useId();
   const gradId = `mg${uid}`;
   const hlId = `mh${uid}`;
 
-  // Always set explicit width/height to prevent FOUC (SVG expanding before CSS loads)
   const h = size ?? 40;
   const sizeProps = { width: Math.round(h * ASPECT), height: h };
-
-  const g1 = branded ? "#34d399" : "var(--logo-g1)";
-  const g2 = branded ? "#10b981" : "var(--logo-g2)";
-  const g3 = branded ? "#059669" : "var(--logo-g3)";
-  const g4 = branded ? "#047857" : "var(--logo-g4)";
-  const hl = branded ? "#a7f3d0" : "var(--logo-hl)";
 
   return (
     <svg
@@ -43,14 +34,14 @@ export function MahfuzLogo({ className, size, branded = false }: MahfuzLogoProps
     >
       <defs>
         <linearGradient id={gradId} x1="0.15" y1="0" x2="0.85" y2="1">
-          <stop offset="0%" stopColor={g1} />
-          <stop offset="35%" stopColor={g2} />
-          <stop offset="70%" stopColor={g3} />
-          <stop offset="100%" stopColor={g4} />
+          <stop offset="0%" stopColor="var(--logo-g1)" />
+          <stop offset="35%" stopColor="var(--logo-g2)" />
+          <stop offset="70%" stopColor="var(--logo-g3)" />
+          <stop offset="100%" stopColor="var(--logo-g4)" />
         </linearGradient>
         <linearGradient id={hlId} x1="0.3" y1="0" x2="0.5" y2="0.6">
-          <stop offset="0%" stopColor={hl} stopOpacity={0.5} />
-          <stop offset="100%" stopColor={g2} stopOpacity={0} />
+          <stop offset="0%" stopColor="var(--logo-hl)" stopOpacity={0.5} />
+          <stop offset="100%" stopColor="var(--logo-g2)" stopOpacity={0} />
         </linearGradient>
       </defs>
       <g transform="translate(2, 2)" opacity={0.08}>

@@ -1,5 +1,8 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+// ── Better Auth tabloları ────────────────────────────────
+// (apps/legacy ile aynı — auth sistemi paylaşılıyor)
+
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),

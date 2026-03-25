@@ -6,7 +6,10 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   server: {
-    port: 3000,
+    port: 3001,
+    watch: {
+      ignored: ["**/routeTree.gen.ts"],
+    },
   },
   plugins: [
     tsConfigPaths(),
@@ -14,24 +17,19 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
-            return "react";
-          }
-          if (id.includes("@tanstack/")) {
-            return "tanstack";
-          }
-          if (id.includes("@radix-ui/")) {
-            return "radix";
-          }
-          if (id.includes("drizzle-orm") || id.includes("better-auth") || id.includes("@libsql/")) {
-            return "db-auth";
-          }
-        },
-      },
-    },
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime",
+      "@tanstack/react-router",
+      "@tanstack/react-query",
+      "@tanstack/router-core",
+      "@tanstack/router-core/ssr/client",
+      "zustand",
+      "zustand/middleware",
+    ],
   },
 });

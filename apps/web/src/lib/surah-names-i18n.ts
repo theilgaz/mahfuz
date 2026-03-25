@@ -1,0 +1,180 @@
+/**
+ * Sure isimlerinin dillere göre çevirileri.
+ * TR zaten surah-names-tr.ts'de var, burası diğer diller için.
+ */
+
+import { SURAH_NAMES_TR } from "./surah-names-tr";
+
+const EN: Record<number, string> = {
+  1: "The Opening", 2: "The Cow", 3: "The Family of Imran", 4: "The Women", 5: "The Table Spread",
+  6: "The Cattle", 7: "The Heights", 8: "The Spoils of War", 9: "The Repentance", 10: "Jonah",
+  11: "Hud", 12: "Joseph", 13: "The Thunder", 14: "Abraham", 15: "The Rocky Tract",
+  16: "The Bee", 17: "The Night Journey", 18: "The Cave", 19: "Mary", 20: "Ta-Ha",
+  21: "The Prophets", 22: "The Pilgrimage", 23: "The Believers", 24: "The Light", 25: "The Criterion",
+  26: "The Poets", 27: "The Ants", 28: "The Stories", 29: "The Spider", 30: "The Romans",
+  31: "Luqman", 32: "The Prostration", 33: "The Combined Forces", 34: "Sheba", 35: "The Originator",
+  36: "Ya-Sin", 37: "Those Ranged in Ranks", 38: "Sad", 39: "The Groups", 40: "The Forgiver",
+  41: "Explained in Detail", 42: "The Consultation", 43: "The Gold Adornments", 44: "The Smoke", 45: "The Kneeling",
+  46: "The Wind-Curved Sandhills", 47: "Muhammad", 48: "The Victory", 49: "The Rooms", 50: "Qaf",
+  51: "The Scattering Winds", 52: "The Mount", 53: "The Star", 54: "The Moon", 55: "The Most Merciful",
+  56: "The Inevitable Event", 57: "The Iron", 58: "The Pleading Woman", 59: "The Exile", 60: "She That Is Examined",
+  61: "The Ranks", 62: "Friday", 63: "The Hypocrites", 64: "Mutual Disillusion", 65: "The Divorce",
+  66: "The Prohibition", 67: "The Sovereignty", 68: "The Pen", 69: "The Inevitable", 70: "The Ways of Ascent",
+  71: "Noah", 72: "The Jinn", 73: "The Enshrouded One", 74: "The Cloaked One", 75: "The Resurrection",
+  76: "Man", 77: "Those Sent Forth", 78: "The Tidings", 79: "Those Who Drag Forth", 80: "He Frowned",
+  81: "The Overthrowing", 82: "The Cleaving", 83: "The Defrauding", 84: "The Splitting Open", 85: "The Mansions of the Stars",
+  86: "The Night-Comer", 87: "The Most High", 88: "The Overwhelming", 89: "The Dawn", 90: "The City",
+  91: "The Sun", 92: "The Night", 93: "The Morning Hours", 94: "The Relief", 95: "The Fig",
+  96: "The Clot", 97: "The Power", 98: "The Clear Proof", 99: "The Earthquake", 100: "The Chargers",
+  101: "The Calamity", 102: "The Rivalry in Worldly Increase", 103: "The Declining Day", 104: "The Traducer", 105: "The Elephant",
+  106: "Quraysh", 107: "The Small Kindnesses", 108: "The Abundance", 109: "The Disbelievers", 110: "The Divine Support",
+  111: "The Palm Fiber", 112: "The Sincerity", 113: "The Daybreak", 114: "Mankind",
+};
+
+const FR: Record<number, string> = {
+  1: "L'Ouverture", 2: "La Vache", 3: "La Famille d'Imran", 4: "Les Femmes", 5: "La Table Servie",
+  6: "Les Bestiaux", 7: "Les Murailles", 8: "Le Butin", 9: "Le Repentir", 10: "Jonas",
+  11: "Houd", 12: "Joseph", 13: "Le Tonnerre", 14: "Abraham", 15: "Al-Hijr",
+  16: "Les Abeilles", 17: "Le Voyage Nocturne", 18: "La Caverne", 19: "Marie", 20: "Ta-Ha",
+  21: "Les Prophètes", 22: "Le Pèlerinage", 23: "Les Croyants", 24: "La Lumière", 25: "Le Discernement",
+  26: "Les Poètes", 27: "Les Fourmis", 28: "Le Récit", 29: "L'Araignée", 30: "Les Romains",
+  31: "Louqmane", 32: "La Prosternation", 33: "Les Coalisés", 34: "Saba", 35: "Le Créateur",
+  36: "Ya-Sin", 37: "Les Rangés", 38: "Sad", 39: "Les Groupes", 40: "Le Pardonneur",
+  41: "Les Versets Détaillés", 42: "La Consultation", 43: "L'Ornement", 44: "La Fumée", 45: "L'Agenouillée",
+  46: "Al-Ahqaf", 47: "Muhammad", 48: "La Victoire", 49: "Les Appartements", 50: "Qaf",
+  51: "Qui Éparpillent", 52: "Le Mont", 53: "L'Étoile", 54: "La Lune", 55: "Le Tout Miséricordieux",
+  56: "L'Événement", 57: "Le Fer", 58: "La Discussion", 59: "L'Exode", 60: "L'Éprouvée",
+  61: "Le Rang", 62: "Le Vendredi", 63: "Les Hypocrites", 64: "La Grande Perte", 65: "Le Divorce",
+  66: "L'Interdiction", 67: "La Royauté", 68: "La Plume", 69: "L'Inévitable", 70: "Les Voies d'Ascension",
+  71: "Noé", 72: "Les Djinns", 73: "L'Enveloppé", 74: "Le Revêtu d'un Manteau", 75: "La Résurrection",
+  76: "L'Homme", 77: "Les Envoyés", 78: "La Nouvelle", 79: "Les Anges Arracheurs", 80: "Il S'est Renfrogné",
+  81: "L'Obscurcissement", 82: "La Rupture", 83: "Les Fraudeurs", 84: "La Déchirure", 85: "Les Constellations",
+  86: "L'Astre Nocturne", 87: "Le Très-Haut", 88: "L'Enveloppante", 89: "L'Aube", 90: "La Cité",
+  91: "Le Soleil", 92: "La Nuit", 93: "Le Jour Montant", 94: "L'Ouverture de la Poitrine", 95: "Le Figuier",
+  96: "L'Adhérence", 97: "La Destinée", 98: "La Preuve", 99: "Le Tremblement de Terre", 100: "Les Coursiers",
+  101: "Le Fracas", 102: "La Course aux Richesses", 103: "Le Temps", 104: "Le Calomniateur", 105: "L'Éléphant",
+  106: "Quraych", 107: "L'Ustensile", 108: "L'Abondance", 109: "Les Mécréants", 110: "Le Secours Divin",
+  111: "Les Fibres", 112: "Le Monothéisme Pur", 113: "L'Aube Naissante", 114: "Les Hommes",
+};
+
+const ES: Record<number, string> = {
+  1: "La Apertura", 2: "La Vaca", 3: "La Familia de Imrán", 4: "Las Mujeres", 5: "La Mesa Servida",
+  6: "El Ganado", 7: "Las Alturas", 8: "El Botín", 9: "El Arrepentimiento", 10: "Jonás",
+  11: "Hud", 12: "José", 13: "El Trueno", 14: "Abraham", 15: "Al-Hiyr",
+  16: "La Abeja", 17: "El Viaje Nocturno", 18: "La Caverna", 19: "María", 20: "Ta-Ha",
+  21: "Los Profetas", 22: "La Peregrinación", 23: "Los Creyentes", 24: "La Luz", 25: "El Criterio",
+  26: "Los Poetas", 27: "Las Hormigas", 28: "El Relato", 29: "La Araña", 30: "Los Romanos",
+  31: "Luqmán", 32: "La Prosternación", 33: "Los Coaligados", 34: "Saba", 35: "El Originador",
+  36: "Ya-Sin", 37: "Los Que Se Alinean", 38: "Sad", 39: "Los Grupos", 40: "El Perdonador",
+  41: "Los Versículos Detallados", 42: "La Consulta", 43: "Los Adornos", 44: "El Humo", 45: "La Arrodillada",
+  46: "Las Dunas", 47: "Muhammad", 48: "La Victoria", 49: "Los Aposentos", 50: "Qaf",
+  51: "Los Vientos", 52: "El Monte", 53: "La Estrella", 54: "La Luna", 55: "El Misericordioso",
+  56: "El Acontecimiento", 57: "El Hierro", 58: "La Discusión", 59: "El Destierro", 60: "La Examinada",
+  61: "La Fila", 62: "El Viernes", 63: "Los Hipócritas", 64: "El Desengaño", 65: "El Divorcio",
+  66: "La Prohibición", 67: "El Dominio", 68: "El Cálamo", 69: "Lo Inevitable", 70: "Las Vías de Ascenso",
+  71: "Noé", 72: "Los Genios", 73: "El Arropado", 74: "El Envuelto en el Manto", 75: "La Resurrección",
+  76: "El Hombre", 77: "Los Enviados", 78: "La Noticia", 79: "Los Arrancadores", 80: "Frunció el Ceño",
+  81: "El Oscurecimiento", 82: "La Hendidura", 83: "Los Defraudadores", 84: "El Resquebrajamiento", 85: "Las Constelaciones",
+  86: "El Astro Nocturno", 87: "El Altísimo", 88: "La Abrumadora", 89: "El Alba", 90: "La Ciudad",
+  91: "El Sol", 92: "La Noche", 93: "La Mañana", 94: "La Apertura del Pecho", 95: "La Higuera",
+  96: "El Coágulo", 97: "El Destino", 98: "La Evidencia", 99: "El Terremoto", 100: "Los Corceles",
+  101: "La Calamidad", 102: "La Acumulación", 103: "El Tiempo", 104: "El Calumniador", 105: "El Elefante",
+  106: "Los Coraichitas", 107: "La Ayuda", 108: "La Abundancia", 109: "Los Incrédulos", 110: "El Socorro Divino",
+  111: "Las Fibras de Palmera", 112: "La Sinceridad", 113: "El Amanecer", 114: "La Humanidad",
+};
+
+const AR: Record<number, string> = {
+  1: "الفاتحة", 2: "البقرة", 3: "آل عمران", 4: "النساء", 5: "المائدة",
+  6: "الأنعام", 7: "الأعراف", 8: "الأنفال", 9: "التوبة", 10: "يونس",
+  11: "هود", 12: "يوسف", 13: "الرعد", 14: "إبراهيم", 15: "الحجر",
+  16: "النحل", 17: "الإسراء", 18: "الكهف", 19: "مريم", 20: "طه",
+  21: "الأنبياء", 22: "الحج", 23: "المؤمنون", 24: "النور", 25: "الفرقان",
+  26: "الشعراء", 27: "النمل", 28: "القصص", 29: "العنكبوت", 30: "الروم",
+  31: "لقمان", 32: "السجدة", 33: "الأحزاب", 34: "سبأ", 35: "فاطر",
+  36: "يس", 37: "الصافات", 38: "ص", 39: "الزمر", 40: "غافر",
+  41: "فصلت", 42: "الشورى", 43: "الزخرف", 44: "الدخان", 45: "الجاثية",
+  46: "الأحقاف", 47: "محمد", 48: "الفتح", 49: "الحجرات", 50: "ق",
+  51: "الذاريات", 52: "الطور", 53: "النجم", 54: "القمر", 55: "الرحمن",
+  56: "الواقعة", 57: "الحديد", 58: "المجادلة", 59: "الحشر", 60: "الممتحنة",
+  61: "الصف", 62: "الجمعة", 63: "المنافقون", 64: "التغابن", 65: "الطلاق",
+  66: "التحريم", 67: "الملك", 68: "القلم", 69: "الحاقة", 70: "المعارج",
+  71: "نوح", 72: "الجن", 73: "المزمل", 74: "المدثر", 75: "القيامة",
+  76: "الإنسان", 77: "المرسلات", 78: "النبأ", 79: "النازعات", 80: "عبس",
+  81: "التكوير", 82: "الانفطار", 83: "المطففين", 84: "الانشقاق", 85: "البروج",
+  86: "الطارق", 87: "الأعلى", 88: "الغاشية", 89: "الفجر", 90: "البلد",
+  91: "الشمس", 92: "الليل", 93: "الضحى", 94: "الشرح", 95: "التين",
+  96: "العلق", 97: "القدر", 98: "البينة", 99: "الزلزلة", 100: "العاديات",
+  101: "القارعة", 102: "التكاثر", 103: "العصر", 104: "الهمزة", 105: "الفيل",
+  106: "قريش", 107: "الماعون", 108: "الكوثر", 109: "الكافرون", 110: "النصر",
+  111: "المسد", 112: "الإخلاص", 113: "الفلق", 114: "الناس",
+};
+
+const DE: Record<number, string> = {
+  1: "Die Eröffnende", 2: "Die Kuh", 3: "Die Familie Imrans", 4: "Die Frauen", 5: "Der Tisch",
+  6: "Das Vieh", 7: "Die Höhen", 8: "Die Beute", 9: "Die Reue", 10: "Jonas",
+  11: "Hud", 12: "Josef", 13: "Der Donner", 14: "Abraham", 15: "Al-Hidschr",
+  16: "Die Biene", 17: "Die Nachtreise", 18: "Die Höhle", 19: "Maria", 20: "Ta-Ha",
+  21: "Die Propheten", 22: "Die Pilgerfahrt", 23: "Die Gläubigen", 24: "Das Licht", 25: "Die Unterscheidung",
+  26: "Die Dichter", 27: "Die Ameisen", 28: "Die Geschichte", 29: "Die Spinne", 30: "Die Römer",
+  31: "Luqman", 32: "Die Niederwerfung", 33: "Die Verbündeten", 34: "Saba", 35: "Der Schöpfer",
+  36: "Ya-Sin", 37: "Die Sich Reihenden", 38: "Sad", 39: "Die Gruppen", 40: "Der Vergebende",
+  41: "Ausführlich Dargelegt", 42: "Die Beratung", 43: "Der Goldschmuck", 44: "Der Rauch", 45: "Die Kniende",
+  46: "Die Sanddünen", 47: "Muhammad", 48: "Der Sieg", 49: "Die Gemächer", 50: "Qaf",
+  51: "Die Zerstreuenden", 52: "Der Berg", 53: "Der Stern", 54: "Der Mond", 55: "Der Allerbarmer",
+  56: "Das Ereignis", 57: "Das Eisen", 58: "Die Streitende", 59: "Die Versammlung", 60: "Die Geprüfte",
+  61: "Die Reihe", 62: "Der Freitag", 63: "Die Heuchler", 64: "Die Enttäuschung", 65: "Die Scheidung",
+  66: "Das Verbot", 67: "Die Herrschaft", 68: "Die Schreibfeder", 69: "Das Unvermeidliche", 70: "Die Wege des Aufstiegs",
+  71: "Noah", 72: "Die Dschinn", 73: "Der Eingehüllte", 74: "Der Bedeckte", 75: "Die Auferstehung",
+  76: "Der Mensch", 77: "Die Entsandten", 78: "Die Nachricht", 79: "Die Entreißenden", 80: "Er Runzelte die Stirn",
+  81: "Die Verdunkelung", 82: "Die Spaltung", 83: "Die Betrüger", 84: "Das Zerbrechen", 85: "Die Sternbilder",
+  86: "Der Nachtstern", 87: "Der Allerhöchste", 88: "Die Überwältigende", 89: "Die Morgendämmerung", 90: "Die Stadt",
+  91: "Die Sonne", 92: "Die Nacht", 93: "Der Vormittag", 94: "Die Erweiterung", 95: "Die Feige",
+  96: "Das Blutgerinnsel", 97: "Die Bestimmung", 98: "Der Beweis", 99: "Das Erdbeben", 100: "Die Rennenden",
+  101: "Die Katastrophe", 102: "Die Anhäufung", 103: "Die Zeit", 104: "Der Verleumder", 105: "Der Elefant",
+  106: "Die Quraisch", 107: "Die Hilfeleistung", 108: "Die Fülle", 109: "Die Ungläubigen", 110: "Die Göttliche Hilfe",
+  111: "Die Palmfasern", 112: "Die Aufrichtigkeit", 113: "Das Morgengrauen", 114: "Die Menschen",
+};
+
+const NL: Record<number, string> = {
+  1: "De Opening", 2: "De Koe", 3: "De Familie van Imraan", 4: "De Vrouwen", 5: "De Gedekte Tafel",
+  6: "Het Vee", 7: "De Hoogten", 8: "De Oorlogsbuit", 9: "Het Berouw", 10: "Jonas",
+  11: "Hoed", 12: "Jozef", 13: "De Donder", 14: "Abraham", 15: "Het Rotsachtige Pad",
+  16: "De Bij", 17: "De Nachtreis", 18: "De Grot", 19: "Maria", 20: "Ta-Ha",
+  21: "De Profeten", 22: "De Bedevaart", 23: "De Gelovigen", 24: "Het Licht", 25: "Het Criterium",
+  26: "De Dichters", 27: "De Mieren", 28: "De Verhalen", 29: "De Spin", 30: "De Romeinen",
+  31: "Loeqmaan", 32: "De Neerknieling", 33: "De Bondgenoten", 34: "Saba", 35: "De Schepper",
+  36: "Ya-Sin", 37: "Zij Die in Rijen Staan", 38: "Saad", 39: "De Groepen", 40: "De Vergever",
+  41: "Uiteengezet", 42: "De Raadpleging", 43: "De Versierselen", 44: "De Rook", 45: "De Knielende",
+  46: "De Zandduinen", 47: "Muhammad", 48: "De Overwinning", 49: "De Kamers", 50: "Qaaf",
+  51: "De Verstrooiende Winden", 52: "De Berg", 53: "De Ster", 54: "De Maan", 55: "De Erbarmer",
+  56: "De Gebeurtenis", 57: "Het IJzer", 58: "De Pleitende Vrouw", 59: "De Verbanning", 60: "De Beproefde",
+  61: "De Gelederen", 62: "De Vrijdag", 63: "De Huichelaars", 64: "De Ontgoocheling", 65: "De Echtscheiding",
+  66: "Het Verbod", 67: "De Heerschappij", 68: "De Pen", 69: "Het Onvermijdelijke", 70: "De Wegen van Opstijging",
+  71: "Noach", 72: "De Djinn", 73: "De Omhulde", 74: "De Bedekte", 75: "De Opstanding",
+  76: "De Mens", 77: "De Uitgezondenen", 78: "Het Nieuws", 79: "De Uittrekkenden", 80: "Hij Fronste",
+  81: "De Verduistering", 82: "De Splijting", 83: "De Bedriegers", 84: "De Scheuring", 85: "De Sterrenbeelden",
+  86: "De Nachtster", 87: "De Allerhoogste", 88: "De Overweldigende", 89: "De Dageraad", 90: "De Stad",
+  91: "De Zon", 92: "De Nacht", 93: "De Ochtend", 94: "De Verruiming", 95: "De Vijg",
+  96: "De Bloedklonter", 97: "De Voorbeschikking", 98: "Het Bewijs", 99: "De Aardbeving", 100: "De Renners",
+  101: "De Ramp", 102: "De Vermeerdering", 103: "De Tijd", 104: "De Lasteraar", 105: "De Olifant",
+  106: "De Qoeraisj", 107: "De Hulpvaardigheid", 108: "De Overvloed", 109: "De Ongelovigen", 110: "De Goddelijke Hulp",
+  111: "De Palmvezels", 112: "De Oprechtheid", 113: "De Dageraad", 114: "De Mensen",
+};
+
+const SURAH_NAMES: Record<string, Record<number, string>> = {
+  tr: SURAH_NAMES_TR,
+  en: EN,
+  fr: FR,
+  es: ES,
+  ar: AR,
+  de: DE,
+  nl: NL,
+};
+
+/**
+ * Dile göre sure ismini döndürür.
+ * Eğer o dilde çeviri yoksa İngilizce fallback kullanır.
+ */
+export function getSurahName(surahId: number, locale: string): string {
+  return SURAH_NAMES[locale]?.[surahId] ?? EN[surahId] ?? "";
+}

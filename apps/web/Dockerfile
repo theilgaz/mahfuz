@@ -7,12 +7,7 @@ WORKDIR /app
 FROM base AS deps
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/web/package.json apps/web/
-COPY packages/api/package.json packages/api/
 COPY packages/audio-engine/package.json packages/audio-engine/
-COPY packages/db/package.json packages/db/
-COPY packages/gamification/package.json packages/gamification/
-COPY packages/memorization/package.json packages/memorization/
-COPY packages/sdk/package.json packages/sdk/
 COPY packages/shared/package.json packages/shared/
 COPY tooling/tailwind/package.json tooling/tailwind/
 COPY tooling/typescript/package.json tooling/typescript/
@@ -31,26 +26,21 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# Copy monorepo root for pnpm workspace resolution
+# Monorepo root
 COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
 
-# Copy built app
+# Built app
 COPY --from=build /app/apps/web/dist apps/web/dist
 COPY --from=build /app/apps/web/drizzle apps/web/drizzle
 COPY --from=build /app/apps/web/server.mjs apps/web/server.mjs
 COPY --from=build /app/apps/web/package.json apps/web/
 
-# Copy built packages (needed at runtime for server imports)
-COPY --from=build /app/packages/api packages/api
-COPY --from=build /app/packages/db packages/db
+# Runtime packages
 COPY --from=build /app/packages/shared packages/shared
-COPY --from=build /app/packages/memorization packages/memorization
-COPY --from=build /app/packages/gamification packages/gamification
 COPY --from=build /app/packages/audio-engine packages/audio-engine
-COPY --from=build /app/packages/sdk packages/sdk
 COPY --from=build /app/tooling tooling
 
-# Copy node_modules (production)
+# Node modules
 COPY --from=build /app/node_modules node_modules
 COPY --from=build /app/apps/web/node_modules apps/web/node_modules
 

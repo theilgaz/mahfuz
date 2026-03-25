@@ -1,13 +1,12 @@
 {
-  "name": "Mahfuz | Kuran-ı Kerim",
+  "name": "Mahfuz — Kuran-ı Kerim",
   "short_name": "Mahfuz",
-  "description": "Kuran-ı Kerim'i okuyun, dinleyin, ezberleyin.",
-  "start_url": "/browse",
+  "description": "Kuran-ı Kerim okuma, dinleme ve hıfz uygulaması",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#1c3f44",
+  "theme_color": "#1a7a4c",
   "orientation": "portrait-primary",
-  "lang": "tr",
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -20,10 +19,13 @@
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "categories": ["education", "lifestyle"],
+  "lang": "tr",
+  "dir": "ltr"
 }

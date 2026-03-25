@@ -11,18 +11,15 @@ function AuthCallback() {
   useEffect(() => {
     const redirect = async () => {
       await router.invalidate();
-      router.navigate({ to: "/browse" });
+      router.navigate({ to: "/" });
     };
     redirect();
   }, [router]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--theme-bg)]">
-      {/* Spinner */}
-      <div className="mb-4 h-8 w-8 animate-spin rounded-full border-[3px] border-[var(--theme-divider)] border-t-primary-600" />
-      <p className="text-[15px] font-medium text-[var(--theme-text-secondary)]">
-        Yönlendiriliyor...
-      </p>
+    <div className="flex min-h-screen flex-col items-center justify-center">
+      <div className="mb-4 h-8 w-8 animate-spin rounded-full border-[3px] border-[var(--color-border)] border-t-[var(--color-accent)]" />
+      <p className="text-sm text-[var(--color-text-secondary)]">Yönlendiriliyor...</p>
     </div>
   );
 }
