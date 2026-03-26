@@ -45,17 +45,21 @@ export function SurahList({ surahs }: SurahListProps) {
 
   // Cüz picker state
   const [juzOpen, setJuzOpen] = useState(false);
+  const [highlightSurahId, setHighlightSurahId] = useState<number | null>(null);
   const juzPanelRef = useRef<HTMLDivElement>(null);
 
-  // Cüze scroll et
+  // Cüze scroll et + highlight
   const scrollToJuz = useCallback((juz: number) => {
     const surahId = JUZ_FIRST_SURAH[juz];
     if (!surahId) return;
     setJuzOpen(false);
+    setHighlightSurahId(surahId);
     const el = itemRefs.current.get(surahId);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
+    // Flash'ı temizle
+    setTimeout(() => setHighlightSurahId(null), 2000);
   }, []);
 
   // Dışarı tıklayınca kapat
@@ -83,7 +87,9 @@ export function SurahList({ surahs }: SurahListProps) {
             to={readingMode === "page" ? "/page/$pageNumber" : "/surah/$surahSlug"}
             params={readingMode === "page" ? { pageNumber: String(surah.pageStart) } : { surahSlug: surahSlug(surah.id) }}
             search={{ ayah: undefined }}
-            className="relative flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] transition-colors overflow-hidden"
+            className={`relative flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] transition-colors duration-1000 overflow-hidden ${
+              highlightSurahId === surah.id ? "bg-[var(--color-accent)]/10 ring-2 ring-[var(--color-accent)]/30" : ""
+            }`}
           >
             {/* Sure numarası + arka plan görseli */}
             <div className="relative w-12 h-12 shrink-0">

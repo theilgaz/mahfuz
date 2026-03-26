@@ -170,14 +170,10 @@ export const useAudioStore = create<AudioState & AudioActions>()((set, get) => (
   _onWordPositionChange: (position) => set({ wordPosition: position }),
   _onVerseChange: (verseKey) => set({ currentVerseKey: verseKey }),
   _onVerseEnd: () => {
-    const { repeatMode, engine } = get();
-    if (repeatMode === "verse") {
-      // Aynı ayeti tekrarla
-      engine?.seekTo(0);
-      engine?.play();
-    } else {
-      // Sonraki ayete geç (surah repeat dahil engine halleder)
-      engine?.nextVerse();
-    }
+    // Engine handles verse transitions internally:
+    // - Chapter mode: syncChapter() increments index, no seek needed
+    // - Verse mode: handleVerseEnded() moves to next verse
+    // - Repeat: both modes handle repeat logic in engine
+    // No action needed here — calling nextVerse() caused double-play stutter.
   },
 }));
