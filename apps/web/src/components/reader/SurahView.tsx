@@ -161,7 +161,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
               textUthmani={useBasic ? cleanImlaei(imlaeiData?.[`${surahId}:${ayah.ayahNumber}`] ?? ayah.textUthmani) : ayah.textUthmani}
               textTajweed={effectiveTajweed ? tajweedData?.[`${surahId}:${ayah.ayahNumber}`] : undefined}
               translation={ayah.translation}
-              showTranslation={showTranslation}
+              showTranslation={showTranslation && !showWbw}
               showTajweed={showTajweed}
               pageNumber={ayah.pageNumber}
               highlight={highlightAyah === ayah.ayahNumber}
