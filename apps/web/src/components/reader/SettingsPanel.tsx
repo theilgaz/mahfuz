@@ -454,14 +454,14 @@ function WbwDisplayControl({ label, value, onChange, t }: {
     on: t.settings.wbwOn,
   };
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-[11px] text-[var(--color-text-secondary)]">{label}</span>
-      <div className="flex rounded-md overflow-hidden border border-[var(--color-border)]">
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-[11px] text-[var(--color-text-secondary)] shrink-0">{label}</span>
+      <div className="flex flex-1 rounded-lg overflow-hidden border border-[var(--color-border)]">
         {WBW_OPTIONS.map((opt) => (
           <button
             key={opt}
             onClick={() => onChange(opt)}
-            className={`px-2 py-0.5 text-[10px] transition-colors ${
+            className={`flex-1 py-1 text-[11px] font-medium transition-colors ${
               value === opt
                 ? "bg-[var(--color-accent)] text-white"
                 : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
