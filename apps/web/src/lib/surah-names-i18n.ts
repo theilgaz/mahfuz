@@ -3,7 +3,7 @@
  * TR zaten surah-names-tr.ts'de var, burası diğer diller için.
  */
 
-import { SURAH_NAMES_TR, SURAH_TRANSLIT_TR } from "./surah-names-tr";
+import { SURAH_NAMES_TR } from "./surah-names-tr";
 
 const EN: Record<number, string> = {
   1: "The Opening", 2: "The Cow", 3: "The Family of Imran", 4: "The Women", 5: "The Table Spread",
@@ -179,16 +179,3 @@ export function getSurahName(surahId: number, locale: string): string {
   return SURAH_NAMES[locale]?.[surahId] ?? EN[surahId] ?? "";
 }
 
-/**
- * Türkçe'de "İnek / Bakara", diğer dillerde sadece `getSurahName` döner.
- * Anlam ve transliterasyon aynıysa tekrar etmez.
- */
-export function getSurahLabel(surahId: number, locale: string): string {
-  if (locale === "tr") {
-    const meaning = SURAH_NAMES_TR[surahId] ?? "";
-    const translit = SURAH_TRANSLIT_TR[surahId] ?? "";
-    if (!meaning || !translit || meaning === translit) return meaning || translit;
-    return `${meaning} / ${translit}`;
-  }
-  return getSurahName(surahId, locale);
-}

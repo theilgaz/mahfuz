@@ -13,7 +13,7 @@ import { useReadingTracker } from "~/hooks/useReadingTracker";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { surahSlug } from "~/lib/surah-slugs";
-import { getSurahLabel } from "~/lib/surah-names-i18n";
+import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 
 const TOTAL_CHAPTERS = 114;
@@ -172,12 +172,32 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
 // ── Sure Picker ─────────────────────────────────────────
 
+// Cüz → ilk sure numarası
+const JUZ_FIRST_SURAH: Record<number, number> = {
+  1: 1, 2: 2, 3: 2, 4: 3, 5: 4, 6: 4, 7: 5, 8: 6, 9: 7, 10: 8,
+  11: 9, 12: 11, 13: 12, 14: 15, 15: 17, 16: 18, 17: 21, 18: 23,
+  19: 25, 20: 27, 21: 29, 22: 33, 23: 36, 24: 39, 25: 41, 26: 46,
+  27: 51, 28: 58, 29: 67, 30: 78,
+};
+
+// Sure → hangi cüzde başlıyor (reverse lookup)
+function getJuzForSurah(surahId: number): number {
+  let juz = 1;
+  for (let j = 1; j <= 30; j++) {
+    if (JUZ_FIRST_SURAH[j] <= surahId) juz = j;
+  }
+  return juz;
+}
+
 function SurahPicker({ currentSurahId }: { currentSurahId: number }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [tab, setTab] = useState<"surah" | "juz">("surah");
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const activeRef = useRef<HTMLAnchorElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const surahRefs = useRef<Map<number, HTMLElement>>(new Map());
   const navigate = useNavigate();
   const { locale } = useTranslation();
   const { data: surahs } = useSurahs();
@@ -233,58 +253,123 @@ function SurahPicker({ currentSurahId }: { currentSurahId: number }) {
       {/* Dropdown */}
       {open && (
         <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 max-h-[60vh] rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 flex flex-col overflow-hidden">
-          {/* Arama */}
-          <div className="p-2 border-b border-[var(--color-border)]">
-            <input
-              ref={inputRef}
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Sure ara..."
-              className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
-            />
+          {/* Tab bar: Sure / Cüz */}
+          <div className="flex border-b border-[var(--color-border)]">
+            <button
+              onClick={() => setTab("surah")}
+              className={`flex-1 py-2 text-xs font-medium transition-colors ${
+                tab === "surah"
+                  ? "text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+            >
+              Sure
+            </button>
+            <button
+              onClick={() => setTab("juz")}
+              className={`flex-1 py-2 text-xs font-medium transition-colors ${
+                tab === "juz"
+                  ? "text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+            >
+              Cüz
+            </button>
           </div>
 
-          {/* Liste */}
-          <div className="overflow-y-auto flex-1">
-            {filtered.map((surah) => {
-              const isActive = surah.id === currentSurahId;
-              return (
-                <Link
-                  key={surah.id}
-                  ref={isActive ? activeRef : undefined}
-                  to="/surah/$surahSlug"
-                  params={{ surahSlug: surahSlug(surah.id) }} search={{ ayah: undefined }}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${
-                    isActive
-                      ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
-                      : "hover:bg-[var(--color-surface)]"
-                  }`}
-                >
-                  <span className="w-7 h-7 rounded-full bg-[var(--color-surface)] flex items-center justify-center text-xs text-[var(--color-text-secondary)] shrink-0">
-                    {surah.id}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium truncate">{getSurahLabel(surah.id, locale) || surah.nameSimple}</span>
-                      <span className="text-sm shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
-                        {surah.nameArabic}
+          {tab === "surah" ? (
+            <>
+              {/* Arama */}
+              <div className="p-2 border-b border-[var(--color-border)]">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Sure ara..."
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                />
+              </div>
+
+              {/* Sure listesi */}
+              <div className="overflow-y-auto flex-1" ref={listRef}>
+                {filtered.map((surah) => {
+                  const isActive = surah.id === currentSurahId;
+                  return (
+                    <Link
+                      key={surah.id}
+                      ref={(el: HTMLAnchorElement | null) => {
+                        if (isActive && el) (activeRef as React.MutableRefObject<HTMLAnchorElement | null>).current = el;
+                        if (el) surahRefs.current.set(surah.id, el);
+                      }}
+                      to="/surah/$surahSlug"
+                      params={{ surahSlug: surahSlug(surah.id) }} search={{ ayah: undefined }}
+                      onClick={() => setOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${
+                        isActive
+                          ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
+                          : "hover:bg-[var(--color-surface)]"
+                      }`}
+                    >
+                      <span className="w-7 h-7 rounded-full bg-[var(--color-surface)] flex items-center justify-center text-xs text-[var(--color-text-secondary)] shrink-0">
+                        {surah.id}
                       </span>
-                    </div>
-                    <span className="text-xs text-[var(--color-text-secondary)]">
-                      {surah.ayahCount} ayet
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-            {filtered.length === 0 && (
-              <p className="text-center text-sm text-[var(--color-text-secondary)] py-6">
-                Sonuç bulunamadı
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-medium truncate">{getSurahName(surah.id, locale) || surah.nameSimple}</span>
+                          <span className="text-sm shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
+                            {surah.nameArabic}
+                          </span>
+                        </div>
+                        <span className="text-xs text-[var(--color-text-secondary)]">
+                          {surah.ayahCount} ayet
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <p className="text-center text-sm text-[var(--color-text-secondary)] py-6">
+                    Sonuç bulunamadı
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            /* Cüz grid */
+            <div className="overflow-y-auto flex-1 p-3">
+              <div className="grid grid-cols-5 gap-1.5">
+                {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => {
+                  const isActive = getJuzForSurah(currentSurahId) === juz;
+                  return (
+                    <button
+                      key={juz}
+                      onClick={() => {
+                        setOpen(false);
+                        setTab("surah");
+                        const firstSurah = JUZ_FIRST_SURAH[juz];
+                        navigate({
+                          to: "/surah/$surahSlug",
+                          params: { surahSlug: surahSlug(firstSurah) },
+                          search: { ayah: undefined },
+                        });
+                      }}
+                      className={`h-10 rounded-lg text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-[var(--color-accent)] text-white"
+                          : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)] hover:text-white"
+                      }`}
+                    >
+                      {juz}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-[var(--color-text-secondary)] text-center mt-3">
+                Cüzün ilk suresine gider
               </p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>

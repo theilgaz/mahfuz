@@ -9,7 +9,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
-import { getSurahLabel } from "~/lib/surah-names-i18n";
+import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
 
@@ -116,7 +116,7 @@ export function SurahList({ surahs }: SurahListProps) {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
-                <span className="truncate">{getSurahLabel(surah.id, locale)}</span>
+                <span className="truncate">{getSurahName(surah.id, locale)}</span>
                 <span className="shrink-0">&middot;</span>
                 <span className="shrink-0">{surah.ayahCount} {t.surahList.verses}</span>
               </div>

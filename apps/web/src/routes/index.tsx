@@ -13,7 +13,7 @@ import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
 import { SettingsButton } from "~/components/SettingsButton";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
-import { getSurahLabel } from "~/lib/surah-names-i18n";
+import { getSurahName } from "~/lib/surah-names-i18n";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(surahsQueryOptions()),
@@ -133,7 +133,7 @@ function HomePage() {
             <div className="flex-1 min-w-0">
               <p className="text-xs text-[var(--color-text-secondary)]">{t.home.continueReading}</p>
               <p className="text-sm font-medium truncate">
-                {getSurahLabel(lastPosition.surahId, locale) || surah?.nameSimple || `${t.common.surah} ${lastPosition.surahId}`}
+                {getSurahName(lastPosition.surahId, locale) || surah?.nameSimple || `${t.common.surah} ${lastPosition.surahId}`}
                 <span className="text-[var(--color-text-secondary)] font-normal text-xs"> · {t.common.verse} {lastPosition.ayahNumber}</span>
               </p>
             </div>
@@ -170,7 +170,7 @@ function HomePage() {
               </span>
               {visible.map((bm) => {
                 const surah = surahMap.get(bm.surahId);
-                const name = getSurahLabel(bm.surahId, locale) || surah?.nameSimple || String(bm.surahId);
+                const name = getSurahName(bm.surahId, locale) || surah?.nameSimple || String(bm.surahId);
                 const label = `${name} ${bm.ayahNumber}`;
                 const linkProps = readingMode === "list"
                   ? { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(bm.surahId) }, search: { ayah: bm.ayahNumber } }

@@ -7,7 +7,7 @@ import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchQuran } from "~/lib/search-service";
 import { useSettingsStore } from "~/stores/settings.store";
-import { getSurahLabel } from "~/lib/surah-names-i18n";
+import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { SettingsButton } from "~/components/SettingsButton";
 import { surahSlug } from "~/lib/surah-slugs";
@@ -120,7 +120,7 @@ function SearchPage() {
             >
               {/* Kaynak bilgisi */}
               <div className="flex items-center gap-2 mb-2 text-xs text-[var(--color-text-secondary)]">
-                <span>{getSurahLabel(r.surahId, locale)}</span>
+                <span>{getSurahName(r.surahId, locale)}</span>
                 <span>&middot;</span>
                 <span>{t.common.verse} {r.ayahNumber}</span>
                 <span>&middot;</span>
