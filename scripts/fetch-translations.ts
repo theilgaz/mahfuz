@@ -42,6 +42,7 @@ const GITHUB_TRANSLATIONS: { filename: string; id: string; name: string }[] = [
   { filename: "Elmalılı Hamdi Yazır.json", id: "elmali-yeni", name: "Elmalılı Hamdi Yazır" },
   { filename: "Ali Fikri Yavuz.json", id: "ali-fikri-yavuz", name: "Ali Fikri Yavuz" },
   { filename: "Ömer Nasuhi Bilmen.json", id: "omer-nasuhi-bilmen", name: "Ömer Nasuhi Bilmen" },
+  { filename: "Muhammed Esed.json", id: "muhammed-esed", name: "Muhammed Esed" },
 ];
 
 function convertGitHubFormat(raw: GitHubTranslation, id: string, name: string): UnifiedTranslation {

@@ -32,6 +32,7 @@ const SLUG_TO_LANGUAGE: Record<string, string> = {
   "diyanet": "tr",
   "omer-nasuhi-bilmen": "tr",
   "ali-fikri-yavuz": "tr",
+  "muhammed-esed": "tr",
   "sahih-international": "en",
   "taisirul-quran": "bn",
   "islamhouse-fa": "fa",
@@ -62,7 +63,7 @@ const DEFAULT_SLUG = "omer-celik";
 // --all ile hepsini import et
 const importAll = process.argv.includes("--all");
 const PRIORITY_SLUGS = [
-  "omer-celik", "diyanet", "elmali-yeni",       // TR
+  "omer-celik", "diyanet", "elmali-yeni", "muhammed-esed", // TR
   "sahih-international", "pickthall-en",          // EN
   "isa-garcia",                                   // ES
   "montada-fr",                                   // FR

@@ -37,6 +37,7 @@ export const LOCAL_TRANSLATIONS = [
   { id: "diyanet", name: "Diyanet İşleri", author: "Diyanet İşleri Başkanlığı", source: "local" as const, language: "turkish" as const },
   { id: "omer-nasuhi-bilmen", name: "Ömer Nasuhi Bilmen", author: "Ömer Nasuhi Bilmen", source: "local" as const, language: "turkish" as const },
   { id: "ali-fikri-yavuz", name: "Ali Fikri Yavuz", author: "Ali Fikri Yavuz", source: "local" as const, language: "turkish" as const },
+  { id: "muhammed-esed", name: "Muhammed Esed", author: "Muhammed Esed", source: "local" as const, language: "turkish" as const },
   { id: "sahih-international", name: "Sahih International", author: "Sahih International", source: "local" as const, language: "english" as const },
   { id: "taisirul-quran", name: "Taisirul Quran", author: "Taisirul Quran", source: "local" as const, language: "bengali" as const },
   { id: "islamhouse-fa", name: "IslamHouse.com", author: "IslamHouse.com", source: "local" as const, language: "persian" as const },
