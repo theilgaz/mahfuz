@@ -94,30 +94,30 @@ export function SurahList({ surahs }: SurahListProps) {
             to={readingMode === "page" ? "/page/$pageNumber" : "/surah/$surahSlug"}
             params={readingMode === "page" ? { pageNumber: String(surah.pageStart) } : { surahSlug: surahSlug(surah.id) }}
             search={{ ayah: undefined }}
-            className={`relative flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] transition-colors duration-1000 overflow-hidden ${
+            className={`group relative flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] transition-colors overflow-hidden ${
               highlightSurahId === surah.id ? "bg-[var(--color-accent)]/10 ring-2 ring-[var(--color-accent)]/30" : ""
             }`}
           >
-            {/* Sure numarası + arka plan görseli */}
-            <div className="relative w-12 h-12 shrink-0">
+            {/* Cami görseli */}
+            <div className="relative shrink-0 w-12 h-12">
               <img
                 src={surah.revelation === "makkah" ? "/images/kaaba.png" : "/images/nabawi.png"}
                 alt=""
                 width={48}
                 height={48}
                 loading="lazy"
-                className="absolute inset-0 w-full h-full object-contain opacity-[0.18]"
+                className="w-full h-full object-contain transition-opacity duration-300 opacity-15 group-hover:opacity-90 group-active:opacity-90"
               />
-              <div className="absolute inset-0 flex items-center justify-center text-base text-[var(--color-text-secondary)] font-semibold">
-                {surah.id}
-                {surah.id === lastSurahId && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] border-2 border-[var(--color-bg)]" />
-                )}
-              </div>
+              {surah.id === lastSurahId && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] border-2 border-[var(--color-bg)]" />
+              )}
             </div>
-            <div className="flex-1 min-w-0">
+
+            {/* İsim + meta */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium truncate">{surah.nameSimple}</span>
+                <span className="text-sm font-medium truncate">
+                  <span className="mr-1.5">{surah.id}.</span>{surah.nameSimple}</span>
                 <span className="text-base shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
                   {surah.nameArabic}
                 </span>
