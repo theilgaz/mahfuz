@@ -35,7 +35,7 @@ export function AudioBar() {
     : chapterName ?? "";
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]">
+    <div className="fixed bottom-18 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]">
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg px-3 py-2">
         {/* Progress bar */}
         <div className="h-0.5 rounded-full bg-[var(--color-border)] overflow-hidden mb-2">

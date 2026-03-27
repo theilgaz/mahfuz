@@ -9,6 +9,7 @@ import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
 import { AudioProvider } from "~/components/reader/AudioProvider";
+import { BottomNav } from "~/components/BottomNav";
 import { useSettingsStore } from "~/stores/settings.store";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { getSession } from "~/lib/auth-session";
@@ -120,9 +121,10 @@ function RootDocument({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased">
+      <body className="bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased overflow-x-hidden">
         <AudioProvider />
         {children}
+        <BottomNav />
         <Scripts />
       </body>
     </html>

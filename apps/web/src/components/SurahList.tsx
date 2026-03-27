@@ -133,7 +133,7 @@ export function SurahList({ surahs }: SurahListProps) {
       </div>
 
       {/* Yüzen cüz butonu — sağ alt köşe (FAB) */}
-      <div ref={juzPanelRef} className="fixed right-4 bottom-20 sm:bottom-6 z-20">
+      <div ref={juzPanelRef} className="fixed right-4 bottom-20 z-20">
         {/* Genişleyen cüz paneli — butonun üstünde */}
         {juzOpen && (
           <div className="absolute right-0 bottom-full mb-2 w-[260px] max-h-[60vh] overflow-y-auto rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl py-1">

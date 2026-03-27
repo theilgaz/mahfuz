@@ -31,7 +31,7 @@ function PageRoute() {
   const firstSurahId = pageData?.surahGroups[0]?.surah.id;
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative pb-20">
       {/* Ayar butonu */}
       <SettingsButton
         context={{ surahId: firstSurahId, pageNumber: page }}

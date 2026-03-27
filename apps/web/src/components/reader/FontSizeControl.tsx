@@ -12,7 +12,7 @@ export function FontSizeControl() {
   const setArabicFontSize = useSettingsStore((s) => s.setArabicFontSize);
 
   return (
-    <div className="fixed left-4 bottom-20 sm:bottom-6 z-20 flex flex-col gap-1">
+    <div className="fixed left-4 bottom-20 z-20 flex flex-col gap-1">
       <button
         onClick={() => setArabicFontSize(arabicFontSize + STEP)}
         className="w-9 h-9 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors active:scale-95"

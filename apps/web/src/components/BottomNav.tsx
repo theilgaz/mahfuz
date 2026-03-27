@@ -14,7 +14,7 @@ export function BottomNav() {
   const bookmarkCount = useBookmarksStore((s) => s.bookmarks.length);
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-30 bg-[var(--color-bg)] border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom)] sm:hidden">
+    <nav className="fixed bottom-0 inset-x-0 z-30 bg-[var(--color-bg)] border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-14">
         {/* Ana sayfa */}
         <Link

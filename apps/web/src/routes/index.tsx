@@ -8,7 +8,6 @@ import { useSettingsStore } from "~/stores/settings.store";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useSurahs, surahsQueryOptions } from "~/hooks/useQuranQuery";
 import { SurahList } from "~/components/SurahList";
-import { BottomNav } from "~/components/BottomNav";
 import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
 import { SettingsButton } from "~/components/SettingsButton";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -23,7 +22,7 @@ export const Route = createFileRoute("/")({
 
 function HomePageSkeleton() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-20 sm:pb-6">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
       {/* Başlık */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
@@ -64,7 +63,7 @@ function HomePage() {
   const { data: surahs } = useSurahs();
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-20 sm:pb-6">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
       {/* Başlık + arama */}
       <div className="flex items-center gap-3 mb-4">
         <h1 className="flex items-center gap-2 text-xl font-semibold">
@@ -224,7 +223,6 @@ function HomePage() {
       {/* Sure listesi + yüzen cüz butonu */}
       <SurahList surahs={surahs} />
 
-      <BottomNav />
     </div>
   );
 }

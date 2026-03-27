@@ -26,7 +26,7 @@ function ProfilePage() {
   const user = session!.user;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-20 sm:pb-6">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
       {/* Üst bar */}
       <div className="flex items-center gap-3 mb-6">
         <Link

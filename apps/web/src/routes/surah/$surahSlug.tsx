@@ -49,7 +49,7 @@ function SurahRoute() {
   const firstPageNumber = surahData?.ayahs[0]?.pageNumber;
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative pb-20">
       <SettingsButton
         context={{ surahId: id, pageNumber: firstPageNumber }}
         className="fixed top-4 right-4 z-20 p-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-border)] transition-colors"
