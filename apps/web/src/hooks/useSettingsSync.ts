@@ -1,23 +1,28 @@
 /**
  * Settings sync hook.
  * Giriş yapılmışsa:
- *   - Açılışta DB'den ayarları yükle (bir kez)
- *   - Ayar değiştiğinde DB'ye debounced kaydet
+ *   - Açılışta DB'den tüm kullanıcı verilerini yükle (bir kez)
+ *   - Değişiklik olduğunda DB'ye debounced kaydet
+ * Kapsam: ayarlar, dil, yer imleri, ezber durumu
  */
 
 import { useEffect, useRef } from "react";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useLocaleStore } from "~/stores/locale.store";
+import { useBookmarksStore } from "~/stores/bookmarks.store";
+import { useHifzStore } from "~/stores/hifz.store";
 import { getUserSettings, saveUserSettings, type UserSettingsData } from "~/lib/settings-service";
 import { loadLocaleMessages, type Locale, LOCALE_CODES } from "~/locales/registry";
 import type { Session } from "~/lib/auth";
 
 const SAVE_DEBOUNCE_MS = 2000;
 
-/** Collect current settings as a plain object for DB storage */
-function collectSettings(): UserSettingsData {
+/** Collect all user data as a plain object for DB storage */
+function collectAll(): UserSettingsData {
   const s = useSettingsStore.getState();
   const l = useLocaleStore.getState();
+  const b = useBookmarksStore.getState();
+  const h = useHifzStore.getState();
   return {
     theme: s.theme,
     textStyle: s.textStyle,
@@ -33,15 +38,14 @@ function collectSettings(): UserSettingsData {
     arabicFontSize: s.arabicFontSize,
     translationFontSize: s.translationFontSize,
     locale: l.locale,
+    bookmarks: b.bookmarks,
+    hifzMemorized: h.memorized,
   };
 }
 
-/** Apply settings from DB to stores */
-function applySettings(data: UserSettingsData) {
-  const ss = useSettingsStore.getState();
-  const ls = useLocaleStore.getState();
-
-  // Settings store — only apply fields that exist in data
+/** Apply data from DB to all stores */
+function applyAll(data: UserSettingsData) {
+  // Settings store
   const patch: Record<string, any> = {};
   if (data.theme) patch.theme = data.theme;
   if (data.textStyle) patch.textStyle = data.textStyle;
@@ -59,17 +63,29 @@ function applySettings(data: UserSettingsData) {
 
   if (Object.keys(patch).length > 0) {
     useSettingsStore.setState(patch);
-    // Apply theme to DOM
     if (patch.theme) {
       document.documentElement.setAttribute("data-theme", patch.theme);
     }
   }
 
   // Locale
-  if (data.locale && LOCALE_CODES.includes(data.locale as Locale) && data.locale !== ls.locale) {
-    loadLocaleMessages(data.locale as Locale).then(() => {
-      ls.setLocale(data.locale as Locale);
-    });
+  if (data.locale && LOCALE_CODES.includes(data.locale as Locale)) {
+    const ls = useLocaleStore.getState();
+    if (data.locale !== ls.locale) {
+      loadLocaleMessages(data.locale as Locale).then(() => {
+        ls.setLocale(data.locale as Locale);
+      });
+    }
+  }
+
+  // Bookmarks — DB is source of truth if it has data
+  if (data.bookmarks && data.bookmarks.length > 0) {
+    useBookmarksStore.setState({ bookmarks: data.bookmarks });
+  }
+
+  // Hifz — DB is source of truth if it has data
+  if (data.hifzMemorized && Object.keys(data.hifzMemorized).length > 0) {
+    useHifzStore.setState({ memorized: data.hifzMemorized });
   }
 }
 
@@ -87,27 +103,30 @@ export function useSettingsSync(session: Session | null) {
     getUserSettings({ data: userId })
       .then((data) => {
         if (data) {
-          applySettings(data);
-          // Set initial snapshot so we don't immediately save back
-          snapshotRef.current = JSON.stringify(collectSettings());
+          applyAll(data);
+          snapshotRef.current = JSON.stringify(collectAll());
         }
       })
       .catch(() => {});
   }, [userId]);
 
-  // Subscribe to store changes and save debounced
+  // Subscribe to all store changes and save debounced
   useEffect(() => {
     if (!userId) return;
 
-    const unsub1 = useSettingsStore.subscribe(() => scheduleSave());
-    const unsub2 = useLocaleStore.subscribe(() => scheduleSave());
+    const unsubs = [
+      useSettingsStore.subscribe(() => scheduleSave()),
+      useLocaleStore.subscribe(() => scheduleSave()),
+      useBookmarksStore.subscribe(() => scheduleSave()),
+      useHifzStore.subscribe(() => scheduleSave()),
+    ];
 
     function scheduleSave() {
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
-        const current = collectSettings();
+        const current = collectAll();
         const json = JSON.stringify(current);
-        if (json === snapshotRef.current) return; // No change
+        if (json === snapshotRef.current) return;
         snapshotRef.current = json;
 
         saveUserSettings({ data: { userId: userId!, data: current } }).catch(() => {});
@@ -115,8 +134,7 @@ export function useSettingsSync(session: Session | null) {
     }
 
     return () => {
-      unsub1();
-      unsub2();
+      unsubs.forEach((u) => u());
       clearTimeout(timerRef.current);
     };
   }, [userId]);

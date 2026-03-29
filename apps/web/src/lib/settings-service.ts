@@ -8,7 +8,15 @@ import { db } from "~/db";
 import { userSettings } from "~/db/schema";
 import { eq } from "drizzle-orm";
 
-/** Ayar verisi — settings store + locale */
+/** Bookmark verisi */
+interface BookmarkData {
+  surahId: number;
+  ayahNumber: number;
+  pageNumber: number;
+  createdAt: number;
+}
+
+/** Ayar verisi — settings store + locale + bookmarks + hifz */
 export interface UserSettingsData {
   theme?: string;
   textStyle?: string;
@@ -24,6 +32,10 @@ export interface UserSettingsData {
   arabicFontSize?: number;
   translationFontSize?: number;
   locale?: string;
+  /** Yer imleri */
+  bookmarks?: BookmarkData[];
+  /** Ezber durumu: surahId → ayet numaraları */
+  hifzMemorized?: Record<number, number[]>;
 }
 
 /** Kullanıcının ayarlarını getir */
