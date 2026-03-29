@@ -112,12 +112,30 @@ export function AyahActionMenu({
     onClose();
   }
 
-  // Position menu near the anchor
+  // Position menu near the cursor / anchor point
   const style: React.CSSProperties = {};
   if (anchorRect) {
+    const menuW = 176; // w-44 = 11rem ≈ 176px
+    const menuH = 280; // approximate menu height
+    const pad = 8;
+
+    // Horizontal: prefer right of cursor, flip left if overflows
+    let left = anchorRect.left + anchorRect.width / 2;
+    if (left + menuW + pad > window.innerWidth) {
+      left = anchorRect.left - menuW;
+    }
+    left = Math.max(pad, Math.min(left, window.innerWidth - menuW - pad));
+
+    // Vertical: prefer below cursor, flip above if overflows
+    let top = anchorRect.top + anchorRect.height / 2;
+    if (top + menuH + pad > window.innerHeight) {
+      top = anchorRect.top - menuH;
+    }
+    top = Math.max(pad, Math.min(top, window.innerHeight - menuH - pad));
+
     style.position = "fixed";
-    style.top = Math.min(anchorRect.bottom + 4, window.innerHeight - 200);
-    style.left = Math.max(8, Math.min(anchorRect.left, window.innerWidth - 180));
+    style.top = top;
+    style.left = left;
     style.zIndex = 50;
   }
 
