@@ -179,6 +179,9 @@ body {
   border-radius: 4px;
   transition: background 0.15s ease, color 0.15s ease;
 }
+.word-audio-active * {
+  color: #fff !important;
+}
 
 .verse-audio-active {
   background: var(--color-accent);
