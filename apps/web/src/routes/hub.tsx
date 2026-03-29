@@ -25,7 +25,7 @@ interface HubCardProps {
 function HubCard({ to, icon, title, description, badge, disabled }: HubCardProps) {
   const content = (
     <div
-      className={`relative flex flex-col items-center gap-2 p-5 rounded-2xl border transition-colors ${
+      className={`relative flex flex-col items-center gap-2 p-5 rounded-2xl border transition-colors h-full ${
         disabled
           ? "border-[var(--color-border)] opacity-50 cursor-default"
           : "border-[var(--color-border)] hover:border-[var(--color-accent)]/40 hover:bg-[var(--color-surface)] cursor-pointer"
@@ -88,11 +88,7 @@ function HubPage() {
           title={t.hub.alifba}
           description={t.hub.alifbaDesc}
           icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 20C4 20 7 17 12 17C17 17 20 20 20 20" />
-              <path d="M7 10C7 10 9 6 12 6C15 6 17 10 17 10" />
-              <circle cx="12" cy="3.5" r="1" fill="currentColor" stroke="none" />
-            </svg>
+            <span className="text-lg font-bold leading-none" style={{ fontFamily: "var(--font-arabic)" }}>ا ب</span>
           }
         />
 

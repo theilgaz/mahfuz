@@ -13,6 +13,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as HubRouteImport } from './routes/hub'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
+import { Route as AlifbaRouteImport } from './routes/alifba'
 import { Route as SurahIdRouteImport } from './routes/$surahId'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SurahSurahSlugRouteImport } from './routes/surah/$surahSlug'
@@ -41,6 +42,11 @@ const HubRoute = HubRouteImport.update({
 const BookmarksRoute = BookmarksRouteImport.update({
   id: '/bookmarks',
   path: '/bookmarks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlifbaRoute = AlifbaRouteImport.update({
+  id: '/alifba',
+  path: '/alifba',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SurahIdRoute = SurahIdRouteImport.update({
@@ -92,6 +98,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$surahId': typeof SurahIdRouteWithChildren
+  '/alifba': typeof AlifbaRoute
   '/bookmarks': typeof BookmarksRoute
   '/hub': typeof HubRoute
   '/profile': typeof ProfileRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$surahId': typeof SurahIdRouteWithChildren
+  '/alifba': typeof AlifbaRoute
   '/bookmarks': typeof BookmarksRoute
   '/hub': typeof HubRoute
   '/profile': typeof ProfileRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$surahId': typeof SurahIdRouteWithChildren
+  '/alifba': typeof AlifbaRoute
   '/bookmarks': typeof BookmarksRoute
   '/hub': typeof HubRoute
   '/profile': typeof ProfileRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$surahId'
+    | '/alifba'
     | '/bookmarks'
     | '/hub'
     | '/profile'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$surahId'
+    | '/alifba'
     | '/bookmarks'
     | '/hub'
     | '/profile'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$surahId'
+    | '/alifba'
     | '/bookmarks'
     | '/hub'
     | '/profile'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SurahIdRoute: typeof SurahIdRouteWithChildren
+  AlifbaRoute: typeof AlifbaRoute
   BookmarksRoute: typeof BookmarksRoute
   HubRoute: typeof HubRoute
   ProfileRoute: typeof ProfileRoute
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/bookmarks'
       fullPath: '/bookmarks'
       preLoaderRoute: typeof BookmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alifba': {
+      id: '/alifba'
+      path: '/alifba'
+      fullPath: '/alifba'
+      preLoaderRoute: typeof AlifbaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$surahId': {
@@ -308,6 +328,7 @@ const SurahIdRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SurahIdRoute: SurahIdRouteWithChildren,
+  AlifbaRoute: AlifbaRoute,
   BookmarksRoute: BookmarksRoute,
   HubRoute: HubRoute,
   ProfileRoute: ProfileRoute,
@@ -322,3 +343,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

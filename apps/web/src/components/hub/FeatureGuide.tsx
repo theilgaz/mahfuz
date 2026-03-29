@@ -84,11 +84,7 @@ const FEATURES: Feature[] = [
     descKey: "alifbaFeatureDesc",
     to: "/alifba",
     icon: (
-      <svg className={ICON_CLASS} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 20C4 20 7 17 12 17C17 17 20 20 20 20" />
-        <path d="M7 10C7 10 9 6 12 6C15 6 17 10 17 10" />
-        <circle cx="12" cy="3.5" r="1" fill="currentColor" stroke="none" />
-      </svg>
+      <span className="text-base font-bold text-[var(--color-accent)]" style={{ fontFamily: "var(--font-arabic)" }}>ا ب</span>
     ),
   },
   {

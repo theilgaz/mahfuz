@@ -2,14 +2,11 @@
  * Profil sayfası — kullanıcı bilgisi, yer imleri, uygulama hub'ı.
  */
 
-import { useState } from "react";
 import { createFileRoute, Link, useRouter, redirect } from "@tanstack/react-router";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { signOut } from "~/lib/auth-client";
 import { useTranslation } from "~/hooks/useTranslation";
 import { HifzStatus } from "~/components/profile/HifzStatus";
-import { ARABIC_LETTERS } from "~/lib/kids-constants";
-import { LetterTrace } from "~/components/kids/LetterTrace";
 
 export const Route = createFileRoute("/profile")({
   beforeLoad: ({ context }) => {
@@ -94,9 +91,6 @@ function ProfilePage() {
         </div>
       </section>
 
-      {/* Elifba Deneme */}
-      <ElifbaTryout />
-
       {/* Yer imleri — link to /bookmarks */}
       <Link
         to="/bookmarks"
@@ -116,60 +110,6 @@ function ProfilePage() {
         </svg>
       </Link>
     </div>
-  );
-}
-
-function ElifbaTryout() {
-  const [selected, setSelected] = useState<(typeof ARABIC_LETTERS)[number] | null>(null);
-
-  return (
-    <section className="mb-8">
-      <h2 className="text-sm font-semibold mb-3 text-[var(--color-text-secondary)]">Elifba Deneme</h2>
-
-      {selected ? (
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-          <div className="flex items-center justify-between mb-2">
-            <button
-              onClick={() => setSelected(null)}
-              className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors flex items-center gap-1"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M10 4L6 8l4 4" />
-              </svg>
-              Harflere dön
-            </button>
-            <span className="text-xs text-[var(--color-text-secondary)]">
-              {selected.order}/28
-            </span>
-          </div>
-          <LetterTrace
-            key={selected.id}
-            letter={selected}
-            onComplete={() => {
-              const next = ARABIC_LETTERS.find((l) => l.order === selected.order + 1);
-              if (next) {
-                setSelected(next);
-              } else {
-                setSelected(null);
-              }
-            }}
-          />
-        </div>
-      ) : (
-        <div className="grid grid-cols-7 gap-1.5">
-          {ARABIC_LETTERS.map((letter) => (
-            <button
-              key={letter.id}
-              onClick={() => setSelected(letter)}
-              className="flex flex-col items-center justify-center gap-0.5 p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 transition-colors active:scale-95"
-            >
-              <span className="font-arabic text-xl leading-none">{letter.arabic}</span>
-              <span className="text-[9px] text-[var(--color-text-secondary)] leading-none">{letter.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </section>
   );
 }
 
