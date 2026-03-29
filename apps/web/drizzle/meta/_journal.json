@@ -15,6 +15,13 @@
       "when": 1774812211529,
       "tag": "0001_clever_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1774814172883,
+      "tag": "0002_sturdy_karnak",
+      "breakpoints": true
     }
   ]
 }

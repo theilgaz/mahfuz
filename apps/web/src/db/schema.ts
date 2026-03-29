@@ -44,6 +44,17 @@ export const account = sqliteTable("account", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
+// ── Kullanıcı ayarları ────────────────────────────────────
+
+export const userSettings = sqliteTable("user_settings", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  /** JSON blob — tüm ayarlar tek sütunda */
+  data: text("data").notNull().default("{}"),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
 // ── Okuma konumu ─────────────────────────────────────────
 
 export const readingPosition = sqliteTable("reading_position", {
