@@ -23,15 +23,29 @@ interface RepoInfo {
 
 const REPO = "theilgaz/mahfuz";
 
+interface StatsContributor {
+  author: { login: string; avatar_url: string; html_url: string };
+  total: number;
+}
+
 function useContributors() {
   return useQuery({
     queryKey: ["github", "contributors"],
     queryFn: async (): Promise<Contributor[]> => {
       const res = await fetch(
-        `https://api.github.com/repos/${REPO}/contributors?per_page=50`,
+        `https://api.github.com/repos/${REPO}/stats/contributors`,
       );
-      if (!res.ok) throw new Error("GitHub API error");
-      return res.json();
+      // 202 = GitHub is computing stats, retry later
+      if (res.status === 202 || !res.ok) throw new Error("GitHub API error");
+      const stats: StatsContributor[] = await res.json();
+      return stats
+        .map((s) => ({
+          login: s.author.login,
+          avatar_url: s.author.avatar_url,
+          html_url: s.author.html_url,
+          contributions: s.total,
+        }))
+        .sort((a, b) => b.contributions - a.contributions);
     },
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
