@@ -13,7 +13,7 @@ interface MushafLineViewProps {
 export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps) {
   return (
     <div
-      className="mushaf-line-container"
+      className="mushaf-line-container overflow-hidden"
       dir="rtl"
       style={{
         fontFamily: "var(--font-arabic)",
@@ -23,7 +23,7 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
       {lineData.lines.map((line, lineIdx) => (
         <div
           key={lineIdx}
-          className="mushaf-line flex justify-between"
+          className="mushaf-line flex justify-between flex-nowrap"
           style={{ lineHeight: 2.6 }}
         >
           {line.words.map((word, wordIdx) => (
