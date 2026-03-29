@@ -1,9 +1,10 @@
 /**
  * GitHub katkıda bulunanlar — açık kaynak vitrin bölümü.
- * Public API, 24h cache, hata durumunda gizlenir.
+ * Server-side cache ile GitHub API rate limit'e takılmaz.
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { createServerFn } from "@tanstack/react-start";
 import { useTranslation } from "~/hooks/useTranslation";
 
 interface Contributor {
@@ -16,29 +17,52 @@ interface Contributor {
 interface RepoInfo {
   stargazers_count: number;
   forks_count: number;
-  open_issues_count: number;
-  language: string;
-  description: string;
+}
+
+interface GitHubData {
+  contributors: Contributor[];
+  repo: RepoInfo;
 }
 
 const REPO = "theilgaz/mahfuz";
+const CACHE_TTL = 60 * 60 * 1000; // 1 saat
+
+// ── Server-side memory cache ────────────────────────────
+
+let cached: { data: GitHubData; ts: number } | null = null;
 
 interface StatsContributor {
   author: { login: string; avatar_url: string; html_url: string };
   total: number;
 }
 
-function useContributors() {
-  return useQuery({
-    queryKey: ["github", "contributors"],
-    queryFn: async (): Promise<Contributor[]> => {
-      const res = await fetch(
-        `https://api.github.com/repos/${REPO}/stats/contributors`,
-      );
-      // 202 = GitHub is computing stats, retry later
-      if (res.status === 202 || !res.ok) throw new Error("GitHub API error");
-      const stats: StatsContributor[] = await res.json();
-      return stats
+async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
+  for (let i = 0; i < retries; i++) {
+    const res = await fetch(url);
+    if (res.status !== 202) return res;
+    // 202 = GitHub computing stats, wait and retry
+    await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
+  }
+  return fetch(url);
+}
+
+const getGitHubData = createServerFn({ method: "GET" }).handler(
+  async (): Promise<GitHubData> => {
+    // Serve from cache if fresh
+    if (cached && Date.now() - cached.ts < CACHE_TTL) {
+      return cached.data;
+    }
+
+    // Fetch contributors + repo info in parallel
+    const [contribRes, repoRes] = await Promise.all([
+      fetchWithRetry(`https://api.github.com/repos/${REPO}/stats/contributors`),
+      fetch(`https://api.github.com/repos/${REPO}`),
+    ]);
+
+    let contributors: Contributor[] = [];
+    if (contribRes.ok && contribRes.status !== 202) {
+      const stats: StatsContributor[] = await contribRes.json();
+      contributors = stats
         .map((s) => ({
           login: s.author.login,
           avatar_url: s.author.avatar_url,
@@ -46,27 +70,38 @@ function useContributors() {
           contributions: s.total,
         }))
         .sort((a, b) => b.contributions - a.contributions);
-    },
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
-  });
-}
+    }
 
-function useRepoInfo() {
+    let repo: RepoInfo = { stargazers_count: 0, forks_count: 0 };
+    if (repoRes.ok) {
+      const r = await repoRes.json();
+      repo = { stargazers_count: r.stargazers_count, forks_count: r.forks_count };
+    }
+
+    const data: GitHubData = { contributors, repo };
+
+    // Cache even partial results (will refresh next TTL)
+    if (contributors.length > 0) {
+      cached = { data, ts: Date.now() };
+    }
+
+    return data;
+  },
+);
+
+// ── Client hook ─────────────────────────────────────────
+
+function useGitHubData() {
   return useQuery({
-    queryKey: ["github", "repo"],
-    queryFn: async (): Promise<RepoInfo> => {
-      const res = await fetch(`https://api.github.com/repos/${REPO}`);
-      if (!res.ok) throw new Error("GitHub API error");
-      return res.json();
-    },
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000,
+    queryKey: ["github", "data"],
+    queryFn: () => getGitHubData(),
+    staleTime: CACHE_TTL,
+    gcTime: CACHE_TTL,
     retry: 1,
   });
 }
+
+// ── Component ───────────────────────────────────────────
 
 /** Rank rozeti renkleri */
 const RANK_STYLES = [
@@ -82,11 +117,11 @@ function getRankStyle(i: number) {
 export function GitHubContributors() {
   const { t } = useTranslation();
   const c = t.hub.contributors;
-  const { data: contributors, isError } = useContributors();
-  const { data: repo } = useRepoInfo();
+  const { data } = useGitHubData();
 
-  if (isError || !contributors || contributors.length === 0) return null;
+  if (!data || data.contributors.length === 0) return null;
 
+  const { contributors, repo } = data;
   const totalCommits = contributors.reduce((s, x) => s + x.contributions, 0);
 
   return (
@@ -123,7 +158,7 @@ export function GitHubContributors() {
         </div>
 
         {/* Stat chips */}
-        {repo && (
+        {(repo.stargazers_count > 0 || repo.forks_count > 0) && (
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <StatChip
               icon={<svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 7.75a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm1.43.75a4.002 4.002 0 01-7.86 0H.75a.75.75 0 110-1.5h3.32a4.002 4.002 0 017.86 0h3.32a.75.75 0 110 1.5h-3.32z" /></svg>}
