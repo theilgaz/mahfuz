@@ -66,6 +66,37 @@ export function AyahActionMenu({
     }
   }, [surahId, ayahNumber, currentChapterId, engine, reciterSlug, playSurah, onClose]);
 
+  // Position menu at cursor — measure after render for accurate placement
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  useLayoutEffect(() => {
+    if (!open || !anchorRect || !menuRef.current) {
+      setPos(null);
+      return;
+    }
+
+    const menu = menuRef.current;
+    const menuW = menu.offsetWidth;
+    const menuH = menu.offsetHeight;
+    const pad = 8;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    const cx = anchorRect.left + anchorRect.width / 2;
+    const cy = anchorRect.top + anchorRect.height / 2;
+
+    let left = cx - menuW / 2;
+    left = Math.max(pad, Math.min(left, vw - menuW - pad));
+
+    let top = cy - menuH - 8;
+    if (top < pad) {
+      top = cy + 8;
+    }
+    top = Math.max(pad, Math.min(top, vh - menuH - pad));
+
+    setPos({ top, left });
+  }, [open, anchorRect]);
+
   useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
@@ -112,44 +143,9 @@ export function AyahActionMenu({
     onClose();
   }
 
-  // Position menu at cursor — measure after render for accurate placement
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
-
-  useLayoutEffect(() => {
-    if (!open || !anchorRect || !menuRef.current) {
-      setPos(null);
-      return;
-    }
-
-    const menu = menuRef.current;
-    const menuW = menu.offsetWidth;
-    const menuH = menu.offsetHeight;
-    const pad = 8;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    // Cursor center point
-    const cx = anchorRect.left + anchorRect.width / 2;
-    const cy = anchorRect.top + anchorRect.height / 2;
-
-    // Horizontal: center on cursor, clamp to viewport
-    let left = cx - menuW / 2;
-    left = Math.max(pad, Math.min(left, vw - menuW - pad));
-
-    // Vertical: prefer just above cursor, fall below if no space
-    let top = cy - menuH - 8;
-    if (top < pad) {
-      top = cy + 8;
-    }
-    top = Math.max(pad, Math.min(top, vh - menuH - pad));
-
-    setPos({ top, left });
-  }, [open, anchorRect]);
-
   const style: React.CSSProperties = {
     position: "fixed",
     zIndex: 50,
-    // Start invisible, position after measurement
     ...(pos ? { top: pos.top, left: pos.left, opacity: 1 } : { top: 0, left: -9999, opacity: 0 }),
   };
 
