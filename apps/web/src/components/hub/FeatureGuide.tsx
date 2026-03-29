@@ -125,7 +125,7 @@ export function FeatureGuide() {
 
           const card = (
             <div
-              className={`snap-start shrink-0 w-[8.5rem] sm:w-auto flex flex-col items-center gap-1.5 p-3.5 rounded-xl border transition-all ${
+              className={`snap-start shrink-0 w-[8.5rem] h-[8.5rem] sm:w-auto sm:h-full flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-xl border transition-all ${
                 f.disabled
                   ? "border-[var(--color-border)] opacity-45 cursor-default"
                   : "border-[var(--color-border)] hover:border-[var(--color-accent)]/30 hover:bg-[var(--color-accent)]/5 cursor-pointer"
@@ -148,10 +148,10 @@ export function FeatureGuide() {
             </div>
           );
 
-          if (f.disabled || !f.to) return <div key={f.titleKey}>{card}</div>;
+          if (f.disabled || !f.to) return <div key={f.titleKey} className="h-full">{card}</div>;
 
           return (
-            <Link key={f.titleKey} to={f.to} className="block">
+            <Link key={f.titleKey} to={f.to} className="block h-full">
               {card}
             </Link>
           );
