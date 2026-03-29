@@ -97,10 +97,13 @@ function RootDocument({ children }: { children: ReactNode }) {
   // Sync reading positions with DB when logged in
   useReadingSync(session);
 
-  // Tema uygula
+  // Tema uygula + FOUC engelle
   const theme = useSettingsStore((s) => s.theme);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    // CSS loaded — reveal content
+    document.documentElement.classList.remove("loading");
+    document.documentElement.classList.add("loaded");
   }, [theme]);
 
   useEffect(() => {
@@ -125,6 +128,8 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('loading')` }} />
+        <style dangerouslySetInnerHTML={{ __html: `.loading{opacity:0}.loaded{opacity:1;transition:opacity .15s ease}` }} />
       </head>
       <body className="bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased overflow-x-hidden">
         <AudioProvider />
