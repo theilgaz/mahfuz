@@ -101,22 +101,33 @@ export function AyahBlock({
 
   const [longPressActive, setLongPressActive] = useState(false);
 
-  const openMenu = useCallback(() => {
-    // Ayetin kendi rect'ini kullan — menü ayetin ortasında açılsın
-    const rect = blockRef.current?.getBoundingClientRect();
-    if (rect) setMenuAnchor(rect);
+  const openMenuAt = useCallback((cursorX: number, cursorY: number) => {
+    // Cursor noktası + ayet rect'i birleştirilir:
+    // menü cursor'a yakın, ayet bloğunun üzerinde açılır
+    const blockRect = blockRef.current?.getBoundingClientRect();
+    const rect = new DOMRect(
+      cursorX,
+      cursorY,
+      0,
+      0,
+    );
+    setMenuAnchor(blockRect ?? rect);
+    // Cursor Y'sini ayrıca sakla — menü dikey pozisyonu için
+    cursorYRef.current = cursorY;
     setMenuOpen(true);
     setLongPressActive(false);
     if (navigator.vibrate) navigator.vibrate(30);
   }, []);
 
+  const cursorYRef = useRef<number>(0);
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       if (!surahId) return;
       e.preventDefault();
-      openMenu();
+      openMenuAt(e.clientX, e.clientY);
     },
-    [surahId, openMenu],
+    [surahId, openMenuAt],
   );
 
   const longPressHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -124,6 +135,9 @@ export function AyahBlock({
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (!surahId) return;
+      const touch = e.touches[0];
+      const x = touch.clientX;
+      const y = touch.clientY;
       // 200ms: visual hint (highlight + subtle vibrate)
       longPressHintTimer.current = setTimeout(() => {
         setLongPressActive(true);
@@ -132,10 +146,10 @@ export function AyahBlock({
       // 500ms: open menu
       longPressTimer.current = setTimeout(() => {
         longPressTimer.current = null;
-        openMenu();
+        openMenuAt(x, y);
       }, 500);
     },
-    [surahId, openMenu],
+    [surahId, openMenuAt],
   );
 
   const cancelLongPress = useCallback(() => {

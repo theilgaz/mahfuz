@@ -82,13 +82,17 @@ export function AyahActionMenu({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // Ayetin yatay ve dikey merkezi
+    // Menüyü ayetin yatay ortasına, dikey olarak ayet bloğu
+    // üzerinde (üst kenardan biraz aşağıda) yerleştir
     const cx = anchorRect.left + anchorRect.width / 2;
-    const cy = anchorRect.top + anchorRect.height / 2;
-
-    // Menüyü ayetin tam ortasına yerleştir
     let left = cx - menuW / 2;
-    let top = cy - menuH / 2;
+
+    // Dikeyde: ayetin üst kenarından biraz içeride başlat
+    let top = anchorRect.top + 16;
+    // Aşağı taşarsa yukarı kaydır
+    if (top + menuH + pad > vh) {
+      top = anchorRect.bottom - menuH - 16;
+    }
 
     // Viewport sınırlarına clamp
     left = Math.max(pad, Math.min(left, vw - menuW - pad));
