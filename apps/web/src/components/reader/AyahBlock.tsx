@@ -101,12 +101,12 @@ export function AyahBlock({
 
   const [longPressActive, setLongPressActive] = useState(false);
 
-  const openMenuAt = useCallback((x: number, y: number) => {
-    const rect = new DOMRect(x - 1, y - 1, 2, 2);
-    setMenuAnchor(rect);
+  const openMenu = useCallback(() => {
+    // Ayetin kendi rect'ini kullan — menü ayetin ortasında açılsın
+    const rect = blockRef.current?.getBoundingClientRect();
+    if (rect) setMenuAnchor(rect);
     setMenuOpen(true);
     setLongPressActive(false);
-    // Haptic feedback
     if (navigator.vibrate) navigator.vibrate(30);
   }, []);
 
@@ -114,9 +114,9 @@ export function AyahBlock({
     (e: React.MouseEvent) => {
       if (!surahId) return;
       e.preventDefault();
-      openMenuAt(e.clientX, e.clientY);
+      openMenu();
     },
-    [surahId, openMenuAt],
+    [surahId, openMenu],
   );
 
   const longPressHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -124,9 +124,6 @@ export function AyahBlock({
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (!surahId) return;
-      const touch = e.touches[0];
-      const x = touch.clientX;
-      const y = touch.clientY;
       // 200ms: visual hint (highlight + subtle vibrate)
       longPressHintTimer.current = setTimeout(() => {
         setLongPressActive(true);
@@ -135,7 +132,7 @@ export function AyahBlock({
       // 500ms: open menu
       longPressTimer.current = setTimeout(() => {
         longPressTimer.current = null;
-        openMenuAt(x, y);
+        openMenu();
       }, 500);
     },
     [surahId, openMenuAt],
