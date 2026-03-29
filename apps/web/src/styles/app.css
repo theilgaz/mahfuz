@@ -171,12 +171,23 @@ body {
   font-family: var(--font-ui);
 }
 
-/* ── Long press focus — dim other verses ─────────────── */
+/* ── Long press / context menu focus — dim other verses ── */
 
-[data-longpress="true"] ~ div:not([data-longpress="true"]),
-div:has(~ [data-longpress="true"]):not([data-longpress="true"]) {
-  opacity: 0.3;
-  transition: opacity 0.3s ease;
+/* AyahBlock'lar wrapper div[data-ayah] içinde.
+   Aktif olan wrapper'ın sibling'lerini soluklaştır. */
+div[data-ayah]:has([data-longpress="true"]) ~ div[data-ayah]:not(:has([data-longpress="true"])),
+div[data-ayah]:not(:has([data-longpress="true"])):has(~ div[data-ayah]:has([data-longpress="true"])) {
+  opacity: 0.25;
+  filter: blur(1px);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Fallback: data-longpress doğrudan sibling ise (wrapper'sız) */
+[data-longpress="true"] ~ div:not([data-longpress="true"]):not([data-ayah]),
+div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"]) {
+  opacity: 0.25;
+  filter: blur(1px);
+  transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
 /* ── Audio word highlight ────────────────────────────── */
