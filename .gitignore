@@ -32,7 +32,7 @@ Thumbs.db
 # Test
 coverage/
 
-# Generated
-*.gen.ts
+# Generated (routeTree.gen.ts tracked — needed for deploy)
+# *.gen.ts
 ROADMAP.md
 mahfuz-kids.md
