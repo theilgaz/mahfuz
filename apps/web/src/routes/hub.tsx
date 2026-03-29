@@ -6,6 +6,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useTranslation } from "~/hooks/useTranslation";
+import { FeatureGuide } from "~/components/hub/FeatureGuide";
+import { GitHubContributors } from "~/components/hub/GitHubContributors";
 
 export const Route = createFileRoute("/hub")({
   component: HubPage,
@@ -64,6 +66,8 @@ function HubPage() {
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       <h1 className="text-lg font-semibold mb-5">{t.hub.title}</h1>
 
+      <FeatureGuide />
+
       <div className="grid grid-cols-2 gap-3">
         {/* Yer İmleri */}
         <HubCard
@@ -80,8 +84,7 @@ function HubPage() {
 
         {/* Elifba Öğren */}
         <HubCard
-          to="/hub"
-          disabled
+          to="/alifba"
           title={t.hub.alifba}
           description={t.hub.alifbaDesc}
           icon={
@@ -124,6 +127,8 @@ function HubPage() {
           }
         />
       </div>
+
+      <GitHubContributors />
     </div>
   );
 }
