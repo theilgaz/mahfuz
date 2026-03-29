@@ -23,10 +23,18 @@ const LANG_LABELS: Record<string, string> = {
   zh: "中文", ms: "Melayu", sw: "Kiswahili", vi: "Tiếng Việt",
 };
 
-const THEMES: { id: Theme; labelKey: "papyrus" | "sea" | "night"; ring: string; dot: string }[] = [
-  { id: "papyrus", labelKey: "papyrus", ring: "#d4c9a8", dot: "#8b6914" },
-  { id: "sea", labelKey: "sea", ring: "#b3ccc9", dot: "#0d7377" },
-  { id: "night", labelKey: "night", ring: "#444", dot: "#7aad4a" },
+const THEMES: {
+  id: Theme;
+  labelKey: "papyrus" | "sea" | "night" | "seher";
+  bg: string;
+  surface: string;
+  text: string;
+  accent: string;
+}[] = [
+  { id: "papyrus", labelKey: "papyrus", bg: "#f5efe0", surface: "#ece4d0", text: "#2c2416", accent: "#8b6914" },
+  { id: "sea",     labelKey: "sea",     bg: "#eef3f2", surface: "#e0eae6", text: "#1a2c28", accent: "#0d7377" },
+  { id: "night",   labelKey: "night",   bg: "#0f0e0c", surface: "#1a1814", text: "#f0ece4", accent: "#7aad4a" },
+  { id: "seher",   labelKey: "seher",   bg: "#1a1018", surface: "#241c22", text: "#f0e6e8", accent: "#c47a5a" },
 ];
 
 interface SettingsPanelProps {
@@ -37,6 +45,7 @@ interface SettingsPanelProps {
 
 export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
   const {
+    labsEnabled, setLabsEnabled,
     showTranslation, toggleTranslation,
     showWbw, toggleWbw,
     wbwTranslation, setWbwTranslation,
@@ -107,18 +116,31 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
     if (match) setTranslation(match.slug);
   }, [locale, translationList, translationSlugs, setTranslation]);
 
+  // Track if mode changed so we navigate on close
+  const modeChangedRef = useRef<{ mode: "page" | "list" } | null>(null);
+
   if (!open) return null;
 
   const handleModeChange = (mode: "page" | "list") => {
     setReadingMode(mode);
+    // Defer navigation to panel close so user can keep adjusting settings
     const isOnPage = currentPath.startsWith("/page/");
     const isOnSurah = currentPath.startsWith("/surah/");
-    if (mode === "list" && isOnPage && context?.surahId) {
-      onClose();
-      navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(context.surahId) }, search: { ayah: undefined } });
-    } else if (mode === "page" && isOnSurah && context?.pageNumber) {
-      onClose();
-      navigate({ to: "/page/$pageNumber", params: { pageNumber: String(context.pageNumber) }, search: { ayah: undefined } });
+    if ((mode === "list" && isOnPage) || (mode === "page" && isOnSurah)) {
+      modeChangedRef.current = { mode };
+    }
+  };
+
+  const handleClose = () => {
+    const pending = modeChangedRef.current;
+    modeChangedRef.current = null;
+    onClose();
+    if (pending) {
+      if (pending.mode === "list" && context?.surahId) {
+        navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(context.surahId) }, search: { ayah: undefined } });
+      } else if (pending.mode === "page" && context?.pageNumber) {
+        navigate({ to: "/page/$pageNumber", params: { pageNumber: String(context.pageNumber) }, search: { ayah: undefined } });
+      }
     }
   };
 
@@ -127,7 +149,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-black/30" onClick={handleClose} />
 
       <div className="fixed right-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-xl overflow-y-auto">
         <div className="p-4">
@@ -135,7 +157,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-medium">{t.settings.title}</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-1 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
               aria-label={t.settings.close}
             >
@@ -145,33 +167,68 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
             </button>
           </div>
 
-          {/* ── Dil + Tema — tek satır ── */}
-          <div className="flex items-center gap-3 mb-3 pb-3 border-b border-[var(--color-border)]">
+          {/* ── Dil ── */}
+          <div className="mb-3 pb-3 border-b border-[var(--color-border)]">
             <select
               value={locale}
               onChange={(e) => setLocale(e.target.value as Locale)}
-              className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] appearance-none cursor-pointer"
+              className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] appearance-none cursor-pointer"
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}
             >
               {getAllLocaleConfigs().map(({ code, config }) => (
                 <option key={code} value={code}>{config.displayName}</option>
               ))}
             </select>
-            <div className="flex gap-1.5 shrink-0">
-              {THEMES.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setTheme(item.id)}
-                  className="relative w-8 h-8 rounded-full transition-all flex items-center justify-center"
-                  style={{
-                    border: theme === item.id ? `2px solid ${item.dot}` : `2px solid ${item.ring}`,
-                  }}
-                  aria-label={t.settings.themes[item.labelKey]}
-                  title={t.settings.themes[item.labelKey]}
-                >
-                  <span className="w-4 h-4 rounded-full" style={{ background: item.dot }} />
-                </button>
-              ))}
+          </div>
+
+          {/* ── Tema — mini preview kartları ── */}
+          <div className="mb-3 pb-3 border-b border-[var(--color-border)]">
+            <div className="grid grid-cols-4 gap-1.5">
+              {THEMES.map((item) => {
+                const active = theme === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setTheme(item.id)}
+                    className="group relative flex flex-col items-center gap-1 focus:outline-none"
+                    aria-label={t.settings.themes[item.labelKey]}
+                  >
+                    {/* Mini preview card */}
+                    <div
+                      className="w-full aspect-[3/4] rounded-lg overflow-hidden transition-all"
+                      style={{
+                        background: item.bg,
+                        boxShadow: active
+                          ? `0 0 0 2px ${item.accent}`
+                          : "0 0 0 1px rgba(128,128,128,0.15)",
+                      }}
+                    >
+                      {/* Simulated content lines */}
+                      <div className="flex flex-col items-center justify-center h-full gap-1 px-1.5">
+                        <span
+                          className="text-[11px] leading-none"
+                          style={{ color: item.text, fontFamily: "var(--font-arabic)" }}
+                        >
+                          بسم
+                        </span>
+                        <div className="flex flex-col gap-[3px] w-full items-center">
+                          <span className="block rounded-full h-[2px] w-[70%]" style={{ background: item.text, opacity: 0.2 }} />
+                          <span className="block rounded-full h-[2px] w-[50%]" style={{ background: item.text, opacity: 0.12 }} />
+                        </div>
+                        {/* Accent strip */}
+                        <span className="block rounded-full h-[3px] w-[40%] mt-0.5" style={{ background: item.accent }} />
+                      </div>
+                    </div>
+                    {/* Label */}
+                    <span
+                      className="text-[10px] font-medium transition-colors"
+                      style={{ color: active ? item.accent : "var(--color-text-secondary)" }}
+                    >
+                      {t.settings.themes[item.labelKey]}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -344,6 +401,27 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
               />
             </div>
           )}
+
+          {/* ── Keşif Modu (Labs) ── */}
+          <div className="mb-3 pb-3 border-b border-[var(--color-border)]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text-secondary)]">
+                  <path d="M9 3H15V8L19 14V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V14L9 8V3Z" />
+                  <path d="M9 3H15" />
+                  <path d="M12 11V15" />
+                  <path d="M10 13H14" />
+                </svg>
+                <label className="text-[11px] font-medium text-[var(--color-text-secondary)]">
+                  {t.settings.labs}
+                </label>
+              </div>
+              <Toggle checked={labsEnabled} onChange={() => setLabsEnabled(!labsEnabled)} />
+            </div>
+            <p className="text-[10px] text-[var(--color-text-secondary)] mt-1 opacity-70">
+              {t.settings.labsDesc}
+            </p>
+          </div>
 
           {/* ── Sıfırla ── */}
           <button

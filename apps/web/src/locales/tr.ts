@@ -7,6 +7,7 @@ export const tr = {
       papyrus: "Papirüs",
       sea: "Deniz",
       night: "Gece",
+      seher: "Seher",
     },
     readingMode: "Okuma Modu",
     mushafPage: "Mushaf Sayfası",
@@ -33,6 +34,8 @@ export const tr = {
     tajweedOnlyUthmani: "Tecvid yalnızca Uthmani metin stilinde kullanılabilir.",
     select: "Seçiniz",
     searchPlaceholder: "Ara...",
+    labs: "Keşif Modu",
+    labsDesc: "Henüz tamamlanmamış yeni özellikleri dene",
   },
 
   nav: {
@@ -182,7 +185,10 @@ export const tr = {
   error: {
     notFound: "Sayfa bulunamadı",
     notFoundDesc: "Aradığınız sayfa mevcut değil veya taşınmış olabilir.",
-    goHome: "Ana Sayfaya Dön",
+    generic: "Bir hata oluştu",
+    genericDesc: "Sayfa yüklenirken beklenmeyen bir hata oluştu.",
+    retry: "Tekrar Dene",
+    goHome: "Ana Sayfa",
   },
 
   surahList: {

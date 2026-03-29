@@ -9,6 +9,7 @@ export const en: Messages = {
       papyrus: "Papyrus",
       sea: "Ocean",
       night: "Night",
+      seher: "Dawn",
     },
     readingMode: "Reading Mode",
     mushafPage: "Mushaf Page",
@@ -35,6 +36,8 @@ export const en: Messages = {
     tajweedOnlyUthmani: "Tajweed is only available with Uthmani text style.",
     select: "Select",
     searchPlaceholder: "Search...",
+    labs: "Discovery Mode",
+    labsDesc: "Try new features before they're fully ready",
   },
 
   nav: {
@@ -184,7 +187,10 @@ export const en: Messages = {
   error: {
     notFound: "Page Not Found",
     notFoundDesc: "The page you're looking for doesn't exist or has been moved.",
-    goHome: "Go to Home",
+    generic: "Something went wrong",
+    genericDesc: "An unexpected error occurred while loading the page.",
+    retry: "Try Again",
+    goHome: "Home",
   },
 
   surahList: {
