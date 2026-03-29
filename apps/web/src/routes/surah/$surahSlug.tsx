@@ -5,13 +5,16 @@
 
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { SurahView } from "~/components/reader/SurahView";
-import { SettingsButton } from "~/components/SettingsButton";
+import { ReadingHeader } from "~/components/reader/ReadingHeader";
+import { SurahPicker } from "~/components/reader/SurahPicker";
 import { AudioBar } from "~/components/reader/AudioBar";
 import { surahDataQueryOptions, useSurahData } from "~/hooks/useQuranQuery";
 import { useSettingsStore } from "~/stores/settings.store";
 import { ScrollToTop } from "~/components/ScrollToTop";
 import { FontSizeControl } from "~/components/reader/FontSizeControl";
 import { surahIdFromSlug, surahSlug } from "~/lib/surah-slugs";
+
+const TOTAL_CHAPTERS = 114;
 
 export const Route = createFileRoute("/surah/$surahSlug")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -50,21 +53,44 @@ function SurahRoute() {
 
   return (
     <div className="min-h-screen relative pb-20">
-      <SettingsButton
-        context={{ surahId: id, pageNumber: firstPageNumber }}
-        className="fixed top-4 right-4 z-20 p-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-border)] transition-colors"
-      />
+      <ReadingHeader settingsContext={{ surahId: id, pageNumber: firstPageNumber }}>
+        {/* Önceki sure */}
+        {id > 1 ? (
+          <Link
+            to="/surah/$surahSlug"
+            params={{ surahSlug: surahSlug(id - 1) }}
+            search={{ ayah: undefined }}
+            className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
+            aria-label="Önceki sure"
+          >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5L7 10L12 15" />
+            </svg>
+          </Link>
+        ) : (
+          <div className="w-7" />
+        )}
 
-      <Link
-        to="/"
-        className="fixed top-4 left-4 z-20 p-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-border)] transition-colors"
-        aria-label="Home"
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 10L10 3L17 10" />
-          <path d="M5 9V17H8V12H12V17H15V9" />
-        </svg>
-      </Link>
+        {/* Sure picker */}
+        <SurahPicker currentSurahId={id} />
+
+        {/* Sonraki sure */}
+        {id < TOTAL_CHAPTERS ? (
+          <Link
+            to="/surah/$surahSlug"
+            params={{ surahSlug: surahSlug(id + 1) }}
+            search={{ ayah: undefined }}
+            className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
+            aria-label="Sonraki sure"
+          >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 5L13 10L8 15" />
+            </svg>
+          </Link>
+        ) : (
+          <div className="w-7" />
+        )}
+      </ReadingHeader>
 
       <SurahView surahId={id} highlightAyah={ayah} />
       <FontSizeControl />

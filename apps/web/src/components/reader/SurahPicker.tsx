@@ -110,23 +110,27 @@ export function SurahPicker({
     );
   });
 
+  // Sure adı
+  const currentSurah = surahs.find((s) => s.id === currentSurahId);
+  const surahName = (currentSurahId ? getSurahName(currentSurahId, locale) : "") || currentSurah?.nameSimple || "";
+
   // Trigger label
   const triggerLabel =
     mode === "page" && currentPage != null
-      ? `${currentPage} / ${totalPages}`
-      : `${currentSurahId} / ${TOTAL_CHAPTERS}`;
+      ? `${t.common.page} ${currentPage} · ${surahName}`
+      : `${currentSurahId}. ${surahName}`;
 
   return (
     <div className="relative" ref={panelRef}>
       {/* Trigger */}
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-[var(--color-surface)] border border-[var(--color-border)] transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-[var(--color-surface)] transition-colors min-w-0"
       >
-        <span className="text-sm text-[var(--color-text-secondary)]">
+        <span className="text-sm font-medium text-[var(--color-text-primary)] truncate">
           {triggerLabel}
         </span>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <svg className="shrink-0" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
           <path d={open ? "M3 7L6 4L9 7" : "M3 5L6 8L9 5"} />
         </svg>
       </button>

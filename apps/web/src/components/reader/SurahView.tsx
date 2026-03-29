@@ -10,15 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useWbwData } from "~/hooks/useWbwData";
 import { cleanImlaei } from "~/lib/strip-diacritics";
 import { AyahBlock } from "./AyahBlock";
-import { SurahHeader } from "./SurahHeader";
-import { SurahPicker } from "./SurahPicker";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
 import { useEffect, useRef, useCallback, useMemo } from "react";
-import { Link } from "@tanstack/react-router";
-import { surahSlug } from "~/lib/surah-slugs";
-import { useTranslation } from "~/hooks/useTranslation";
-
-const TOTAL_CHAPTERS = 114;
 
 interface SurahViewProps {
   surahId: number;
@@ -26,7 +19,6 @@ interface SurahViewProps {
 }
 
 export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
-  const { locale } = useTranslation();
   const showTranslation = useSettingsStore((s) => s.showTranslation);
   const showWbw = useSettingsStore((s) => s.showWbw);
   const showTajweed = useSettingsStore((s) => s.showTajweed);
@@ -123,41 +115,16 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
   return (
     <div className="max-w-3xl mx-auto px-4">
-      {/* Navigasyon — ok + sure picker */}
-      <div className="flex items-center justify-between px-4 py-2">
-        {surahId > 1 ? (
-          <Link
-            to="/surah/$surahSlug"
-            params={{ surahSlug: surahSlug(surahId - 1) }} search={{ ayah: undefined }}
-            className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 5L7 10L12 15" />
-            </svg>
-          </Link>
-        ) : <div className="w-9" />}
-
-        <SurahPicker currentSurahId={surahId} />
-
-        {surahId < TOTAL_CHAPTERS ? (
-          <Link
-            to="/surah/$surahSlug"
-            params={{ surahSlug: surahSlug(surahId + 1) }} search={{ ayah: undefined }}
-            className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M8 5L13 10L8 15" />
-            </svg>
-          </Link>
-        ) : <div className="w-9" />}
-      </div>
-
-      <SurahHeader
-        surahId={surah.id}
-        nameArabic={surah.nameArabic}
-        nameSimple={surah.nameSimple}
-        showBismillah={surah.bismillahPre}
-      />
+      {/* Besmele (sure adı artık header'da) */}
+      {surah.bismillahPre && (
+        <p
+          className="pt-6 pb-4 text-center text-[var(--color-text-primary)]"
+          dir="rtl"
+          style={{ fontFamily: "var(--font-arabic)", fontSize: "clamp(1.6rem, 4vw, 2.8rem)" }}
+        >
+          بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
+        </p>
+      )}
 
       <div className="pb-8">
         {ayahs.map((ayah) => (

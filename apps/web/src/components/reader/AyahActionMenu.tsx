@@ -3,8 +3,12 @@
  * Ayet numarasına tıklayınca açılır.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
+import { useAudioStore } from "~/stores/audio.store";
+import { useSettingsStore } from "~/stores/settings.store";
+import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
+import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 
 interface AyahActionMenuProps {
   open: boolean;
@@ -30,6 +34,37 @@ export function AyahActionMenu({
   const menuRef = useRef<HTMLDivElement>(null);
   const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surahId, ayahNumber));
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
+  const playSurah = useAudioStore((s) => s.playSurah);
+  const currentChapterId = useAudioStore((s) => s.chapterId);
+  const playbackState = useAudioStore((s) => s.playbackState);
+  const engine = useAudioStore((s) => s.engine);
+  const reciterSlug = useSettingsStore((s) => s.reciterSlug);
+  const [audioLoading, setAudioLoading] = useState(false);
+
+  const handlePlayFromHere = useCallback(async () => {
+    const verseKey = `${surahId}:${ayahNumber}`;
+
+    // Aynı sure zaten yüklüyse, direkt o ayete atla
+    if (currentChapterId === surahId && engine) {
+      engine.playByKey(verseKey);
+      onClose();
+      return;
+    }
+
+    // Yeni sure yükle ve belirtilen ayetten başlat
+    setAudioLoading(true);
+    try {
+      const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
+      const audioData = await fetchChapterAudio(reciterId, surahId);
+      if (audioData) {
+        const surahName = SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`;
+        playSurah(surahId, surahName, audioData, verseKey);
+      }
+    } finally {
+      setAudioLoading(false);
+      onClose();
+    }
+  }, [surahId, ayahNumber, currentChapterId, engine, reciterSlug, playSurah, onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -104,6 +139,23 @@ export function AyahActionMenu({
           <path d="M4 2h8a1 1 0 011 1v11.5l-4.5-3-4.5 3V3a1 1 0 011-1z" />
         </svg>
         {isBookmarked ? "Yer İmini Kaldır" : "Yer İmine Ekle"}
+      </button>
+
+      <button
+        onClick={handlePlayFromHere}
+        disabled={audioLoading}
+        className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-surface)] transition-colors flex items-center gap-2 disabled:opacity-50"
+      >
+        {audioLoading ? (
+          <svg width="14" height="14" viewBox="0 0 14 14" className="animate-spin" stroke="currentColor" fill="none" strokeWidth="1.5">
+            <circle cx="7" cy="7" r="5" strokeDasharray="16 10" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+            <path d="M4 2L12 7L4 12V2Z" />
+          </svg>
+        )}
+        Buradan Dinle
       </button>
 
       <div className="h-px bg-[var(--color-border)] my-1" />

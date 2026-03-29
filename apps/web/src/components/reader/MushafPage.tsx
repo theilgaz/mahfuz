@@ -14,12 +14,10 @@ import { parseTajweed } from "~/lib/tajweed-parser";
 import { splitWords } from "~/lib/split-words";
 import { SurahHeader } from "./SurahHeader";
 import { MushafLineView } from "./MushafLineView";
-import { PageNav } from "./PageNav";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { AyahActionMenu } from "./AyahActionMenu";
 import { VerseEndMarker } from "~/components/quran/VerseEndMarker";
-import { useTranslation } from "~/hooks/useTranslation";
 
 interface MushafPageProps {
   pageNumber: number;
@@ -29,7 +27,6 @@ interface MushafPageProps {
 
 export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
   const { showTranslation, showTajweed, translationSlugs, arabicFontSize, textStyle } = useSettingsStore();
-  const { t } = useTranslation();
   const useBasic = textStyle === "basic";
   const effectiveTajweed = showTajweed && !useBasic;
   const savePosition = useReadingStore((s) => s.savePosition);
@@ -105,13 +102,6 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
 
   return (
     <div className="max-w-3xl mx-auto px-4">
-      <PageNav pageNumber={pageNumber} enableSwipe surahId={surahIds[0]} />
-
-      {/* Cüz bilgisi */}
-      <div className="text-center text-xs text-[var(--color-text-secondary)] py-1">
-        {pageData.juzNumber}. {t.common.juz}
-      </div>
-
       {/* Mushaf metin */}
       <div className="pb-8">
         {lineData ? (
@@ -184,7 +174,6 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
         )}
       </div>
 
-      <PageNav pageNumber={pageNumber} surahId={surahIds[0]} dropUp />
     </div>
   );
 }
