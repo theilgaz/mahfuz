@@ -32,7 +32,9 @@ COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml
 # Built app
 COPY --from=build /app/apps/web/dist apps/web/dist
 COPY --from=build /app/apps/web/drizzle apps/web/drizzle
+COPY --from=build /app/apps/web/drizzle.config.ts apps/web/drizzle.config.ts
 COPY --from=build /app/apps/web/server.mjs apps/web/server.mjs
+COPY --from=build /app/apps/web/start.sh apps/web/start.sh
 COPY --from=build /app/apps/web/package.json apps/web/
 
 # Runtime packages
@@ -49,4 +51,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 WORKDIR /app/apps/web
-CMD ["node", "server.mjs"]
+CMD ["sh", "start.sh"]
