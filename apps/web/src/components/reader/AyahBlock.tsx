@@ -135,7 +135,7 @@ export function AyahBlock({
         openMenu();
       }, 500);
     },
-    [surahId, openMenuAt],
+    [surahId, openMenu],
   );
 
   const cancelLongPress = useCallback(() => {
