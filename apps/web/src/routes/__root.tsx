@@ -6,7 +6,8 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useFocusTrap } from "~/hooks/useFocusTrap";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
 import { AudioProvider } from "~/components/reader/AudioProvider";
@@ -116,6 +117,9 @@ function AppHeader() {
   const [labsMenuOpen, setLabsMenuOpen] = useState(false);
   const { session } = useRouteContext({ from: "__root__" });
   const labsMenuRef = useRef<HTMLDivElement>(null);
+  const labsDropdownRef = useRef<HTMLDivElement>(null);
+  const closeLabsMenu = useCallback(() => setLabsMenuOpen(false), []);
+  useFocusTrap(labsDropdownRef, labsMenuOpen, closeLabsMenu);
 
   const path = routerState.location.pathname;
   const isHome = path === "/";
@@ -225,6 +229,8 @@ function AppHeader() {
                 onClick={() => setLabsMenuOpen((v) => !v)}
                 className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
                 aria-label="Labs"
+                aria-haspopup="true"
+                aria-expanded={labsMenuOpen}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 3H15V8L19 14V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V14L9 8V3Z" />
@@ -236,7 +242,7 @@ function AppHeader() {
               {labsMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setLabsMenuOpen(false)} />
-                  <div className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 py-1 overflow-hidden">
+                  <div ref={labsDropdownRef} role="menu" className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 py-1 overflow-hidden">
                     {[
                       { to: "/discover", label: t.hub.listenMemorize, icon: "🎧" },
                       { to: "/discover", label: t.hub.apps, icon: "📦" },
@@ -245,6 +251,7 @@ function AppHeader() {
                       <Link
                         key={item.label}
                         to={item.to}
+                        role="menuitem"
                         onClick={() => setLabsMenuOpen(false)}
                         className="flex items-center gap-2.5 px-3 py-2 text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors"
                       >

@@ -68,17 +68,19 @@ function SearchPage() {
       {!query && <SearchSuggestions onSelect={handleInput} locale={locale} t={t} />}
 
       {/* Sonuçlar */}
-      {isLoading && debouncedQuery.length >= 2 && (
-        <p className="text-sm text-[var(--color-text-secondary)] text-center py-4">
-          {t.common.searching}
-        </p>
-      )}
+      <div aria-live="polite" aria-atomic="true">
+        {isLoading && debouncedQuery.length >= 2 && (
+          <p className="text-sm text-[var(--color-text-secondary)] text-center py-4">
+            {t.common.searching}
+          </p>
+        )}
 
-      {results && results.length === 0 && debouncedQuery.length >= 2 && (
-        <p className="text-sm text-[var(--color-text-secondary)] text-center py-4">
-          {t.common.noResults}
-        </p>
-      )}
+        {results && results.length === 0 && debouncedQuery.length >= 2 && (
+          <p className="text-sm text-[var(--color-text-secondary)] text-center py-4">
+            {t.common.noResults}
+          </p>
+        )}
+      </div>
 
       {results && results.length > 0 && (
         <GroupedResults results={results} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />

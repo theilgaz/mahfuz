@@ -105,7 +105,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh] text-[var(--color-text-secondary)]">
+      <div className="flex items-center justify-center min-h-[50vh] text-[var(--color-text-secondary)]" aria-live="polite">
         Sure bulunamadı
       </div>
     );

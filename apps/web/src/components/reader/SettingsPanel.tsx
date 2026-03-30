@@ -3,7 +3,8 @@
  * İki sekme: Okuma (sık kullanılan) + Genel (nadir değişen).
  */
 
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useMemo, useEffect, useRef, useState, useCallback } from "react";
+import { useFocusTrap } from "~/hooks/useFocusTrap";
 import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type WbwDisplay, type ColorPaletteId } from "~/stores/settings.store";
 import { useQuery } from "@tanstack/react-query";
 import { recitersQueryOptions, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
@@ -57,6 +58,9 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
   const navigate = useNavigate();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
+  const panelRef = useRef<HTMLDivElement>(null);
+  const stableOnClose = useCallback(() => onClose(), [onClose]);
+  useFocusTrap(panelRef, open, stableOnClose);
 
   const store = useSettingsStore();
   const { data: reciterList } = useQuery({ ...recitersQueryOptions(), enabled: open });
@@ -92,7 +96,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-xl overflow-y-auto">
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t.settings.title} className="fixed right-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-xl overflow-y-auto">
         <div className="flex flex-col min-h-full p-4">
           {/* Header + tabs */}
           <div className="flex items-center justify-between mb-3">

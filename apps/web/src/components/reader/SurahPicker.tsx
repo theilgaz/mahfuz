@@ -5,12 +5,13 @@
  * mode="page":  tıklanan surenin başlangıç sayfasına /page/$pageStart ile gider
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useSurahs } from "~/hooks/useQuranQuery";
 import { surahSlug } from "~/lib/surah-slugs";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
+import { useFocusTrap } from "~/hooks/useFocusTrap";
 
 const TOTAL_CHAPTERS = 114;
 
@@ -71,11 +72,14 @@ export function SurahPicker({
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"surah" | "juz">("surah");
   const panelRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const activeRef = useRef<HTMLAnchorElement>(null);
   const navigate = useNavigate();
   const { t, locale } = useTranslation();
   const { data: surahs } = useSurahs();
+  const closeDropdown = useCallback(() => setOpen(false), []);
+  useFocusTrap(dropdownRef, open, closeDropdown);
 
   // Dışarı tıklayınca kapat
   useEffect(() => {
@@ -125,6 +129,8 @@ export function SurahPicker({
       {/* Trigger */}
       <button
         onClick={() => setOpen(!open)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-[var(--color-surface)] transition-colors min-w-0"
       >
         <span className="text-sm font-medium text-[var(--color-text-primary)] truncate">
@@ -137,7 +143,7 @@ export function SurahPicker({
 
       {/* Dropdown */}
       {open && (
-        <div className={`absolute left-1/2 -translate-x-1/2 w-72 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 flex flex-col overflow-hidden ${dropUp ? "bottom-full mb-2 max-h-[40vh]" : "top-full mt-2 max-h-[60vh]"}`}>
+        <div ref={dropdownRef} role="listbox" aria-label={t.surahPicker.searchPlaceholder} className={`absolute left-1/2 -translate-x-1/2 w-72 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 flex flex-col overflow-hidden ${dropUp ? "bottom-full mb-2 max-h-[40vh]" : "top-full mt-2 max-h-[60vh]"}`}>
           {/* Tab bar: Sure / Cüz */}
           <div className="flex border-b border-[var(--color-border)]">
             <button

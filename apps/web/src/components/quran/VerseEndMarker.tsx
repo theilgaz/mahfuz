@@ -41,7 +41,7 @@ export function VerseEndMarker({
           : "flex"
       } items-center justify-center cursor-pointer group/marker transition-transform hover:scale-110 active:scale-95 shrink-0`}
       style={{ width: size, height: size }}
-      aria-label={`Ayet ${ayahNumber} eylemleri`}
+      aria-label={`Ayet ${ayahNumber}`}
     >
       <svg
         width={size}
@@ -49,6 +49,7 @@ export function VerseEndMarker({
         viewBox={`0 0 ${size} ${size}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
       >
         {/* Two overlapping squares = 8-pointed star */}
         <path
