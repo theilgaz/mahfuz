@@ -8,6 +8,7 @@ FROM base AS deps
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/web/package.json apps/web/
 COPY packages/audio-engine/package.json packages/audio-engine/
+COPY packages/recitation-engine/package.json packages/recitation-engine/
 COPY packages/shared/package.json packages/shared/
 COPY tooling/tailwind/package.json tooling/tailwind/
 COPY tooling/typescript/package.json tooling/typescript/
@@ -31,6 +32,7 @@ COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml
 COPY --from=build /app/apps/web/package.json apps/web/
 COPY --from=build /app/packages/shared/package.json packages/shared/
 COPY --from=build /app/packages/audio-engine/package.json packages/audio-engine/
+COPY --from=build /app/packages/recitation-engine/package.json packages/recitation-engine/
 COPY --from=build /app/tooling/tailwind/package.json tooling/tailwind/
 COPY --from=build /app/tooling/typescript/package.json tooling/typescript/
 COPY --from=build /app/tooling/eslint/package.json tooling/eslint/
@@ -48,6 +50,7 @@ COPY --from=build /app/apps/web/start.sh apps/web/start.sh
 # Runtime packages (built source needed by server)
 COPY --from=build /app/packages/shared packages/shared
 COPY --from=build /app/packages/audio-engine packages/audio-engine
+COPY --from=build /app/packages/recitation-engine packages/recitation-engine
 COPY --from=build /app/tooling tooling
 
 ENV PORT=3000

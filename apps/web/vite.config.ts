@@ -17,10 +17,14 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  worker: {
+    format: "es",
+  },
   build: {
     chunkSizeWarningLimit: 300,
   },
   optimizeDeps: {
+    exclude: ["onnxruntime-web"],
     include: [
       "react",
       "react-dom",

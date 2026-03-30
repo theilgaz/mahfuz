@@ -29,6 +29,11 @@ Thumbs.db
 # Database
 *.db
 
+# ML models (large files — fetched via script)
+*.onnx
+apps/web/public/models/*.json
+!apps/web/public/models/.gitkeep
+
 # Test
 coverage/
 

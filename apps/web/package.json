@@ -21,6 +21,7 @@
   "dependencies": {
     "@libsql/client": "^0.17.0",
     "@mahfuz/audio-engine": "workspace:*",
+    "@mahfuz/recitation-engine": "workspace:*",
     "@mahfuz/shared": "workspace:*",
     "@tanstack/react-query": "^5.64.2",
     "@tanstack/react-router": "^1.114.3",
