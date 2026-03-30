@@ -15,6 +15,7 @@ import { parseTajweed } from "~/lib/tajweed-parser";
 import { splitWords } from "~/lib/split-words";
 import { SurahHeader } from "./SurahHeader";
 import { MushafLineView } from "./MushafLineView";
+import { MushafSkeleton } from "./MushafSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { AyahActionMenu } from "./AyahActionMenu";
@@ -116,11 +117,7 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
   }, [pageNumber, pageData, savePosition]);
 
   if (!pageData) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh] text-[var(--color-text-secondary)]">
-        Sayfa bulunamadı
-      </div>
-    );
+    return <MushafSkeleton />;
   }
 
   return (

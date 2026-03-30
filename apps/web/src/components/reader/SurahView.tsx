@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useWbwData } from "~/hooks/useWbwData";
 import { cleanImlaei } from "~/lib/strip-diacritics";
 import { AyahBlock } from "./AyahBlock";
+import { SurahSkeleton } from "./SurahSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
 import { useEffect, useRef, useCallback, useMemo } from "react";
 
@@ -92,23 +93,21 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     return () => observer.disconnect();
   }, [surahId, data, savePosition]);
 
-  // highlightAyah varsa o ayete scroll et
+  // highlightAyah varsa o ayete scroll et (double-rAF ensures paint is complete)
   useEffect(() => {
     if (!highlightAyah || !data) return;
-    // DOM'un render olması için kısa gecikme
-    const timer = setTimeout(() => {
-      const el = ayahRefs.current.get(highlightAyah);
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 100);
-    return () => clearTimeout(timer);
+    let id: number;
+    id = requestAnimationFrame(() => {
+      id = requestAnimationFrame(() => {
+        const el = ayahRefs.current.get(highlightAyah);
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+    return () => cancelAnimationFrame(id);
   }, [highlightAyah, data]);
 
   if (!data) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh] text-[var(--color-text-secondary)]" aria-live="polite">
-        Sure bulunamadı
-      </div>
-    );
+    return <SurahSkeleton />;
   }
 
   const { surah, ayahs } = data;

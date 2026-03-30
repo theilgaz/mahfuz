@@ -3,6 +3,7 @@
  */
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import { MushafPage } from "~/components/reader/MushafPage";
 import { AudioBar } from "~/components/reader/AudioBar";
@@ -30,7 +31,14 @@ function PageRoute() {
   const { pageNumber } = Route.useParams();
   const { ayah } = Route.useSearch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const page = parseInt(pageNumber, 10);
+
+  // Prefetch adjacent pages for instant navigation
+  useEffect(() => {
+    if (page > 1) queryClient.prefetchQuery(pageDataQueryOptions(page - 1));
+    if (page < TOTAL_PAGES) queryClient.prefetchQuery(pageDataQueryOptions(page + 1));
+  }, [page, queryClient]);
 
   const goTo = useCallback(
     (p: number) => {
