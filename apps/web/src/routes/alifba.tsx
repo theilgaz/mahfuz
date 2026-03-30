@@ -3,11 +3,14 @@
  * Arap harflerini tanıma ve yazı alıştırması.
  */
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ARABIC_LETTERS } from "~/lib/kids-constants";
-import { LetterTrace } from "~/components/kids/LetterTrace";
 import { useTranslation } from "~/hooks/useTranslation";
+
+const LetterTrace = lazy(() =>
+  import("~/components/kids/LetterTrace").then((m) => ({ default: m.LetterTrace }))
+);
 
 export const Route = createFileRoute("/alifba")({
   component: AlifbaPage,
@@ -35,18 +38,20 @@ function AlifbaPage() {
               {selected.order}/28
             </span>
           </div>
-          <LetterTrace
-            key={selected.id}
-            letter={selected}
-            onComplete={() => {
-              const next = ARABIC_LETTERS.find((l) => l.order === selected.order + 1);
-              if (next) {
-                setSelected(next);
-              } else {
-                setSelected(null);
-              }
-            }}
-          />
+          <Suspense fallback={<div className="h-64 flex items-center justify-center text-sm text-[var(--color-text-secondary)]">...</div>}>
+            <LetterTrace
+              key={selected.id}
+              letter={selected}
+              onComplete={() => {
+                const next = ARABIC_LETTERS.find((l) => l.order === selected.order + 1);
+                if (next) {
+                  setSelected(next);
+                } else {
+                  setSelected(null);
+                }
+              }}
+            />
+          </Suspense>
         </div>
       ) : (
         <div className="grid grid-cols-7 gap-1.5">

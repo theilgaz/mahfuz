@@ -3,14 +3,17 @@
  * Elifba, Ezberle, Uygulamalar gibi modüllerin giriş noktası.
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
 import { getAllLocaleConfigs, loadLocaleMessages, type Locale } from "~/locales/registry";
-import { GitHubContributors } from "~/components/hub/GitHubContributors";
 import { Credits } from "~/components/hub/Credits";
+
+const GitHubContributors = lazy(() =>
+  import("~/components/hub/GitHubContributors").then((m) => ({ default: m.GitHubContributors }))
+);
 
 export const Route = createFileRoute("/discover")({
   component: HubPage,
@@ -132,7 +135,9 @@ function HubPage() {
         />
       </div>
 
-      <GitHubContributors />
+      <Suspense fallback={null}>
+        <GitHubContributors />
+      </Suspense>
       <Credits />
     </div>
   );

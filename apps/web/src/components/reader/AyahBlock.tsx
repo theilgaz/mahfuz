@@ -3,6 +3,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useSettingsStore, COLOR_PALETTES } from "~/stores/settings.store";
 import { useAudioStore } from "~/stores/audio.store";
@@ -53,14 +54,18 @@ export function AyahBlock({
     surahId ? s.isBookmarked(surahId, ayahNumber) : false,
   );
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
-  const arabicFontSize = useSettingsStore((s) => s.arabicFontSize);
-  const translationFontSize = useSettingsStore((s) => s.translationFontSize);
-  const translationSlugs = useSettingsStore((s) => s.translationSlugs);
+  const { arabicFontSize, translationFontSize, translationSlugs, wbwTranslation, wbwTranslit, colorizeWords, colorPaletteId } = useSettingsStore(
+    useShallow((s) => ({
+      arabicFontSize: s.arabicFontSize,
+      translationFontSize: s.translationFontSize,
+      translationSlugs: s.translationSlugs,
+      wbwTranslation: s.wbwTranslation,
+      wbwTranslit: s.wbwTranslit,
+      colorizeWords: s.colorizeWords,
+      colorPaletteId: s.colorPaletteId,
+    }))
+  );
   const multiMode = translationSlugs.length > 1;
-  const wbwTranslation = useSettingsStore((s) => s.wbwTranslation);
-  const wbwTranslit = useSettingsStore((s) => s.wbwTranslit);
-  const colorizeWords = useSettingsStore((s) => s.colorizeWords);
-  const colorPaletteId = useSettingsStore((s) => s.colorPaletteId);
   const wordColors = colorizeWords ? COLOR_PALETTES[colorPaletteId].colors : null;
 
   // Audio word tracking

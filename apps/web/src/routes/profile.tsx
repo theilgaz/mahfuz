@@ -2,14 +2,18 @@
  * Profil sayfası — kullanıcı bilgisi, ezber durumu, yer imleri, keşfet.
  */
 
+import { lazy, Suspense } from "react";
 import { createFileRoute, Link, useRouter, redirect } from "@tanstack/react-router";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { signOut } from "~/lib/auth-client";
 import { useTranslation } from "~/hooks/useTranslation";
-import { HifzStatus } from "~/components/profile/HifzStatus";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useLocaleStore } from "~/stores/locale.store";
 import { surahSlug } from "~/lib/surah-slugs";
+
+const HifzStatus = lazy(() =>
+  import("~/components/profile/HifzStatus").then((m) => ({ default: m.HifzStatus }))
+);
 
 export const Route = createFileRoute("/profile")({
   beforeLoad: ({ context }) => {
@@ -68,7 +72,9 @@ function ProfilePage() {
       </div>
 
       {/* ── Ezber Durumu ──────────────────────────────── */}
-      <HifzStatus />
+      <Suspense fallback={<div className="h-32 flex items-center justify-center text-sm text-[var(--color-text-secondary)]">...</div>}>
+        <HifzStatus />
+      </Suspense>
 
       {/* ── Yer İmleri ────────────────────────────────── */}
       <section className="mb-6">

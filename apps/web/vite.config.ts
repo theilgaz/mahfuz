@@ -17,6 +17,9 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  build: {
+    chunkSizeWarningLimit: 300,
+  },
   optimizeDeps: {
     include: [
       "react",

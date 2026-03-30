@@ -6,7 +6,7 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
 import { AudioProvider } from "~/components/reader/AudioProvider";
@@ -66,12 +66,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.json" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap",
-      },
+      { rel: "preload", href: "/fonts/KFGQPCUthmanicScriptHAFS.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
+      { rel: "preload", href: "/fonts/ScheherazadeNew-Regular.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: appCss },
     ],
   }),
@@ -150,6 +146,19 @@ function AppHeader() {
     : path === "/hifz" ? t.hub.hifz
     : path.startsWith("/changelog") ? t.changelog.banner
     : null;
+
+  const settingsContext = useMemo(() => {
+    const ctx: { surahId?: number; pageNumber?: number } = {};
+    if (surahSlugMatch) {
+      ctx.surahId = surahIdFromSlug(surahSlugMatch[1]);
+    }
+    if (pageNumMatch) {
+      ctx.pageNumber = parseInt(pageNumMatch[1], 10) || undefined;
+    }
+    if (!ctx.surahId && lastPosition) ctx.surahId = lastPosition.surahId;
+    if (!ctx.pageNumber && lastPosition) ctx.pageNumber = lastPosition.pageNumber;
+    return ctx;
+  }, [surahSlugMatch, pageNumMatch, lastPosition]);
 
   return (
     <>
@@ -282,21 +291,7 @@ function AppHeader() {
       <SettingsPanel
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        context={(() => {
-          const ctx: { surahId?: number; pageNumber?: number } = {};
-          if (path.startsWith("/surah/")) {
-            const slug = path.split("/surah/")[1]?.split("?")[0];
-            if (slug) ctx.surahId = surahIdFromSlug(slug);
-          }
-          if (path.startsWith("/page/")) {
-            ctx.pageNumber = Number(path.split("/page/")[1]) || undefined;
-          }
-          // Eksik alanları readingStore'dan tamamla
-          const pos = useReadingStore.getState().recentPositions[0];
-          if (!ctx.surahId && pos) ctx.surahId = pos.surahId;
-          if (!ctx.pageNumber && pos) ctx.pageNumber = pos.pageNumber;
-          return ctx;
-        })()}
+        context={settingsContext}
       />
     </>
   );

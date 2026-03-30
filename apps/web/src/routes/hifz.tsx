@@ -3,8 +3,12 @@
  * Discover altından erişilen tam sayfa ezber durumu.
  */
 
+import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { HifzStatus } from "~/components/profile/HifzStatus";
+
+const HifzStatus = lazy(() =>
+  import("~/components/profile/HifzStatus").then((m) => ({ default: m.HifzStatus }))
+);
 
 export const Route = createFileRoute("/hifz")({
   component: HifzPage,
@@ -13,7 +17,9 @@ export const Route = createFileRoute("/hifz")({
 function HifzPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
-      <HifzStatus />
+      <Suspense fallback={<div className="h-64 flex items-center justify-center text-sm text-[var(--color-text-secondary)]">...</div>}>
+        <HifzStatus />
+      </Suspense>
     </div>
   );
 }

@@ -3,10 +3,9 @@
  */
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchQuran, type SearchResult } from "~/lib/search-service";
-import { useMemo } from "react";
 import { useSettingsStore } from "~/stores/settings.store";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -25,15 +24,15 @@ function SearchPage() {
   const translationSlug = translationSlugs[0];
   const readingMode = useSettingsStore((s) => s.readingMode);
   const navigate = useNavigate();
-  const debounceRef = useState<ReturnType<typeof setTimeout>>(null!);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleInput = useCallback(
     (value: string) => {
       setQuery(value);
-      if (debounceRef[0]) clearTimeout(debounceRef[0]);
-      debounceRef[0] = setTimeout(() => setDebouncedQuery(value), 400);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => setDebouncedQuery(value), 400);
     },
-    [debounceRef],
+    [],
   );
 
   const { data: results, isLoading } = useQuery({
