@@ -57,7 +57,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/translations/") ||
     url.pathname.startsWith("/mushaf-lines/") ||
     url.pathname.startsWith("/tajweed/") ||
-    url.pathname.startsWith("/imlaei/")
+    url.pathname.startsWith("/imlaei/") ||
+    url.pathname.startsWith("/models/")
   ) {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) =>

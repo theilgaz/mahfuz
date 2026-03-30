@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as ReciteRouteImport } from './routes/recite'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as HifzRouteImport } from './routes/hifz'
 import { Route as DiscoverRouteImport } from './routes/discover'
@@ -33,6 +34,11 @@ const StatsRoute = StatsRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReciteRoute = ReciteRouteImport.update({
+  id: '/recite',
+  path: '/recite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/discover': typeof DiscoverRoute
   '/hifz': typeof HifzRoute
   '/profile': typeof ProfileRoute
+  '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverRoute
   '/hifz': typeof HifzRoute
   '/profile': typeof ProfileRoute
+  '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/discover': typeof DiscoverRoute
   '/hifz': typeof HifzRoute
   '/profile': typeof ProfileRoute
+  '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/hifz'
     | '/profile'
+    | '/recite'
     | '/search'
     | '/stats'
     | '/auth/callback'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/hifz'
     | '/profile'
+    | '/recite'
     | '/search'
     | '/stats'
     | '/auth/callback'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/hifz'
     | '/profile'
+    | '/recite'
     | '/search'
     | '/stats'
     | '/auth/callback'
@@ -215,6 +227,7 @@ export interface RootRouteChildren {
   DiscoverRoute: typeof DiscoverRoute
   HifzRoute: typeof HifzRoute
   ProfileRoute: typeof ProfileRoute
+  ReciteRoute: typeof ReciteRoute
   SearchRoute: typeof SearchRoute
   StatsRoute: typeof StatsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recite': {
+      id: '/recite'
+      path: '/recite'
+      fullPath: '/recite'
+      preLoaderRoute: typeof ReciteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -343,6 +363,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverRoute: DiscoverRoute,
   HifzRoute: HifzRoute,
   ProfileRoute: ProfileRoute,
+  ReciteRoute: ReciteRoute,
   SearchRoute: SearchRoute,
   StatsRoute: StatsRoute,
   AuthCallbackRoute: AuthCallbackRoute,

@@ -11,6 +11,7 @@ import { useFocusTrap } from "~/hooks/useFocusTrap";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
 import { RouteErrorFallback } from "~/components/RouteErrorFallback";
+import { RecitationBar } from "~/components/recitation/RecitationBar";
 import { AudioProvider } from "~/components/reader/AudioProvider";
 import { BottomNav } from "~/components/BottomNav";
 import { useSettingsStore } from "~/stores/settings.store";
@@ -396,6 +397,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <AppHeader />
         <AudioProvider />
         {children}
+        <RecitationBar />
         <BottomNav />
         <Scripts />
       </body>
