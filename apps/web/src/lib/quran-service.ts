@@ -6,6 +6,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 import { db } from "~/db";
 import { surahs, ayahs, translations, translationSources, reciters } from "~/db/quran-schema";
 import { eq, and, asc, desc, inArray } from "drizzle-orm";
@@ -59,7 +60,7 @@ export const getAyahsByJuz = createServerFn({ method: "GET" })
 
 export const getTranslationsForPage = createServerFn({ method: "GET" })
   .inputValidator((input: { surahIds: number[]; ayahNumbers: Record<number, number[]>; sourceSlug?: string }) => input)
-  .handler(async ({ data: { surahIds, ayahNumbers, sourceSlug = "omer-celik" } }) => {
+  .handler(async ({ data: { surahIds, ayahNumbers, sourceSlug = DEFAULT_TRANSLATION_SLUG } }) => {
     const [source] = await db
       .select()
       .from(translationSources)
@@ -104,7 +105,7 @@ export const getReciters = createServerFn({ method: "GET" }).handler(async () =>
 
 export const getPageData = createServerFn({ method: "GET" })
   .inputValidator((input: { pageNumber: number; translationSlugs?: string[] }) => input)
-  .handler(async ({ data: { pageNumber, translationSlugs = ["omer-celik"] } }) => {
+  .handler(async ({ data: { pageNumber, translationSlugs = [DEFAULT_TRANSLATION_SLUG] } }) => {
     // 1. Sayfadaki ayetleri çek
     const pageAyahs = await db
       .select()
@@ -219,7 +220,7 @@ export const getPageData = createServerFn({ method: "GET" })
 
 export const getSurahData = createServerFn({ method: "GET" })
   .inputValidator((input: { surahId: number; translationSlugs?: string[] }) => input)
-  .handler(async ({ data: { surahId, translationSlugs = ["omer-celik"] } }) => {
+  .handler(async ({ data: { surahId, translationSlugs = [DEFAULT_TRANSLATION_SLUG] } }) => {
     const [surah] = await db.select().from(surahs).where(eq(surahs.id, surahId));
     if (!surah) return null;
 

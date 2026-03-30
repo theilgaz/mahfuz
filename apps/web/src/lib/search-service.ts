@@ -4,6 +4,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 import { db } from "~/db";
 import { ayahs, surahs, translations, translationSources } from "~/db/quran-schema";
 import { eq, like, and, inArray } from "drizzle-orm";
@@ -46,7 +47,7 @@ const SURAH_ALIASES: Record<number, string[]> = {
 
 export const searchQuran = createServerFn({ method: "GET" })
   .inputValidator((input: { query: string; translationSlug?: string; limit?: number }) => input)
-  .handler(async ({ data: { query, translationSlug = "omer-celik", limit = 30 } }) => {
+  .handler(async ({ data: { query, translationSlug = DEFAULT_TRANSLATION_SLUG, limit = 30 } }) => {
     if (!query || query.trim().length < 2) return [];
 
     const trimmed = query.trim();

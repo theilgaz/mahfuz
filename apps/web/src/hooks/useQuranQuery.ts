@@ -3,6 +3,7 @@
  */
 
 import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 import {
   getSurahs,
   getSurah,
@@ -45,14 +46,14 @@ export const surahQueryOptions = (surahId: number) =>
     staleTime: Infinity,
   });
 
-export const pageDataQueryOptions = (pageNumber: number, translationSlugs: string[] = ["omer-celik"]) =>
+export const pageDataQueryOptions = (pageNumber: number, translationSlugs: string[] = [DEFAULT_TRANSLATION_SLUG]) =>
   queryOptions({
     queryKey: quranKeys.page(pageNumber, translationSlugs),
     queryFn: () => getPageData({ data: { pageNumber, translationSlugs } }),
     staleTime: Infinity,
   });
 
-export const surahDataQueryOptions = (surahId: number, translationSlugs: string[] = ["omer-celik"]) =>
+export const surahDataQueryOptions = (surahId: number, translationSlugs: string[] = [DEFAULT_TRANSLATION_SLUG]) =>
   queryOptions({
     queryKey: quranKeys.surahData(surahId, translationSlugs),
     queryFn: () => getSurahData({ data: { surahId, translationSlugs } }),
@@ -127,11 +128,11 @@ export function useSurah(surahId: number) {
   return useSuspenseQuery(surahQueryOptions(surahId));
 }
 
-export function usePageData(pageNumber: number, translationSlugs: string[] = ["omer-celik"]) {
+export function usePageData(pageNumber: number, translationSlugs: string[] = [DEFAULT_TRANSLATION_SLUG]) {
   return useSuspenseQuery(pageDataQueryOptions(pageNumber, translationSlugs));
 }
 
-export function useSurahData(surahId: number, translationSlugs: string[] = ["omer-celik"]) {
+export function useSurahData(surahId: number, translationSlugs: string[] = [DEFAULT_TRANSLATION_SLUG]) {
   return useSuspenseQuery(surahDataQueryOptions(surahId, translationSlugs));
 }
 

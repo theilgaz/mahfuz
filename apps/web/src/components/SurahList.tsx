@@ -7,28 +7,14 @@
 
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
+import { JUZ_FIRST_SURAH, JUZ_FIRST_PAGE, TOTAL_JUZ } from "@mahfuz/shared";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
 
-// Cüz → ilk sure numarası (cüzün başladığı sure)
-const JUZ_FIRST_SURAH: Record<number, number> = {
-  1: 1, 2: 2, 3: 2, 4: 3, 5: 4, 6: 4, 7: 5, 8: 6, 9: 7, 10: 8,
-  11: 9, 12: 11, 13: 12, 14: 15, 15: 17, 16: 18, 17: 21, 18: 23,
-  19: 25, 20: 27, 21: 29, 22: 33, 23: 36, 24: 39, 25: 41, 26: 46,
-  27: 51, 28: 58, 29: 67, 30: 78,
-};
-
-// Cüz → ilk sayfa numarası
-const JUZ_FIRST_PAGE: Record<number, number> = {
-  1: 1, 2: 22, 3: 42, 4: 62, 5: 82, 6: 102, 7: 121, 8: 142, 9: 162, 10: 182,
-  11: 201, 12: 222, 13: 242, 14: 262, 15: 282, 16: 302, 17: 322, 18: 342, 19: 362, 20: 382,
-  21: 402, 22: 422, 23: 442, 24: 462, 25: 482, 26: 502, 27: 522, 28: 542, 29: 562, 30: 582,
-};
-
-const ALL_JUZ = Array.from({ length: 30 }, (_, i) => i + 1);
+const ALL_JUZ = Array.from({ length: TOTAL_JUZ }, (_, i) => i + 1);
 
 
 interface Surah {

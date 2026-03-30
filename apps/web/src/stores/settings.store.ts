@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 
 export type Theme = "papyrus" | "sea" | "night" | "seher";
 export type TextStyle = "uthmani" | "basic";
@@ -63,7 +64,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     (set) => ({
       // Defaults
       theme: "papyrus" as Theme,
-      translationSlugs: ["omer-celik"],
+      translationSlugs: [DEFAULT_TRANSLATION_SLUG],
       showTranslation: true,
       showWbw: false,
       wbwTranslation: "on" as WbwDisplay,
@@ -123,7 +124,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         document.documentElement.setAttribute("data-theme", "papyrus");
         set({
           theme: "papyrus",
-          translationSlugs: ["omer-celik"],
+          translationSlugs: [DEFAULT_TRANSLATION_SLUG],
           showTranslation: true,
           showWbw: false,
           wbwTranslation: "on",
