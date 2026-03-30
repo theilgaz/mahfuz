@@ -11,16 +11,17 @@ import { createSession, runInference } from "./session";
 import { QuranDB } from "../lib/quran-db";
 import type { WorkerInbound, WorkerOutbound, QuranVerse } from "../lib/types";
 
-// Model files — served locally if available, otherwise fetched from GitHub
-const GH_BASE = "https://github.com/yazinsai/offline-tarteel/releases/download/v0.1.0";
-const GH_RAW = "https://raw.githubusercontent.com/yazinsai/offline-tarteel/main/web/frontend/public";
+// Model files — served locally if available, otherwise fetched from CDN
+// jsDelivr provides GitHub content with proper CORS + global CDN caching
+const CDN_BASE = "https://cdn.jsdelivr.net/gh/yazinsai/offline-tarteel@main/web/frontend/public";
+const GH_RELEASE = "https://github.com/yazinsai/offline-tarteel/releases/download/v0.1.0";
 
 const MODEL_URL = "/models/fastconformer_ar_ctc_q8.onnx";
-const MODEL_FALLBACK = `${GH_BASE}/fastconformer_ar_ctc_q8.onnx`;
+const MODEL_FALLBACK = `${GH_RELEASE}/fastconformer_ar_ctc_q8.onnx`;
 const VOCAB_URL = "/models/phoneme_vocab.json";
-const VOCAB_FALLBACK = `${GH_RAW}/phoneme_vocab.json`;
+const VOCAB_FALLBACK = `${CDN_BASE}/phoneme_vocab.json`;
 const QURAN_URL = "/models/quran_phonemes.json";
-const QURAN_FALLBACK = `${GH_RAW}/quran_phonemes.json`;
+const QURAN_FALLBACK = `${CDN_BASE}/quran_phonemes.json`;
 
 /** Fetch with local-first, CDN fallback */
 async function fetchWithFallback(localUrl: string, fallbackUrl: string): Promise<Response> {
