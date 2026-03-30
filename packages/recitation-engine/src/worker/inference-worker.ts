@@ -11,9 +11,25 @@ import { createSession, runInference } from "./session";
 import { QuranDB } from "../lib/quran-db";
 import type { WorkerInbound, WorkerOutbound, QuranVerse } from "../lib/types";
 
+// Model files — served locally if available, otherwise fetched from GitHub
+const GH_BASE = "https://github.com/yazinsai/offline-tarteel/releases/download/v0.1.0";
+const GH_RAW = "https://raw.githubusercontent.com/yazinsai/offline-tarteel/main/web/frontend/public";
+
 const MODEL_URL = "/models/fastconformer_ar_ctc_q8.onnx";
+const MODEL_FALLBACK = `${GH_BASE}/fastconformer_ar_ctc_q8.onnx`;
 const VOCAB_URL = "/models/phoneme_vocab.json";
+const VOCAB_FALLBACK = `${GH_RAW}/phoneme_vocab.json`;
 const QURAN_URL = "/models/quran_phonemes.json";
+const QURAN_FALLBACK = `${GH_RAW}/quran_phonemes.json`;
+
+/** Fetch with local-first, CDN fallback */
+async function fetchWithFallback(localUrl: string, fallbackUrl: string): Promise<Response> {
+  try {
+    const res = await fetch(localUrl);
+    if (res.ok) return res;
+  } catch { /* local not available */ }
+  return fetch(fallbackUrl);
+}
 
 let decoder: CTCDecoder | null = null;
 let db: QuranDB | null = null;
@@ -33,26 +49,26 @@ async function init() {
   try {
     // Load vocabulary
     post({ type: "loading_status", message: "Loading vocabulary..." });
-    const vocabRes = await fetch(VOCAB_URL);
+    const vocabRes = await fetchWithFallback(VOCAB_URL, VOCAB_FALLBACK);
     if (!vocabRes.ok) throw new Error(`Vocab fetch failed: ${vocabRes.status}`);
     const vocabJson = await vocabRes.json();
     decoder = new CTCDecoder(vocabJson);
 
-    // Download/load ONNX model
+    // Download/load ONNX model (tries local first, then CDN, caches in IndexedDB)
     post({ type: "loading_status", message: "Downloading model..." });
     const modelBuffer = await loadModel(MODEL_URL, (loaded, total) => {
       post({
         type: "loading",
         percent: total ? Math.round((loaded / total) * 100) : 0,
       });
-    });
+    }, MODEL_FALLBACK);
 
     post({ type: "loading_status", message: "Creating inference session..." });
     await createSession(modelBuffer);
 
     // Load Quran phoneme data
     post({ type: "loading_status", message: "Loading Quran data..." });
-    const quranRes = await fetch(QURAN_URL);
+    const quranRes = await fetchWithFallback(QURAN_URL, QURAN_FALLBACK);
     if (!quranRes.ok) throw new Error(`Quran data fetch failed: ${quranRes.status}`);
     const quranData: QuranVerse[] = await quranRes.json();
     db = new QuranDB(quranData, decoder);

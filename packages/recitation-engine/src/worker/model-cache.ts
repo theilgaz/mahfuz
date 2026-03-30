@@ -52,13 +52,21 @@ export async function isModelCached(): Promise<boolean> {
 export async function loadModel(
   url: string,
   onProgress?: (loaded: number, total: number) => void,
+  fallbackUrl?: string,
 ): Promise<ArrayBuffer> {
   // Try IndexedDB cache first
   const cached = await getFromCache(MODEL_KEY);
   if (cached) return cached;
 
-  // Download with progress
-  const response = await fetch(url);
+  // Download with progress (try local first, then fallback)
+  let response: Response;
+  try {
+    response = await fetch(url);
+    if (!response.ok && fallbackUrl) throw new Error("local not available");
+  } catch {
+    if (!fallbackUrl) throw new Error(`Model download failed`);
+    response = await fetch(fallbackUrl);
+  }
   if (!response.ok) throw new Error(`Model download failed: ${response.status}`);
 
   const total = parseInt(response.headers.get("content-length") || "0");
