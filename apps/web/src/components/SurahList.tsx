@@ -141,7 +141,7 @@ export function SurahList({ surahs }: SurahListProps) {
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium truncate">
                   <span className="mr-1.5">{surahListFilter === "nuzul" ? surah.revelationOrder : surah.id}.</span>{surah.nameSimple}</span>
-                <span className="text-base shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
+                <span className="shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "34px", lineHeight: 1 }}>
                   {surah.nameArabic}
                 </span>
               </div>
