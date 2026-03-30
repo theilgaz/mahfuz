@@ -305,6 +305,22 @@ export const en: Messages = {
     },
   },
 
+  stats: {
+    title: "Statistics",
+    bookmarks: "Bookmarks",
+    recentlyRead: "Recently Read",
+    memorizedVerses: "Memorized Verses",
+    completeSurahs: "Complete Surahs",
+    memorization: "Memorization Progress",
+    versesUnit: "verses",
+    activeSurahsSummary: "{active} surahs in progress, {complete} completed",
+    surahProgress: "Surah Progress",
+    topBookmarked: "Top Bookmarked Surahs",
+    recentPositions: "Recently Read",
+    page: "Page",
+    empty: "No stats yet. Start reading!",
+  },
+
   recitation: {
     title: "Recitation Recognition",
     findVerse: "Find My Verse",

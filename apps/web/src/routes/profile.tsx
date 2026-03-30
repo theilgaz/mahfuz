@@ -164,25 +164,45 @@ function ProfilePage() {
         )}
       </section>
 
-      {/* ── Keşfet Linki ──────────────────────────────── */}
-      <Link
-        to="/discover"
-        className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-[var(--color-accent)]/8 to-transparent border border-[var(--color-accent)]/15 hover:border-[var(--color-accent)]/30 transition-colors"
-      >
-        <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/12 text-[var(--color-accent)] flex items-center justify-center shrink-0">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="10" cy="10" r="8" />
-            <path d="M13.5 6.5L8.5 8.5L6.5 13.5L11.5 11.5L13.5 6.5Z" />
+      {/* ── İstatistikler + Keşfet Linkleri ─────────── */}
+      <div className="space-y-3">
+        <Link
+          to="/stats"
+          className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-colors"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/8 text-[var(--color-accent)] flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">{t.stats.title}</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">{t.stats.memorization}</p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-text-secondary)] shrink-0">
+            <path d="M6 4l4 4-4 4" />
           </svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">{t.hub.title}</p>
-          <p className="text-xs text-[var(--color-text-secondary)]">{t.hub.guide.subtitle}</p>
-        </div>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-accent)] shrink-0">
-          <path d="M6 4l4 4-4 4" />
-        </svg>
-      </Link>
+        </Link>
+
+        <Link
+          to="/discover"
+          className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-[var(--color-accent)]/8 to-transparent border border-[var(--color-accent)]/15 hover:border-[var(--color-accent)]/30 transition-colors"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/12 text-[var(--color-accent)] flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="10" cy="10" r="8" />
+              <path d="M13.5 6.5L8.5 8.5L6.5 13.5L11.5 11.5L13.5 6.5Z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">{t.hub.title}</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">{t.hub.guide.subtitle}</p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-accent)] shrink-0">
+            <path d="M6 4l4 4-4 4" />
+          </svg>
+        </Link>
+      </div>
     </div>
   );
 }

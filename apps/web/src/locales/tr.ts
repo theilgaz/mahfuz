@@ -303,6 +303,22 @@ export const tr = {
     },
   },
 
+  stats: {
+    title: "İstatistikler",
+    bookmarks: "Yer İmi",
+    recentlyRead: "Son Okunan",
+    memorizedVerses: "Ezber Ayet",
+    completeSurahs: "Tam Sure",
+    memorization: "Ezber İlerlemesi",
+    versesUnit: "ayet",
+    activeSurahsSummary: "{active} surede çalışma var, {complete} sure tamamlandı",
+    surahProgress: "Ezber Durumu",
+    topBookmarked: "En Çok İmlenen Sureler",
+    recentPositions: "Son Okunanlar",
+    page: "Sayfa",
+    empty: "Henüz istatistik yok. Okumaya başlayın!",
+  },
+
   recitation: {
     title: "Tilavet Tanıma",
     findVerse: "Ayetimi Bul",

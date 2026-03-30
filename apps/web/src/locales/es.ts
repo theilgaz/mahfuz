@@ -187,6 +187,22 @@ export const es: Messages = {
     filterMadani: "Medinés",
   },
 
+  stats: {
+    title: "Estadísticas",
+    bookmarks: "Marcadores",
+    recentlyRead: "Leído Reciente",
+    memorizedVerses: "Versos Memorizados",
+    completeSurahs: "Suras Completas",
+    memorization: "Progreso de Memorización",
+    versesUnit: "versos",
+    activeSurahsSummary: "{active} suras en progreso, {complete} completadas",
+    surahProgress: "Progreso por Sura",
+    topBookmarked: "Suras Más Marcadas",
+    recentPositions: "Leído Recientemente",
+    page: "Página",
+    empty: "Sin estadísticas aún. ¡Empieza a leer!",
+  },
+
   recitation: {
     title: "Reconocimiento de Recitación",
     findVerse: "Encontrar Mi Verso",
