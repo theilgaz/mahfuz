@@ -10,6 +10,7 @@ import { surahDataQueryOptions } from "~/hooks/useQuranQuery";
 import { ScrollToTop } from "~/components/ScrollToTop";
 import { FontSizeControl } from "~/components/reader/FontSizeControl";
 import { surahIdFromSlug, surahSlug } from "~/lib/surah-slugs";
+import { RouteErrorFallback } from "~/components/RouteErrorFallback";
 
 export const Route = createFileRoute("/surah/$surahSlug")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/surah/$surahSlug")({
     return context.queryClient.ensureQueryData(surahDataQueryOptions(id));
   },
   component: SurahRoute,
+  errorComponent: RouteErrorFallback,
 });
 
 function SurahRoute() {

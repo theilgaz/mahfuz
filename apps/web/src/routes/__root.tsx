@@ -10,6 +10,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useFocusTrap } from "~/hooks/useFocusTrap";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
+import { RouteErrorFallback } from "~/components/RouteErrorFallback";
 import { AudioProvider } from "~/components/reader/AudioProvider";
 import { BottomNav } from "~/components/BottomNav";
 import { useSettingsStore } from "~/stores/settings.store";
@@ -51,6 +52,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     return { session };
   },
   notFoundComponent: NotFound,
+  errorComponent: RouteErrorFallback,
   pendingComponent: PendingIndicator,
   head: () => ({
     meta: [

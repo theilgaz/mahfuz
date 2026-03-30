@@ -3,6 +3,7 @@
  * Satır verisi mevcutsa gerçek Mushaf satır düzeni kullanılır.
  */
 
+import { useShallow } from "zustand/react/shallow";
 import { useSettingsStore, COLOR_PALETTES } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
@@ -27,7 +28,15 @@ interface MushafPageProps {
 }
 
 export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
-  const { showTranslation, showTajweed, translationSlugs, arabicFontSize, textStyle } = useSettingsStore();
+  const { showTranslation, showTajweed, translationSlugs, arabicFontSize, textStyle } = useSettingsStore(
+    useShallow((s) => ({
+      showTranslation: s.showTranslation,
+      showTajweed: s.showTajweed,
+      translationSlugs: s.translationSlugs,
+      arabicFontSize: s.arabicFontSize,
+      textStyle: s.textStyle,
+    }))
+  );
   const useBasic = textStyle === "basic";
   const effectiveTajweed = showTajweed && !useBasic;
   const savePosition = useReadingStore((s) => s.savePosition);

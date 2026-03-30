@@ -10,6 +10,7 @@ import { pageDataQueryOptions } from "~/hooks/useQuranQuery";
 import { ScrollToTop } from "~/components/ScrollToTop";
 import { FontSizeControl } from "~/components/reader/FontSizeControl";
 import { useSwipeNav } from "~/hooks/useSwipeNav";
+import { RouteErrorFallback } from "~/components/RouteErrorFallback";
 
 const TOTAL_PAGES = 604;
 
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/page/$pageNumber")({
     return context.queryClient.ensureQueryData(pageDataQueryOptions(pageNumber));
   },
   component: PageRoute,
+  errorComponent: RouteErrorFallback,
 });
 
 function PageRoute() {

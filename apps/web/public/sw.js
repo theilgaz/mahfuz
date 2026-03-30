@@ -1,7 +1,9 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "mahfuz-v1";
+const CACHE_VERSION = "20260330";
+const CACHE_NAME = `mahfuz-${CACHE_VERSION}`;
 const STATIC_ASSETS = ["/", "/manifest.json"];
+const MAX_CACHE_ITEMS = 500;
 
 // Install — precache shell
 self.addEventListener("install", (event) => {
@@ -23,6 +25,17 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+// Trim cache to prevent unbounded growth
+async function trimCache(cacheName, maxItems) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  if (keys.length > maxItems) {
+    // Delete oldest entries (first in list)
+    const toDelete = keys.length - maxItems;
+    await Promise.all(keys.slice(0, toDelete).map((k) => cache.delete(k)));
+  }
+}
+
 // Fetch — network-first for navigation & API, cache-first for static assets
 self.addEventListener("fetch", (event) => {
   const { request } = event;
@@ -34,11 +47,14 @@ self.addEventListener("fetch", (event) => {
   // Skip external requests
   if (url.origin !== self.location.origin) return;
 
-  // Font files + Quran JSON — cache-first (immutable content)
+  // Immutable content — cache-first (fonts, quran data, translations, mushaf, tajweed, imlaei)
   if (
     url.pathname.startsWith("/fonts/") ||
     url.pathname.startsWith("/quran/") ||
-    url.pathname.startsWith("/translations/")
+    url.pathname.startsWith("/translations/") ||
+    url.pathname.startsWith("/mushaf-lines/") ||
+    url.pathname.startsWith("/tajweed/") ||
+    url.pathname.startsWith("/imlaei/")
   ) {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) =>
@@ -47,6 +63,7 @@ self.addEventListener("fetch", (event) => {
             cached ||
             fetch(request).then((response) => {
               cache.put(request, response.clone());
+              trimCache(CACHE_NAME, MAX_CACHE_ITEMS);
               return response;
             }),
         ),
@@ -77,7 +94,6 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Başarılı yanıtı cache'le
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return response;
@@ -89,7 +105,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Server functions — network-only (DB bağımlı, cache'lenemez)
+  // Server functions — network-only (DB dependent, cannot cache)
   if (url.pathname.startsWith("/_server")) {
     return;
   }
