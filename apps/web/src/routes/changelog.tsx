@@ -40,6 +40,46 @@ interface Milestone {
 
 const MILESTONES: Milestone[] = [
   {
+    version: "0.6",
+    name: "Senkronizasyon & Performans",
+    nameEn: "Sync & Performance",
+    date: "2026-03-30",
+    days: [
+      {
+        date: "2026-03-30",
+        entries: [
+          { tag: "feat", category: "reading", title: "Uzun sureler için sanal kaydırma (virtual scrolling)", titleEn: "Virtual scrolling for long surahs" },
+          { tag: "feat", category: "reading", title: "Kelime renklendirme: 4 palet seçeneği", titleEn: "Word coloring with 4 palette options" },
+          { tag: "feat", category: "reading", title: "İstatistikler sayfası ve okuma grafikleri", titleEn: "Stats page with reading charts" },
+          { tag: "feat", category: "nav", title: "Arama: popüler sureler, anahtar kelime önerileri, bulanık eşleşme", titleEn: "Search: popular surahs, keyword suggestions, fuzzy matching" },
+          { tag: "feat", category: "nav", title: "Tüm navigasyon tek AppHeader'da birleştirildi", titleEn: "All navigation unified in single AppHeader" },
+          { tag: "feat", category: "hub", title: "Profil sayfası yeniden tasarlandı (yer imleri + keşfet)", titleEn: "Redesigned profile page with bookmarks + discover" },
+          { tag: "feat", category: "reading", title: "5 yeni Türkçe meal eklendi (toplam 9)", titleEn: "5 new Turkish translations added (total 9)" },
+          { tag: "feat", category: "reading", title: "Sayfa geçiş animasyonları (view transitions)", titleEn: "Page transition animations (view transitions)" },
+          { tag: "improve", category: "settings", title: "Ayarlar iki sekmeli düzen ve canlı önizleme", titleEn: "Settings: two-tab layout with live preview" },
+          { tag: "improve", category: "infra", title: "Fontlar self-host, ağır bileşenler lazy-load", titleEn: "Self-hosted fonts, lazy-loaded heavy components" },
+          { tag: "improve", category: "reading", title: "İskelet yükleyiciler ve komşu sayfa ön yükleme", titleEn: "Skeleton loaders and adjacent page prefetch" },
+          { tag: "improve", category: "infra", title: "Erişilebilirlik: focus trap, ARIA, canlı bölgeler", titleEn: "Accessibility: focus trap, ARIA, live regions" },
+          { tag: "fix", category: "reading", title: "Mushaf modunda kelime kelime geçişi devre dışı", titleEn: "Disabled word-by-word toggle in mushaf mode" },
+          { tag: "fix", category: "infra", title: "Tema: tüm sabit kodlu renkler CSS değişkenlerine taşındı", titleEn: "All hardcoded colors replaced with CSS variables" },
+          { tag: "fix", category: "learning", title: "Elifba: nokta konumları ve çizim rehberi iyileştirmeleri", titleEn: "Alifba: dot positions and stroke guide improvements" },
+          { tag: "fix", category: "nav", title: "Router: sayısal sure yönlendirme düzeltmesi", titleEn: "Router: numeric surah redirect fix" },
+          { tag: "fix", category: "infra", title: "Hata sınırları, SW önbellek ve yeniden çizim düzeltmeleri", titleEn: "Error boundaries, SW cache and re-render fixes" },
+          { tag: "fix", category: "infra", title: "Üretimdeki font 404 hatası düzeltildi", titleEn: "Fixed font 404 errors in production" },
+        ],
+      },
+      {
+        date: "2026-03-29",
+        entries: [
+          { tag: "feat", category: "settings", title: "Cihazlar arası senkronizasyon: okuma konumu, ayarlar, yer imleri, hıfz", titleEn: "Cross-device sync: reading position, settings, bookmarks, hifz" },
+          { tag: "feat", category: "infra", title: "Konteyner başlangıcında otomatik veritabanı göçü", titleEn: "Auto-run database migrations on container start" },
+          { tag: "fix", category: "settings", title: "Mod değişiminde ayar paneli açık kalıyor", titleEn: "Settings panel stays open on mode change" },
+          { tag: "fix", category: "hub", title: "İstatistik/katkıcılar API'si ve FOUC önleme", titleEn: "Stats/contributors API and FOUC prevention" },
+        ],
+      },
+    ],
+  },
+  {
     version: "0.5",
     name: "Keşfet & İyileştirmeler",
     nameEn: "Explore & Refinements",
