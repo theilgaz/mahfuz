@@ -8,8 +8,8 @@ import { useSettingsStore, COLOR_PALETTES } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useAudioStore } from "~/stores/audio.store";
-import { usePageData, useTajweed, useImlaei, useMushafLines, translationSourcesQueryOptions, mushafLinesQueryOptions, pageDataQueryOptions } from "~/hooks/useQuranQuery";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePageData, useTajweed, useImlaei, useMushafLines, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
+import { useQuery } from "@tanstack/react-query";
 import { cleanImlaei } from "~/lib/strip-diacritics";
 import { parseTajweed } from "~/lib/tajweed-parser";
 import { splitWords } from "~/lib/split-words";
@@ -91,19 +91,6 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
   }, [translationSourceList]);
 
   useReadingTracker(pageNumber);
-
-  // Prefetch adjacent pages for instant navigation
-  const queryClient = useQueryClient();
-  useEffect(() => {
-    if (pageNumber > 1) {
-      queryClient.prefetchQuery(mushafLinesQueryOptions(pageNumber - 1));
-      queryClient.prefetchQuery(pageDataQueryOptions(pageNumber - 1, translationSlugs));
-    }
-    if (pageNumber < 604) {
-      queryClient.prefetchQuery(mushafLinesQueryOptions(pageNumber + 1));
-      queryClient.prefetchQuery(pageDataQueryOptions(pageNumber + 1, translationSlugs));
-    }
-  }, [pageNumber, translationSlugs, queryClient]);
 
   useEffect(() => {
     if (pageData && pageData.surahGroups.length > 0) {

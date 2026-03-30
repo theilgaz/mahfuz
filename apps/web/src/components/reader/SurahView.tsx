@@ -13,7 +13,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { AyahBlock } from "./AyahBlock";
 import { SurahSkeleton } from "./SurahSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
-import { useEffect, useRef, useCallback, useMemo } from "react";
+import { useEffect, useRef, useCallback, useMemo, type ReactNode } from "react";
 
 interface SurahViewProps {
   surahId: number;
@@ -178,15 +178,13 @@ const VIRTUAL_OVERSCAN = 5;
 const ESTIMATED_AYAH_HEIGHT = 180;
 
 interface VirtualAyahListProps {
-  ayahs: any[];
-  renderAyah: (ayah: any) => React.ReactNode;
+  ayahs: Array<{ ayahNumber: number; [key: string]: unknown }>;
+  renderAyah: (ayah: VirtualAyahListProps["ayahs"][number]) => ReactNode;
   setAyahRef: (ayahNumber: number, el: HTMLDivElement | null) => void;
   highlightAyah?: number;
 }
 
 function VirtualAyahList({ ayahs, renderAyah, setAyahRef, highlightAyah }: VirtualAyahListProps) {
-  const parentRef = useRef<HTMLDivElement>(null);
-
   const virtualizer = useVirtualizer({
     count: ayahs.length,
     getScrollElement: () => document.documentElement,
@@ -204,7 +202,7 @@ function VirtualAyahList({ ayahs, renderAyah, setAyahRef, highlightAyah }: Virtu
   }, [highlightAyah, ayahs, virtualizer]);
 
   return (
-    <div ref={parentRef} className="pb-8 relative" style={{ height: virtualizer.getTotalSize() }}>
+    <div className="pb-8 relative" style={{ height: virtualizer.getTotalSize() }}>
       {virtualizer.getVirtualItems().map((virtualRow) => {
         const ayah = ayahs[virtualRow.index];
         return (

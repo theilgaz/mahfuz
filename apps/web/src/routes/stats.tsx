@@ -10,7 +10,7 @@ import { useHifzStore, computeHifzStats, SURAH_VERSE_COUNTS, TOTAL_VERSES } from
 import { useReadingStore } from "~/stores/reading.store";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
-import { TOTAL_CHAPTERS, TOTAL_PAGES } from "@mahfuz/shared";
+import { TOTAL_CHAPTERS } from "@mahfuz/shared";
 
 export const Route = createFileRoute("/stats")({
   component: StatsPage,
@@ -25,7 +25,7 @@ function StatsPage() {
   const hifzStats = useMemo(() => computeHifzStats(memorized), [memorized]);
 
   // Bookmark stats
-  const bookmarksBySuported = useMemo(() => {
+  const bookmarksBySurah = useMemo(() => {
     const map: Record<number, number> = {};
     for (const bm of bookmarks) {
       map[bm.surahId] = (map[bm.surahId] ?? 0) + 1;
@@ -125,11 +125,11 @@ function StatsPage() {
       )}
 
       {/* ── Top bookmarked surahs ────────────────────── */}
-      {bookmarksBySuported.length > 0 && (
+      {bookmarksBySurah.length > 0 && (
         <section className="mb-8">
           <h2 className="text-sm font-semibold text-[var(--color-text-secondary)] mb-3">En Çok İmlenen Sureler</h2>
           <div className="space-y-1.5">
-            {bookmarksBySuported.map((s) => (
+            {bookmarksBySurah.map((s) => (
               <div key={s.surahId} className="flex items-center justify-between rounded-lg border border-[var(--color-border)] px-3 py-2.5">
                 <span className="text-sm font-medium">{s.name}</span>
                 <span className="text-xs text-[var(--color-accent)] font-semibold">{s.count} ayet</span>

@@ -25,12 +25,15 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Trim cache to prevent unbounded growth
-async function trimCache(cacheName, maxItems) {
+// Trim cache to prevent unbounded growth (throttled to once per 60s)
+let lastTrimTime = 0;
+async function trimCacheThrottled(cacheName, maxItems) {
+  const now = Date.now();
+  if (now - lastTrimTime < 60000) return;
+  lastTrimTime = now;
   const cache = await caches.open(cacheName);
   const keys = await cache.keys();
   if (keys.length > maxItems) {
-    // Delete oldest entries (first in list)
     const toDelete = keys.length - maxItems;
     await Promise.all(keys.slice(0, toDelete).map((k) => cache.delete(k)));
   }
@@ -63,7 +66,7 @@ self.addEventListener("fetch", (event) => {
             cached ||
             fetch(request).then((response) => {
               cache.put(request, response.clone());
-              trimCache(CACHE_NAME, MAX_CACHE_ITEMS);
+              trimCacheThrottled(CACHE_NAME, MAX_CACHE_ITEMS);
               return response;
             }),
         ),

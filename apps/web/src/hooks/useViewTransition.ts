@@ -17,10 +17,11 @@ function supportsViewTransitions(): boolean {
  */
 export function useViewTransition() {
   const router = useRouter();
+  const isSupported = supportsViewTransitions();
 
   const navigateWithTransition = useCallback(
     (opts: Parameters<typeof router.navigate>[0]) => {
-      if (!supportsViewTransitions()) {
+      if (!isSupported) {
         router.navigate(opts);
         return;
       }
@@ -29,8 +30,8 @@ export function useViewTransition() {
         router.navigate(opts);
       });
     },
-    [router],
+    [router, isSupported],
   );
 
-  return { navigateWithTransition, supportsViewTransitions: supportsViewTransitions() };
+  return { navigateWithTransition, supportsViewTransitions: isSupported };
 }

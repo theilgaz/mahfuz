@@ -113,7 +113,7 @@ function RootComponent() {
 function AppHeader() {
   const labsEnabled = useSettingsStore((s) => s.labsEnabled);
   const { t } = useTranslation();
-  const routerState = useRouterState();
+  const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [labsMenuOpen, setLabsMenuOpen] = useState(false);
@@ -123,7 +123,6 @@ function AppHeader() {
   const closeLabsMenu = useCallback(() => setLabsMenuOpen(false), []);
   useFocusTrap(labsDropdownRef, labsMenuOpen, closeLabsMenu);
 
-  const path = routerState.location.pathname;
   const isHome = path === "/";
   const isAuth = path.startsWith("/auth");
   if (isAuth) return null;
@@ -133,8 +132,8 @@ function AppHeader() {
   const pageNumMatch = path.match(/^\/page\/(\d+)$/);
   const isReadingRoute = !!(surahSlugMatch || pageNumMatch);
 
-  // Current surah ID for reading routes
-  const lastPosition = useReadingStore((s) => s.lastPosition);
+  // Current surah ID for reading routes (read lazily to avoid scroll-triggered re-renders)
+  const lastPosition = useReadingStore.getState().lastPosition;
   const currentSurahId = surahSlugMatch
     ? undefined // will be resolved by SurahPicker from slug
     : pageNumMatch
@@ -164,7 +163,7 @@ function AppHeader() {
     if (!ctx.surahId && lastPosition) ctx.surahId = lastPosition.surahId;
     if (!ctx.pageNumber && lastPosition) ctx.pageNumber = lastPosition.pageNumber;
     return ctx;
-  }, [surahSlugMatch, pageNumMatch, lastPosition]);
+  }, [surahSlugMatch, pageNumMatch]);
 
   return (
     <>
@@ -308,8 +307,7 @@ function AppHeader() {
 
 // ── Reading route nav helpers ────────────────────────────
 
-const TOTAL_CHAPTERS = 114;
-const TOTAL_PAGES = 604;
+import { TOTAL_CHAPTERS, TOTAL_PAGES } from "@mahfuz/shared";
 
 function SurahPickerNav({ surahSlug: slug }: { surahSlug: string }) {
   const id = surahIdFromSlug(slug) ?? 1;
