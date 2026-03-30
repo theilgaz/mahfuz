@@ -138,19 +138,19 @@ export function SurahList({ surahs }: SurahListProps) {
 
             {/* İsim + meta */}
             <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium truncate">
-                  <span className="mr-1.5">{surahListFilter === "nuzul" ? surah.revelationOrder : surah.id}.</span>{surah.nameSimple}</span>
-                <span className="shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "34px", lineHeight: 1 }}>
-                  {surah.nameArabic}
-                </span>
-              </div>
+              <span className="text-sm font-medium truncate">
+                <span className="mr-1.5">{surahListFilter === "nuzul" ? surah.revelationOrder : surah.id}.</span>{surah.nameSimple}</span>
               <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
                 <span className="truncate">{getSurahName(surah.id, locale)}</span>
                 <span className="shrink-0">&middot;</span>
                 <span className="shrink-0">{surah.ayahCount} {t.surahList.verses}</span>
               </div>
             </div>
+
+            {/* Arapça sure ismi */}
+            <span className="shrink-0 self-center" dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "34px", lineHeight: "normal" }}>
+              {surah.nameArabic}
+            </span>
           </Link>
         ))}
       </div>
