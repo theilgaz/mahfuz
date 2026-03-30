@@ -162,7 +162,7 @@ Server DB (LibSQL via Drizzle ORM)
 
 ## Contributing
 
-Contributions are welcome. Whether you work with React, mobile development, or are passionate about building tools for the Quran, there is a place for you here.
+Contributions are welcome and encouraged. Whether you work with React, mobile development, or are passionate about building tools for the Quran, there is a place for you here.
 
 Start by opening an issue to discuss your idea, then send a pull request.
 
