@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StatsRouteImport } from './routes/stats'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as HifzRouteImport } from './routes/hifz'
@@ -24,6 +25,11 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const StatsRoute = StatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/hifz': typeof HifzRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/hifz': typeof HifzRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/hifz': typeof HifzRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/hifz'
     | '/profile'
     | '/search'
+    | '/stats'
     | '/auth/callback'
     | '/auth/login'
     | '/juz/$juzId'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/hifz'
     | '/profile'
     | '/search'
+    | '/stats'
     | '/auth/callback'
     | '/auth/login'
     | '/juz/$juzId'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/hifz'
     | '/profile'
     | '/search'
+    | '/stats'
     | '/auth/callback'
     | '/auth/login'
     | '/juz/$juzId'
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   HifzRoute: typeof HifzRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
+  StatsRoute: typeof StatsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
   JuzJuzIdRoute: typeof JuzJuzIdRoute
@@ -214,6 +227,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
@@ -324,6 +344,7 @@ const rootRouteChildren: RootRouteChildren = {
   HifzRoute: HifzRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
+  StatsRoute: StatsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,
   JuzJuzIdRoute: JuzJuzIdRoute,

@@ -324,3 +324,23 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
   border: 2px solid var(--color-bg);
   box-shadow: 0 1px 3px rgba(0,0,0,.25);
 }
+
+/* ── View Transitions ────────────────────────────────── */
+
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vt-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+::view-transition-old(root) {
+  animation: vt-fade-out 120ms ease-out;
+}
+
+::view-transition-new(root) {
+  animation: vt-fade-in 120ms ease-in;
+}

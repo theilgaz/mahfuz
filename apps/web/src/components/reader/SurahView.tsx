@@ -9,6 +9,7 @@ import { useSurahData, useTajweed, useImlaei, translationSourcesQueryOptions } f
 import { useQuery } from "@tanstack/react-query";
 import { useWbwData } from "~/hooks/useWbwData";
 import { cleanImlaei } from "~/lib/strip-diacritics";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { AyahBlock } from "./AyahBlock";
 import { SurahSkeleton } from "./SurahSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
@@ -110,11 +111,33 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     return <SurahSkeleton />;
   }
 
-  const { surah, ayahs } = data;
+  const { surah, ayahs: ayahList } = data;
+  const useVirtual = ayahList.length >= 100;
+
+  const renderAyah = useCallback(
+    (ayah: (typeof ayahList)[number]) => (
+      <AyahBlock
+        surahId={surahId}
+        ayahNumber={ayah.ayahNumber}
+        textUthmani={useBasic ? cleanImlaei(imlaeiData?.[`${surahId}:${ayah.ayahNumber}`] ?? ayah.textUthmani) : ayah.textUthmani}
+        textTajweed={effectiveTajweed ? tajweedData?.[`${surahId}:${ayah.ayahNumber}`] : undefined}
+        translation={ayah.translation}
+        translations={ayah.translations}
+        translationNames={translationNames}
+        showTranslation={showTranslation && !showWbw}
+        showTajweed={showTajweed}
+        pageNumber={ayah.pageNumber}
+        highlight={highlightAyah === ayah.ayahNumber}
+        wbwWords={showWbw ? wbwData?.get(`${surahId}:${ayah.ayahNumber}`) : undefined}
+        sajdah={!!ayah.sajdah}
+      />
+    ),
+    [surahId, useBasic, imlaeiData, effectiveTajweed, tajweedData, translationNames, showTranslation, showWbw, showTajweed, highlightAyah, wbwData],
+  );
 
   return (
     <div className="max-w-3xl mx-auto px-4">
-      {/* Besmele (sure adı artık header'da) */}
+      {/* Besmele */}
       {surah.bismillahPre && (
         <p
           className="pt-6 pb-4 text-center text-[var(--color-text-primary)]"
@@ -125,31 +148,81 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
         </p>
       )}
 
-      <div className="pb-8">
-        {ayahs.map((ayah) => (
+      {useVirtual ? (
+        <VirtualAyahList
+          ayahs={ayahList}
+          renderAyah={renderAyah}
+          setAyahRef={setAyahRef}
+          highlightAyah={highlightAyah}
+        />
+      ) : (
+        <div className="pb-8">
+          {ayahList.map((ayah) => (
+            <div
+              key={ayah.ayahNumber}
+              ref={(el) => setAyahRef(ayah.ayahNumber, el)}
+              data-ayah={ayah.ayahNumber}
+            >
+              {renderAyah(ayah)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Virtual scrolling for long surahs (100+ ayahs) ──────
+
+const VIRTUAL_OVERSCAN = 5;
+const ESTIMATED_AYAH_HEIGHT = 180;
+
+interface VirtualAyahListProps {
+  ayahs: any[];
+  renderAyah: (ayah: any) => React.ReactNode;
+  setAyahRef: (ayahNumber: number, el: HTMLDivElement | null) => void;
+  highlightAyah?: number;
+}
+
+function VirtualAyahList({ ayahs, renderAyah, setAyahRef, highlightAyah }: VirtualAyahListProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: ayahs.length,
+    getScrollElement: () => document.documentElement,
+    estimateSize: () => ESTIMATED_AYAH_HEIGHT,
+    overscan: VIRTUAL_OVERSCAN,
+  });
+
+  // Scroll to highlighted ayah
+  useEffect(() => {
+    if (!highlightAyah) return;
+    const idx = ayahs.findIndex((a) => a.ayahNumber === highlightAyah);
+    if (idx >= 0) {
+      virtualizer.scrollToIndex(idx, { align: "center", behavior: "smooth" });
+    }
+  }, [highlightAyah, ayahs, virtualizer]);
+
+  return (
+    <div ref={parentRef} className="pb-8 relative" style={{ height: virtualizer.getTotalSize() }}>
+      {virtualizer.getVirtualItems().map((virtualRow) => {
+        const ayah = ayahs[virtualRow.index];
+        return (
           <div
             key={ayah.ayahNumber}
-            ref={(el) => setAyahRef(ayah.ayahNumber, el)}
+            ref={(el) => {
+              virtualizer.measureElement(el);
+              setAyahRef(ayah.ayahNumber, el);
+            }}
+            data-index={virtualRow.index}
             data-ayah={ayah.ayahNumber}
+            className="absolute left-0 right-0"
+            style={{ transform: `translateY(${virtualRow.start}px)` }}
           >
-            <AyahBlock
-              surahId={surahId}
-              ayahNumber={ayah.ayahNumber}
-              textUthmani={useBasic ? cleanImlaei(imlaeiData?.[`${surahId}:${ayah.ayahNumber}`] ?? ayah.textUthmani) : ayah.textUthmani}
-              textTajweed={effectiveTajweed ? tajweedData?.[`${surahId}:${ayah.ayahNumber}`] : undefined}
-              translation={ayah.translation}
-              translations={ayah.translations}
-              translationNames={translationNames}
-              showTranslation={showTranslation && !showWbw}
-              showTajweed={showTajweed}
-              pageNumber={ayah.pageNumber}
-              highlight={highlightAyah === ayah.ayahNumber}
-              wbwWords={showWbw ? wbwData?.get(`${surahId}:${ayah.ayahNumber}`) : undefined}
-              sajdah={!!ayah.sajdah}
-            />
+            {renderAyah(ayah)}
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

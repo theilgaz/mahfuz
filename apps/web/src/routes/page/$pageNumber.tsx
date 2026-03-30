@@ -2,7 +2,7 @@
  * Mushaf sayfası route'u — /page/1 ... /page/604
  */
 
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import { MushafPage } from "~/components/reader/MushafPage";
@@ -11,6 +11,7 @@ import { pageDataQueryOptions } from "~/hooks/useQuranQuery";
 import { ScrollToTop } from "~/components/ScrollToTop";
 import { FontSizeControl } from "~/components/reader/FontSizeControl";
 import { useSwipeNav } from "~/hooks/useSwipeNav";
+import { useViewTransition } from "~/hooks/useViewTransition";
 import { RouteErrorFallback } from "~/components/RouteErrorFallback";
 
 const TOTAL_PAGES = 604;
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/page/$pageNumber")({
 function PageRoute() {
   const { pageNumber } = Route.useParams();
   const { ayah } = Route.useSearch();
-  const navigate = useNavigate();
+  const { navigateWithTransition } = useViewTransition();
   const queryClient = useQueryClient();
   const page = parseInt(pageNumber, 10);
 
@@ -43,9 +44,9 @@ function PageRoute() {
   const goTo = useCallback(
     (p: number) => {
       if (p < 1 || p > TOTAL_PAGES) return;
-      navigate({ to: "/page/$pageNumber", params: { pageNumber: String(p) }, search: { ayah: undefined } });
+      navigateWithTransition({ to: "/page/$pageNumber", params: { pageNumber: String(p) }, search: { ayah: undefined } });
     },
-    [navigate],
+    [navigateWithTransition],
   );
 
   useEffect(() => {
