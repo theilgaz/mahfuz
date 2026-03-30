@@ -247,6 +247,9 @@ export const searchQuran = createServerFn({ method: "GET" })
       for (const r of surahResults) seenKeys.add(`${r.surahId}:${r.ayahNumber}`);
     }
 
+    const results: SearchResult[] = [];
+    const seenKeys = new Set<string>();
+
     const pattern = `%${trimmed}%`;
 
     // Meal kaynak ID'sini bul
@@ -254,9 +257,6 @@ export const searchQuran = createServerFn({ method: "GET" })
       .select()
       .from(translationSources)
       .where(eq(translationSources.slug, translationSlug));
-
-    const results: SearchResult[] = [];
-    const seenKeys = new Set<string>();
 
     // 1. Mealde ara — JOIN ile tek sorguda ayah + surah + translation
     if (source) {
