@@ -80,7 +80,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function PendingIndicator() {
   return (
-    <div className="fixed top-0 inset-x-0 z-50 h-0.5 bg-[var(--color-accent)] animate-pulse" />
+    <div className="fixed top-0 inset-x-0 z-50 h-0.5 bg-[var(--color-accent)] animate-pulse" role="status" aria-label="Loading">
+      <span className="sr-only">Loading...</span>
+    </div>
   );
 }
 
@@ -354,6 +356,7 @@ function PagePickerNav({ page, surahId }: { page: number; surahId: number }) {
 function RootDocument({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const locale = useLocaleStore((s) => s.locale);
+  const { t } = useTranslation();
   const { session } = useRouteContext({ from: "__root__" });
 
   // Unified cross-device sync
@@ -394,9 +397,14 @@ function RootDocument({ children }: { children: ReactNode }) {
         <style dangerouslySetInnerHTML={{ __html: `.loading{opacity:0}.loaded{opacity:1;transition:opacity .15s ease}` }} />
       </head>
       <body className="bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased overflow-x-hidden">
+        <a href="#main-content" className="skip-link">
+          {t.a11y?.skipToContent ?? "Skip to content"}
+        </a>
         <AppHeader />
         <AudioProvider />
-        {children}
+        <main id="main-content">
+          {children}
+        </main>
         <RecitationBar />
         <BottomNav />
         <Scripts />

@@ -34,11 +34,17 @@ export function AudioBar() {
     ? currentVerseKey.replace(":", " : ")
     : chapterName ?? "";
 
+  const stateLabel = isLoading ? "Loading" : isPlaying ? "Playing" : "Paused";
+
   return (
-    <div className="fixed bottom-18 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]">
+    <div className="fixed bottom-18 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]" role="region" aria-label="Audio player">
+      {/* Screen reader announcements */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {stateLabel} {verseDisplay} — {speed}x
+      </div>
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg px-3 py-2">
         {/* Progress bar */}
-        <div className="h-0.5 rounded-full bg-[var(--color-border)] overflow-hidden mb-2">
+        <div className="h-0.5 rounded-full bg-[var(--color-border)] overflow-hidden mb-2" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
           <div
             className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-200"
             style={{ width: `${progress}%` }}
@@ -130,6 +136,7 @@ export function AudioBar() {
                   setSpeed(s);
                   setShowSpeed(false);
                 }}
+                aria-pressed={speed === s}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                   speed === s
                     ? "bg-[var(--color-accent)] text-white"

@@ -350,4 +350,18 @@ export const en: Messages = {
     confidence: "confidence",
     modelCached: "Model ready (available offline)",
   },
+  a11y: {
+    skipToContent: "Skip to content",
+    arabicFontSize: "Arabic font size",
+    translationFontSize: "Translation font size",
+    searchQuran: "Search the Quran",
+    playbackSpeed: "Playback speed",
+    playing: "Playing",
+    paused: "Paused",
+    stopped: "Stopped",
+    loading: "Loading",
+    speedChanged: "Speed: {speed}x",
+    pageJump: "Enter page number",
+    verseActions: "Verse actions menu",
+  },
 } as const;

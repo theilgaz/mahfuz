@@ -348,4 +348,18 @@ export const tr = {
     confidence: "güven",
     modelCached: "Model hazır (çevrimdışı kullanılabilir)",
   },
+  a11y: {
+    skipToContent: "İçeriğe atla",
+    arabicFontSize: "Arapça yazı boyutu",
+    translationFontSize: "Meal yazı boyutu",
+    searchQuran: "Kuran'da ara",
+    playbackSpeed: "Oynatma hızı",
+    playing: "Oynatılıyor",
+    paused: "Duraklatıldı",
+    stopped: "Durduruldu",
+    loading: "Yükleniyor",
+    speedChanged: "Hız: {speed}x",
+    pageJump: "Sayfa numarası girin",
+    verseActions: "Ayet menüsü",
+  },
 } as const;

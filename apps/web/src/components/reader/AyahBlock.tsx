@@ -123,6 +123,18 @@ export function AyahBlock({
     [surahId, openMenu],
   );
 
+  // Keyboard fallback for long-press: Enter/Space opens verse menu
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!surahId) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openMenu();
+      }
+    },
+    [surahId, openMenu],
+  );
+
   // Long press gesture
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -171,6 +183,10 @@ export function AyahBlock({
           ? "bg-[var(--color-accent)]/10 scale-[0.98] shadow-lg ring-1 ring-[var(--color-accent)]/20"
           : flash ? "bg-[var(--color-accent)]/10" : isPlaying ? "bg-[var(--color-accent)]/6" : ""
       }`}
+      tabIndex={surahId ? 0 : undefined}
+      role={surahId ? "button" : undefined}
+      aria-label={surahId ? `${surahId}:${ayahNumber}` : undefined}
+      onKeyDown={handleKeyDown}
       onContextMenu={handleContextMenu}
       onTouchStart={handleTouchStart}
       onTouchEnd={cancelLongPress}

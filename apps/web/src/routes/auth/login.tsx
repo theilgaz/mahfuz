@@ -79,7 +79,7 @@ function LoginPage() {
 
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           {error && (
-            <div className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-[13px] text-red-400">
+            <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-[13px] text-red-400">
               {error}
             </div>
           )}
@@ -104,32 +104,50 @@ function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3">
             {mode === "register" && (
+              <div>
+                <label htmlFor="auth-name" className="sr-only">{t.auth.namePlaceholder}</label>
+                <input
+                  id="auth-name"
+                  type="text"
+                  required
+                  aria-required="true"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t.auth.namePlaceholder}
+                  className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
+                />
+              </div>
+            )}
+            <div>
+              <label htmlFor="auth-email" className="sr-only">{t.auth.emailPlaceholder}</label>
               <input
-                type="text"
+                id="auth-email"
+                type="email"
                 required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t.auth.namePlaceholder}
+                aria-required="true"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t.auth.emailPlaceholder}
                 className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
               />
-            )}
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={t.auth.emailPlaceholder}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
-            />
-            <input
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={t.auth.passwordPlaceholder}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
-            />
+            </div>
+            <div>
+              <label htmlFor="auth-password" className="sr-only">{t.auth.passwordPlaceholder}</label>
+              <input
+                id="auth-password"
+                type="password"
+                required
+                aria-required="true"
+                autoComplete={mode === "register" ? "new-password" : "current-password"}
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t.auth.passwordPlaceholder}
+                className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
+              />
+            </div>
             <button
               type="submit"
               disabled={loading}
@@ -163,7 +181,7 @@ function LoginPage() {
 
 function GoogleIcon() {
   return (
-    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24">
+    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />

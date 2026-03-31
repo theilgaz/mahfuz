@@ -232,4 +232,18 @@ export const es: Messages = {
     confidence: "confianza",
     modelCached: "Modelo listo (disponible sin conexión)",
   },
+  a11y: {
+    skipToContent: "Saltar al contenido",
+    arabicFontSize: "Tamaño de fuente árabe",
+    translationFontSize: "Tamaño de fuente de traducción",
+    searchQuran: "Buscar en el Corán",
+    playbackSpeed: "Velocidad de reproducción",
+    playing: "Reproduciendo",
+    paused: "Pausado",
+    stopped: "Detenido",
+    loading: "Cargando",
+    speedChanged: "Velocidad: {speed}x",
+    pageJump: "Ingrese número de página",
+    verseActions: "Menú de acciones del verso",
+  },
 } as const;

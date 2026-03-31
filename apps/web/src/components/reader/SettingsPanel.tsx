@@ -109,8 +109,11 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
           </div>
 
           {/* Tab bar */}
-          <div className="flex rounded-lg overflow-hidden border border-[var(--color-border)] mb-4">
+          <div role="tablist" className="flex rounded-lg overflow-hidden border border-[var(--color-border)] mb-4">
             <button
+              role="tab"
+              aria-selected={tab === "reading"}
+              aria-controls="settings-tab-reading"
               onClick={() => setTab("reading")}
               className={`flex-1 py-2 text-xs font-medium transition-colors ${
                 tab === "reading" ? "bg-[var(--color-accent)] text-white" : "bg-[var(--color-surface)] text-[var(--color-text-secondary)]"
@@ -119,6 +122,9 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
               {t.settings.tabs.reading}
             </button>
             <button
+              role="tab"
+              aria-selected={tab === "general"}
+              aria-controls="settings-tab-general"
               onClick={() => setTab("general")}
               className={`flex-1 py-2 text-xs font-medium transition-colors ${
                 tab === "general" ? "bg-[var(--color-accent)] text-white" : "bg-[var(--color-surface)] text-[var(--color-text-secondary)]"
@@ -200,7 +206,7 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
   const mealMin = 0.75, mealMax = 2.0;
 
   return (
-    <div className="space-y-4">
+    <div id="settings-tab-reading" role="tabpanel" className="space-y-4">
       {/* ── Yazı Boyutu + canlı önizleme ── */}
       <div>
         <p
@@ -218,15 +224,17 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
         </p>
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <button onClick={() => store.setArabicFontSize(store.arabicFontSize - 0.2)} className="w-7 h-7 rounded-lg border border-[var(--color-border)] flex items-center justify-center text-xs font-bold shrink-0">A-</button>
+            <button onClick={() => store.setArabicFontSize(store.arabicFontSize - 0.2)} className="w-7 h-7 rounded-lg border border-[var(--color-border)] flex items-center justify-center text-xs font-bold shrink-0" aria-label={`${t.a11y?.arabicFontSize ?? "Arabic font size"} -`}>A-</button>
             <input type="range" min={arabicMin} max={arabicMax} step={0.1} value={store.arabicFontSize}
-              onChange={(e) => store.setArabicFontSize(parseFloat(e.target.value))} className="settings-range flex-1" />
-            <button onClick={() => store.setArabicFontSize(store.arabicFontSize + 0.2)} className="w-7 h-7 rounded-lg border border-[var(--color-border)] flex items-center justify-center text-xs font-bold shrink-0">A+</button>
+              onChange={(e) => store.setArabicFontSize(parseFloat(e.target.value))} className="settings-range flex-1"
+              aria-label={t.a11y?.arabicFontSize ?? "Arabic font size"} aria-valuemin={arabicMin} aria-valuemax={arabicMax} aria-valuenow={store.arabicFontSize} />
+            <button onClick={() => store.setArabicFontSize(store.arabicFontSize + 0.2)} className="w-7 h-7 rounded-lg border border-[var(--color-border)] flex items-center justify-center text-xs font-bold shrink-0" aria-label={`${t.a11y?.arabicFontSize ?? "Arabic font size"} +`}>A+</button>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-[var(--color-text-secondary)] w-7 text-center shrink-0">{t.settings.translation}</span>
             <input type="range" min={mealMin} max={mealMax} step={0.05} value={store.translationFontSize}
-              onChange={(e) => store.setTranslationFontSize(parseFloat(e.target.value))} className="settings-range flex-1" />
+              onChange={(e) => store.setTranslationFontSize(parseFloat(e.target.value))} className="settings-range flex-1"
+              aria-label={t.a11y?.translationFontSize ?? "Translation font size"} aria-valuemin={mealMin} aria-valuemax={mealMax} aria-valuenow={store.translationFontSize} />
             <button
               onClick={() => { store.setArabicFontSize(1.8); store.setTranslationFontSize(0.95); }}
               className="text-[10px] text-[var(--color-accent)] shrink-0"
@@ -327,7 +335,7 @@ function GeneralTab({ store, locale, setLocale, t }: {
   t: any;
 }) {
   return (
-    <div className="space-y-4">
+    <div id="settings-tab-general" role="tabpanel" className="space-y-4">
       {/* ── Tema ── */}
       <div className="grid grid-cols-4 gap-1.5">
         {THEMES.map((item) => {
@@ -379,6 +387,7 @@ function GeneralTab({ store, locale, setLocale, t }: {
       <div>
         <Label>{t.settings.language}</Label>
         <select
+          aria-label={t.settings.language}
           value={locale}
           onChange={(e) => setLocale(e.target.value as Locale)}
           className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-sm appearance-none cursor-pointer"

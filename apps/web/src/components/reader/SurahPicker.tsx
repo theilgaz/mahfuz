@@ -109,10 +109,12 @@ export function SurahPicker({
 
       {/* Dropdown */}
       {open && (
-        <div ref={dropdownRef} role="listbox" aria-label={t.surahPicker.searchPlaceholder} className={`absolute left-1/2 -translate-x-1/2 w-72 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 flex flex-col overflow-hidden ${dropUp ? "bottom-full mb-2 max-h-[40vh]" : "top-full mt-2 max-h-[60vh]"}`}>
+        <div ref={dropdownRef} role="listbox" aria-label={t.surahList.searchPlaceholder} className={`absolute left-1/2 -translate-x-1/2 w-72 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 flex flex-col overflow-hidden ${dropUp ? "bottom-full mb-2 max-h-[40vh]" : "top-full mt-2 max-h-[60vh]"}`}>
           {/* Tab bar: Sure / Cüz */}
-          <div className="flex border-b border-[var(--color-border)]">
+          <div role="tablist" className="flex border-b border-[var(--color-border)]">
             <button
+              role="tab"
+              aria-selected={tab === "surah"}
               onClick={() => setTab("surah")}
               className={`flex-1 py-2 text-xs font-medium transition-colors ${
                 tab === "surah"
@@ -123,6 +125,8 @@ export function SurahPicker({
               Sure
             </button>
             <button
+              role="tab"
+              aria-selected={tab === "juz"}
               onClick={() => setTab("juz")}
               className={`flex-1 py-2 text-xs font-medium transition-colors ${
                 tab === "juz"
@@ -138,9 +142,11 @@ export function SurahPicker({
             <>
               {/* Arama */}
               <div className="p-2 border-b border-[var(--color-border)]">
+                <label htmlFor="surah-search" className="sr-only">{t.surahList.searchPlaceholder}</label>
                 <input
+                  id="surah-search"
                   ref={inputRef}
-                  type="text"
+                  type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Sure ara..."
@@ -164,6 +170,8 @@ export function SurahPicker({
                         if (isActive && el) (activeRef as React.MutableRefObject<HTMLAnchorElement | null>).current = el;
                       }}
                       {...target}
+                      role="option"
+                      aria-selected={isActive}
                       onClick={() => setOpen(false)}
                       className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${
                         isActive

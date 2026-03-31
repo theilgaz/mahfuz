@@ -47,15 +47,19 @@ function SearchPage() {
     <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
       {/* Arama kutusu */}
       <div className="relative mb-6">
+        <label htmlFor="search-quran" className="sr-only">{t.a11y?.searchQuran ?? t.search.placeholder}</label>
         <svg
           className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
           width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          aria-hidden="true"
         >
           <circle cx="8" cy="8" r="5.5" />
           <path d="M12.5 12.5L16 16" />
         </svg>
         <input
-          type="text"
+          id="search-quran"
+          type="search"
+          role="searchbox"
           value={query}
           onChange={(e) => handleInput(e.target.value)}
           placeholder={t.search.placeholder}
@@ -116,23 +120,25 @@ function GroupedResults({ results, readingMode, locale, t, navigate }: {
   }, [results]);
 
   return (
-    <div className="space-y-5">
+    <section className="space-y-5" aria-label={`${results.length} ${t.common.results}`}>
       <p className="text-xs text-[var(--color-text-secondary)]">
         {results.length} {t.common.results}
       </p>
       {groups.map((group) => (
-        <div key={group.type}>
+        <section key={group.type}>
           <h3 className="text-[11px] font-semibold text-[var(--color-text-secondary)] mb-2">
             {GROUP_LABELS[group.type]?.[locale as "tr" | "en"] ?? GROUP_LABELS[group.type]?.tr ?? group.type}
           </h3>
-          <div className="space-y-2">
+          <ul className="space-y-2 list-none p-0">
             {group.items.map((r) => (
-              <ResultCard key={`${r.surahId}:${r.ayahNumber}`} r={r} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />
+              <li key={`${r.surahId}:${r.ayahNumber}`}>
+                <ResultCard r={r} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </section>
       ))}
-    </div>
+    </section>
   );
 }
 
