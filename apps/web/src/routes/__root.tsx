@@ -19,6 +19,7 @@ import { useReadingStore } from "~/stores/reading.store";
 import { SettingsPanel } from "~/components/reader/SettingsPanel";
 import { ReadingProgressBar } from "~/components/reader/ReadingProgressBar";
 import { SurahPicker } from "~/components/reader/SurahPicker";
+import { SmartPlayButton } from "~/components/reader/SmartPlayButton";
 import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { getSession } from "~/lib/auth-session";
@@ -268,6 +269,14 @@ function AppHeader() {
                 </>
               )}
             </div>
+          )}
+
+          {/* Akıllı oynat — sadece okuma rotalarında */}
+          {surahSlugMatch && (
+            <SmartPlayButton mode="surah" surahId={surahIdFromSlug(surahSlugMatch[1]) ?? 1} />
+          )}
+          {pageNumMatch && currentPage && (
+            <SmartPlayButton mode="page" pageNumber={currentPage} />
           )}
 
           {/* Search */}

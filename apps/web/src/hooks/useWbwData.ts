@@ -1,6 +1,7 @@
 /**
  * Word-by-word (kelime kelime) veri hook'u.
  * quran.com API'den kelime bazlı çeviri verisini çeker.
+ * Türkçe eksik kelimeleri /wbw-tr-patch.json ile tamamlar.
  */
 
 import { queryOptions, useQuery } from "@tanstack/react-query";
@@ -40,7 +41,28 @@ interface QDCResponse {
   pagination: { total_pages: number; current_page: number };
 }
 
+/** Türkçe yama: Arapça kelime formu → Türkçe çeviri */
+type TrPatch = Record<string, string>;
+
+let patchCache: TrPatch | null = null;
+
+async function loadTrPatch(): Promise<TrPatch> {
+  if (patchCache) return patchCache;
+  try {
+    const res = await fetch("/wbw-tr-patch.json");
+    if (res.ok) {
+      patchCache = await res.json();
+    } else {
+      patchCache = {};
+    }
+  } catch {
+    patchCache = {};
+  }
+  return patchCache!;
+}
+
 async function fetchWbwChapter(chapterId: number): Promise<WbwData> {
+  const patch = await loadTrPatch();
   const map: WbwData = new Map();
   let page = 1;
   let totalPages = 1;
@@ -56,12 +78,17 @@ async function fetchWbwChapter(chapterId: number): Promise<WbwData> {
     for (const verse of data.verses) {
       const words: WbwWord[] = verse.words
         .filter((w) => w.char_type_name === "word")
-        .map((w) => ({
-          position: w.position,
-          textUthmani: w.text_uthmani,
-          translation: w.translation?.text ?? "",
-          transliteration: w.transliteration?.text ?? "",
-        }));
+        .map((w) => {
+          const isTurkish = w.translation?.language_name === "turkish";
+          const apiTranslation = isTurkish ? (w.translation?.text ?? "") : "";
+          const patchTranslation = !isTurkish ? (patch[w.text_uthmani] ?? "") : "";
+          return {
+            position: w.position,
+            textUthmani: w.text_uthmani,
+            translation: apiTranslation || patchTranslation,
+            transliteration: w.transliteration?.text ?? "",
+          };
+        });
       map.set(verse.verse_key, words);
     }
 
