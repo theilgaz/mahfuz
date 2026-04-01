@@ -1,7 +1,6 @@
 /**
- * Dekoratif ayet sonu işareti — Selçuklu yıldızı (8 köşeli) içinde ayet numarası.
- * İki kare 45° döndürülerek üst üste bindirilir, iç daire + numara.
- * Minimal tek katman tasarım.
+ * Ayet sonu işareti — geleneksel mushaf madalyonu.
+ * Dış halka + iç daire + 4 yön noktası (N/E/S/W) + Arap-Hint rakamı.
  */
 
 interface VerseEndMarkerProps {
@@ -13,6 +12,11 @@ interface VerseEndMarkerProps {
   size?: number;
 }
 
+const ARABIC_INDIC = "٠١٢٣٤٥٦٧٨٩";
+function toArabicIndic(n: number): string {
+  return String(n).replace(/\d/g, (d) => ARABIC_INDIC[+d]);
+}
+
 export function VerseEndMarker({
   ayahNumber,
   onClick,
@@ -21,16 +25,22 @@ export function VerseEndMarker({
 }: VerseEndMarkerProps) {
   const size = sizeProp ?? (variant === "block" ? 32 : 28);
   const mid = size / 2;
-  const r = mid * 0.68; // square half-side
-  const d = r * Math.SQRT2; // rotated square vertex distance
+
+  const R = mid * 0.86;             // dış halka yarıçapı
+  const r = mid * 0.58;             // iç daire yarıçapı
+  const r_dec = (R + r) / 2;        // yön noktalarının oturduğu yarıçap
+  const dec_r = (R - r) * 0.38;     // yön noktası yarıçapı
 
   const digits = String(ayahNumber).length;
-  const fontSize = digits >= 3 ? size * 0.27 : size * 0.33;
+  const fontSize = digits >= 3 ? size * 0.24 : digits === 2 ? size * 0.28 : size * 0.30;
 
-  // Square 1: axis-aligned
-  const sq1 = `M${mid - r},${mid - r} L${mid + r},${mid - r} L${mid + r},${mid + r} L${mid - r},${mid + r}Z`;
-  // Square 2: rotated 45°
-  const sq2 = `M${mid},${mid - d} L${mid + d},${mid} L${mid},${mid + d} L${mid - d},${mid}Z`;
+  // 4 yön noktası: K / D / G / B
+  const cardinals = [
+    { cx: mid,        cy: mid - r_dec },  // Kuzey
+    { cx: mid + r_dec, cy: mid },         // Doğu
+    { cx: mid,        cy: mid + r_dec },  // Güney
+    { cx: mid - r_dec, cy: mid },         // Batı
+  ];
 
   return (
     <button
@@ -51,32 +61,55 @@ export function VerseEndMarker({
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        {/* Two overlapping squares = 8-pointed star */}
-        <path
-          d={`${sq1} ${sq2}`}
+        {/* Dış halka */}
+        <circle
+          cx={mid}
+          cy={mid}
+          r={R}
           stroke="var(--color-text-secondary)"
-          strokeWidth="0.9"
-          strokeLinejoin="miter"
+          strokeWidth="0.75"
           fill="none"
           opacity="0.5"
-          className="group-hover/marker:opacity-80 transition-opacity"
+          className="group-hover/marker:opacity-75 transition-opacity"
         />
 
-        {/* Verse number */}
+        {/* 4 yön noktası */}
+        {cardinals.map((d, i) => (
+          <circle
+            key={i}
+            cx={d.cx}
+            cy={d.cy}
+            r={dec_r}
+            fill="var(--color-text-secondary)"
+            opacity="0.45"
+            className="group-hover/marker:opacity-70 transition-opacity"
+          />
+        ))}
+
+        {/* İç daire — sayı zemini */}
+        <circle
+          cx={mid}
+          cy={mid}
+          r={r}
+          fill="var(--color-text-secondary)"
+          fillOpacity="0.07"
+        />
+
+        {/* Ayet numarası — Arap-Hint rakamı */}
         <text
           x={mid}
           y={mid}
-          dy="0.36em"
+          dy="0.38em"
           textAnchor="middle"
           fill="var(--color-text-secondary)"
           style={{
-            fontFamily: "var(--font-ui)",
+            fontFamily: "var(--font-arabic)",
             fontSize: `${fontSize}px`,
-            fontWeight: 600,
+            fontWeight: 500,
           }}
           className="group-hover/marker:fill-[var(--color-text-primary)] transition-colors select-none"
         >
-          {ayahNumber}
+          {toArabicIndic(ayahNumber)}
         </text>
       </svg>
     </button>
