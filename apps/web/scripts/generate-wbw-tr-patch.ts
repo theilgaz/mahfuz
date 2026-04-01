@@ -1,100 +1,73 @@
 /**
  * Quran.com WBW Türkçe Yama Üreticisi
  *
- * Quran.com API'sinde Türkçe karşılığı olmayan Arapça kelimeleri
- * Claude API kullanarak toplu çevirir ve public/wbw-tr-patch.json oluşturur.
+ * Quran.com API'sinde Türkçe karşılığı olmayan Arapça kelimelerin
+ * İngilizce fallback çevirilerini MyMemory (ücretsiz, key gerektirmez)
+ * aracılığıyla Türkçeye çevirir ve public/wbw-tr-patch.json oluşturur.
  *
- * Kullanım:
- *   ANTHROPIC_API_KEY=sk-... npx tsx scripts/generate-wbw-tr-patch.ts
+ * Kullanım (apps/web/ dizininden):
+ *   npx tsx scripts/generate-wbw-tr-patch.ts
  *
  * Çıktı: apps/web/public/wbw-tr-patch.json
  *   { "تَرَ": "gördün", "يَجْعَلْ": "kıldı", ... }
  */
 
-import Anthropic from "@anthropic-ai/sdk";
 import { writeFileSync, readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 const OUT_FILE = resolve(import.meta.dirname, "../public/wbw-tr-patch.json");
-const BATCH_SIZE = 60;
-const DELAY_MS = 300;
+const SCAN_FILE = "/tmp/wbw_missing_tr.json";
+
+/** Aynı anda kaç kelime paralel çevrilsin */
+const CONCURRENCY = 5;
+/** İstekler arası bekleme (ms) — MyMemory rate limiti için */
+const DELAY_MS = 120;
 
 function sleep(ms: number) {
-  return new Promise((r) => setTimeout(r, ms));
+  return new Promise<void>((r) => setTimeout(r, ms));
 }
 
-async function translateBatch(
-  client: Anthropic,
-  batch: Array<{ arabic: string; english: string }>,
-): Promise<Record<string, string>> {
-  const lines = batch
-    .map((w, i) => `${i + 1}. Arapça: ${w.arabic} | İngilizce: ${w.english}`)
-    .join("\n");
-
-  const msg = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 2048,
-    messages: [
-      {
-        role: "user",
-        content: `Aşağıdaki Kur'an Arapçası kelimelerini Türkçeye çevir. Her kelime bir Kur'an ayetinde geçen tek bir kelime formudur. İngilizce çeviri bağlam için verilmiştir.
-
-Kurallar:
-- Her kelime için kısa ve öz bir Türkçe karşılık ver (1-4 kelime)
-- Kur'an Türkçesine uygun klasik kelimeler kullan
-- Zamir eklerini (-i, -ı, -nın, -si vb.) dahil et
-- Sadece numara ve çeviriyi yaz, açıklama ekleme
-
-Format (TAM OLARAK bu formatta yanıtla):
-1. <türkçe çeviri>
-2. <türkçe çeviri>
-...
-
-Kelimeler:
-${lines}`,
-      },
-    ],
-  });
-
-  const text = msg.content[0].type === "text" ? msg.content[0].text : "";
-  const result: Record<string, string> = {};
-  const responseLines = text.trim().split("\n");
-
-  for (let i = 0; i < batch.length; i++) {
-    const line = responseLines[i] ?? "";
-    const match = line.match(/^\d+\.\s+(.+)$/);
-    if (match) {
-      result[batch[i].arabic] = match[1].trim();
+/**
+ * MyMemory ücretsiz API ile en → tr çevirisi.
+ * Başarısız olursa boş string döner (hata fırlatmaz).
+ */
+async function translateEnToTr(text: string): Promise<string> {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|tr`;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return "";
+    const data = await res.json();
+    const translated: string = data?.responseData?.translatedText ?? "";
+    // MyMemory bazen kaynağı döner — farklıysa kabul et
+    if (translated && translated.toLowerCase() !== text.toLowerCase()) {
+      return translated;
     }
+    return "";
+  } catch {
+    return "";
   }
-
-  return result;
 }
 
 async function main() {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    console.error("ANTHROPIC_API_KEY ortam değişkeni gerekli");
+  // Tarama dosyasını kontrol et
+  if (!existsSync(SCAN_FILE)) {
+    console.error(`Tarama dosyası bulunamadı: ${SCAN_FILE}`);
+    console.error(
+      "Önce tüm sureleri tara. Tarama dosyası generate-wbw-tr-patch script'i çalıştırıldığında otomatik oluşturulur.",
+    );
+    console.error(
+      "Veya sureleri elle trayarak /tmp/wbw_missing_tr.json dosyası oluşturun.",
+    );
     process.exit(1);
   }
 
-  // Tarama dosyasını bul
-  const scanFile = "/tmp/wbw_missing_tr.json";
-  if (!existsSync(scanFile)) {
-    console.error(`Tarama dosyası bulunamadı: ${scanFile}`);
-    console.error("Önce tüm sureleri tara ve /tmp/wbw_missing_tr.json oluştur.");
-    process.exit(1);
-  }
-
-  const scanData = JSON.parse(readFileSync(scanFile, "utf-8"));
+  const scanData = JSON.parse(readFileSync(SCAN_FILE, "utf-8"));
   const uniqueWords: Record<string, string> = scanData.unique_words ?? {};
   const entries = Object.entries(uniqueWords); // [arabic, english][]
 
   console.log(`Toplam eksik kelime: ${entries.length}`);
-  console.log(`Batch boyutu: ${BATCH_SIZE}`);
-  console.log(`Tahmini batch sayısı: ${Math.ceil(entries.length / BATCH_SIZE)}`);
 
-  // Mevcut patch varsa yükle (kaldığımız yerden devam)
+  // Mevcut patch varsa yükle (kaldığımız yerden devam et)
   let patch: Record<string, string> = {};
   if (existsSync(OUT_FILE)) {
     patch = JSON.parse(readFileSync(OUT_FILE, "utf-8"));
@@ -102,55 +75,47 @@ async function main() {
     console.log(`Mevcut patch yüklendi: ${existing} kelime`);
   }
 
-  const client = new Anthropic({ apiKey });
-
-  let processed = 0;
-  let skipped = 0;
-  let errors = 0;
-
   // Zaten çevrilenleri atla
   const remaining = entries.filter(([ar]) => !patch[ar]);
   console.log(`Çevrilecek: ${remaining.length} kelime\n`);
 
-  for (let i = 0; i < remaining.length; i += BATCH_SIZE) {
-    const batch = remaining.slice(i, i + BATCH_SIZE).map(([arabic, english]) => ({
-      arabic,
-      english,
-    }));
+  let processed = 0;
+  let failed = 0;
 
-    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
-    const totalBatches = Math.ceil(remaining.length / BATCH_SIZE);
-    process.stdout.write(`Batch ${batchNum}/${totalBatches} (${batch.length} kelime)... `);
+  for (let i = 0; i < remaining.length; i += CONCURRENCY) {
+    const chunk = remaining.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(
+      chunk.map(async ([arabic, english]) => {
+        const tr = await translateEnToTr(english);
+        return { arabic, english, tr };
+      }),
+    );
 
-    try {
-      const translations = await translateBatch(client, batch);
-      const count = Object.keys(translations).length;
-      Object.assign(patch, translations);
-      processed += count;
-
-      if (count < batch.length) {
-        skipped += batch.length - count;
-        process.stdout.write(`✓ ${count}/${batch.length} çevrildi\n`);
+    for (const { arabic, english, tr } of results) {
+      if (tr) {
+        patch[arabic] = tr;
+        processed++;
       } else {
-        process.stdout.write(`✓\n`);
+        failed++;
+        if (failed <= 10) {
+          console.warn(`  Çevrilemedi: ${arabic} (${english})`);
+        }
       }
+    }
 
-      // Her batch'ten sonra kaydet (kesmeler için güvenli)
+    // Her 50 kelimede bir ara kaydet
+    if ((i + CONCURRENCY) % 50 === 0 || i + CONCURRENCY >= remaining.length) {
       writeFileSync(OUT_FILE, JSON.stringify(patch, null, 2), "utf-8");
-    } catch (err) {
-      errors++;
-      process.stdout.write(`✗ Hata: ${err}\n`);
+      const pct = Math.min(100, Math.round(((i + CONCURRENCY) / remaining.length) * 100));
+      process.stdout.write(`\r${pct}% (${i + CONCURRENCY}/${remaining.length}) ...`);
     }
 
-    if (i + BATCH_SIZE < remaining.length) {
-      await sleep(DELAY_MS);
-    }
+    await sleep(DELAY_MS);
   }
 
-  console.log(`\n--- Tamamlandı ---`);
+  console.log(`\n\n--- Tamamlandı ---`);
   console.log(`Çevrilen: ${processed}`);
-  console.log(`Atlanan: ${skipped}`);
-  console.log(`Hata: ${errors}`);
+  console.log(`Başarısız: ${failed}`);
   console.log(`Toplam patch: ${Object.keys(patch).length} kelime`);
   console.log(`Çıktı: ${OUT_FILE}`);
 }
