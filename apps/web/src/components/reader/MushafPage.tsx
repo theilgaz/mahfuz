@@ -9,6 +9,7 @@ import { useReadingStore } from "~/stores/reading.store";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useAudioStore } from "~/stores/audio.store";
 import { usePageData, useTajweed, useImlaei, useMushafLines, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
+import type { MushafPageLines } from "~/hooks/useQuranQuery";
 import { useQuery } from "@tanstack/react-query";
 import { cleanImlaei } from "~/lib/strip-diacritics";
 import { parseTajweed } from "~/lib/tajweed-parser";
@@ -17,7 +18,7 @@ import { SurahHeader } from "./SurahHeader";
 import { MushafLineView } from "./MushafLineView";
 import { MushafSkeleton } from "./MushafSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo, type ReactNode } from "react";
 import { AyahActionMenu } from "./AyahActionMenu";
 import { VerseEndMarker } from "~/components/quran/VerseEndMarker";
 import { SajdahMarker } from "~/components/quran/SajdahMarker";
@@ -107,25 +108,100 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
     return <MushafSkeleton />;
   }
 
+  // lineData branch için sure geçiş satırlarını hesapla
+  const surahTransitions = useMemo((): { lineIndex: number; group: typeof pageData.surahGroups[0] }[] => {
+    if (!lineData || !pageData) return [];
+    // Sayfanın ilk grubundan sonraki isStart=true grupların geçiş satırını bul
+    const transitions: { lineIndex: number; group: typeof pageData.surahGroups[0] }[] = [];
+    const groups = pageData.surahGroups;
+    if (groups.length <= 1) return transitions;
+
+    // Satırları tarayıp ayet numarasının büyükten 1'e döndüğü yeri bul
+    let prevVerseNum: number | null = null;
+    let transitionGroupIdx = 1; // ilk geçiş için groups[1]
+
+    for (let li = 0; li < lineData.lines.length; li++) {
+      const line = lineData.lines[li];
+      for (const word of line.words) {
+        if (word.c === "e") {
+          // Arapça rakamları sayıya çevir
+          const num = parseInt(
+            word.t.replace(/[٠١٢٣٤٥٦٧٨٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))),
+            10,
+          );
+          if (!isNaN(num)) {
+            if (prevVerseNum !== null && num === 1 && prevVerseNum > 1) {
+              // Sure geçişi: bu satırın başında yeni sure
+              const group = groups[transitionGroupIdx];
+              if (group?.isStart) {
+                transitions.push({ lineIndex: li, group });
+                transitionGroupIdx++;
+              }
+            }
+            prevVerseNum = num;
+          }
+        }
+      }
+    }
+    return transitions;
+  }, [lineData, pageData]);
+
   return (
     <div className="max-w-3xl mx-auto px-4">
       {/* Mushaf metin */}
       <div className="pb-8">
         {lineData ? (
           <>
-            {/* Gerçek Mushaf satır düzeni */}
-            {pageData.surahGroups.map((group) =>
-              group.isStart ? (
-                <SurahHeader
-                  key={`sh-${group.surah.id}`}
-                  surahId={group.surah.id}
-                  nameArabic={group.surah.nameArabic}
-                  nameSimple={group.surah.nameSimple}
-                  showBismillah={false}
-                />
-              ) : null,
-            )}
-            <MushafLineView lineData={lineData} arabicFontSize={arabicFontSize} />
+            {/* Gerçek Mushaf satır düzeni — sure geçişlerini satır noktasına enjekte et */}
+            {(() => {
+              const firstGroup = pageData.surahGroups[0];
+              const segments: ReactNode[] = [];
+              let prevLineIdx = 0;
+
+              // Sayfanın ilk grubu isStart ise üste başlık göster
+              if (firstGroup?.isStart) {
+                segments.push(
+                  <SurahHeader
+                    key={`sh-first-${firstGroup.surah.id}`}
+                    surahId={firstGroup.surah.id}
+                    nameArabic={firstGroup.surah.nameArabic}
+                    nameSimple={firstGroup.surah.nameSimple}
+                    showBismillah={firstGroup.surah.bismillahPre ?? false}
+                  />
+                );
+              }
+
+              for (const { lineIndex, group } of surahTransitions) {
+                // Geçişten önceki satırlar
+                const beforeLines: MushafPageLines = { lines: lineData.lines.slice(prevLineIdx, lineIndex) };
+                if (beforeLines.lines.length > 0) {
+                  segments.push(
+                    <MushafLineView key={`mlv-${prevLineIdx}`} lineData={beforeLines} arabicFontSize={arabicFontSize} />
+                  );
+                }
+                // Sure ayraç başlığı
+                segments.push(
+                  <SurahHeader
+                    key={`sh-${group.surah.id}`}
+                    surahId={group.surah.id}
+                    nameArabic={group.surah.nameArabic}
+                    nameSimple={group.surah.nameSimple}
+                    showBismillah={group.surah.bismillahPre ?? false}
+                  />
+                );
+                prevLineIdx = lineIndex;
+              }
+
+              // Kalan satırlar
+              const remainingLines: MushafPageLines = { lines: lineData.lines.slice(prevLineIdx) };
+              if (remainingLines.lines.length > 0) {
+                segments.push(
+                  <MushafLineView key={`mlv-${prevLineIdx}-end`} lineData={remainingLines} arabicFontSize={arabicFontSize} />
+                );
+              }
+
+              return segments;
+            })()}
             {/* Meal bloğu */}
             {showTranslation &&
               pageData.surahGroups.map((group) => (

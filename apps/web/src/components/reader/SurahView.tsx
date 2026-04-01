@@ -5,7 +5,7 @@
 
 import { useSettingsStore } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
-import { useSurahData, useTajweed, useImlaei, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
+import { useSurahData, useTajweed, useImlaei, translationSourcesQueryOptions, useSurahs } from "~/hooks/useQuranQuery";
 import { useQuery } from "@tanstack/react-query";
 import { useWbwData } from "~/hooks/useWbwData";
 import { cleanImlaei } from "~/lib/strip-diacritics";
@@ -14,6 +14,10 @@ import { AyahBlock } from "./AyahBlock";
 import { SurahSkeleton } from "./SurahSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
 import { useEffect, useRef, useCallback, useMemo, type ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { surahSlug } from "~/lib/surah-slugs";
+import { getSurahName } from "~/lib/surah-names-i18n";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface SurahViewProps {
   surahId: number;
@@ -168,6 +172,61 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
           ))}
         </div>
       )}
+
+      {surahId < 114 && <NextSurahCard currentSurahId={surahId} />}
+    </div>
+  );
+}
+
+// ── Sonraki Sure Kartı ───────────────────────────────────
+
+function NextSurahCard({ currentSurahId }: { currentSurahId: number }) {
+  const navigate = useNavigate();
+  const { locale } = useTranslation();
+  const { data: surahs } = useSurahs();
+  const nextSurahId = currentSurahId + 1;
+  const nextSurah = surahs.find((s) => s.id === nextSurahId);
+  if (!nextSurah) return null;
+
+  const name = getSurahName(nextSurahId, locale) || nextSurah.nameSimple;
+
+  return (
+    <div className="mt-8 mb-4">
+      <div className="h-px bg-[var(--color-border)] mb-6" />
+      <button
+        onClick={() =>
+          navigate({
+            to: "/surah/$surahSlug",
+            params: { surahSlug: surahSlug(nextSurahId) },
+            search: { ayah: undefined },
+          })
+        }
+        className="w-full flex items-center justify-between gap-3 px-4 py-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] active:bg-[var(--color-accent)]/10 transition-colors group"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex flex-col items-start min-w-0">
+            <span className="text-xs text-[var(--color-text-secondary)] mb-0.5">Sonraki Sure</span>
+            <span className="text-sm font-medium text-[var(--color-text-primary)] truncate">{nextSurahId}. {name}</span>
+            <span className="text-xs text-[var(--color-text-secondary)]">{nextSurah.ayahCount} ayet</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <span
+            dir="rtl"
+            className="text-[var(--color-text-secondary)] group-hover:text-[var(--color-accent)] transition-colors"
+            style={{ fontFamily: "var(--font-arabic)", fontSize: "28px", lineHeight: "normal" }}
+          >
+            {nextSurah.nameArabic}
+          </span>
+          <svg
+            width="18" height="18" viewBox="0 0 18 18" fill="none"
+            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+            className="text-[var(--color-text-secondary)] group-hover:text-[var(--color-accent)] transition-colors"
+          >
+            <path d="M6 4l5 5-5 5" />
+          </svg>
+        </div>
+      </button>
     </div>
   );
 }

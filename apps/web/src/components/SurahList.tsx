@@ -50,6 +50,18 @@ export function SurahList({ surahs }: SurahListProps) {
   }, [surahs, surahListFilter]);
 
   // Cüz picker state
+  // İlk açılışta son okunan sureye scroll et
+  const didScrollRef = useRef(false);
+  useEffect(() => {
+    if (didScrollRef.current || !lastSurahId) return;
+    const el = itemRefs.current.get(lastSurahId);
+    if (!el) return;
+    didScrollRef.current = true;
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: "instant", block: "center" });
+    });
+  }, [lastSurahId]);
+
   const [juzOpen, setJuzOpen] = useState(false);
   const [highlightSurahId, setHighlightSurahId] = useState<number | null>(null);
   const juzPanelRef = useRef<HTMLDivElement>(null);
