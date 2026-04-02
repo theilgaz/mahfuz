@@ -5,7 +5,8 @@
 
 import { useMemo, useEffect, useRef, useState, useCallback } from "react";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
-import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type WbwDisplay, type ColorPaletteId } from "~/stores/settings.store";
+import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type WbwDisplay, type ColorPaletteId, type SeherOverride } from "~/stores/settings.store";
+import { isDaytime, nextTransition } from "~/lib/solar";
 import { useQuery } from "@tanstack/react-query";
 import { recitersQueryOptions, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -381,6 +382,11 @@ function GeneralTab({ store, locale, setLocale, t }: {
         })}
       </div>
 
+      {/* ── Seher geçiş modu (yalnızca Seher teması seçiliyse) ── */}
+      {store.theme === "seher" && (
+        <SeherControls store={store} t={t} />
+      )}
+
       <Divider />
 
       {/* ── Dil ── */}
@@ -566,6 +572,97 @@ function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (
 }
 
 const WBW_OPTIONS: WbwDisplay[] = ["off", "hover", "on"];
+
+// ── Seher Geçiş Kontrolleri ──────────────────────────────
+
+function SeherControls({ store, t }: {
+  store: ReturnType<typeof useSettingsStore>;
+  t: any;
+}) {
+  const { seherOverride, seherLocation, setSeherOverride } = store;
+
+  const nextTime = seherLocation
+    ? nextTransition(seherLocation.lat, seherLocation.lon)
+    : null;
+
+  const formatTime = (d: Date) =>
+    d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  const currentlyDay = seherLocation
+    ? isDaytime(seherLocation.lat, seherLocation.lon)
+    : null;
+
+  const MODES: { id: SeherOverride; icon: string; label: string }[] = [
+    { id: "auto",  icon: "🌅", label: t.settings.seherAuto },
+    { id: "light", icon: "☀️", label: t.settings.seherLight },
+    { id: "dark",  icon: "🌙", label: t.settings.seherDark },
+  ];
+
+  return (
+    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
+      <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
+        {t.settings.seherMode}
+      </span>
+
+      {/* 3-button toggle */}
+      <div className="flex rounded-xl overflow-hidden border border-[var(--color-border)]">
+        {MODES.map(({ id, icon, label }) => {
+          const active = seherOverride === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setSeherOverride(id)}
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors ${
+                active
+                  ? "bg-[var(--color-accent)] text-white"
+                  : "bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+              }`}
+            >
+              <span className="text-base leading-none">{icon}</span>
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Durum satırı */}
+      {seherOverride === "auto" && (
+        <div className="text-[11px] text-[var(--color-text-secondary)] space-y-1">
+          {seherLocation ? (
+            <>
+              <div className="flex items-center gap-1.5">
+                <span className="opacity-70">📍</span>
+                <span>
+                  {t.settings.seherLocationUsing} —{" "}
+                  {seherLocation.lat.toFixed(1)}°{seherLocation.lat >= 0 ? "K" : "G"},{" "}
+                  {seherLocation.lon.toFixed(1)}°{seherLocation.lon >= 0 ? "D" : "B"}
+                </span>
+              </div>
+              {nextTime && (
+                <div className="flex items-center gap-1.5">
+                  <span className="opacity-70">{currentlyDay ? "🌇" : "🌄"}</span>
+                  <span>
+                    {currentlyDay
+                      ? t.settings.seherNextDark
+                      : t.settings.seherNextLight}{" "}
+                    — {formatTime(nextTime)}
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-start gap-1.5">
+              <span className="opacity-70 mt-0.5">📍</span>
+              <span className="leading-snug">{t.settings.seherLocationNeeded}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── WBW Display ──────────────────────────────────────────
 
 function WbwDisplayControl({ label, value, onChange, t }: {
   label: string; value: WbwDisplay; onChange: (v: WbwDisplay) => void; t: any;

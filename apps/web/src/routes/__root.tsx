@@ -24,6 +24,7 @@ import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { getSession } from "~/lib/auth-session";
 import { useSyncEngine } from "~/hooks/useSyncEngine";
+import { useSeherTheme } from "~/hooks/useSeherTheme";
 import { surahSlug, surahIdFromSlug } from "~/lib/surah-slugs";
 import type { Session } from "~/lib/auth";
 import appCss from "~/styles/app.css?url";
@@ -379,6 +380,9 @@ function RootDocument({ children }: { children: ReactNode }) {
     document.documentElement.classList.remove("loading");
     document.documentElement.classList.add("loaded");
   }, [theme]);
+
+  // Seher teması: gün doğumu/batımı bazlı otomatik geçiş
+  useSeherTheme();
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {

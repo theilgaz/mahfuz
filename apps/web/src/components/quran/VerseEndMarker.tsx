@@ -1,6 +1,6 @@
 /**
  * Ayet sonu işareti — geleneksel mushaf madalyonu.
- * Dış halka + iç daire + 4 yön noktası (N/E/S/W) + Arap-Hint rakamı.
+ * Tırtıllı (scalloped) kenar + altın gradient dolgu + Arap-Hint rakamı.
  */
 
 interface VerseEndMarkerProps {
@@ -17,6 +17,26 @@ function toArabicIndic(n: number): string {
   return String(n).replace(/\d/g, (d) => ARABIC_INDIC[+d]);
 }
 
+/** Tırtıllı (scalloped) rozet SVG path'i üretir. */
+function scallopedPath(cx: number, cy: number, outerR: number, innerR: number, N: number): string {
+  const pts: [number, number][] = [];
+  for (let i = 0; i < N * 2; i++) {
+    const angle = (Math.PI * i) / N - Math.PI / 2;
+    const r = i % 2 === 0 ? outerR : innerR;
+    pts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)]);
+  }
+  // Smooth scalloped path: midpoint-quadratic bezier zinciri
+  const last = pts[pts.length - 1];
+  const first = pts[0];
+  let d = `M ${(last[0] + first[0]) / 2} ${(last[1] + first[1]) / 2}`;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    const q = pts[(i + 1) % pts.length];
+    d += ` Q ${p[0]} ${p[1]} ${(p[0] + q[0]) / 2} ${(p[1] + q[1]) / 2}`;
+  }
+  return d + " Z";
+}
+
 export function VerseEndMarker({
   ayahNumber,
   onClick,
@@ -26,21 +46,14 @@ export function VerseEndMarker({
   const size = sizeProp ?? (variant === "block" ? 32 : 28);
   const mid = size / 2;
 
-  const R = mid * 0.86;             // dış halka yarıçapı
-  const r = mid * 0.58;             // iç daire yarıçapı
-  const r_dec = (R + r) / 2;        // yön noktalarının oturduğu yarıçap
-  const dec_r = (R - r) * 0.38;     // yön noktası yarıçapı
+  const outerR = mid * 0.90;
+  const innerR = mid * 0.72;
+  const rosetteD = scallopedPath(mid, mid, outerR, innerR, 14);
 
   const digits = String(ayahNumber).length;
-  const fontSize = digits >= 3 ? size * 0.24 : digits === 2 ? size * 0.28 : size * 0.30;
+  const fontSize = digits >= 3 ? size * 0.26 : digits === 2 ? size * 0.30 : size * 0.34;
 
-  // 4 yön noktası: K / D / G / B
-  const cardinals = [
-    { cx: mid,        cy: mid - r_dec },  // Kuzey
-    { cx: mid + r_dec, cy: mid },         // Doğu
-    { cx: mid,        cy: mid + r_dec },  // Güney
-    { cx: mid - r_dec, cy: mid },         // Batı
-  ];
+  const gradId = `vmg-${ayahNumber}`;
 
   return (
     <button
@@ -61,53 +74,34 @@ export function VerseEndMarker({
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        {/* Dış halka */}
-        <circle
-          cx={mid}
-          cy={mid}
-          r={R}
-          stroke="var(--color-text-secondary)"
-          strokeWidth="0.75"
-          fill="none"
-          opacity="0.5"
-          className="group-hover/marker:opacity-75 transition-opacity"
+        <defs>
+          <radialGradient id={gradId} cx="38%" cy="35%" r="65%" fx="38%" fy="35%">
+            <stop offset="0%"   stopColor="var(--marker-g1, #d4a24e)" />
+            <stop offset="55%"  stopColor="var(--marker-g2, #b8860b)" />
+            <stop offset="100%" stopColor="var(--marker-g3, #7a5800)" />
+          </radialGradient>
+        </defs>
+
+        {/* Tırtıllı rozet gövdesi */}
+        <path
+          d={rosetteD}
+          fill={`url(#${gradId})`}
+          className="group-hover/marker:brightness-110 transition-[filter]"
         />
 
-        {/* 4 yön noktası */}
-        {cardinals.map((d, i) => (
-          <circle
-            key={i}
-            cx={d.cx}
-            cy={d.cy}
-            r={dec_r}
-            fill="var(--color-text-secondary)"
-            opacity="0.45"
-            className="group-hover/marker:opacity-70 transition-opacity"
-          />
-        ))}
-
-        {/* İç daire — sayı zemini */}
-        <circle
-          cx={mid}
-          cy={mid}
-          r={r}
-          fill="var(--color-text-secondary)"
-          fillOpacity="0.07"
-        />
-
-        {/* Ayet numarası — Arap-Hint rakamı */}
+        {/* Ayet numarası — açık krem/beyaz */}
         <text
           x={mid}
           y={mid}
           dy="0.38em"
           textAnchor="middle"
-          fill="var(--color-text-secondary)"
+          fill="var(--marker-text, #fdf3d8)"
           style={{
             fontFamily: "var(--font-arabic)",
             fontSize: `${fontSize}px`,
-            fontWeight: 500,
+            fontWeight: 700,
           }}
-          className="group-hover/marker:fill-[var(--color-text-primary)] transition-colors select-none"
+          className="select-none"
         >
           {toArabicIndic(ayahNumber)}
         </text>

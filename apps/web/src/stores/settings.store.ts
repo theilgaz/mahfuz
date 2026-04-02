@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 
 export type Theme = "papyrus" | "sea" | "night" | "seher";
+export type SeherOverride = "auto" | "light" | "dark";
 export type TextStyle = "uthmani" | "basic";
 export type WbwDisplay = "off" | "hover" | "on";
 export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
@@ -17,6 +18,8 @@ export const COLOR_PALETTES: Record<ColorPaletteId, { name: string; nameAr: stri
 
 interface SettingsState {
   theme: Theme;
+  seherOverride: SeherOverride;
+  seherLocation: { lat: number; lon: number } | null;
   textStyle: TextStyle;
   translationSlugs: string[];
   showTranslation: boolean;
@@ -36,6 +39,8 @@ interface SettingsState {
 
 interface SettingsActions {
   setTheme: (theme: Theme) => void;
+  setSeherOverride: (mode: SeherOverride) => void;
+  setSeherLocation: (lat: number, lon: number) => void;
   /** Bir meal ekle/çıkar (toggle) */
   toggleTranslationSlug: (slug: string) => void;
   /** Seçili meali bir adım yukarı/aşağı taşı */
@@ -64,6 +69,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     (set) => ({
       // Defaults
       theme: "papyrus" as Theme,
+      seherOverride: "auto" as SeherOverride,
+      seherLocation: null,
       translationSlugs: [DEFAULT_TRANSLATION_SLUG],
       showTranslation: true,
       showWbw: false,
@@ -83,8 +90,11 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       // Actions
       setTheme: (theme) => {
         document.documentElement.setAttribute("data-theme", theme);
+        if (theme !== "seher") document.documentElement.removeAttribute("data-seher");
         set({ theme });
       },
+      setSeherOverride: (mode) => set({ seherOverride: mode }),
+      setSeherLocation: (lat, lon) => set({ seherLocation: { lat, lon } }),
       toggleTranslationSlug: (slug) =>
         set((s) => {
           const has = s.translationSlugs.includes(slug);

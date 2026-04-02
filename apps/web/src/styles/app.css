@@ -47,6 +47,12 @@
   --logo-g4: #6b4c00;
   --logo-hl: #f0d590;
 
+  /* Ayet sonu madalyonu */
+  --marker-g1: #d4a24e;
+  --marker-g2: #b8860b;
+  --marker-g3: #7a5800;
+  --marker-text: #fdf3d8;
+
   /* Üst bant — altın yaldız tezhip şeridi */
   --header-band: linear-gradient(90deg, transparent, #6b4c00, #b8860b, #d4a24e, #f0d590, #d4a24e, #b8860b, #6b4c00, transparent);
 
@@ -105,6 +111,12 @@
 
   /* Üst bant — kuzey ışıkları, karanlıkta yeşil fısıltı */
   --header-band: linear-gradient(90deg, #0f0e0c, #1a2010, #2a3818, #3d6b14, #5a8c2a, #3d6b14, #2a3818, #1a2010, #0f0e0c);
+
+  /* Ayet sonu madalyonu — gece için biraz daha parlak */
+  --marker-g1: #e0b060;
+  --marker-g2: #c49020;
+  --marker-g3: #8a6000;
+  --marker-text: #fff8e8;
 }
 
 /* ── Tema: Seher (سحر — şafak öncesi) ────────────────── */
@@ -133,9 +145,23 @@
   --header-band: linear-gradient(90deg, #3a1520, #843a1a, #c47a5a, #f0c8b0, #c47a5a, #843a1a, #3a1520);
 }
 
+[data-theme="seher"][data-seher="dark"] {
+  /* Gece — şafak öncesi karanlık mürdüm */
+  --color-bg: #1a1018;
+  --color-surface: #241c22;
+  --color-text-primary: #f0e6e8;
+  --color-text-secondary: #9a8890;
+  --color-text-translation: #c4b8be;
+  --color-border: #362a32;
+  --color-word-hover: rgba(196, 122, 90, 0.15);
+  --color-word-hover-text: #e0a080;
+
+  --logo-hl: #f0c8b0;
+}
+
+/* Konum/hesap yok — OS dark-mode fallback (data-seher henüz atanmadıysa) */
 @media (prefers-color-scheme: dark) {
-  [data-theme="seher"] {
-    /* Dark (gece — şafak öncesi karanlık) */
+  [data-theme="seher"]:not([data-seher]) {
     --color-bg: #1a1018;
     --color-surface: #241c22;
     --color-text-primary: #f0e6e8;
@@ -144,7 +170,6 @@
     --color-border: #362a32;
     --color-word-hover: rgba(196, 122, 90, 0.15);
     --color-word-hover-text: #e0a080;
-
     --logo-hl: #f0c8b0;
   }
 }
