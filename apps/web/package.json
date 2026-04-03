@@ -18,6 +18,7 @@
     "import:all": "tsx scripts/import-all.ts",
     "import:verify": "tsx scripts/verify-data.ts",
     "wbw:generate-patch": "tsx scripts/generate-wbw-tr-patch.ts",
+    "download:letter-audio": "tsx scripts/download-letter-audio.ts",
     "wbw:fetch-words": "tsx scripts/fetch-arabic-words.ts",
     "wbw:build-oc": "tsx scripts/build-wbw-oc.ts"
   },
