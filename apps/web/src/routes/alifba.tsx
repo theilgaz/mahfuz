@@ -54,15 +54,15 @@ function AlifbaPage() {
           </Suspense>
         </div>
       ) : (
-        <div className="grid grid-cols-7 gap-1.5">
+        <div className="grid grid-cols-7 gap-2" dir="rtl">
           {ARABIC_LETTERS.map((letter) => (
             <button
               key={letter.id}
               onClick={() => setSelected(letter)}
-              className="flex flex-col items-center justify-center gap-0.5 p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 transition-colors active:scale-95"
+              className="flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 transition-colors active:scale-95"
             >
-              <span className="font-arabic text-xl leading-none">{letter.arabic}</span>
-              <span className="text-[9px] text-[var(--color-text-secondary)] leading-none">{letter.name}</span>
+              <span className="font-arabic text-2xl leading-none">{letter.arabic}</span>
+              <span className="text-[10px] text-[var(--color-text-secondary)] leading-none">{letter.name}</span>
             </button>
           ))}
         </div>
