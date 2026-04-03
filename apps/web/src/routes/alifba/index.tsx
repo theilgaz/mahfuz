@@ -145,7 +145,7 @@ function AlifbaIndexPage() {
               key={letter.id}
               to="/alifba/$letterId"
               params={{ letterId: letter.id }}
-              className={`flex flex-col items-center justify-center gap-2.5 py-4 px-1 rounded-xl border transition-colors active:scale-95 ${
+              className={`flex flex-col items-center justify-center gap-2 h-[4.5rem] rounded-xl border transition-colors active:scale-95 ${
                 isMastered
                   ? "bg-[var(--color-accent)]/10 border-[var(--color-accent)]/40"
                   : isSeen
