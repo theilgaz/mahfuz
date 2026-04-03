@@ -209,7 +209,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
 function NextSurahCard({ currentSurahId }: { currentSurahId: number }) {
   const navigate = useNavigate();
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
   const { data: surahs } = useSurahs();
   const nextSurahId = currentSurahId + 1;
   const nextSurah = surahs.find((s) => s.id === nextSurahId);
@@ -232,9 +232,9 @@ function NextSurahCard({ currentSurahId }: { currentSurahId: number }) {
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="flex flex-col items-start min-w-0">
-            <span className="text-xs text-[var(--color-text-secondary)] mb-0.5">Sonraki Sure</span>
+            <span className="text-xs text-[var(--color-text-secondary)] mb-0.5">{t.reader.nextSurah}</span>
             <span className="text-sm font-medium text-[var(--color-text-primary)] truncate">{nextSurahId}. {name}</span>
-            <span className="text-xs text-[var(--color-text-secondary)]">{nextSurah.ayahCount} ayet</span>
+            <span className="text-xs text-[var(--color-text-secondary)]">{nextSurah.ayahCount} {t.common.verse.toLowerCase()}</span>
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
