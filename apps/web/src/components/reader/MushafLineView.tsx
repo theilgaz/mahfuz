@@ -2,8 +2,8 @@
  * Mushaf satır görünümü — fiziksel Mushaf'taki satır kırılımlarını birebir takip eder.
  * Her sayfa 15 satır (Medine Mushafı), kelimeler justify-between ile dağıtılır.
  *
- * Auto-scaling: Kullanıcının tercih ettiği font boyutu taşma yaparsa,
- * container genişliğine sığacak şekilde CSS transform ile küçültülür.
+ * Auto-scaling: CSS zoom kullanılır (transform aksine layout'u da etkiler,
+ * overflow:hidden klipleme sorununu önler).
  */
 
 import { useRef, useEffect, useState, useCallback } from "react";
@@ -34,16 +34,15 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
     const inner = innerRef.current;
     if (!container || !inner) return;
 
-    // Temporarily reset scale to measure natural width
-    inner.style.transform = "none";
-    inner.style.transformOrigin = "top right";
+    // zoom'u sıfırla → doğal boyutu ölç
+    inner.style.zoom = "1";
+    void inner.offsetWidth; // reflow zorla
 
     const containerWidth = container.clientWidth;
     const contentWidth = inner.scrollWidth;
 
     if (contentWidth > containerWidth && containerWidth > 0) {
-      const newScale = Math.max(0.5, containerWidth / contentWidth);
-      setScale(newScale);
+      setScale(Math.max(0.5, containerWidth / contentWidth));
     } else {
       setScale(1);
     }
@@ -56,11 +55,7 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
-    const observer = new ResizeObserver(() => {
-      computeScale();
-    });
-
+    const observer = new ResizeObserver(() => computeScale());
     observer.observe(container);
     return () => observer.disconnect();
   }, [computeScale]);
@@ -70,18 +65,14 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
       ref={containerRef}
       className="mushaf-line-container overflow-hidden"
       dir="rtl"
-      style={{
-        // Reserve the scaled height so parent layout stays correct
-        height: scale < 1 ? `calc(${scale} * 100%)` : undefined,
-      }}
     >
       <div
         ref={innerRef}
         style={{
           fontFamily: "var(--font-arabic)",
           fontSize: `${arabicFontSize}rem`,
-          transform: scale < 1 ? `scale(${scale})` : undefined,
-          transformOrigin: "top right",
+          // zoom layout'u da etkiler — transform:scale'in aksine overflow sorununa yol açmaz
+          zoom: scale < 1 ? scale : undefined,
         }}
       >
         {(() => {
