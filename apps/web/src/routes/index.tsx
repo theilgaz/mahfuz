@@ -11,6 +11,7 @@ import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
 import { SettingsButton } from "~/components/SettingsButton";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
+import { useShallow } from "zustand/react/shallow";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(surahsQueryOptions()),
@@ -54,12 +55,36 @@ function HomePageSkeleton() {
 function HomePage() {
   const { session } = Route.useRouteContext();
   const { t } = useTranslation();
-  const readingMode = useSettingsStore((s) => s.readingMode);
+  const { readingMode, labsEnabled } = useSettingsStore(
+    useShallow((s) => ({ readingMode: s.readingMode, labsEnabled: s.labsEnabled }))
+  );
   const bookmarks = useBookmarksStore((s) => s.bookmarks);
   const { data: surahs } = useSurahs();
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
+      {/* Labs: Tilavet kartı */}
+      {labsEnabled && (
+        <Link
+          to="/recite"
+          className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 hover:bg-[var(--color-accent)]/10 transition-colors group"
+        >
+          <div className="w-9 h-9 rounded-lg bg-[var(--color-accent)]/15 flex items-center justify-center shrink-0 group-hover:bg-[var(--color-accent)]/25 transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="2" width="6" height="12" rx="3" />
+              <path d="M5 10a7 7 0 0 0 14 0" />
+              <path d="M12 17v4" />
+              <path d="M8 21h8" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">Tilavet</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">Okuma pratiği yap</p>
+          </div>
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-semibold tracking-wide shrink-0">BETA</span>
+        </Link>
+      )}
+
       {/* Yer imleri */}
       {bookmarks.length > 0 && (() => {
         const surahMap = new Map(surahs.map((s) => [s.id, s]));

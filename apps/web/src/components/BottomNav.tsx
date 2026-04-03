@@ -18,7 +18,6 @@ export function BottomNav() {
   const { t, locale } = useTranslation();
   const lastPosition = useReadingStore((s) => s.lastPosition);
   const recentPositions = useReadingStore((s) => s.recentPositions);
-  const labsEnabled = useSettingsStore((s) => s.labsEnabled);
   const { session } = useRouteContext({ from: "__root__" });
 
   const user = session?.user;
@@ -148,26 +147,7 @@ export function BottomNav() {
           )}
         </div>
 
-        {/* 4. Tilavet (labs only) */}
-        {labsEnabled && (
-          <Link
-            to="/recite"
-            aria-current={pathname === "/recite" ? "page" : undefined}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 ${
-              pathname === "/recite" ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"
-            }`}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="2" width="6" height="12" rx="3" />
-              <path d="M5 10a7 7 0 0 0 14 0" />
-              <path d="M12 17v4" />
-              <path d="M8 21h8" />
-            </svg>
-            <span className="text-[10px]">Tilavet</span>
-          </Link>
-        )}
-
-        {/* 5. Ara */}
+        {/* 4. Ara */}
         <Link
           to="/search"
           aria-current={pathname === "/search" ? "page" : undefined}

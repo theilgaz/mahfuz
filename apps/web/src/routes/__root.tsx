@@ -244,6 +244,7 @@ function AppHeader() {
                   <div className="fixed inset-0 z-40" onClick={() => setLabsMenuOpen(false)} />
                   <div ref={labsDropdownRef} role="menu" className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 py-1 overflow-hidden">
                     {[
+                      { to: "/recite", label: "Tilavet", icon: "🎙️" },
                       { to: "/discover", label: t.hub.listenMemorize, icon: "🎧" },
                       { to: "/discover", label: t.hub.apps, icon: "📦" },
                       { to: "/alifba", label: t.hub.alifba, icon: "ا ب" },
@@ -273,18 +274,6 @@ function AppHeader() {
           {pageNumMatch && currentPage && (
             <SmartPlayButton mode="page" pageNumber={currentPage} />
           )}
-
-          {/* Search */}
-          <Link
-            to="/search"
-            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
-            aria-label={t.nav.search}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <circle cx="7" cy="7" r="5" />
-              <path d="M11 11L14 14" />
-            </svg>
-          </Link>
 
           {/* Settings */}
           <button
