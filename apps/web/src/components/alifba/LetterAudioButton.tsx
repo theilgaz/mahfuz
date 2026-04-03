@@ -6,6 +6,7 @@
 
 import { useState, useRef } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
+import { ARABIC_LETTERS } from "~/lib/kids-constants";
 
 interface LetterAudioButtonProps {
   letterId: string;
@@ -24,12 +25,27 @@ export function LetterAudioButton({
 
   const play = () => {
     if (playing) return;
+    setPlaying(true);
+
     const audio = new Audio(`/kids/audio/${letterId}.mp3`);
     audioRef.current = audio;
-    setPlaying(true);
-    audio.play().catch(() => {});
     audio.onended = () => setPlaying(false);
-    audio.onerror = () => setPlaying(false);
+    audio.onerror = () => {
+      // Ses dosyası yoksa Web Speech API ile telaffuz et
+      if ("speechSynthesis" in window) {
+        const letter = ARABIC_LETTERS.find((l) => l.id === letterId);
+        if (letter) {
+          const utter = new SpeechSynthesisUtterance(letter.nameAr);
+          utter.lang = "ar-SA";
+          utter.onend = () => setPlaying(false);
+          utter.onerror = () => setPlaying(false);
+          speechSynthesis.speak(utter);
+          return;
+        }
+      }
+      setPlaying(false);
+    };
+    audio.play().catch(() => {});
   };
 
   const sizeClasses = {
