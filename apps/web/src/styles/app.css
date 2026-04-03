@@ -118,11 +118,11 @@
   /* Üst bant — kuzey ışıkları, karanlıkta yeşil fısıltı */
   --header-band: linear-gradient(90deg, #0f0e0c, #1a2010, #2a3818, #3d6b14, #5a8c2a, #3d6b14, #2a3818, #1a2010, #0f0e0c);
 
-  /* Ayet sonu madalyonu — gece için biraz daha parlak */
-  --marker-g1: #e0b060;
-  --marker-g2: #c49020;
-  --marker-g3: #8a6000;
-  --marker-text: #fff8e8;
+  /* Ayet sonu madalyonu — yeşil accent ile uyumlu */
+  --marker-g1: #a4d470;
+  --marker-g2: #7aad4a;
+  --marker-g3: #3d6b14;
+  --marker-text: #f0f8e8;
 }
 
 /* ── Tema: Seher (سحر — şafak öncesi) ────────────────── */
@@ -203,6 +203,10 @@
     --logo-g3: #5a8c2a;
     --logo-g4: #3d6b14;
     --logo-hl: #d4f0a8;
+    --marker-g1: #a4d470;
+    --marker-g2: #7aad4a;
+    --marker-g3: #3d6b14;
+    --marker-text: #f0f8e8;
   }
 }
 
