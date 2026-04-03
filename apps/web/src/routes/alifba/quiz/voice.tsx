@@ -10,6 +10,7 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { LetterAudioButton } from "~/components/alifba/LetterAudioButton";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
+import { playLetterAudio, type LetterAudioHandle } from "~/lib/letter-audio";
 
 export const Route = createFileRoute("/alifba/quiz/voice")({
   component: VoiceQuizPage,
@@ -48,7 +49,7 @@ function VoiceQuizPage() {
   const [correct, setCorrect] = useState(0);
   const [wrongIds, setWrongIds] = useState<string[]>([]);
   const [lcCorrectIds, setLcCorrectIds] = useState<string[]>([]);
-  const autoAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioHandleRef = useRef<LetterAudioHandle | null>(null);
 
   const currentQuestions = phase === "lastChance" ? lcQuestions : questions;
   const q = currentQuestions[index];
@@ -56,19 +57,9 @@ function VoiceQuizPage() {
   // Auto-play audio on new question
   useEffect(() => {
     if (phase === "done" || !q) return;
-    const audio = new Audio(`/kids/audio/${q.letter.id}.mp3`);
-    autoAudioRef.current = audio;
-    audio.onerror = () => {
-      if ("speechSynthesis" in window) {
-        const utter = new SpeechSynthesisUtterance(q.letter.nameAr.replace(/[\u064B-\u065F]/g, ""));
-        utter.lang = "ar-SA";
-        speechSynthesis.speak(utter);
-      }
-    };
-    audio.play().catch(() => {});
+    audioHandleRef.current = playLetterAudio(q.letter.arabic, q.letter.id, () => {});
     return () => {
-      audio.pause();
-      speechSynthesis.cancel();
+      audioHandleRef.current?.stop();
     };
   }, [index, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -171,7 +162,7 @@ function VoiceQuizPage() {
       {/* Son Şans banner */}
       {phase === "lastChance" && (
         <div className="mb-4 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
-          <span className="text-base">⚡</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-amber-500 shrink-0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <div>
             <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{t.alifba.lastChance}</p>
             <p className="text-[10px] text-[var(--color-text-secondary)]">{t.alifba.lastChanceDesc}</p>

@@ -10,6 +10,7 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { LetterAudioButton } from "~/components/alifba/LetterAudioButton";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
+import { playLetterAudio, type LetterAudioHandle } from "~/lib/letter-audio";
 
 export const Route = createFileRoute("/alifba/exam")({
   component: ExamPage,
@@ -76,24 +77,14 @@ function ExamPage() {
 
   const currentQuestions = phase === "lastChance" ? lcQuestions : questions;
   const q = currentQuestions[index];
-  const autoAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioHandleRef = useRef<LetterAudioHandle | null>(null);
 
   // Auto-play audio when a voice question appears
   useEffect(() => {
     if (!started || phase === "done" || !q || q.qtype !== "voice") return;
-    const audio = new Audio(`/kids/audio/${q.letter.id}.mp3`);
-    autoAudioRef.current = audio;
-    audio.onerror = () => {
-      if ("speechSynthesis" in window) {
-        const utter = new SpeechSynthesisUtterance(q.letter.nameAr.replace(/[\u064B-\u065F]/g, ""));
-        utter.lang = "ar-SA";
-        speechSynthesis.speak(utter);
-      }
-    };
-    audio.play().catch(() => {});
+    audioHandleRef.current = playLetterAudio(q.letter.arabic, q.letter.id, () => {});
     return () => {
-      audio.pause();
-      speechSynthesis.cancel();
+      audioHandleRef.current?.stop();
     };
   }, [index, phase, started]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -171,11 +162,17 @@ function ExamPage() {
   if (phase === "done") {
     const finalCorrect = questions.length - wrongIds.length + lcCorrectIds.length;
     const pct = Math.round((finalCorrect / questions.length) * 100);
-    const grade = pct >= 90 ? "🌟" : pct >= 70 ? "✅" : pct >= 50 ? "👍" : "📚";
+    const gradeIcon = pct >= 90
+      ? <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2"/><path d="M8 21h8M12 17v4M6 3h12v10a6 6 0 0 1-12 0V3z"/></svg>
+      : pct >= 70
+      ? <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+      : pct >= 50
+      ? <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M9 13.5L6 21l6-3 6 3-3-7.5"/></svg>
+      : <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-4">
         <div className="w-28 h-28 rounded-full bg-[var(--color-accent)]/15 flex flex-col items-center justify-center">
-          <span className="text-2xl">{grade}</span>
+          {gradeIcon}
           <span className="text-2xl font-bold text-[var(--color-accent)]">{finalCorrect}/28</span>
         </div>
         <h2 className="text-lg font-semibold">{t.alifba.examResult}</h2>
@@ -214,7 +211,7 @@ function ExamPage() {
       {/* Son Şans banner */}
       {phase === "lastChance" && (
         <div className="mb-4 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
-          <span className="text-base">⚡</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-amber-500 shrink-0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <div>
             <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{t.alifba.lastChance}</p>
             <p className="text-[10px] text-[var(--color-text-secondary)]">{t.alifba.lastChanceDesc}</p>
@@ -266,7 +263,6 @@ function ExamPage() {
           return (
             <button key={choice.id} onClick={() => handleChoice(choice.id)} className={cls}>
               <span className="text-3xl" style={{ fontFamily: "var(--font-arabic)" }}>{choice.arabic}</span>
-              {q.qtype === "form" && <span className="text-xs text-[var(--color-text-secondary)]">{choice.name}</span>}
             </button>
           );
         })}

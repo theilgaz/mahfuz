@@ -1,12 +1,12 @@
 /**
  * Bir harfin sesini çalan buton.
- * /kids/audio/{id}.mp3 dosyasını kullanır.
- * Dosya yoksa sessizce başarısız olur.
+ * /kids/audio/{id}.mp3 → Web Speech API (ar-SA, rate 0.75) fallback.
  */
 
 import { useState, useRef } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
 import { ARABIC_LETTERS } from "~/lib/kids-constants";
+import { playLetterAudio, type LetterAudioHandle } from "~/lib/letter-audio";
 
 interface LetterAudioButtonProps {
   letterId: string;
@@ -21,39 +21,17 @@ export function LetterAudioButton({
 }: LetterAudioButtonProps) {
   const { t } = useTranslation();
   const [playing, setPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const handleRef = useRef<LetterAudioHandle | null>(null);
 
   const play = () => {
     if (playing) return;
+    const letter = ARABIC_LETTERS.find((l) => l.id === letterId);
+    if (!letter) return;
     setPlaying(true);
-
-    const audio = new Audio(`/kids/audio/${letterId}.mp3`);
-    audioRef.current = audio;
-    audio.onended = () => setPlaying(false);
-    audio.onerror = () => {
-      // Ses dosyası yoksa Web Speech API ile telaffuz et
-      if ("speechSynthesis" in window) {
-        const letter = ARABIC_LETTERS.find((l) => l.id === letterId);
-        if (letter) {
-          const utter = new SpeechSynthesisUtterance(letter.nameAr);
-          utter.lang = "ar-SA";
-          utter.onend = () => setPlaying(false);
-          utter.onerror = () => setPlaying(false);
-          speechSynthesis.speak(utter);
-          return;
-        }
-      }
-      setPlaying(false);
-    };
-    audio.play().catch(() => {});
+    handleRef.current = playLetterAudio(letter.arabic, letterId, () => setPlaying(false));
   };
 
-  const sizeClasses = {
-    sm: "w-8 h-8",
-    md: "w-10 h-10",
-    lg: "w-14 h-14",
-  }[size];
-
+  const sizeClasses = { sm: "w-8 h-8", md: "w-10 h-10", lg: "w-14 h-14" }[size];
   const iconSize = { sm: 16, md: 20, lg: 24 }[size];
 
   return (
@@ -68,7 +46,6 @@ export function LetterAudioButton({
       } ${className}`}
     >
       {playing ? (
-        /* sound wave animation */
         <svg width={iconSize} height={iconSize} viewBox="0 0 20 20" fill="currentColor">
           <rect x="2" y="7" width="2" height="6" rx="1" />
           <rect x="6" y="4" width="2" height="12" rx="1" opacity="0.7" />
