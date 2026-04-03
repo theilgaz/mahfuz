@@ -19,12 +19,21 @@ import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as AlifbaRouteImport } from './routes/alifba'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AlifbaIndexRouteImport } from './routes/alifba/index'
 import { Route as SurahSurahSlugRouteImport } from './routes/surah/$surahSlug'
 import { Route as PagePageNumberRouteImport } from './routes/page/$pageNumber'
 import { Route as JuzJuzIdRouteImport } from './routes/juz/$juzId'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AlifbaGamesRouteImport } from './routes/alifba/games'
+import { Route as AlifbaExamRouteImport } from './routes/alifba/exam'
+import { Route as AlifbaLetterIdRouteImport } from './routes/alifba/$letterId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AlifbaQuizVoiceRouteImport } from './routes/alifba/quiz/voice'
+import { Route as AlifbaQuizFormsRouteImport } from './routes/alifba/quiz/forms'
+import { Route as AlifbaGamesSpeedRouteImport } from './routes/alifba/games/speed'
+import { Route as AlifbaGamesMemoryRouteImport } from './routes/alifba/games/memory'
+import { Route as AlifbaGamesFillRouteImport } from './routes/alifba/games/fill'
 
 const StatsRoute = StatsRouteImport.update({
   id: '/stats',
@@ -76,6 +85,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlifbaIndexRoute = AlifbaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AlifbaRoute,
+} as any)
 const SurahSurahSlugRoute = SurahSurahSlugRouteImport.update({
   id: '/surah/$surahSlug',
   path: '/surah/$surahSlug',
@@ -101,15 +115,55 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlifbaGamesRoute = AlifbaGamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => AlifbaRoute,
+} as any)
+const AlifbaExamRoute = AlifbaExamRouteImport.update({
+  id: '/exam',
+  path: '/exam',
+  getParentRoute: () => AlifbaRoute,
+} as any)
+const AlifbaLetterIdRoute = AlifbaLetterIdRouteImport.update({
+  id: '/$letterId',
+  path: '/$letterId',
+  getParentRoute: () => AlifbaRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlifbaQuizVoiceRoute = AlifbaQuizVoiceRouteImport.update({
+  id: '/quiz/voice',
+  path: '/quiz/voice',
+  getParentRoute: () => AlifbaRoute,
+} as any)
+const AlifbaQuizFormsRoute = AlifbaQuizFormsRouteImport.update({
+  id: '/quiz/forms',
+  path: '/quiz/forms',
+  getParentRoute: () => AlifbaRoute,
+} as any)
+const AlifbaGamesSpeedRoute = AlifbaGamesSpeedRouteImport.update({
+  id: '/speed',
+  path: '/speed',
+  getParentRoute: () => AlifbaGamesRoute,
+} as any)
+const AlifbaGamesMemoryRoute = AlifbaGamesMemoryRouteImport.update({
+  id: '/memory',
+  path: '/memory',
+  getParentRoute: () => AlifbaGamesRoute,
+} as any)
+const AlifbaGamesFillRoute = AlifbaGamesFillRouteImport.update({
+  id: '/fill',
+  path: '/fill',
+  getParentRoute: () => AlifbaGamesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/alifba': typeof AlifbaRoute
+  '/alifba': typeof AlifbaRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
@@ -118,16 +172,24 @@ export interface FileRoutesByFullPath {
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
+  '/alifba/$letterId': typeof AlifbaLetterIdRoute
+  '/alifba/exam': typeof AlifbaExamRoute
+  '/alifba/games': typeof AlifbaGamesRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
+  '/alifba/': typeof AlifbaIndexRoute
+  '/alifba/games/fill': typeof AlifbaGamesFillRoute
+  '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
+  '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
+  '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
+  '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/alifba': typeof AlifbaRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
@@ -136,17 +198,26 @@ export interface FileRoutesByTo {
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
+  '/alifba/$letterId': typeof AlifbaLetterIdRoute
+  '/alifba/exam': typeof AlifbaExamRoute
+  '/alifba/games': typeof AlifbaGamesRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
+  '/alifba': typeof AlifbaIndexRoute
+  '/alifba/games/fill': typeof AlifbaGamesFillRoute
+  '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
+  '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
+  '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
+  '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/alifba': typeof AlifbaRoute
+  '/alifba': typeof AlifbaRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
@@ -155,11 +226,20 @@ export interface FileRoutesById {
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
+  '/alifba/$letterId': typeof AlifbaLetterIdRoute
+  '/alifba/exam': typeof AlifbaExamRoute
+  '/alifba/games': typeof AlifbaGamesRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
+  '/alifba/': typeof AlifbaIndexRoute
+  '/alifba/games/fill': typeof AlifbaGamesFillRoute
+  '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
+  '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
+  '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
+  '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -175,16 +255,24 @@ export interface FileRouteTypes {
     | '/recite'
     | '/search'
     | '/stats'
+    | '/alifba/$letterId'
+    | '/alifba/exam'
+    | '/alifba/games'
     | '/auth/callback'
     | '/auth/login'
     | '/juz/$juzId'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
+    | '/alifba/'
+    | '/alifba/games/fill'
+    | '/alifba/games/memory'
+    | '/alifba/games/speed'
+    | '/alifba/quiz/forms'
+    | '/alifba/quiz/voice'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/alifba'
     | '/bookmarks'
     | '/changelog'
     | '/discover'
@@ -193,11 +281,20 @@ export interface FileRouteTypes {
     | '/recite'
     | '/search'
     | '/stats'
+    | '/alifba/$letterId'
+    | '/alifba/exam'
+    | '/alifba/games'
     | '/auth/callback'
     | '/auth/login'
     | '/juz/$juzId'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
+    | '/alifba'
+    | '/alifba/games/fill'
+    | '/alifba/games/memory'
+    | '/alifba/games/speed'
+    | '/alifba/quiz/forms'
+    | '/alifba/quiz/voice'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -211,17 +308,26 @@ export interface FileRouteTypes {
     | '/recite'
     | '/search'
     | '/stats'
+    | '/alifba/$letterId'
+    | '/alifba/exam'
+    | '/alifba/games'
     | '/auth/callback'
     | '/auth/login'
     | '/juz/$juzId'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
+    | '/alifba/'
+    | '/alifba/games/fill'
+    | '/alifba/games/memory'
+    | '/alifba/games/speed'
+    | '/alifba/quiz/forms'
+    | '/alifba/quiz/voice'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AlifbaRoute: typeof AlifbaRoute
+  AlifbaRoute: typeof AlifbaRouteWithChildren
   BookmarksRoute: typeof BookmarksRoute
   ChangelogRoute: typeof ChangelogRoute
   DiscoverRoute: typeof DiscoverRoute
@@ -310,6 +416,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alifba/': {
+      id: '/alifba/'
+      path: '/'
+      fullPath: '/alifba/'
+      preLoaderRoute: typeof AlifbaIndexRouteImport
+      parentRoute: typeof AlifbaRoute
+    }
     '/surah/$surahSlug': {
       id: '/surah/$surahSlug'
       path: '/surah/$surahSlug'
@@ -345,6 +458,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alifba/games': {
+      id: '/alifba/games'
+      path: '/games'
+      fullPath: '/alifba/games'
+      preLoaderRoute: typeof AlifbaGamesRouteImport
+      parentRoute: typeof AlifbaRoute
+    }
+    '/alifba/exam': {
+      id: '/alifba/exam'
+      path: '/exam'
+      fullPath: '/alifba/exam'
+      preLoaderRoute: typeof AlifbaExamRouteImport
+      parentRoute: typeof AlifbaRoute
+    }
+    '/alifba/$letterId': {
+      id: '/alifba/$letterId'
+      path: '/$letterId'
+      fullPath: '/alifba/$letterId'
+      preLoaderRoute: typeof AlifbaLetterIdRouteImport
+      parentRoute: typeof AlifbaRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -352,12 +486,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alifba/quiz/voice': {
+      id: '/alifba/quiz/voice'
+      path: '/quiz/voice'
+      fullPath: '/alifba/quiz/voice'
+      preLoaderRoute: typeof AlifbaQuizVoiceRouteImport
+      parentRoute: typeof AlifbaRoute
+    }
+    '/alifba/quiz/forms': {
+      id: '/alifba/quiz/forms'
+      path: '/quiz/forms'
+      fullPath: '/alifba/quiz/forms'
+      preLoaderRoute: typeof AlifbaQuizFormsRouteImport
+      parentRoute: typeof AlifbaRoute
+    }
+    '/alifba/games/speed': {
+      id: '/alifba/games/speed'
+      path: '/speed'
+      fullPath: '/alifba/games/speed'
+      preLoaderRoute: typeof AlifbaGamesSpeedRouteImport
+      parentRoute: typeof AlifbaGamesRoute
+    }
+    '/alifba/games/memory': {
+      id: '/alifba/games/memory'
+      path: '/memory'
+      fullPath: '/alifba/games/memory'
+      preLoaderRoute: typeof AlifbaGamesMemoryRouteImport
+      parentRoute: typeof AlifbaGamesRoute
+    }
+    '/alifba/games/fill': {
+      id: '/alifba/games/fill'
+      path: '/fill'
+      fullPath: '/alifba/games/fill'
+      preLoaderRoute: typeof AlifbaGamesFillRouteImport
+      parentRoute: typeof AlifbaGamesRoute
+    }
   }
 }
 
+interface AlifbaGamesRouteChildren {
+  AlifbaGamesFillRoute: typeof AlifbaGamesFillRoute
+  AlifbaGamesMemoryRoute: typeof AlifbaGamesMemoryRoute
+  AlifbaGamesSpeedRoute: typeof AlifbaGamesSpeedRoute
+}
+
+const AlifbaGamesRouteChildren: AlifbaGamesRouteChildren = {
+  AlifbaGamesFillRoute: AlifbaGamesFillRoute,
+  AlifbaGamesMemoryRoute: AlifbaGamesMemoryRoute,
+  AlifbaGamesSpeedRoute: AlifbaGamesSpeedRoute,
+}
+
+const AlifbaGamesRouteWithChildren = AlifbaGamesRoute._addFileChildren(
+  AlifbaGamesRouteChildren,
+)
+
+interface AlifbaRouteChildren {
+  AlifbaLetterIdRoute: typeof AlifbaLetterIdRoute
+  AlifbaExamRoute: typeof AlifbaExamRoute
+  AlifbaGamesRoute: typeof AlifbaGamesRouteWithChildren
+  AlifbaIndexRoute: typeof AlifbaIndexRoute
+  AlifbaQuizFormsRoute: typeof AlifbaQuizFormsRoute
+  AlifbaQuizVoiceRoute: typeof AlifbaQuizVoiceRoute
+}
+
+const AlifbaRouteChildren: AlifbaRouteChildren = {
+  AlifbaLetterIdRoute: AlifbaLetterIdRoute,
+  AlifbaExamRoute: AlifbaExamRoute,
+  AlifbaGamesRoute: AlifbaGamesRouteWithChildren,
+  AlifbaIndexRoute: AlifbaIndexRoute,
+  AlifbaQuizFormsRoute: AlifbaQuizFormsRoute,
+  AlifbaQuizVoiceRoute: AlifbaQuizVoiceRoute,
+}
+
+const AlifbaRouteWithChildren =
+  AlifbaRoute._addFileChildren(AlifbaRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AlifbaRoute: AlifbaRoute,
+  AlifbaRoute: AlifbaRouteWithChildren,
   BookmarksRoute: BookmarksRoute,
   ChangelogRoute: ChangelogRoute,
   DiscoverRoute: DiscoverRoute,

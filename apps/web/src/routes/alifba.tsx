@@ -1,72 +1,9 @@
 /**
- * Elifba sayfası — /alifba
- * Arap harflerini tanıma ve yazı alıştırması.
+ * Elifba modülü layout — /alifba ve alt rotalar için kabuk.
  */
 
-import { useState, lazy, Suspense } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ARABIC_LETTERS } from "~/lib/kids-constants";
-import { useTranslation } from "~/hooks/useTranslation";
-
-const LetterTrace = lazy(() =>
-  import("~/components/kids/LetterTrace").then((m) => ({ default: m.LetterTrace }))
-);
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/alifba")({
-  component: AlifbaPage,
+  component: () => <Outlet />,
 });
-
-function AlifbaPage() {
-  const { t } = useTranslation();
-  const [selected, setSelected] = useState<(typeof ARABIC_LETTERS)[number] | null>(null);
-
-  return (
-    <div className="max-w-lg mx-auto px-4 py-6 pb-24">
-      {selected ? (
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-          <div className="flex items-center justify-between mb-2">
-            <button
-              onClick={() => setSelected(null)}
-              className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-1"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M10 4L6 8l4 4" />
-              </svg>
-              {t.nav.back}
-            </button>
-            <span className="text-xs text-[var(--color-text-secondary)]">
-              {selected.order}/28
-            </span>
-          </div>
-          <Suspense fallback={<div className="h-64 flex items-center justify-center text-sm text-[var(--color-text-secondary)]">...</div>}>
-            <LetterTrace
-              key={selected.id}
-              letter={selected}
-              onComplete={() => {
-                const next = ARABIC_LETTERS.find((l) => l.order === selected.order + 1);
-                if (next) {
-                  setSelected(next);
-                } else {
-                  setSelected(null);
-                }
-              }}
-            />
-          </Suspense>
-        </div>
-      ) : (
-        <div className="grid grid-cols-7 gap-2" dir="rtl">
-          {ARABIC_LETTERS.map((letter) => (
-            <button
-              key={letter.id}
-              onClick={() => setSelected(letter)}
-              className="flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 transition-colors active:scale-95"
-            >
-              <span className="font-arabic text-2xl leading-none">{letter.arabic}</span>
-              <span className="text-[10px] text-[var(--color-text-secondary)] leading-none">{letter.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
