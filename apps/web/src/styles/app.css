@@ -85,6 +85,12 @@
   --logo-g4: #0d7377;
   --logo-hl: #99f6e4;
 
+  /* Ayet sonu madalyonu — teal */
+  --marker-g1: #2ab8c0;
+  --marker-g2: #0d9098;
+  --marker-g3: #075f64;
+  --marker-text: #e4f8f8;
+
   /* Üst bant — okyanus yüzeyi, dalgalanan teal */
   --header-band: linear-gradient(90deg, #065a5e, #0d9488, #14b8a6, #2dd4bf, #99f6e4, #2dd4bf, #0d9488, #065a5e);
 }
@@ -140,6 +146,12 @@
   --logo-g3: #a45a3a;
   --logo-g4: #843a1a;
   --logo-hl: #f0c8b0;
+
+  /* Ayet sonu madalyonu — şafak terrakota */
+  --marker-g1: #e09878;
+  --marker-g2: #c47a5a;
+  --marker-g3: #8c4e2c;
+  --marker-text: #fdf0e8;
 
   /* Üst bant — şafak ufku, geceden aydınlığa */
   --header-band: linear-gradient(90deg, #3a1520, #843a1a, #c47a5a, #f0c8b0, #c47a5a, #843a1a, #3a1520);

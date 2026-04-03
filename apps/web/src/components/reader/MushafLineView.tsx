@@ -94,7 +94,7 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
                     key={wordIdx}
                     className={
                       word.c === "e"
-                        ? "mushaf-end-marker text-[var(--color-text-secondary)] text-[0.55em] self-center select-none whitespace-nowrap"
+                        ? "mushaf-end-marker text-[var(--marker-g2)] text-[0.55em] self-center select-none whitespace-nowrap"
                         : word.c === "p"
                           ? "mushaf-pause-marker text-[var(--color-text-secondary)] text-[0.7em] self-center select-none whitespace-nowrap"
                           : "mushaf-word transition-colors duration-150 cursor-default rounded-sm px-[0.04em] hover:bg-[var(--color-word-hover)] hover:text-[var(--color-word-hover-text)] whitespace-nowrap"
