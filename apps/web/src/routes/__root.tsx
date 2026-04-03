@@ -146,7 +146,7 @@ function AppHeader() {
     : path === "/search" ? t.nav.search
     : path === "/profile" ? t.nav.profile
     : path === "/bookmarks" ? t.hub.bookmarks
-    : path === "/alifba" ? t.hub.alifba
+    : (path === "/alifba" || path === "/alifba/") ? t.hub.alifba
     : path === "/hifz" ? t.hub.hifz
     : path.startsWith("/changelog") ? t.changelog.banner
     : null;
