@@ -145,7 +145,7 @@ function AlifbaIndexPage() {
               key={letter.id}
               to="/alifba/$letterId"
               params={{ letterId: letter.id }}
-              className={`flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-xl border transition-colors active:scale-95 ${
+              className={`flex flex-col items-center justify-center gap-2.5 py-4 px-1 rounded-xl border transition-colors active:scale-95 ${
                 isMastered
                   ? "bg-[var(--color-accent)]/10 border-[var(--color-accent)]/40"
                   : isSeen
@@ -153,7 +153,7 @@ function AlifbaIndexPage() {
                     : "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5"
               }`}
             >
-              <span className="text-2xl leading-none" style={{ fontFamily: "var(--font-arabic)" }}>
+              <span className="text-3xl leading-none" style={{ fontFamily: "var(--font-arabic)" }}>
                 {letter.arabic}
               </span>
               <span className="text-[10px] text-[var(--color-text-secondary)] leading-none">{letter.name}</span>
