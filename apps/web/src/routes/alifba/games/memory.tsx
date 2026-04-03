@@ -116,7 +116,7 @@ function MemoryGamePage() {
           {t.nav.back}
         </Link>
         <span className="text-xs text-[var(--color-text-secondary)]">
-          {t.alifba.pairs}: {pairs}/{totalPairs} · {moves} hamle
+          {t.alifba.pairs}: {pairs}/{totalPairs} · {moves} {t.alifba.moves}
         </span>
       </div>
 

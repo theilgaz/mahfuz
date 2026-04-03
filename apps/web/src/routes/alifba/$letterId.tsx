@@ -42,9 +42,9 @@ function LetterDetailPage() {
   if (!letter) {
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 text-center text-[var(--color-text-secondary)]">
-        Harf bulunamadı.{" "}
+        {t.alifba.letterNotFound}{" "}
         <Link to="/alifba/" className="text-[var(--color-accent)]">
-          Geri dön
+          {t.nav.back}
         </Link>
       </div>
     );
@@ -145,7 +145,12 @@ function LetterDetailPage() {
             <LetterTrace
               key={letter.id}
               letter={letter}
-              onComplete={() => markTracingDone(letter.id)}
+              onComplete={() => {
+                markTracingDone(letter.id);
+                if (nextLetter) {
+                  navigate({ to: "/alifba/$letterId", params: { letterId: nextLetter.id } });
+                }
+              }}
             />
           </Suspense>
         </div>
@@ -190,7 +195,7 @@ function LetterDetailPage() {
               <path d="M13 8H3" />
               <path d="M8 3l-5 5 5 5" />
             </svg>
-            <span className="text-sm font-medium">Elifba'ya Dön</span>
+            <span className="text-sm font-medium">{t.alifba.backToAlifba}</span>
           </Link>
         )}
       </div>

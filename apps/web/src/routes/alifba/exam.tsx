@@ -5,7 +5,7 @@
 
 import { useState, useCallback } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ARABIC_LETTERS, getLetterForms, NON_CONNECTORS } from "~/lib/kids-constants";
+import { ARABIC_LETTERS, getLetterForms, getSimilarDistractors, NON_CONNECTORS } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { LetterAudioButton } from "~/components/alifba/LetterAudioButton";
@@ -26,10 +26,10 @@ function buildQuestions() {
   return shuffle(ARABIC_LETTERS).map((letter, i) => {
     const qtype: QType = i % 2 === 0 ? "voice" : "form";
     const nc = NON_CONNECTORS.has(letter.arabic);
-    const availableForms: FormType[] = nc ? ["isolated", "final"] : ["isolated", "initial", "medial", "final"];
+    const availableForms: FormType[] = nc ? ["isolated", "final"] : ["initial", "medial", "final"];
     const formType = availableForms[Math.floor(Math.random() * availableForms.length)];
     const forms = getLetterForms(letter.arabic);
-    const distractors = shuffle(ARABIC_LETTERS.filter((l) => l.id !== letter.id)).slice(0, 3);
+    const distractors = getSimilarDistractors(letter.id, 3);
     return {
       letter,
       qtype,
@@ -40,17 +40,42 @@ function buildQuestions() {
   });
 }
 
+function buildLastChanceQuestions(wrongLetterIds: string[]) {
+  return wrongLetterIds.map((id, i) => {
+    const letter = ARABIC_LETTERS.find((l) => l.id === id)!;
+    const qtype: QType = i % 2 === 0 ? "voice" : "form";
+    const nc = NON_CONNECTORS.has(letter.arabic);
+    const availableForms: FormType[] = nc ? ["isolated", "final"] : ["initial", "medial", "final"];
+    const formType = availableForms[Math.floor(Math.random() * availableForms.length)];
+    const forms = getLetterForms(letter.arabic);
+    const distractors = getSimilarDistractors(letter.id, 3);
+    return {
+      letter,
+      qtype,
+      formType,
+      displayForm: forms[formType],
+      choices: shuffle([letter, ...distractors]),
+    };
+  });
+}
+
+type Phase = "main" | "lastChance" | "done";
+
 function ExamPage() {
   const { t } = useTranslation();
   const addExamResult = useAlifbaStore((s) => s.addExamResult);
   const [started, setStarted] = useState(false);
   const [questions] = useState(buildQuestions);
+  const [phase, setPhase] = useState<Phase>("main");
+  const [lcQuestions, setLcQuestions] = useState<ReturnType<typeof buildQuestions>>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [correct, setCorrect] = useState(0);
-  const [done, setDone] = useState(false);
+  const [wrongIds, setWrongIds] = useState<string[]>([]);
+  const [lcCorrectIds, setLcCorrectIds] = useState<string[]>([]);
 
-  const q = questions[index];
+  const currentQuestions = phase === "lastChance" ? lcQuestions : questions;
+  const q = currentQuestions[index];
 
   const handleChoice = useCallback(
     (choiceId: string) => {
@@ -59,18 +84,38 @@ function ExamPage() {
       const isCorrect = choiceId === q.letter.id;
       if (isCorrect) { setCorrect((c) => c + 1); playCorrect(); } else { playWrong(); }
 
+      const newWrongIds = phase === "main" && !isCorrect ? [...wrongIds, q.letter.id] : wrongIds;
+      const newLcCorrectIds = phase === "lastChance" && isCorrect ? [...lcCorrectIds, q.letter.id] : lcCorrectIds;
+
       setTimeout(() => {
-        const newCorrect = correct + (isCorrect ? 1 : 0);
-        if (index + 1 >= questions.length) {
-          addExamResult({ score: newCorrect, total: questions.length });
-          setDone(true);
+        if (index + 1 >= currentQuestions.length) {
+          if (phase === "main") {
+            if (newWrongIds.length > 0) {
+              setWrongIds(newWrongIds);
+              setLcQuestions(buildLastChanceQuestions(newWrongIds));
+              setIndex(0);
+              setSelected(null);
+              setCorrect(0);
+              setPhase("lastChance");
+            } else {
+              addExamResult({ score: questions.length, total: questions.length });
+              setPhase("done");
+            }
+          } else {
+            const finalCorrect = (questions.length - newWrongIds.length) + newLcCorrectIds.length;
+            addExamResult({ score: finalCorrect, total: questions.length });
+            setLcCorrectIds(newLcCorrectIds);
+            setPhase("done");
+          }
         } else {
+          if (phase === "main") setWrongIds(newWrongIds);
+          if (phase === "lastChance") setLcCorrectIds(newLcCorrectIds);
           setIndex((i) => i + 1);
           setSelected(null);
         }
       }, 700);
     },
-    [selected, q, index, correct, questions, addExamResult],
+    [selected, q, index, correct, currentQuestions, phase, wrongIds, lcCorrectIds, questions, addExamResult],
   );
 
   if (!started) {
@@ -103,14 +148,15 @@ function ExamPage() {
     );
   }
 
-  if (done) {
-    const pct = Math.round((correct / questions.length) * 100);
+  if (phase === "done") {
+    const finalCorrect = questions.length - wrongIds.length + lcCorrectIds.length;
+    const pct = Math.round((finalCorrect / questions.length) * 100);
     const grade = pct >= 90 ? "🌟" : pct >= 70 ? "✅" : pct >= 50 ? "👍" : "📚";
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-4">
         <div className="w-28 h-28 rounded-full bg-[var(--color-accent)]/15 flex flex-col items-center justify-center">
           <span className="text-2xl">{grade}</span>
-          <span className="text-2xl font-bold text-[var(--color-accent)]">{correct}/28</span>
+          <span className="text-2xl font-bold text-[var(--color-accent)]">{finalCorrect}/28</span>
         </div>
         <h2 className="text-lg font-semibold">{t.alifba.examResult}</h2>
         <p className="text-sm text-[var(--color-text-secondary)]">{pct}%</p>
@@ -119,7 +165,11 @@ function ExamPage() {
             {t.nav.back}
           </Link>
           <button
-            onClick={() => { setIndex(0); setSelected(null); setCorrect(0); setDone(false); setStarted(true); }}
+            onClick={() => {
+              setIndex(0); setSelected(null); setCorrect(0);
+              setWrongIds([]); setLcCorrectIds([]); setLcQuestions([]);
+              setPhase("main"); setStarted(true);
+            }}
             className="px-4 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm"
           >
             {t.alifba.tryAgain}
@@ -133,17 +183,30 @@ function ExamPage() {
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       {/* Üst bar */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-[var(--color-text-secondary)]">{t.alifba.mixedExam}</span>
         <span className="text-xs text-[var(--color-text-secondary)]">
-          {index + 1} {t.alifba.of} {questions.length}
+          {phase === "lastChance" ? t.alifba.lastChance : t.alifba.mixedExam}
+        </span>
+        <span className="text-xs text-[var(--color-text-secondary)]">
+          {index + 1} {t.alifba.of} {currentQuestions.length}
         </span>
       </div>
+
+      {/* Son Şans banner */}
+      {phase === "lastChance" && (
+        <div className="mb-4 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
+          <span className="text-base">⚡</span>
+          <div>
+            <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{t.alifba.lastChance}</p>
+            <p className="text-[10px] text-[var(--color-text-secondary)]">{t.alifba.lastChanceDesc}</p>
+          </div>
+        </div>
+      )}
 
       {/* Progress */}
       <div className="w-full h-1.5 bg-[var(--color-surface)] rounded-full mb-6 overflow-hidden">
         <div
-          className="h-full bg-[var(--color-accent)] transition-all"
-          style={{ width: `${(index / questions.length) * 100}%` }}
+          className={`h-full transition-all ${phase === "lastChance" ? "bg-amber-500" : "bg-[var(--color-accent)]"}`}
+          style={{ width: `${(index / currentQuestions.length) * 100}%` }}
         />
       </div>
 

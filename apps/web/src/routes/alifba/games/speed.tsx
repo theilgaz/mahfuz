@@ -99,10 +99,10 @@ function SpeedGamePage() {
         <div className="text-center mt-8">
           <span className="text-5xl">⚡</span>
           <h1 className="text-xl font-semibold mt-3 mb-2">{t.alifba.speedGame}</h1>
-          <p className="text-sm text-[var(--color-text-secondary)]">{GAME_DURATION} saniye · mümkün olduğunca çok harfi tanı</p>
+          <p className="text-sm text-[var(--color-text-secondary)]">{GAME_DURATION} {t.alifba.speedGameDesc2}</p>
         </div>
         <button onClick={() => setStarted(true)} className="px-8 py-3 rounded-2xl bg-[var(--color-accent)] text-white font-medium">
-          Başla
+          {t.alifba.start}
         </button>
       </div>
     );

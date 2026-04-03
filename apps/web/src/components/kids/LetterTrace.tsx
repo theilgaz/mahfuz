@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import { useTranslation } from "~/hooks/useTranslation";
 import type { ArabicLetter } from "~/lib/kids-constants";
 import {
   LETTER_STROKES,
@@ -31,17 +32,18 @@ interface PathSample {
 }
 
 export function LetterTrace({ letter, onComplete }: LetterTraceProps) {
+  const { t } = useTranslation();
   if (!LETTER_STROKES[letter.id]) {
     return (
       <div className="flex flex-col items-center gap-4 py-4">
         <p className="text-sm text-[var(--color-text-secondary)]">
-          &quot;{letter.id}&quot; için çizim verisi bulunamadı.
+          &quot;{letter.id}&quot; {t.alifba.tracingNoData}
         </p>
         <button
           onClick={onComplete}
           className="rounded-xl bg-[var(--color-accent)] px-8 py-3 text-[14px] font-bold text-white shadow-md active:scale-95"
         >
-          Sonraki →
+          {t.alifba.tracingNext}
         </button>
       </div>
     );
@@ -53,6 +55,7 @@ export function LetterTrace({ letter, onComplete }: LetterTraceProps) {
 // ────────────────────────────────────────────────────────────────────
 
 function LetterTraceInner({ letter, onComplete }: LetterTraceProps) {
+  const { t } = useTranslation();
   const strokeData = LETTER_STROKES[letter.id];
   const guideData = LETTER_GUIDE_PATHS[letter.id];
   const svgRef = useRef<SVGSVGElement>(null);
@@ -572,10 +575,10 @@ function LetterTraceInner({ letter, onComplete }: LetterTraceProps) {
       {!done && currentStroke && (
         <p className="text-[13px] font-medium text-[var(--color-text-secondary)]">
           {isCurrentDot
-            ? "Noktaya dokun"
+            ? t.alifba.tracingTapDot
             : progress === 0
-              ? "Yeşil noktadan başla"
-              : "Çizmeye devam et"}
+              ? t.alifba.tracingStartGreen
+              : t.alifba.tracingKeepDrawing}
         </p>
       )}
 
@@ -584,14 +587,14 @@ function LetterTraceInner({ letter, onComplete }: LetterTraceProps) {
           onClick={handleReset}
           className="rounded-xl border border-[var(--color-border)] px-6 py-3 text-[14px] font-semibold text-[var(--color-text-secondary)] active:scale-95"
         >
-          Tekrar dene
+          {t.alifba.tracingRetry}
         </button>
         {done && (
           <button
             onClick={onComplete}
             className="rounded-xl bg-[var(--color-accent)] px-8 py-3 text-[14px] font-bold text-white shadow-md active:scale-95"
           >
-            Sonraki →
+            {t.alifba.tracingNext}
           </button>
         )}
       </div>

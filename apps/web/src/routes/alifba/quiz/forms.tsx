@@ -5,7 +5,7 @@
 
 import { useState, useCallback } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ARABIC_LETTERS, getLetterForms, NON_CONNECTORS } from "~/lib/kids-constants";
+import { ARABIC_LETTERS, getLetterForms, getSimilarDistractors, NON_CONNECTORS } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
@@ -15,7 +15,6 @@ export const Route = createFileRoute("/alifba/quiz/forms")({
 });
 
 type FormType = "isolated" | "initial" | "medial" | "final";
-const FORM_TYPES: FormType[] = ["isolated", "initial", "medial", "final"];
 
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
@@ -24,28 +23,49 @@ function shuffle<T>(arr: T[]): T[] {
 function buildQuestions() {
   return shuffle(ARABIC_LETTERS).map((letter) => {
     const nc = NON_CONNECTORS.has(letter.arabic);
-    const availableForms = nc
+    const availableForms: FormType[] = nc
       ? (["isolated", "final"] as FormType[])
-      : FORM_TYPES;
+      : (["initial", "medial", "final"] as FormType[]);
     const formType = availableForms[Math.floor(Math.random() * availableForms.length)];
     const forms = getLetterForms(letter.arabic);
     const displayForm = forms[formType];
-    const distractors = shuffle(ARABIC_LETTERS.filter((l) => l.id !== letter.id)).slice(0, 3);
+    const distractors = getSimilarDistractors(letter.id, 3);
     return { letter, formType, displayForm, choices: shuffle([letter, ...distractors]) };
   });
 }
+
+function buildLastChanceQuestions(wrongLetterIds: string[]) {
+  return wrongLetterIds.map((id) => {
+    const letter = ARABIC_LETTERS.find((l) => l.id === id)!;
+    const nc = NON_CONNECTORS.has(letter.arabic);
+    const availableForms: FormType[] = nc
+      ? (["isolated", "final"] as FormType[])
+      : (["initial", "medial", "final"] as FormType[]);
+    const formType = availableForms[Math.floor(Math.random() * availableForms.length)];
+    const forms = getLetterForms(letter.arabic);
+    const displayForm = forms[formType];
+    const distractors = getSimilarDistractors(letter.id, 3);
+    return { letter, formType, displayForm, choices: shuffle([letter, ...distractors]) };
+  });
+}
+
+type Phase = "main" | "lastChance" | "done";
 
 function FormsQuizPage() {
   const { t } = useTranslation();
   const setFormScore = useAlifbaStore((s) => s.setFormScore);
 
   const [questions] = useState(buildQuestions);
+  const [phase, setPhase] = useState<Phase>("main");
+  const [lcQuestions, setLcQuestions] = useState<ReturnType<typeof buildQuestions>>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [correct, setCorrect] = useState(0);
-  const [done, setDone] = useState(false);
+  const [wrongIds, setWrongIds] = useState<string[]>([]);
+  const [lcCorrectIds, setLcCorrectIds] = useState<string[]>([]);
 
-  const q = questions[index];
+  const currentQuestions = phase === "lastChance" ? lcQuestions : questions;
+  const q = currentQuestions[index];
 
   const formLabel: Record<FormType, string> = {
     isolated: t.alifba.isolated,
@@ -61,22 +81,51 @@ function FormsQuizPage() {
       const isCorrect = choiceId === q.letter.id;
       if (isCorrect) { setCorrect((c) => c + 1); playCorrect(); } else { playWrong(); }
 
+      const newWrongIds = phase === "main" && !isCorrect ? [...wrongIds, q.letter.id] : wrongIds;
+      const newLcCorrectIds = phase === "lastChance" && isCorrect ? [...lcCorrectIds, q.letter.id] : lcCorrectIds;
+
       setTimeout(() => {
-        if (index + 1 >= questions.length) {
-          const score = Math.round(((correct + (isCorrect ? 1 : 0)) / questions.length) * 100);
-          questions.forEach((qu) => setFormScore(qu.letter.id, score));
-          setDone(true);
+        if (index + 1 >= currentQuestions.length) {
+          if (phase === "main") {
+            if (newWrongIds.length > 0) {
+              setWrongIds(newWrongIds);
+              setLcQuestions(buildLastChanceQuestions(newWrongIds));
+              setIndex(0);
+              setSelected(null);
+              setCorrect(0);
+              setPhase("lastChance");
+            } else {
+              questions.forEach((qu) => setFormScore(qu.letter.id, 100));
+              setPhase("done");
+            }
+          } else {
+            questions.forEach((qu) => {
+              if (!newWrongIds.includes(qu.letter.id)) {
+                setFormScore(qu.letter.id, 100);
+              } else if (newLcCorrectIds.includes(qu.letter.id)) {
+                setFormScore(qu.letter.id, 70);
+              } else {
+                setFormScore(qu.letter.id, 0);
+              }
+            });
+            setLcCorrectIds(newLcCorrectIds);
+            setPhase("done");
+          }
         } else {
+          if (phase === "main") setWrongIds(newWrongIds);
+          if (phase === "lastChance") setLcCorrectIds(newLcCorrectIds);
           setIndex((i) => i + 1);
           setSelected(null);
         }
       }, 800);
     },
-    [selected, q, index, correct, questions, setFormScore],
+    [selected, q, index, correct, currentQuestions, phase, wrongIds, lcCorrectIds, questions, setFormScore],
   );
 
-  if (done) {
-    const pct = Math.round((correct / questions.length) * 100);
+  const finalCorrect = questions.length - wrongIds.length + lcCorrectIds.length;
+
+  if (phase === "done") {
+    const pct = Math.round((finalCorrect / questions.length) * 100);
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-4">
         <div className="w-24 h-24 rounded-full bg-[var(--color-accent)]/15 flex items-center justify-center">
@@ -84,14 +133,18 @@ function FormsQuizPage() {
         </div>
         <h2 className="text-lg font-semibold">{t.alifba.quizComplete}</h2>
         <p className="text-sm text-[var(--color-text-secondary)]">
-          {correct} / {questions.length} {t.alifba.correct}
+          {finalCorrect} / {questions.length} {t.alifba.correct}
         </p>
         <div className="flex gap-3">
           <Link to="/alifba/" className="px-4 py-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
             {t.nav.back}
           </Link>
           <button
-            onClick={() => { setIndex(0); setSelected(null); setCorrect(0); setDone(false); }}
+            onClick={() => {
+              setIndex(0); setSelected(null); setCorrect(0);
+              setWrongIds([]); setLcCorrectIds([]); setLcQuestions([]);
+              setPhase("main");
+            }}
             className="px-4 py-2 rounded-xl bg-[var(--color-accent)] text-white text-sm"
           >
             {t.alifba.tryAgain}
@@ -112,15 +165,26 @@ function FormsQuizPage() {
           {t.nav.back}
         </Link>
         <span className="text-xs text-[var(--color-text-secondary)]">
-          {t.alifba.question} {index + 1} {t.alifba.of} {questions.length}
+          {t.alifba.question} {index + 1} {t.alifba.of} {currentQuestions.length}
         </span>
       </div>
+
+      {/* Son Şans banner */}
+      {phase === "lastChance" && (
+        <div className="mb-4 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
+          <span className="text-base">⚡</span>
+          <div>
+            <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{t.alifba.lastChance}</p>
+            <p className="text-[10px] text-[var(--color-text-secondary)]">{t.alifba.lastChanceDesc}</p>
+          </div>
+        </div>
+      )}
 
       {/* Progress */}
       <div className="w-full h-1.5 bg-[var(--color-surface)] rounded-full mb-6 overflow-hidden">
         <div
-          className="h-full bg-[var(--color-accent)] transition-all"
-          style={{ width: `${(index / questions.length) * 100}%` }}
+          className={`h-full transition-all ${phase === "lastChance" ? "bg-amber-500" : "bg-[var(--color-accent)]"}`}
+          style={{ width: `${(index / currentQuestions.length) * 100}%` }}
         />
       </div>
 
