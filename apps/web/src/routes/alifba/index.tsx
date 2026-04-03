@@ -153,7 +153,7 @@ function AlifbaIndexPage() {
               to="/alifba/$letterId"
               params={{ letterId: letter.id }}
               className={[
-                "relative flex flex-col items-center justify-center aspect-square min-w-0 overflow-hidden rounded-2xl border",
+                "relative flex flex-col min-w-0 h-20 overflow-hidden rounded-2xl border",
                 "transition-all duration-150 ease-out active:scale-95",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                 isMastered
@@ -180,22 +180,30 @@ function AlifbaIndexPage() {
                 </span>
               )}
 
-              {/* Harf */}
-              <span
-                className={`text-4xl leading-none select-none ${isMastered ? "text-[var(--color-accent)]" : ""}`}
-                style={{ fontFamily: "var(--font-arabic)" }}
-              >
-                {letter.arabic}
-              </span>
+              {/* Harf — kart üst kısmını dolduruyor */}
+              <div className="flex-1 flex items-center justify-center">
+                <span
+                  className={`text-4xl leading-none select-none ${isMastered ? "text-[var(--color-accent)]" : ""}`}
+                  style={{ fontFamily: "var(--font-arabic)" }}
+                >
+                  {letter.arabic}
+                </span>
+              </div>
 
-              {/* İsim */}
-              <span className="text-[9px] font-medium tracking-wide uppercase text-[var(--color-text-secondary)] leading-none mt-0.5 select-none">
-                {letter.name}
-              </span>
+              {/* Alt şerit — descender'ları örter, ismi içinde taşır */}
+              <div className={`shrink-0 w-full flex items-center justify-center py-1 border-t ${
+                isMastered
+                  ? "bg-[var(--color-accent)]/12 border-[var(--color-accent)]/20"
+                  : "bg-[var(--color-surface)] border-[var(--color-border)]/50"
+              }`}>
+                <span className="text-[9px] font-medium tracking-wide uppercase text-[var(--color-text-secondary)] leading-none select-none">
+                  {letter.name}
+                </span>
+              </div>
 
               {/* Görüldü çizgisi */}
               {isSeen && !isMastered && (
-                <span className="absolute bottom-0 inset-x-0 h-[2px] bg-[var(--color-accent)]/50" />
+                <span className="absolute bottom-0 inset-x-0 h-[2px] bg-[var(--color-accent)]/60" />
               )}
             </Link>
           );
