@@ -30,19 +30,18 @@ export function WordTooltip({ word, anchorRect, onClose }: WordTooltipProps) {
     };
   }, [onClose]);
 
-  // Tooltip'i pencerenin dışına taşıma
+  // Ayah bloğunun merkezine hizala, viewport dışına taşıma
   const viewportW = window.innerWidth;
-  const tipW = 140;
+  const tipW = 160;
   let left = anchorRect.left + anchorRect.width / 2 - tipW / 2;
   left = Math.max(8, Math.min(left, viewportW - tipW - 8));
 
   // Yukarı yeterli yer yoksa aşağıya yerleştir
-  const spaceAbove = anchorRect.top;
   const tipH = 60;
-  const above = spaceAbove >= tipH + 12;
+  const above = anchorRect.top >= tipH + 16;
   const top = above
-    ? anchorRect.top - tipH - 8
-    : anchorRect.bottom + 8;
+    ? anchorRect.top - tipH - 10
+    : anchorRect.bottom + 10;
 
   return (
     <div

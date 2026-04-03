@@ -300,8 +300,8 @@ export const AyahBlock = memo(function AyahBlock({
                     onClick={wbwWord ? (e) => {
                       e.stopPropagation();
                       if (isTooltipOpen) { setTooltip(null); return; }
-                      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                      setTooltip({ word: wbwWord, rect });
+                      const rect = blockRef.current?.getBoundingClientRect();
+                      if (rect) setTooltip({ word: wbwWord, rect });
                     } : undefined}
                   >
                     {word}{" "}
@@ -310,14 +310,14 @@ export const AyahBlock = memo(function AyahBlock({
               })}
           <VerseEndMarker ayahNumber={ayahNumber} onClick={handleBadgeClick} variant="inline" size={32} />
           {sajdah && <SajdahMarker />}
-          {tooltip && (
-            <WordTooltip
-              word={tooltip.word}
-              anchorRect={tooltip.rect}
-              onClose={() => setTooltip(null)}
-            />
-          )}
         </div>
+      )}
+      {tooltip && (
+        <WordTooltip
+          word={tooltip.word}
+          anchorRect={tooltip.rect}
+          onClose={() => setTooltip(null)}
+        />
       )}
 
       {/* Meal — çoklu veya tekli */}
