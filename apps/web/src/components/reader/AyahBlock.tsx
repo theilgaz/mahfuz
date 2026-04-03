@@ -2,7 +2,7 @@
  * Tek ayet bloğu — Arapça metin + meal + yer imi + eylem menüsü.
  */
 
-import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { memo, useState, useCallback, useEffect, useRef, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useSettingsStore, COLOR_PALETTES } from "~/stores/settings.store";
@@ -32,7 +32,7 @@ interface AyahBlockProps {
   sajdah?: boolean;
 }
 
-export function AyahBlock({
+export const AyahBlock = memo(function AyahBlock({
   surahId,
   ayahNumber,
   textUthmani,
@@ -361,4 +361,4 @@ export function AyahBlock({
       )}
     </div>
   );
-}
+});

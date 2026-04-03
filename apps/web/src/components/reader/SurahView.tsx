@@ -116,27 +116,42 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   }
 
   const { surah, ayahs: ayahList } = data;
-  const useVirtual = ayahList.length >= 100;
+  const useVirtual = ayahList.length >= 50;
+
+  // Stable shared props for AyahBlock (memo-friendly)
+  const sharedProps = useMemo(() => ({
+    surahId,
+    useBasic,
+    imlaeiData,
+    effectiveTajweed,
+    tajweedData,
+    translationNames,
+    showTranslation: showTranslation && !showWbw,
+    showTajweed,
+    highlightAyah,
+    showWbw,
+    wbwData,
+  }), [surahId, useBasic, imlaeiData, effectiveTajweed, tajweedData, translationNames, showTranslation, showWbw, showTajweed, highlightAyah, wbwData]);
 
   const renderAyah = useCallback(
     (ayah: (typeof ayahList)[number]) => (
       <AyahBlock
-        surahId={surahId}
+        surahId={sharedProps.surahId}
         ayahNumber={ayah.ayahNumber}
-        textUthmani={useBasic ? cleanImlaei(imlaeiData?.[`${surahId}:${ayah.ayahNumber}`] ?? ayah.textUthmani) : ayah.textUthmani}
-        textTajweed={effectiveTajweed ? tajweedData?.[`${surahId}:${ayah.ayahNumber}`] : undefined}
+        textUthmani={sharedProps.useBasic ? cleanImlaei(sharedProps.imlaeiData?.[`${sharedProps.surahId}:${ayah.ayahNumber}`] ?? ayah.textUthmani) : ayah.textUthmani}
+        textTajweed={sharedProps.effectiveTajweed ? sharedProps.tajweedData?.[`${sharedProps.surahId}:${ayah.ayahNumber}`] : undefined}
         translation={ayah.translation}
         translations={ayah.translations}
-        translationNames={translationNames}
-        showTranslation={showTranslation && !showWbw}
-        showTajweed={showTajweed}
+        translationNames={sharedProps.translationNames}
+        showTranslation={sharedProps.showTranslation}
+        showTajweed={sharedProps.showTajweed}
         pageNumber={ayah.pageNumber}
-        highlight={highlightAyah === ayah.ayahNumber}
-        wbwWords={showWbw ? wbwData?.get(`${surahId}:${ayah.ayahNumber}`) : undefined}
+        highlight={sharedProps.highlightAyah === ayah.ayahNumber}
+        wbwWords={sharedProps.showWbw ? sharedProps.wbwData?.get(`${sharedProps.surahId}:${ayah.ayahNumber}`) : undefined}
         sajdah={!!ayah.sajdah}
       />
     ),
-    [surahId, useBasic, imlaeiData, effectiveTajweed, tajweedData, translationNames, showTranslation, showWbw, showTajweed, highlightAyah, wbwData],
+    [sharedProps],
   );
 
   return (
@@ -236,14 +251,14 @@ function NextSurahCard({ currentSurahId }: { currentSurahId: number }) {
 const VIRTUAL_OVERSCAN = 5;
 const ESTIMATED_AYAH_HEIGHT = 180;
 
-interface VirtualAyahListProps {
-  ayahs: Array<{ ayahNumber: number; [key: string]: unknown }>;
-  renderAyah: (ayah: VirtualAyahListProps["ayahs"][number]) => ReactNode;
+interface VirtualAyahListProps<T extends { ayahNumber: number }> {
+  ayahs: Array<T>;
+  renderAyah: (ayah: T) => ReactNode;
   setAyahRef: (ayahNumber: number, el: HTMLDivElement | null) => void;
   highlightAyah?: number;
 }
 
-function VirtualAyahList({ ayahs, renderAyah, setAyahRef, highlightAyah }: VirtualAyahListProps) {
+function VirtualAyahList<T extends { ayahNumber: number }>({ ayahs, renderAyah, setAyahRef, highlightAyah }: VirtualAyahListProps<T>) {
   const virtualizer = useVirtualizer({
     count: ayahs.length,
     getScrollElement: () => document.documentElement,

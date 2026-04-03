@@ -4,23 +4,41 @@
  */
 
 import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useAudioStore } from "~/stores/audio.store";
 
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2] as const;
 
 export function AudioBar() {
-  const playbackState = useAudioStore((s) => s.playbackState);
-  const isVisible = useAudioStore((s) => s.isVisible);
-  const currentVerseKey = useAudioStore((s) => s.currentVerseKey);
-  const currentTime = useAudioStore((s) => s.currentTime);
-  const duration = useAudioStore((s) => s.duration);
-  const chapterName = useAudioStore((s) => s.chapterName);
-  const speed = useAudioStore((s) => s.speed);
-  const togglePlayPause = useAudioStore((s) => s.togglePlayPause);
-  const stop = useAudioStore((s) => s.stop);
-  const nextVerse = useAudioStore((s) => s.nextVerse);
-  const prevVerse = useAudioStore((s) => s.prevVerse);
-  const setSpeed = useAudioStore((s) => s.setSpeed);
+  const {
+    playbackState,
+    isVisible,
+    currentVerseKey,
+    currentTime,
+    duration,
+    chapterName,
+    speed,
+    togglePlayPause,
+    stop,
+    nextVerse,
+    prevVerse,
+    setSpeed,
+  } = useAudioStore(
+    useShallow((s) => ({
+      playbackState: s.playbackState,
+      isVisible: s.isVisible,
+      currentVerseKey: s.currentVerseKey,
+      currentTime: s.currentTime,
+      duration: s.duration,
+      chapterName: s.chapterName,
+      speed: s.speed,
+      togglePlayPause: s.togglePlayPause,
+      stop: s.stop,
+      nextVerse: s.nextVerse,
+      prevVerse: s.prevVerse,
+      setSpeed: s.setSpeed,
+    }))
+  );
 
   const [showSpeed, setShowSpeed] = useState(false);
 

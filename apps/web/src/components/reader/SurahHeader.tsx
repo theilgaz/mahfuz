@@ -12,15 +12,17 @@ interface SurahHeaderProps {
   nameArabic: string;
   nameSimple: string;
   showBismillah: boolean;
+  /** Mushaf sayfası içinde — minimal dikey boşluk */
+  compact?: boolean;
 }
 
-export function SurahHeader({ surahId, nameArabic, nameSimple, showBismillah }: SurahHeaderProps) {
+export function SurahHeader({ surahId, nameArabic, nameSimple, showBismillah, compact }: SurahHeaderProps) {
   const { locale } = useTranslation();
   const label = (surahId ? getSurahName(surahId, locale) : "") || nameSimple;
   return (
-    <div className="my-6 select-none">
+    <div className={`${compact ? "my-2" : "my-6"} select-none`}>
       {/* Üst süslü çizgi */}
-      <div className="flex items-center gap-2 mb-3">
+      <div className={`flex items-center gap-2 ${compact ? "mb-1.5" : "mb-3"}`}>
         <div className="flex-1 h-px bg-[var(--color-border)]" />
         <div className="flex gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] opacity-60" />
@@ -50,16 +52,16 @@ export function SurahHeader({ surahId, nameArabic, nameSimple, showBismillah }: 
       {/* Besmele */}
       {showBismillah && (
         <p
-          className="mt-4 text-center text-[var(--color-text-primary)]"
+          className={`${compact ? "mt-2" : "mt-4"} text-center text-[var(--color-text-primary)]`}
           dir="rtl"
-          style={{ fontFamily: "var(--font-arabic)", fontSize: "clamp(1.6rem, 4vw, 2.8rem)" }}
+          style={{ fontFamily: "var(--font-arabic)", fontSize: compact ? "clamp(1.2rem, 3.5vw, 2rem)" : "clamp(1.6rem, 4vw, 2.8rem)" }}
         >
           بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
         </p>
       )}
 
       {/* Alt süslü çizgi */}
-      <div className="flex items-center gap-2 mt-3">
+      <div className={`flex items-center gap-2 ${compact ? "mt-1.5" : "mt-3"}`}>
         <div className="flex-1 h-px bg-[var(--color-border)]" />
         <div className="flex gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] opacity-60" />

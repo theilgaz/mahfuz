@@ -8,6 +8,7 @@ export type TextStyle = "uthmani" | "basic";
 export type WbwDisplay = "off" | "hover" | "on";
 export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
+export type MushafSizeMode = "standard" | "fill";
 
 export const COLOR_PALETTES: Record<ColorPaletteId, { name: string; nameAr: string; colors: string[] }> = {
   pastel: { name: "Zarif", nameAr: "زهري", colors: ["#e8a435", "#d45d5d", "#4db89a", "#9b6dcc", "#e07840", "#5b9ec9", "#d46a8e", "#6db85e"] },
@@ -35,6 +36,7 @@ interface SettingsState {
   colorizeWords: boolean;
   colorPaletteId: ColorPaletteId;
   labsEnabled: boolean;
+  mushafSizeMode: MushafSizeMode;
 }
 
 interface SettingsActions {
@@ -61,6 +63,7 @@ interface SettingsActions {
   setColorizeWords: (on: boolean) => void;
   setColorPaletteId: (id: ColorPaletteId) => void;
   setLabsEnabled: (enabled: boolean) => void;
+  setMushafSizeMode: (mode: MushafSizeMode) => void;
   resetToDefaults: () => void;
 }
 
@@ -86,6 +89,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       colorizeWords: false,
       colorPaletteId: "earth" as ColorPaletteId,
       labsEnabled: false,
+      mushafSizeMode: "standard" as MushafSizeMode,
 
       // Actions
       setTheme: (theme) => {
@@ -130,6 +134,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setColorizeWords: (on) => set({ colorizeWords: on }),
       setColorPaletteId: (id) => set({ colorPaletteId: id }),
       setLabsEnabled: (enabled) => set({ labsEnabled: enabled }),
+      setMushafSizeMode: (mode) => set({ mushafSizeMode: mode }),
       resetToDefaults: () => {
         document.documentElement.setAttribute("data-theme", "papyrus");
         set({

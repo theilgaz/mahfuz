@@ -64,8 +64,8 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
   useFocusTrap(panelRef, open, stableOnClose);
 
   const store = useSettingsStore();
-  const { data: reciterList } = useQuery({ ...recitersQueryOptions(), enabled: open });
-  const { data: translationList } = useQuery({ ...translationSourcesQueryOptions(), enabled: open });
+  const { data: reciterList } = useQuery(recitersQueryOptions());
+  const { data: translationList } = useQuery(translationSourcesQueryOptions());
 
   // Auto-switch translation on locale change
   const prevLocaleRef = useRef(locale);
