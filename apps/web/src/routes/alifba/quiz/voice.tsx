@@ -9,6 +9,7 @@ import { ARABIC_LETTERS } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { LetterAudioButton } from "~/components/alifba/LetterAudioButton";
+import { playCorrect, playWrong } from "~/lib/quiz-sounds";
 
 export const Route = createFileRoute("/alifba/quiz/voice")({
   component: VoiceQuizPage,
@@ -45,7 +46,7 @@ function VoiceQuizPage() {
       if (selected) return;
       setSelected(choiceId);
       const isCorrect = choiceId === q.letter.id;
-      if (isCorrect) setCorrect((c) => c + 1);
+      if (isCorrect) { setCorrect((c) => c + 1); playCorrect(); } else { playWrong(); }
 
       setTimeout(() => {
         if (index + 1 >= questions.length) {
