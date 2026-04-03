@@ -34,12 +34,13 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
     const inner = innerRef.current;
     if (!container || !inner) return;
 
+    // zoom'u sıfırla, ölç, hemen geri yükle — React senkronizasyon sorununu önler
+    const prevZoom = inner.style.zoom;
     inner.style.zoom = "1";
-    void inner.offsetWidth; // reflow zorla
+    void inner.offsetWidth; // reflow zorla (zoom=1 anında)
 
     const containerRect = container.getBoundingClientRect();
     const containerWidth = containerRect.width;
-    if (containerWidth === 0) return;
 
     // RTL sola-taşmayı scrollWidth yakalayamaz — getBoundingClientRect kullan
     const items = inner.querySelectorAll<HTMLElement>(".mushaf-line > *");
@@ -52,6 +53,12 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
         maxRight = Math.max(maxRight, r.right);
       }
     });
+
+    // Zoom'u ölçüm tamamlanır tamamlanmaz geri yükle — setScale aynı değerse
+    // React re-render yapmaz ve DOM'daki zoom=1 kalıcı olurdu
+    inner.style.zoom = prevZoom;
+
+    if (containerWidth === 0) return;
 
     const contentWidth =
       minLeft < Infinity ? maxRight - minLeft : inner.scrollWidth;
