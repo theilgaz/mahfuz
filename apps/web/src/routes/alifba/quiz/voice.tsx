@@ -41,6 +41,7 @@ function VoiceQuizPage() {
   const { t } = useTranslation();
   const setVoiceScore = useAlifbaStore((s) => s.setVoiceScore);
 
+  const [started, setStarted] = useState(false);
   const [questions] = useState(buildQuestions);
   const [phase, setPhase] = useState<Phase>("main");
   const [lcQuestions, setLcQuestions] = useState<ReturnType<typeof buildQuestions>>([]);
@@ -54,14 +55,14 @@ function VoiceQuizPage() {
   const currentQuestions = phase === "lastChance" ? lcQuestions : questions;
   const q = currentQuestions[index];
 
-  // Auto-play audio on new question
+  // Auto-play audio on new question (only after user gesture via Başla button)
   useEffect(() => {
-    if (phase === "done" || !q) return;
+    if (!started || phase === "done" || !q) return;
     audioHandleRef.current = playLetterAudio(q.letter.arabic, q.letter.id, () => {});
     return () => {
       audioHandleRef.current?.stop();
     };
-  }, [index, phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [index, phase, started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChoice = useCallback(
     (choiceId: string) => {
@@ -114,6 +115,38 @@ function VoiceQuizPage() {
 
   const finalCorrect = questions.length - wrongIds.length + lcCorrectIds.length;
 
+  if (!started) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-6">
+        <Link to="/alifba/" className="self-start text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M10 4L6 8l4 4" />
+          </svg>
+          {t.nav.back}
+        </Link>
+        <div className="text-center mt-8">
+          <div className="w-20 h-20 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center mx-auto mb-4">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-semibold mb-2">{t.alifba.voiceQuiz}</h1>
+          <p className="text-sm text-[var(--color-text-secondary)] mb-1">{t.alifba.voiceQuizDesc}</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">{questions.length} {t.alifba.question}</p>
+        </div>
+        <button
+          onClick={() => setStarted(true)}
+          className="px-8 py-3 rounded-2xl bg-[var(--color-accent)] text-white font-medium"
+        >
+          {t.alifba.start}
+        </button>
+      </div>
+    );
+  }
+
   if (phase === "done") {
     const pct = Math.round((finalCorrect / questions.length) * 100);
     return (
@@ -133,7 +166,7 @@ function VoiceQuizPage() {
             onClick={() => {
               setIndex(0); setSelected(null); setCorrect(0);
               setWrongIds([]); setLcCorrectIds([]); setLcQuestions([]);
-              setPhase("main");
+              setPhase("main"); setStarted(true);
             }}
             className="px-4 py-2 rounded-xl bg-[var(--color-accent)] text-white text-sm"
           >
