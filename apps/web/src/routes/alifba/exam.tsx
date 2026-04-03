@@ -152,7 +152,6 @@ function ExamPage() {
           <>
             <p className="text-xs text-[var(--color-text-secondary)]">{t.alifba.voiceQuiz}</p>
             <LetterAudioButton letterId={q.letter.id} size="lg" />
-            <p className="text-[10px] text-[var(--color-text-secondary)] opacity-50">{q.letter.name}</p>
           </>
         ) : (
           <>
@@ -183,7 +182,7 @@ function ExamPage() {
           return (
             <button key={choice.id} onClick={() => handleChoice(choice.id)} className={cls}>
               <span className="text-3xl" style={{ fontFamily: "var(--font-arabic)" }}>{choice.arabic}</span>
-              <span className="text-xs text-[var(--color-text-secondary)]">{choice.name}</span>
+              {q.qtype === "form" && <span className="text-xs text-[var(--color-text-secondary)]">{choice.name}</span>}
             </button>
           );
         })}

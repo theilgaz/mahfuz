@@ -120,7 +120,6 @@ function VoiceQuizPage() {
       <div className="flex flex-col items-center gap-4 py-8 mb-6">
         <p className="text-sm text-[var(--color-text-secondary)]">{t.alifba.voiceQuiz}</p>
         <LetterAudioButton letterId={q.letter.id} size="lg" />
-        <p className="text-xs text-[var(--color-text-secondary)] opacity-60">{q.letter.name}</p>
       </div>
 
       {/* Seçenekler */}
