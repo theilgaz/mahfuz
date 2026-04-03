@@ -129,7 +129,7 @@ function FormsQuizPage() {
           {formLabel[q.formType]}
         </span>
         <span
-          className="text-7xl leading-none"
+          className="text-7xl leading-tight"
           dir="rtl"
           style={{ fontFamily: "var(--font-arabic)" }}
         >
@@ -143,7 +143,7 @@ function FormsQuizPage() {
         {q.choices.map((choice) => {
           const isSelected = selected === choice.id;
           const isRight = choice.id === q.letter.id;
-          let cls = "flex flex-col items-center justify-center gap-1 py-4 rounded-2xl border transition-colors ";
+          let cls = "flex flex-col items-center justify-center gap-2 h-[5.5rem] overflow-hidden rounded-2xl border transition-colors ";
           if (!selected) {
             cls += "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)] cursor-pointer active:scale-95";
           } else if (isRight) {

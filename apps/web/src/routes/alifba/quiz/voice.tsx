@@ -128,7 +128,7 @@ function VoiceQuizPage() {
         {q.choices.map((choice) => {
           const isSelected = selected === choice.id;
           const isRight = choice.id === q.letter.id;
-          let cls = "flex items-center justify-center py-5 rounded-2xl border text-3xl transition-colors ";
+          let cls = "flex items-center justify-center h-[5.5rem] overflow-hidden rounded-2xl border text-3xl transition-colors ";
           if (!selected) {
             cls += "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)] cursor-pointer active:scale-95";
           } else if (isRight) {
