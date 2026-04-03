@@ -9,13 +9,13 @@ interface SurahHeaderProps {
   surahId?: number;
   nameArabic: string;
   nameSimple: string;
+  nameTranslation?: string;
   showBismillah: boolean;
   /** Mushaf sayfası içinde — minimal dikey boşluk */
   compact?: boolean;
 }
 
-export function SurahHeader({ surahId, nameArabic, nameSimple, showBismillah, compact }: SurahHeaderProps) {
-  const label = nameSimple;
+export function SurahHeader({ surahId, nameArabic, nameSimple, nameTranslation, showBismillah, compact }: SurahHeaderProps) {
   return (
     <div className={`${compact ? "my-2" : "my-6"} select-none`}>
       {/* Üst süslü çizgi */}
@@ -30,20 +30,27 @@ export function SurahHeader({ surahId, nameArabic, nameSimple, showBismillah, co
       </div>
 
       {/* Sure adı kutusu */}
-      <div className="flex items-center justify-center gap-3 px-4 py-2.5 mx-auto max-w-xs
+      <div className="flex flex-col items-center gap-1 px-4 py-2.5 mx-auto max-w-xs
         border border-[var(--color-accent)]/40 rounded
         bg-[var(--color-accent)]/5">
-        {surahId && (
-          <PlaySurahButton surahId={surahId} surahName={nameSimple} />
+        <div className="flex items-center justify-center gap-3">
+          {surahId && (
+            <PlaySurahButton surahId={surahId} surahName={nameSimple} />
+          )}
+          <span
+            className="text-2xl text-[var(--color-text-primary)] leading-none"
+            dir="rtl"
+            style={{ fontFamily: "var(--font-arabic)" }}
+          >
+            {nameArabic}
+          </span>
+          <span className="text-sm text-[var(--color-text-secondary)] shrink-0">{nameSimple}</span>
+        </div>
+        {nameTranslation && (
+          <span className="text-[0.65rem] text-[var(--color-text-secondary)] opacity-60 tracking-wide">
+            {nameTranslation}
+          </span>
         )}
-        <span
-          className="text-2xl text-[var(--color-text-primary)] leading-none"
-          dir="rtl"
-          style={{ fontFamily: "var(--font-arabic)" }}
-        >
-          {nameArabic}
-        </span>
-        <span className="text-sm text-[var(--color-text-secondary)] shrink-0">{label}</span>
       </div>
 
       {/* Besmele */}

@@ -30,15 +30,18 @@ interface MushafPageProps {
 }
 
 export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
-  const { showTranslation, showTajweed, translationSlugs, arabicFontSize, textStyle } = useSettingsStore(
+  const { showTranslation, showTajweed, translationSlugs, arabicFontSize, textStyle, mushafSizeMode } = useSettingsStore(
     useShallow((s) => ({
       showTranslation: s.showTranslation,
       showTajweed: s.showTajweed,
       translationSlugs: s.translationSlugs,
       arabicFontSize: s.arabicFontSize,
       textStyle: s.textStyle,
+      mushafSizeMode: s.mushafSizeMode,
     }))
   );
+  // Fill modunda büyük font boyutu — auto-scale her satırı container genişliğine getirir
+  const effectiveFontSize = mushafSizeMode === "fill" ? 3.5 : arabicFontSize;
   const useBasic = textStyle === "basic";
   const effectiveTajweed = showTajweed && !useBasic;
   const savePosition = useReadingStore((s) => s.savePosition);
@@ -147,9 +150,9 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
   }, [lineData, pageData]);
 
   return (
-    <div className="max-w-3xl mx-auto px-4">
+    <div className="max-w-3xl mx-auto px-3">
       {/* Mushaf metin */}
-      <div className="pb-8">
+      <div className="pb-4">
         {lineData ? (
           <>
             {/* Gerçek Mushaf satır düzeni — sure geçişlerini satır noktasına enjekte et */}
@@ -166,7 +169,9 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
                     surahId={firstGroup.surah.id}
                     nameArabic={firstGroup.surah.nameArabic}
                     nameSimple={firstGroup.surah.nameSimple}
+                    nameTranslation={firstGroup.surah.nameTranslation}
                     showBismillah={firstGroup.surah.bismillahPre ?? false}
+                    compact
                   />
                 );
               }
@@ -176,17 +181,19 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
                 const beforeLines: MushafPageLines = { lines: lineData.lines.slice(prevLineIdx, lineIndex) };
                 if (beforeLines.lines.length > 0) {
                   segments.push(
-                    <MushafLineView key={`mlv-${prevLineIdx}`} lineData={beforeLines} arabicFontSize={arabicFontSize} />
+                    <MushafLineView key={`mlv-${prevLineIdx}`} lineData={beforeLines} arabicFontSize={effectiveFontSize} />
                   );
                 }
-                // Sure ayraç başlığı
+                // Sure ayraç başlığı — compact
                 segments.push(
                   <SurahHeader
                     key={`sh-${group.surah.id}`}
                     surahId={group.surah.id}
                     nameArabic={group.surah.nameArabic}
                     nameSimple={group.surah.nameSimple}
+                    nameTranslation={group.surah.nameTranslation}
                     showBismillah={group.surah.bismillahPre ?? false}
+                    compact
                   />
                 );
                 prevLineIdx = lineIndex;
@@ -196,7 +203,7 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
               const remainingLines: MushafPageLines = { lines: lineData.lines.slice(prevLineIdx) };
               if (remainingLines.lines.length > 0) {
                 segments.push(
-                  <MushafLineView key={`mlv-${prevLineIdx}-end`} lineData={remainingLines} arabicFontSize={arabicFontSize} />
+                  <MushafLineView key={`mlv-${prevLineIdx}-end`} lineData={remainingLines} arabicFontSize={effectiveFontSize} />
                 );
               }
 
@@ -217,6 +224,7 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
                   surahId={group.surah.id}
                   nameArabic={group.surah.nameArabic}
                   nameSimple={group.surah.nameSimple}
+                  nameTranslation={group.surah.nameTranslation}
                   showBismillah={group.surah.bismillahPre}
                 />
               )}
@@ -227,7 +235,7 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
                 dir="rtl"
                 style={{
                   fontFamily: "var(--font-arabic)",
-                  fontSize: `${arabicFontSize}rem`,
+                  fontSize: `${effectiveFontSize}rem`,
                   textAlign: "justify",
                   textAlignLast: "center",
                 }}
