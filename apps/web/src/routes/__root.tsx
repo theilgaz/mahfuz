@@ -137,13 +137,7 @@ function AppHeader() {
   const pageNumMatch = path.match(/^\/page\/(\d+)$/);
   const isReadingRoute = !!(surahSlugMatch || pageNumMatch);
 
-  // Current surah ID for reading routes (read lazily to avoid scroll-triggered re-renders)
   const lastPosition = useReadingStore.getState().lastPosition;
-  const currentSurahId = surahSlugMatch
-    ? undefined // will be resolved by SurahPicker from slug
-    : pageNumMatch
-      ? lastPosition?.surahId ?? 1
-      : undefined;
   const currentPage = pageNumMatch ? parseInt(pageNumMatch[1], 10) : undefined;
 
   // Sayfa başlığı (non-reading routes only)
@@ -203,7 +197,7 @@ function AppHeader() {
               {surahSlugMatch ? (
                 <SurahPickerNav surahSlug={surahSlugMatch[1]} />
               ) : pageNumMatch ? (
-                <PagePickerNav page={currentPage!} surahId={currentSurahId ?? 1} />
+                <PagePickerNav page={currentPage!} />
               ) : null}
             </div>
           ) : title ? (
@@ -321,6 +315,7 @@ function AppHeader() {
 // ── Reading route nav helpers ────────────────────────────
 
 import { TOTAL_CHAPTERS, TOTAL_PAGES } from "@mahfuz/shared";
+import { useSurahs } from "~/hooks/useQuranQuery";
 
 function SurahPickerNav({ surahSlug: slug }: { surahSlug: string }) {
   const id = surahIdFromSlug(slug) ?? 1;
@@ -343,7 +338,14 @@ function SurahPickerNav({ surahSlug: slug }: { surahSlug: string }) {
   );
 }
 
-function PagePickerNav({ page, surahId }: { page: number; surahId: number }) {
+function PagePickerNav({ page }: { page: number }) {
+  const { data: surahs } = useSurahs();
+  // Sayfadaki ilk sureyi pageStart'a göre türet (stale store'a güvenmeden)
+  const surahId = surahs.reduce<number>((best, s) => {
+    if (s.pageStart <= page && s.pageStart > (surahs.find(x => x.id === best)?.pageStart ?? 0)) return s.id;
+    return best;
+  }, 1);
+
   return (
     <>
       {page > 1 ? (

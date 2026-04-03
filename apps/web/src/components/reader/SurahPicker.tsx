@@ -80,9 +80,9 @@ export function SurahPicker({
     );
   });
 
-  // Sure adı
+  // Sure adı — her zaman transliterasyon (nameSimple) kullan
   const currentSurah = surahs.find((s) => s.id === currentSurahId);
-  const surahName = (currentSurahId ? getSurahName(currentSurahId, locale) : "") || currentSurah?.nameSimple || "";
+  const surahName = currentSurah?.nameSimple || "";
 
   // Trigger label
   const triggerLabel =

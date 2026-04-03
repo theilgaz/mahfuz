@@ -4,8 +4,6 @@
  */
 
 import { PlaySurahButton } from "./PlaySurahButton";
-import { getSurahName } from "~/lib/surah-names-i18n";
-import { useTranslation } from "~/hooks/useTranslation";
 
 interface SurahHeaderProps {
   surahId?: number;
@@ -17,8 +15,7 @@ interface SurahHeaderProps {
 }
 
 export function SurahHeader({ surahId, nameArabic, nameSimple, showBismillah, compact }: SurahHeaderProps) {
-  const { locale } = useTranslation();
-  const label = (surahId ? getSurahName(surahId, locale) : "") || nameSimple;
+  const label = nameSimple;
   return (
     <div className={`${compact ? "my-2" : "my-6"} select-none`}>
       {/* Üst süslü çizgi */}
