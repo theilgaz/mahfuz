@@ -3,7 +3,7 @@
  * 28 soruluk kapsamlı sınav: ses tanıma + form tanıma karışık.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ARABIC_LETTERS, getLetterForms, getSimilarDistractors, NON_CONNECTORS } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -76,6 +76,26 @@ function ExamPage() {
 
   const currentQuestions = phase === "lastChance" ? lcQuestions : questions;
   const q = currentQuestions[index];
+  const autoAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Auto-play audio when a voice question appears
+  useEffect(() => {
+    if (!started || phase === "done" || !q || q.qtype !== "voice") return;
+    const audio = new Audio(`/kids/audio/${q.letter.id}.mp3`);
+    autoAudioRef.current = audio;
+    audio.onerror = () => {
+      if ("speechSynthesis" in window) {
+        const utter = new SpeechSynthesisUtterance(q.letter.nameAr.replace(/[\u064B-\u065F]/g, ""));
+        utter.lang = "ar-SA";
+        speechSynthesis.speak(utter);
+      }
+    };
+    audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      speechSynthesis.cancel();
+    };
+  }, [index, phase, started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChoice = useCallback(
     (choiceId: string) => {
