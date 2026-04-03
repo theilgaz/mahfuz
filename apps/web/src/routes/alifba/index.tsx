@@ -99,6 +99,10 @@ function AlifbaIndexPage() {
         </div>
         <div className="flex gap-3 text-center">
           <div>
+            <p className="text-base font-bold text-[var(--color-accent)]">{stats.mastered}</p>
+            <p className="text-[10px] text-[var(--color-text-secondary)]">{t.alifba.mastered}</p>
+          </div>
+          <div>
             <p className="text-base font-bold text-[var(--color-accent)]">{stats.seen}</p>
             <p className="text-[10px] text-[var(--color-text-secondary)]">{t.alifba.seen}</p>
           </div>
@@ -134,8 +138,11 @@ function AlifbaIndexPage() {
       </div>
 
       {/* Harf ızgarası */}
-      <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-2">{t.alifba.learnLetters}</p>
-      <div className="grid grid-cols-7 gap-2" dir="rtl">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold">{t.alifba.learnLetters}</h2>
+        <span className="text-xs text-[var(--color-text-secondary)]">{stats.mastered}/{ARABIC_LETTERS.length}</span>
+      </div>
+      <div className="grid grid-cols-7 gap-1.5" dir="rtl">
         {ARABIC_LETTERS.map((letter) => {
           const prog = progress[letter.id];
           const isSeen = prog?.seen;
@@ -145,18 +152,51 @@ function AlifbaIndexPage() {
               key={letter.id}
               to="/alifba/$letterId"
               params={{ letterId: letter.id }}
-              className={`flex flex-col items-center justify-center gap-2 h-[5.5rem] overflow-hidden rounded-xl border transition-colors active:scale-95 ${
+              className={[
+                "relative flex flex-col items-center justify-center aspect-square min-w-0 overflow-hidden rounded-2xl border",
+                "transition-all duration-150 ease-out active:scale-95",
+                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                 isMastered
-                  ? "bg-[var(--color-accent)]/10 border-[var(--color-accent)]/40"
-                  : isSeen
-                    ? "bg-[var(--color-surface)] border-[var(--color-border)] opacity-80"
-                    : "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5"
-              }`}
+                  ? "bg-[var(--color-accent)]/8 border-[var(--color-accent)]/50"
+                  : "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)]/40 hover:bg-[var(--color-accent)]/5 hover:-translate-y-px",
+              ].join(" ")}
+              style={{
+                boxShadow: isMastered
+                  ? "0 2px 8px color-mix(in srgb, var(--color-accent) 28%, transparent), 0 1px 3px rgba(0,0,0,0.06)"
+                  : "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+              }}
             >
-              <span className="text-3xl leading-tight" style={{ fontFamily: "var(--font-arabic)" }}>
+              {/* Sıra numarası */}
+              <span className="absolute top-1 left-1 text-[8px] text-[var(--color-text-secondary)]/40 leading-none font-mono select-none">
+                {letter.order}
+              </span>
+
+              {/* Ustalaşıldı rozeti */}
+              {isMastered && (
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[var(--color-accent)] flex items-center justify-center">
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                    <path d="M1.5 4L3 5.5L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              )}
+
+              {/* Harf */}
+              <span
+                className={`text-4xl leading-none select-none ${isMastered ? "text-[var(--color-accent)]" : ""}`}
+                style={{ fontFamily: "var(--font-arabic)" }}
+              >
                 {letter.arabic}
               </span>
-              <span className="text-[10px] text-[var(--color-text-secondary)] leading-none shrink-0">{letter.name}</span>
+
+              {/* İsim */}
+              <span className="text-[9px] font-medium tracking-wide uppercase text-[var(--color-text-secondary)] leading-none mt-0.5 select-none">
+                {letter.name}
+              </span>
+
+              {/* Görüldü çizgisi */}
+              {isSeen && !isMastered && (
+                <span className="absolute bottom-0 inset-x-0 h-[2px] bg-[var(--color-accent)]/50" />
+              )}
             </Link>
           );
         })}
