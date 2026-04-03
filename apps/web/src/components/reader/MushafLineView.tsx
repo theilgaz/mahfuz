@@ -9,6 +9,12 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import type { MushafPageLines } from "~/hooks/useQuranQuery";
 import { useSettingsStore, COLOR_PALETTES } from "~/stores/settings.store";
+import { VerseEndMarker } from "~/components/quran/VerseEndMarker";
+
+const ARABIC_INDIC = "٠١٢٣٤٥٦٧٨٩";
+function fromArabicIndic(s: string): number {
+  return parseInt(s.replace(/[٠-٩]/g, (d) => String(ARABIC_INDIC.indexOf(d))), 10);
+}
 
 interface MushafLineViewProps {
   lineData: MushafPageLines;
@@ -89,15 +95,22 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
               {line.words.map((word, wordIdx) => {
                 const isWord = word.c !== "e" && word.c !== "p";
                 const colorIdx = isWord ? wordCounter++ : 0;
+                if (word.c === "e") {
+                  const ayahNum = fromArabicIndic(word.t);
+                  const markerSize = Math.max(20, Math.round(arabicFontSize * 14));
+                  return (
+                    <span key={wordIdx} className="self-center shrink-0 inline-flex">
+                      <VerseEndMarker ayahNumber={ayahNum} size={markerSize} variant="inline" />
+                    </span>
+                  );
+                }
                 return (
                   <span
                     key={wordIdx}
                     className={
-                      word.c === "e"
-                        ? "mushaf-end-marker text-[var(--marker-g2)] text-[0.55em] self-center select-none whitespace-nowrap"
-                        : word.c === "p"
-                          ? "mushaf-pause-marker text-[var(--color-text-secondary)] text-[0.7em] self-center select-none whitespace-nowrap"
-                          : "mushaf-word transition-colors duration-150 cursor-default rounded-sm px-[0.04em] hover:bg-[var(--color-word-hover)] hover:text-[var(--color-word-hover-text)] whitespace-nowrap"
+                      word.c === "p"
+                        ? "mushaf-pause-marker text-[var(--color-text-secondary)] text-[0.7em] self-center select-none whitespace-nowrap"
+                        : "mushaf-word transition-colors duration-150 cursor-default rounded-sm px-[0.04em] hover:bg-[var(--color-word-hover)] hover:text-[var(--color-word-hover-text)] whitespace-nowrap"
                     }
                     style={wordColors && isWord ? { color: wordColors[colorIdx % wordColors.length] } : undefined}
                   >
