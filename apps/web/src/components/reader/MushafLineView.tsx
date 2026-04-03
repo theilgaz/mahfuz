@@ -34,14 +34,29 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
     const inner = innerRef.current;
     if (!container || !inner) return;
 
-    // zoom'u sıfırla → doğal boyutu ölç
     inner.style.zoom = "1";
     void inner.offsetWidth; // reflow zorla
 
-    const containerWidth = container.clientWidth;
-    const contentWidth = inner.scrollWidth;
+    const containerRect = container.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    if (containerWidth === 0) return;
 
-    if (contentWidth > containerWidth && containerWidth > 0) {
+    // RTL sola-taşmayı scrollWidth yakalayamaz — getBoundingClientRect kullan
+    const items = inner.querySelectorAll<HTMLElement>(".mushaf-line > *");
+    let minLeft = Infinity;
+    let maxRight = -Infinity;
+    items.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0) {
+        minLeft = Math.min(minLeft, r.left);
+        maxRight = Math.max(maxRight, r.right);
+      }
+    });
+
+    const contentWidth =
+      minLeft < Infinity ? maxRight - minLeft : inner.scrollWidth;
+
+    if (contentWidth > containerWidth + 0.5) {
       setScale(Math.max(0.5, containerWidth / contentWidth));
     } else {
       setScale(1);
