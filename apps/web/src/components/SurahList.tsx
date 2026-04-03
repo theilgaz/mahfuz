@@ -125,8 +125,8 @@ export function SurahList({ surahs }: SurahListProps) {
             ref={(el: HTMLAnchorElement | null) => {
               if (el) itemRefs.current.set(surah.id, el);
             }}
-            to={readingMode === "page" ? "/page/$pageNumber" : "/surah/$surahSlug"}
-            params={readingMode === "page" ? { pageNumber: String(surah.pageStart) } : { surahSlug: surahSlug(surah.id) }}
+            to={readingMode === "mushaf" ? "/page/$pageNumber" : "/surah/$surahSlug"}
+            params={readingMode === "mushaf" ? { pageNumber: String(surah.pageStart) } : { surahSlug: surahSlug(surah.id) }}
             search={{ ayah: undefined }}
             preload="intent"
             className={`group relative flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] transition-colors overflow-hidden ${

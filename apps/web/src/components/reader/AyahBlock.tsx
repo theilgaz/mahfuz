@@ -10,6 +10,7 @@ import { useAudioStore } from "~/stores/audio.store";
 import { parseTajweed } from "~/lib/tajweed-parser";
 import { splitWords } from "~/lib/split-words";
 import { AyahActionMenu } from "./AyahActionMenu";
+import { WordTooltip } from "./WordTooltip";
 import { VerseEndMarker } from "~/components/quran/VerseEndMarker";
 import { SajdahMarker } from "~/components/quran/SajdahMarker";
 import type { WbwWord } from "~/hooks/useWbwData";
@@ -54,19 +55,26 @@ export const AyahBlock = memo(function AyahBlock({
     surahId ? s.isBookmarked(surahId, ayahNumber) : false,
   );
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
-  const { arabicFontSize, translationFontSize, translationSlugs, wbwTranslation, wbwTranslit, colorizeWords, colorPaletteId } = useSettingsStore(
+  const { arabicFontSize, translationFontSize, translationSlugs, showTranslit, readingMode, colorizeWords, colorPaletteId } = useSettingsStore(
     useShallow((s) => ({
       arabicFontSize: s.arabicFontSize,
       translationFontSize: s.translationFontSize,
       translationSlugs: s.translationSlugs,
-      wbwTranslation: s.wbwTranslation,
-      wbwTranslit: s.wbwTranslit,
+      showTranslit: s.showTranslit,
+      readingMode: s.readingMode,
       colorizeWords: s.colorizeWords,
       colorPaletteId: s.colorPaletteId,
     }))
   );
   const multiMode = translationSlugs.length > 1;
   const wordColors = colorizeWords ? COLOR_PALETTES[colorPaletteId].colors : null;
+
+  // WBW modunda: kelime kartları; diğer modlarda: tooltip
+  const isWbwLayout = readingMode === "wbw" && wbwWords && wbwWords.length > 0;
+  const hasTooltip = readingMode === "verse" && wbwWords && wbwWords.length > 0;
+
+  // Tooltip state — verse modunda kelimeye tıklayınca
+  const [tooltip, setTooltip] = useState<{ word: WbwWord; rect: DOMRect } | null>(null);
 
   // Audio word tracking
   const verseKey = surahId ? `${surahId}:${ayahNumber}` : null;
@@ -96,7 +104,9 @@ export const AyahBlock = memo(function AyahBlock({
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
 
-  const hasHoverField = wbwTranslation === "hover" || wbwTranslit === "hover";
+  // WBW modunda translit toggle; diğer modlarda hover yok
+  const wbwTranslit = showTranslit ? "on" : "off";
+  const wbwTranslation = "on"; // WBW modunda çeviri her zaman görünür
 
   // Tek menü açma fonksiyonu — her zaman ayetin rect'ini kullanır
   const [longPressActive, setLongPressActive] = useState(false);
@@ -216,15 +226,13 @@ export const AyahBlock = memo(function AyahBlock({
       )}
 
       {/* Arapça metin — WBW / tecvid / normal */}
-      {wbwWords && wbwWords.length > 0 ? (
-        /* Kelime kelime mod */
+      {isWbwLayout ? (
+        /* Kelime kelime mod — kartlar */
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-3 py-2" dir="rtl">
-          {wbwWords.map((w, i) => (
+          {wbwWords!.map((w, i) => (
             <div
               key={w.position}
-              className={`group/wbw flex flex-col items-center min-w-[3rem] rounded-lg px-1.5 py-1 transition-colors duration-150 ${
-                hasHoverField ? "cursor-pointer" : "cursor-default"
-              } ${
+              className={`group/wbw flex flex-col items-center min-w-[3rem] rounded-lg px-1.5 py-1 transition-colors duration-150 cursor-default ${
                 wordPosition === w.position
                   ? "word-audio-active"
                   : "hover:bg-[var(--color-word-hover)]"
@@ -242,40 +250,20 @@ export const AyahBlock = memo(function AyahBlock({
                 {w.textUthmani}
               </span>
               {w.transliteration && wbwTranslit !== "off" && (
-                wbwTranslit === "hover" ? (
-                  <span
-                    className="text-center leading-tight mt-0.5"
-                    style={{ fontFamily: "var(--font-ui)", fontSize: `${Math.max(0.6, translationFontSize * 0.65)}rem` }}
-                  >
-                    <span className="group-hover/wbw:hidden text-[var(--color-border)] select-none">{"‒".repeat(Math.min(6, Math.max(2, Math.ceil(w.transliteration.length / 2))))}</span>
-                    <span className="hidden group-hover/wbw:inline text-[var(--color-accent)] italic">{w.transliteration}</span>
-                  </span>
-                ) : (
-                  <span
-                    className="text-[var(--color-accent)] text-center leading-tight mt-0.5 italic"
-                    style={{ fontFamily: "var(--font-ui)", fontSize: `${Math.max(0.6, translationFontSize * 0.65)}rem` }}
-                  >
-                    {w.transliteration}
-                  </span>
-                )
+                <span
+                  className="text-[var(--color-accent)] text-center leading-tight mt-0.5 italic"
+                  style={{ fontFamily: "var(--font-ui)", fontSize: `${Math.max(0.6, translationFontSize * 0.65)}rem` }}
+                >
+                  {w.transliteration}
+                </span>
               )}
-              {w.translation && wbwTranslation !== "off" && (
-                wbwTranslation === "hover" ? (
-                  <span
-                    className="text-center leading-tight mt-0.5"
-                    style={{ fontFamily: "var(--font-ui)", fontSize: `${Math.max(0.65, translationFontSize * 0.75)}rem` }}
-                  >
-                    <span className="group-hover/wbw:hidden text-[var(--color-border)] select-none">{"‒".repeat(Math.min(6, Math.max(2, Math.ceil(w.translation.length / 3))))}</span>
-                    <span className="hidden group-hover/wbw:inline text-[var(--color-text-translation)]">{w.translation}</span>
-                  </span>
-                ) : (
-                  <span
-                    className="text-[var(--color-text-translation)] text-center leading-tight mt-0.5"
-                    style={{ fontFamily: "var(--font-ui)", fontSize: `${Math.max(0.65, translationFontSize * 0.75)}rem` }}
-                  >
-                    {w.translation}
-                  </span>
-                )
+              {w.translation && (
+                <span
+                  className="text-[var(--color-text-translation)] text-center leading-tight mt-0.5"
+                  style={{ fontFamily: "var(--font-ui)", fontSize: `${Math.max(0.65, translationFontSize * 0.75)}rem` }}
+                >
+                  {w.translation}
+                </span>
               )}
             </div>
           ))}
@@ -285,24 +273,36 @@ export const AyahBlock = memo(function AyahBlock({
           </div>
         </div>
       ) : (
-        /* Normal metin */
-        <div className="leading-[2.8]" dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: `${arabicFontSize}rem`, textAlign: "justify" }}>
+        /* Normal metin — verse modunda kelimeye tıklayınca WordTooltip */
+        <div className="leading-[2.8] relative" dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: `${arabicFontSize}rem`, textAlign: "justify" }}>
           {showTajweed && textTajweed && !colorizeWords
             ? parseTajweed(textTajweed, true)
             : splitWords(textUthmani).map((word, i) => {
                 const isActive = wordPosition === i + 1;
                 const wc = wordColors && !isActive ? wordColors[i % wordColors.length] : undefined;
+                const wbwWord = hasTooltip ? wbwWords![i] : undefined;
+                const isTooltipOpen = tooltip?.word === wbwWord;
                 return (
                   <span
                     key={i}
-                    className={`inline rounded-sm px-[0.06em] transition-colors duration-150 cursor-default ${
+                    className={`inline rounded-sm px-[0.06em] transition-colors duration-150 ${
+                      hasTooltip ? "cursor-pointer" : "cursor-default"
+                    } ${
                       isActive
                         ? "word-audio-active"
-                        : wc
-                          ? "hover:bg-[var(--color-word-hover)]"
-                          : "hover:bg-[var(--color-word-hover)] hover:text-[var(--color-word-hover-text)]"
+                        : isTooltipOpen
+                          ? "bg-[var(--color-accent)]/15 text-[var(--color-text-primary)]"
+                          : wc
+                            ? "hover:bg-[var(--color-word-hover)]"
+                            : "hover:bg-[var(--color-word-hover)] hover:text-[var(--color-word-hover-text)]"
                     }`}
-                    style={wc ? { color: wc } : undefined}
+                    style={wc && !isTooltipOpen ? { color: wc } : undefined}
+                    onClick={wbwWord ? (e) => {
+                      e.stopPropagation();
+                      if (isTooltipOpen) { setTooltip(null); return; }
+                      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                      setTooltip({ word: wbwWord, rect });
+                    } : undefined}
                   >
                     {word}{" "}
                   </span>
@@ -310,6 +310,13 @@ export const AyahBlock = memo(function AyahBlock({
               })}
           <VerseEndMarker ayahNumber={ayahNumber} onClick={handleBadgeClick} variant="inline" size={32} />
           {sajdah && <SajdahMarker />}
+          {tooltip && (
+            <WordTooltip
+              word={tooltip.word}
+              anchorRect={tooltip.rect}
+              onClose={() => setTooltip(null)}
+            />
+          )}
         </div>
       )}
 

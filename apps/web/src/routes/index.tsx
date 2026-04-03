@@ -77,7 +77,7 @@ function HomePage() {
                 const surah = surahMap.get(bm.surahId);
                 const name = surah?.nameSimple || String(bm.surahId);
                 const label = `${name} ${bm.ayahNumber}`;
-                const linkProps = readingMode === "list"
+                const linkProps = readingMode !== "mushaf"
                   ? { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(bm.surahId) }, search: { ayah: bm.ayahNumber } }
                   : { to: "/page/$pageNumber" as const, params: { pageNumber: String(bm.pageNumber) }, search: { ayah: undefined } };
                 return (

@@ -20,9 +20,7 @@ export interface SettingsFields {
   textStyle?: string;
   translationSlugs?: string[];
   showTranslation?: boolean;
-  showWbw?: boolean;
-  wbwTranslation?: string;
-  wbwTranslit?: string;
+  showTranslit?: boolean;
   showTajweed?: boolean;
   readingMode?: string;
   surahListFilter?: string;
@@ -352,7 +350,7 @@ export const pullChanges = createServerFn({ method: "GET" })
     const settings: SettingsFields = {};
     const SETTINGS_KEYS = [
       "theme", "textStyle", "translationSlugs", "showTranslation",
-      "showWbw", "wbwTranslation", "wbwTranslit", "showTajweed",
+      "showTranslit", "showTajweed",
       "readingMode", "surahListFilter", "reciterSlug",
       "arabicFontSize", "translationFontSize", "locale",
     ] as const;

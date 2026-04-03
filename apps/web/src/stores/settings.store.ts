@@ -5,7 +5,8 @@ import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 export type Theme = "papyrus" | "sea" | "night" | "seher";
 export type SeherOverride = "auto" | "light" | "dark";
 export type TextStyle = "uthmani" | "basic";
-export type WbwDisplay = "off" | "hover" | "on";
+export type WbwDisplay = "off" | "hover" | "on"; // geriye uyumluluk
+export type ReadingMode = "mushaf" | "verse" | "wbw";
 export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
 export type MushafSizeMode = "standard" | "fill";
@@ -24,11 +25,9 @@ interface SettingsState {
   textStyle: TextStyle;
   translationSlugs: string[];
   showTranslation: boolean;
-  showWbw: boolean;
-  wbwTranslation: WbwDisplay;
-  wbwTranslit: WbwDisplay;
+  showTranslit: boolean;
   showTajweed: boolean;
-  readingMode: "page" | "list";
+  readingMode: ReadingMode;
   surahListFilter: SurahListFilter;
   reciterSlug: string;
   arabicFontSize: number; // rem
@@ -50,11 +49,9 @@ interface SettingsActions {
   /** Eski tek-meal setter (geriye uyumluluk — listeyi [slug] yapar) */
   setTranslation: (slug: string) => void;
   toggleTranslation: () => void;
-  toggleWbw: () => void;
-  setWbwTranslation: (mode: WbwDisplay) => void;
-  setWbwTranslit: (mode: WbwDisplay) => void;
+  toggleTranslit: () => void;
   toggleTajweed: () => void;
-  setReadingMode: (mode: "page" | "list") => void;
+  setReadingMode: (mode: ReadingMode) => void;
   setSurahListFilter: (filter: SurahListFilter) => void;
   setReciter: (slug: string) => void;
   setTextStyle: (style: TextStyle) => void;
@@ -76,12 +73,10 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       seherLocation: null,
       translationSlugs: [DEFAULT_TRANSLATION_SLUG],
       showTranslation: true,
-      showWbw: false,
-      wbwTranslation: "on" as WbwDisplay,
-      wbwTranslit: "off" as WbwDisplay,
+      showTranslit: false,
       showTajweed: false,
       textStyle: "uthmani" as TextStyle,
-      readingMode: "page",
+      readingMode: "mushaf" as ReadingMode,
       surahListFilter: "all" as SurahListFilter,
       reciterSlug: "mishary-rashid-alafasy",
       arabicFontSize: 1.8,
@@ -121,9 +116,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         }),
       setTranslation: (slug) => set({ translationSlugs: [slug] }),
       toggleTranslation: () => set((s) => ({ showTranslation: !s.showTranslation })),
-      toggleWbw: () => set((s) => ({ showWbw: !s.showWbw })),
-      setWbwTranslation: (mode) => set({ wbwTranslation: mode }),
-      setWbwTranslit: (mode) => set({ wbwTranslit: mode }),
+      toggleTranslit: () => set((s) => ({ showTranslit: !s.showTranslit })),
       toggleTajweed: () => set((s) => ({ showTajweed: !s.showTajweed })),
       setReadingMode: (mode) => set({ readingMode: mode }),
       setSurahListFilter: (filter) => set({ surahListFilter: filter }),
@@ -141,12 +134,10 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           theme: "papyrus",
           translationSlugs: [DEFAULT_TRANSLATION_SLUG],
           showTranslation: true,
-          showWbw: false,
-          wbwTranslation: "on",
-          wbwTranslit: "off",
+          showTranslit: false,
           showTajweed: false,
           textStyle: "uthmani",
-          readingMode: "page",
+          readingMode: "mushaf",
           surahListFilter: "all",
           reciterSlug: "mishary-rashid-alafasy",
           arabicFontSize: 1.8,
@@ -159,7 +150,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     }),
     {
       name: "mahfuz-core-settings",
-      version: 1,
+      version: 2,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
@@ -167,11 +158,20 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       migrate: (persisted: any, version: number) => {
         if (version === 0) {
           // v0 → v1: translationSlug (string) → translationSlugs (string[])
-          const old = persisted as any;
-          if (old.translationSlug && !old.translationSlugs) {
-            old.translationSlugs = [old.translationSlug];
-            delete old.translationSlug;
+          if (persisted.translationSlug && !persisted.translationSlugs) {
+            persisted.translationSlugs = [persisted.translationSlug];
+            delete persisted.translationSlug;
           }
+        }
+        if (version < 2) {
+          // v1 → v2: "page"/"list" + showWbw → "mushaf"/"verse"/"wbw"
+          const wasPage = persisted.readingMode === "page" || !persisted.readingMode;
+          const hadWbw = persisted.showWbw === true;
+          persisted.readingMode = wasPage ? "mushaf" : hadWbw ? "wbw" : "verse";
+          persisted.showTranslit = persisted.wbwTranslit === "on";
+          delete persisted.showWbw;
+          delete persisted.wbwTranslation;
+          delete persisted.wbwTranslit;
         }
         return persisted as any;
       },

@@ -22,9 +22,7 @@ export interface UserSettingsData {
   textStyle?: string;
   translationSlugs?: string[];
   showTranslation?: boolean;
-  showWbw?: boolean;
-  wbwTranslation?: string;
-  wbwTranslit?: string;
+  showTranslit?: boolean;
   showTajweed?: boolean;
   readingMode?: string;
   surahListFilter?: string;

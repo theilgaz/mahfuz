@@ -28,9 +28,7 @@ function collectAll(): UserSettingsData {
     textStyle: s.textStyle,
     translationSlugs: s.translationSlugs,
     showTranslation: s.showTranslation,
-    showWbw: s.showWbw,
-    wbwTranslation: s.wbwTranslation,
-    wbwTranslit: s.wbwTranslit,
+    showTranslit: s.showTranslit,
     showTajweed: s.showTajweed,
     readingMode: s.readingMode,
     surahListFilter: s.surahListFilter,
@@ -51,9 +49,7 @@ function applyAll(data: UserSettingsData) {
   if (data.textStyle) patch.textStyle = data.textStyle;
   if (data.translationSlugs) patch.translationSlugs = data.translationSlugs;
   if (data.showTranslation !== undefined) patch.showTranslation = data.showTranslation;
-  if (data.showWbw !== undefined) patch.showWbw = data.showWbw;
-  if (data.wbwTranslation) patch.wbwTranslation = data.wbwTranslation;
-  if (data.wbwTranslit) patch.wbwTranslit = data.wbwTranslit;
+  if (data.showTranslit !== undefined) patch.showTranslit = data.showTranslit;
   if (data.showTajweed !== undefined) patch.showTajweed = data.showTajweed;
   if (data.readingMode) patch.readingMode = data.readingMode;
   if (data.surahListFilter) patch.surahListFilter = data.surahListFilter;

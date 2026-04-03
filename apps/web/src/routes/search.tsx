@@ -148,7 +148,7 @@ function ResultCard({ r, readingMode, locale, t, navigate }: {
   return (
     <button
       onClick={() => {
-        if (readingMode === "list") {
+        if (readingMode !== "mushaf") {
           navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(r.surahId) }, search: { ayah: r.ayahNumber } });
         } else {
           navigate({ to: "/page/$pageNumber", params: { pageNumber: String(r.pageNumber) }, search: { ayah: `${r.surahId}:${r.ayahNumber}` } });

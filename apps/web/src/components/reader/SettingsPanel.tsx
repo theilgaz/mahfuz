@@ -5,7 +5,7 @@
 
 import { useMemo, useEffect, useRef, useState, useCallback } from "react";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
-import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type WbwDisplay, type ColorPaletteId, type SeherOverride } from "~/stores/settings.store";
+import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type ReadingMode, type ColorPaletteId, type SeherOverride } from "~/stores/settings.store";
 import { isDaytime, nextTransition } from "~/lib/solar";
 import { useQuery } from "@tanstack/react-query";
 import { recitersQueryOptions, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
@@ -44,6 +44,44 @@ const THEMES: ThemeDef[] = [
     split: { bg2: "#1a1018", text2: "#f0e6e8" } },
 ];
 
+// ── Okuma modu ikonları ───────────────────────────────────
+
+function MushafIcon({ size, active }: { size: number; active: boolean }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={active ? 1.8 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="16" height="14" rx="2" />
+      <line x1="10" y1="3" x2="10" y2="17" />
+      <line x1="4" y1="7" x2="8" y2="7" />
+      <line x1="4" y1="10" x2="8" y2="10" />
+      <line x1="4" y1="13" x2="8" y2="13" />
+      <line x1="12" y1="7" x2="16" y2="7" />
+      <line x1="12" y1="10" x2="16" y2="10" />
+      <line x1="12" y1="13" x2="16" y2="13" />
+    </svg>
+  );
+}
+
+function VerseIcon({ size, active }: { size: number; active: boolean }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={active ? 1.8 : 1.5} strokeLinecap="round">
+      <line x1="3" y1="5" x2="17" y2="5" />
+      <line x1="3" y1="10" x2="17" y2="10" />
+      <line x1="3" y1="15" x2="11" y2="15" />
+    </svg>
+  );
+}
+
+function WbwIcon({ size, active }: { size: number; active: boolean }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={active ? 1.8 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="7" height="7" rx="1.5" />
+      <rect x="11" y="3" width="7" height="7" rx="1.5" />
+      <rect x="2" y="12" width="7" height="5" rx="1.5" />
+      <rect x="11" y="12" width="7" height="5" rx="1.5" />
+    </svg>
+  );
+}
+
 // ── Main Panel ───────────────────────────────────────────
 
 interface SettingsPanelProps {
@@ -81,14 +119,14 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
 
   if (!open) return null;
 
-  const handleModeChange = (mode: "page" | "list") => {
+  const handleModeChange = (mode: ReadingMode) => {
     store.setReadingMode(mode);
     const isOnPage = currentPath.startsWith("/page/");
     const isOnSurah = currentPath.startsWith("/surah/");
-    if (mode === "list" && isOnPage && context?.surahId) {
+    if (mode !== "mushaf" && isOnPage && context?.surahId) {
       onClose();
       navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(context.surahId) }, search: { ayah: undefined } });
-    } else if (mode === "page" && isOnSurah) {
+    } else if (mode === "mushaf" && isOnSurah) {
       onClose();
       navigate({ to: "/page/$pageNumber", params: { pageNumber: String(context?.pageNumber || 1) }, search: { ayah: undefined } });
     }
@@ -177,7 +215,7 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
   translationList: any;
   locale: string;
   t: any;
-  onModeChange: (mode: "page" | "list") => void;
+  onModeChange: (mode: ReadingMode) => void;
 }) {
   const LANG_ORDER = ["tr", "en", "es", "fr", "ar", "de", "nl"];
   const langOrder = useMemo(() => [locale, ...LANG_ORDER.filter((l) => l !== locale)], [locale]);
@@ -292,36 +330,50 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
 
       <Divider />
 
-      {/* ── Okuma Modu ── */}
+      {/* ── Okuma Modu — 3 seçenek ── */}
       <div>
         <Label>{t.settings.readingMode}</Label>
-        <SegmentedControl
-          options={[
-            { value: "page", label: t.settings.mushafPage },
-            { value: "list", label: t.settings.verseList },
-          ]}
-          value={store.readingMode}
-          onChange={(v) => onModeChange(v as "page" | "list")}
-        />
-      </div>
-
-      <Divider />
-
-      {/* ── Kelime Kelime ── */}
-      <div>
-        <div className="flex items-center justify-between">
-          <Label>{t.settings.wordByWord}</Label>
-          <Toggle checked={store.showWbw && store.readingMode !== "page"} onChange={store.toggleWbw} disabled={store.readingMode === "page"} />
+        <div className="grid grid-cols-3 gap-1.5 mt-1">
+          {([
+            { value: "mushaf" as ReadingMode, label: t.settings.modeMushaf, icon: MushafIcon },
+            { value: "verse" as ReadingMode, label: t.settings.modeVerse, icon: VerseIcon },
+            { value: "wbw" as ReadingMode, label: t.settings.modeWbw, icon: WbwIcon },
+          ] as const).map(({ value, label, icon: Icon }) => {
+            const active = store.readingMode === value;
+            return (
+              <button
+                key={value}
+                onClick={() => onModeChange(value)}
+                className={`flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl border text-[10px] font-medium leading-tight transition-colors ${
+                  active
+                    ? "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
+                    : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/40"
+                }`}
+              >
+                <Icon size={18} active={active} />
+                <span className="text-center">{label}</span>
+              </button>
+            );
+          })}
         </div>
-        {store.readingMode === "page" && (
-          <p className="text-[10px] text-[var(--color-text-secondary)] mt-1 opacity-70">{t.settings.wbwOnlyList}</p>
-        )}
-        {store.showWbw && store.readingMode !== "page" && (
-          <div className="mt-2 space-y-1.5">
-            <WbwDisplayControl label={t.settings.wbwTranslation} value={store.wbwTranslation} onChange={store.setWbwTranslation} t={t} />
-            <WbwDisplayControl label={t.settings.wbwTransliteration} value={store.wbwTranslit} onChange={store.setWbwTranslit} t={t} />
-          </div>
-        )}
+
+        {/* Mod bazlı seçenekler */}
+        <div className="mt-3 space-y-2">
+          {/* Mushaf + Ayet Ayet: Meal toggle */}
+          {store.readingMode !== "wbw" && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-[var(--color-text-secondary)]">{t.settings.translation}</span>
+              <Toggle checked={store.showTranslation} onChange={store.toggleTranslation} />
+            </div>
+          )}
+          {/* Kırık Meal: Transliterasyon toggle */}
+          {store.readingMode === "wbw" && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-[var(--color-text-secondary)]">{t.settings.wbwTransliteration}</span>
+              <Toggle checked={store.showTranslit} onChange={store.toggleTranslit} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -571,8 +623,6 @@ function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (
   );
 }
 
-const WBW_OPTIONS: WbwDisplay[] = ["off", "hover", "on"];
-
 // ── Seher Geçiş Kontrolleri ──────────────────────────────
 
 function SeherControls({ store, t }: {
@@ -662,30 +712,3 @@ function SeherControls({ store, t }: {
   );
 }
 
-// ── WBW Display ──────────────────────────────────────────
-
-function WbwDisplayControl({ label, value, onChange, t }: {
-  label: string; value: WbwDisplay; onChange: (v: WbwDisplay) => void; t: any;
-}) {
-  const labels: Record<WbwDisplay, string> = { off: t.settings.wbwOff, hover: t.settings.wbwHover, on: t.settings.wbwOn };
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="text-[11px] text-[var(--color-text-secondary)] shrink-0">{label}</span>
-      <div className="flex rounded-lg overflow-hidden border border-[var(--color-border)]">
-        {WBW_OPTIONS.map((opt) => (
-          <button
-            key={opt}
-            onClick={() => onChange(opt)}
-            className={`px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
-              value === opt
-                ? "bg-[var(--color-accent)] text-white"
-                : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
-            }`}
-          >
-            {labels[opt]}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}

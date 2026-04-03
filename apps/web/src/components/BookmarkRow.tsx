@@ -71,7 +71,7 @@ export function BookmarkRow({
     setSwiping(false);
   }, [offsetX, removeBookmark, surahId, ayahNumber]);
 
-  const linkTo = readingMode === "list"
+  const linkTo = readingMode !== "mushaf"
     ? { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(surahId) }, search: { ayah: ayahNumber } }
     : { to: "/page/$pageNumber" as const, params: { pageNumber: String(pageNumber) }, search: { ayah: undefined } };
 

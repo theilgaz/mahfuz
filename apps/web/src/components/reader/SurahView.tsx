@@ -26,17 +26,21 @@ interface SurahViewProps {
 
 export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const showTranslation = useSettingsStore((s) => s.showTranslation);
-  const showWbw = useSettingsStore((s) => s.showWbw);
+  const readingMode = useSettingsStore((s) => s.readingMode);
   const showTajweed = useSettingsStore((s) => s.showTajweed);
   const translationSlugs = useSettingsStore((s) => s.translationSlugs);
   const textStyle = useSettingsStore((s) => s.textStyle);
   const useBasic = textStyle === "basic";
-  const effectiveTajweed = showTajweed && !useBasic && !showWbw;
+  const isWbw = readingMode === "wbw";
+  const isVerse = readingMode === "verse";
+  // Tecvid: WBW modunda çalışmaz (HTML renderı WBW kelime kartlarıyla çakışır)
+  const effectiveTajweed = showTajweed && !useBasic && !isWbw;
   const savePosition = useReadingStore((s) => s.savePosition);
   const { data } = useSurahData(surahId, translationSlugs);
   const { data: tajweedData } = useTajweed(surahId, effectiveTajweed);
   const { data: imlaeiData } = useImlaei(surahId, useBasic);
-  const { data: wbwData } = useWbwData(surahId, showWbw);
+  // WBW verisi: WBW modunda kelime kartları, verse modunda tooltip için
+  const { data: wbwData } = useWbwData(surahId, isWbw || isVerse);
 
   // Çoklu meal adları
   const { data: translationSourceList } = useQuery({ ...translationSourcesQueryOptions(), enabled: translationSlugs.length > 1 });
@@ -126,12 +130,14 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     effectiveTajweed,
     tajweedData,
     translationNames,
-    showTranslation: showTranslation && !showWbw,
+    // WBW modunda ayah-level meal gösterilmez (kelime altında zaten var)
+    showTranslation: showTranslation && !isWbw,
     showTajweed,
     highlightAyah,
-    showWbw,
+    isWbw,
+    isVerse,
     wbwData,
-  }), [surahId, useBasic, imlaeiData, effectiveTajweed, tajweedData, translationNames, showTranslation, showWbw, showTajweed, highlightAyah, wbwData]);
+  }), [surahId, useBasic, imlaeiData, effectiveTajweed, tajweedData, translationNames, showTranslation, isWbw, isVerse, showTajweed, highlightAyah, wbwData]);
 
   const renderAyah = useCallback(
     (ayah: (typeof ayahList)[number]) => (
@@ -147,7 +153,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
         showTajweed={sharedProps.showTajweed}
         pageNumber={ayah.pageNumber}
         highlight={sharedProps.highlightAyah === ayah.ayahNumber}
-        wbwWords={sharedProps.showWbw ? sharedProps.wbwData?.get(`${sharedProps.surahId}:${ayah.ayahNumber}`) : undefined}
+        wbwWords={(sharedProps.isWbw || sharedProps.isVerse) ? sharedProps.wbwData?.get(`${sharedProps.surahId}:${ayah.ayahNumber}`) : undefined}
         sajdah={!!ayah.sajdah}
       />
     ),

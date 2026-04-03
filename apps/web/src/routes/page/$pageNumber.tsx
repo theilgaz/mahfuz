@@ -66,7 +66,7 @@ function PageRoute() {
   return (
     <div className="min-h-screen relative pb-20">
       <MushafPage pageNumber={page} highlightAyah={ayah} />
-      <FontSizeControl />
+      <FontSizeControl mushaf />
       <AudioBar />
       <ScrollToTop />
     </div>
