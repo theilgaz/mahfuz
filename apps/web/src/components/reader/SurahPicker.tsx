@@ -122,7 +122,7 @@ export function SurahPicker({
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              Sure
+              {t.common.surah}
             </button>
             <button
               role="tab"
@@ -134,7 +134,7 @@ export function SurahPicker({
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              Cüz
+              {t.common.juz}
             </button>
           </div>
 
@@ -149,7 +149,7 @@ export function SurahPicker({
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Sure ara..."
+                  placeholder={t.reader.searchSurah}
                   className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                 />
               </div>
@@ -190,7 +190,7 @@ export function SurahPicker({
                           </span>
                         </div>
                         <span className="text-xs text-[var(--color-text-secondary)]">
-                          {surah.ayahCount} ayet
+                          {surah.ayahCount} {t.surahList.verses}
                         </span>
                       </div>
                     </Link>
@@ -198,7 +198,7 @@ export function SurahPicker({
                 })}
                 {filtered.length === 0 && (
                   <p className="text-center text-sm text-[var(--color-text-secondary)] py-6">
-                    Sonuç bulunamadı
+                    {t.common.noResults}
                   </p>
                 )}
               </div>

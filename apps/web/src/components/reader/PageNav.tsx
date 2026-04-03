@@ -6,6 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect } from "react";
 import { useSwipeNav } from "~/hooks/useSwipeNav";
 import { SurahPicker } from "./SurahPicker";
+import { useTranslation } from "~/hooks/useTranslation";
 
 const TOTAL_PAGES = 604;
 
@@ -20,6 +21,7 @@ interface PageNavProps {
 
 export function PageNav({ pageNumber, enableSwipe = false, surahId, dropUp = false }: PageNavProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const goTo = useCallback(
     (page: number) => {
@@ -52,7 +54,7 @@ export function PageNav({ pageNumber, enableSwipe = false, surahId, dropUp = fal
         onClick={() => goTo(pageNumber - 1)}
         disabled={pageNumber <= 1}
         className="p-2 rounded-lg hover:bg-[var(--color-surface)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        aria-label="Önceki sayfa"
+        aria-label={t.reader.prevPage}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5L7 10L12 15" />
@@ -79,7 +81,7 @@ export function PageNav({ pageNumber, enableSwipe = false, surahId, dropUp = fal
         onClick={() => goTo(pageNumber + 1)}
         disabled={pageNumber >= TOTAL_PAGES}
         className="p-2 rounded-lg hover:bg-[var(--color-surface)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        aria-label="Sonraki sayfa"
+        aria-label={t.reader.nextPage}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M8 5L13 10L8 15" />

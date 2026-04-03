@@ -171,6 +171,7 @@ export const tr = {
     loading: "Yükleniyor...",
     noResults: "Sonuç bulunamadı",
     close: "Kapat",
+    go: "Git",
     page: "Sayfa",
     surah: "Sure",
     verse: "Ayet",
@@ -203,6 +204,14 @@ export const tr = {
     removeBookmark: "Yer imini kaldır",
     verseActions: "Ayet {n} eylemleri",
     sajdah: "Secde ayeti",
+    pageJumpTitle: "Sayfaya Git",
+    prevVerse: "Önceki ayet",
+    nextVerse: "Sonraki ayet",
+    playSurah: "Sureyi dinle",
+    playPage: "Bu sayfayı dinle",
+    startListening: "Dinlemeye başla",
+    fromStart: "Başından",
+    fromVerse: "{n}. ayetten",
   },
 
   error: {
@@ -372,5 +381,8 @@ export const tr = {
     speedChanged: "Hız: {speed}x",
     pageJump: "Sayfa numarası girin",
     verseActions: "Ayet menüsü",
+    scrollToTop: "Yukarı git",
+    pause: "Duraklat",
+    play: "Oynat",
   },
 } as const;

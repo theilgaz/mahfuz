@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAudioStore } from "~/stores/audio.store";
+import { useTranslation } from "~/hooks/useTranslation";
 
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2] as const;
 
@@ -41,6 +42,7 @@ export function AudioBar() {
   );
 
   const [showSpeed, setShowSpeed] = useState(false);
+  const { t } = useTranslation();
 
   if (!isVisible) return null;
 
@@ -81,7 +83,7 @@ export function AudioBar() {
             <button
               onClick={() => setShowSpeed(!showSpeed)}
               className="px-1.5 py-1 rounded-lg text-[10px] font-medium hover:bg-[var(--color-border)] transition-colors text-[var(--color-text-secondary)]"
-              aria-label="Oynatma hızı"
+              aria-label={t.a11y.playbackSpeed}
             >
               {speed}x
             </button>
@@ -90,7 +92,7 @@ export function AudioBar() {
             <button
               onClick={prevVerse}
               className="p-1.5 rounded-lg hover:bg-[var(--color-border)] transition-colors"
-              aria-label="Önceki ayet"
+              aria-label={t.reader.prevVerse}
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
                 <path d="M3 3v8h1.5V3H3zm8 0L6 7l5 4V3z" />
@@ -102,7 +104,7 @@ export function AudioBar() {
               onClick={togglePlayPause}
               disabled={isLoading}
               className="w-9 h-9 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
-              aria-label={isPlaying ? "Duraklat" : "Oynat"}
+              aria-label={isPlaying ? t.a11y.pause : t.a11y.play}
             >
               {isLoading ? (
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="animate-spin">
@@ -124,7 +126,7 @@ export function AudioBar() {
             <button
               onClick={nextVerse}
               className="p-1.5 rounded-lg hover:bg-[var(--color-border)] transition-colors"
-              aria-label="Sonraki ayet"
+              aria-label={t.reader.nextVerse}
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
                 <path d="M11 3v8H9.5V3H11zM3 3l5 4-5 4V3z" />
@@ -135,7 +137,7 @@ export function AudioBar() {
             <button
               onClick={stop}
               className="p-1.5 rounded-lg hover:bg-[var(--color-border)] transition-colors text-[var(--color-text-secondary)]"
-              aria-label="Kapat"
+              aria-label={t.common.close}
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M4 4l6 6m0-6l-6 6" />

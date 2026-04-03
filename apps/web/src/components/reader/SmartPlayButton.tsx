@@ -11,6 +11,7 @@ import { useSettingsStore } from "~/stores/settings.store";
 import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 import { pageDataQueryOptions } from "~/hooks/useQuranQuery";
+import { useTranslation } from "~/hooks/useTranslation";
 
 type SmartPlayButtonProps =
   | { mode: "surah"; surahId: number }
@@ -32,6 +33,7 @@ function SurahPlayButton({ surahId }: { surahId: number }) {
   const chapterId = useAudioStore((s) => s.chapterId);
   const togglePlayPause = useAudioStore((s) => s.togglePlayPause);
   const reciterSlug = useSettingsStore((s) => s.reciterSlug);
+  const { t } = useTranslation();
 
   const isThisActive = chapterId === surahId;
   const isPlaying = isThisActive && playbackState === "playing";
@@ -58,7 +60,7 @@ function SurahPlayButton({ surahId }: { surahId: number }) {
       isPlaying={isPlaying}
       isLoading={loading}
       onClick={handleClick}
-      ariaLabel={isPlaying ? "Duraklat" : "Sureyi dinle"}
+      ariaLabel={isPlaying ? t.a11y.pause : t.reader.playSurah}
     />
   );
 }
@@ -75,6 +77,7 @@ function PagePlayButton({ pageNumber }: { pageNumber: number }) {
   const chapterId = useAudioStore((s) => s.chapterId);
   const togglePlayPause = useAudioStore((s) => s.togglePlayPause);
   const reciterSlug = useSettingsStore((s) => s.reciterSlug);
+  const { t } = useTranslation();
 
   // Sayfa verisi loader tarafından zaten yüklenmiş — cache'den anında gelir
   const { data: pageData } = useQuery(pageDataQueryOptions(pageNumber));
@@ -138,7 +141,7 @@ function PagePlayButton({ pageNumber }: { pageNumber: number }) {
         isPlaying={isPagePlaying}
         isLoading={loadingId !== null}
         onClick={handleClick}
-        ariaLabel={isPagePlaying ? "Duraklat" : "Bu sayfayı dinle"}
+        ariaLabel={isPagePlaying ? t.a11y.pause : t.reader.playPage}
       />
 
       {open && groups.length > 0 && (
@@ -150,7 +153,7 @@ function PagePlayButton({ pageNumber }: { pageNumber: number }) {
             style={{ fontFamily: "var(--font-ui)" }}
           >
             <p className="px-3 py-1 text-[10px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">
-              Dinlemeye başla
+              {t.reader.startListening}
             </p>
             {groups.map((g) => {
               const name = SURAH_NAMES_TR[g.surah.id] ?? g.surah.nameSimple;
@@ -182,7 +185,7 @@ function PagePlayButton({ pageNumber }: { pageNumber: number }) {
                       {g.surah.id}. {name}
                     </span>
                     <span className="text-xs text-[var(--color-text-secondary)]">
-                      {g.isStart ? "Başından" : `${firstAyah}. ayetten`}
+                      {g.isStart ? t.reader.fromStart : t.reader.fromVerse.replace("{n}", String(firstAyah))}
                     </span>
                   </div>
                 </button>

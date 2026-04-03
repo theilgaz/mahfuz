@@ -5,6 +5,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "~/hooks/useTranslation";
 
 const TOTAL_PAGES = 604;
 
@@ -18,6 +19,7 @@ export function PageJumpDialog({ open, onClose, currentPage }: PageJumpDialogPro
   const [value, setValue] = useState(String(currentPage));
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (open) {
@@ -43,7 +45,7 @@ export function PageJumpDialog({ open, onClose, currentPage }: PageJumpDialogPro
     <>
       <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
       <div className="fixed top-1/3 left-1/2 -translate-x-1/2 z-50 w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl shadow-xl p-5">
-        <h3 className="text-sm font-medium mb-3">Sayfaya Git</h3>
+        <h3 className="text-sm font-medium mb-3">{t.reader.pageJumpTitle}</h3>
 
         <div className="flex gap-2 mb-4">
           <input
@@ -62,7 +64,7 @@ export function PageJumpDialog({ open, onClose, currentPage }: PageJumpDialogPro
             disabled={!isValid}
             className="px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white text-sm font-medium disabled:opacity-40 transition-opacity"
           >
-            Git
+            {t.common.go}
           </button>
         </div>
 

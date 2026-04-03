@@ -3,9 +3,11 @@
  */
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "~/hooks/useTranslation";
 
 export function ScrollToTop() {
   const [visible, setVisible] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     function onScroll() {
@@ -21,7 +23,7 @@ export function ScrollToTop() {
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       className="fixed bottom-20 right-4 z-20 w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg flex items-center justify-center hover:bg-[var(--color-border)] transition-colors"
-      aria-label="Yukarı git"
+      aria-label={t.a11y.scrollToTop}
     >
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 14V4M5 7L9 3L13 7" />

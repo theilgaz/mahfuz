@@ -173,6 +173,7 @@ export const en: Messages = {
     loading: "Loading...",
     noResults: "No results found",
     close: "Close",
+    go: "Go",
     page: "Page",
     surah: "Surah",
     verse: "Verse",
@@ -205,6 +206,14 @@ export const en: Messages = {
     removeBookmark: "Remove bookmark",
     verseActions: "Verse {n} actions",
     sajdah: "Sajdah verse",
+    pageJumpTitle: "Go to Page",
+    prevVerse: "Previous verse",
+    nextVerse: "Next verse",
+    playSurah: "Play surah",
+    playPage: "Play this page",
+    startListening: "Start listening",
+    fromStart: "From beginning",
+    fromVerse: "From verse {n}",
   },
 
   error: {
@@ -374,5 +383,8 @@ export const en: Messages = {
     speedChanged: "Speed: {speed}x",
     pageJump: "Enter page number",
     verseActions: "Verse actions menu",
+    scrollToTop: "Scroll to top",
+    pause: "Pause",
+    play: "Play",
   },
 } as const;
