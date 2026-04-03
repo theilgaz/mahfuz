@@ -30,7 +30,7 @@ export function SurahHeader({ surahId, nameArabic, nameSimple, nameTranslation, 
       </div>
 
       {/* Sure adı kutusu */}
-      <div className="flex flex-col items-center gap-1 px-4 py-2.5 mx-auto max-w-xs
+      <div className="flex flex-col items-center gap-1 px-4 py-2.5 w-full
         border border-[var(--color-accent)]/40 rounded
         bg-[var(--color-accent)]/5">
         <div className="flex items-center justify-center gap-3">
