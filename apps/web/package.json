@@ -17,7 +17,9 @@
     "import:reciters": "tsx scripts/import-reciters.ts",
     "import:all": "tsx scripts/import-all.ts",
     "import:verify": "tsx scripts/verify-data.ts",
-    "wbw:generate-patch": "tsx scripts/generate-wbw-tr-patch.ts"
+    "wbw:generate-patch": "tsx scripts/generate-wbw-tr-patch.ts",
+    "wbw:fetch-words": "tsx scripts/fetch-arabic-words.ts",
+    "wbw:build-oc": "tsx scripts/build-wbw-oc.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",

@@ -8,3 +8,6 @@ public/translations/
 # Local DB
 *.db
 *.db-journal
+
+# WBW script generated data (large, regeneratable)
+scripts/data/
