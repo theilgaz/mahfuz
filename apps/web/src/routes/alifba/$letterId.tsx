@@ -68,24 +68,43 @@ function LetterDetailPage() {
         </span>
       </div>
 
-      {/* Harf büyük gösterim */}
-      <div className="flex items-center justify-center gap-4 py-6 mb-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]">
-        <span
-          className="text-7xl leading-none"
-          dir="rtl"
-          style={{ fontFamily: "var(--font-arabic)" }}
-        >
-          {letter.arabic}
+      {/* Harf hero */}
+      <div className="relative mb-5 rounded-3xl overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)]">
+        {/* Subtle radial glow behind the letter */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 70% at 38% 55%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 72%)",
+          }}
+        />
+
+        {/* Order badge */}
+        <span className="absolute top-3 right-3 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+          {letter.order} / 28
         </span>
-        <div className="flex flex-col items-start gap-1">
-          <span className="text-xl font-semibold">{letter.name}</span>
+
+        <div className="flex items-center gap-5 px-6 py-7">
+          {/* Giant letter */}
           <span
-            className="text-base text-[var(--color-text-secondary)]"
+            className="text-[7rem] leading-none select-none shrink-0"
+            dir="rtl"
             style={{ fontFamily: "var(--font-arabic)" }}
           >
-            {letter.nameAr}
+            {letter.arabic}
           </span>
-          <LetterAudioButton letterId={letter.id} size="md" className="mt-1" />
+
+          {/* Meta */}
+          <div className="flex flex-col gap-2 min-w-0">
+            <span className="text-2xl font-bold tracking-tight leading-none">{letter.name}</span>
+            <span
+              className="text-lg text-[var(--color-text-secondary)] leading-none"
+              style={{ fontFamily: "var(--font-arabic)" }}
+            >
+              {letter.nameAr}
+            </span>
+            <LetterAudioButton letterId={letter.id} size="md" className="mt-1" />
+          </div>
         </div>
       </div>
 
