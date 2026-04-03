@@ -167,8 +167,8 @@ function AppHeader() {
   return (
     <>
       <div className="sticky top-0 z-40">
-        {/* Tema bandı */}
-        <div className="h-[3px]" style={{ background: "var(--header-band)" }} />
+        {/* Okuma ilerleme bandı */}
+        <ReadingProgressBar />
 
         {/* Main header */}
         <header className="flex items-center h-11 bg-[var(--color-bg)]/95 backdrop-blur-sm border-b border-[var(--color-border)]">
@@ -300,7 +300,6 @@ function AppHeader() {
 
         </div>
         </header>
-        <ReadingProgressBar />
       </div>
 
       <SettingsPanel
