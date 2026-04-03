@@ -140,6 +140,10 @@ function AppHeader() {
   const lastPosition = useReadingStore.getState().lastPosition;
   const currentPage = pageNumMatch ? parseInt(pageNumMatch[1], 10) : undefined;
 
+  // Alifba sub-route tespiti
+  const isAlifbaGame = path.startsWith("/alifba/games/");
+  const isAlifbaSubRoute = path.startsWith("/alifba/") && path !== "/alifba/";
+
   // Sayfa başlığı (non-reading routes only)
   const title = isHome || isReadingRoute ? null
     : path === "/discover" ? t.hub.title
@@ -149,6 +153,8 @@ function AppHeader() {
     : (path === "/alifba" || path === "/alifba/") ? t.hub.alifba
     : path === "/hifz" ? t.hub.hifz
     : path.startsWith("/changelog") ? t.changelog.banner
+    : isAlifbaGame ? t.alifba.games
+    : isAlifbaSubRoute ? t.hub.alifba
     : null;
 
   const settingsContext = useMemo(() => {
@@ -181,7 +187,11 @@ function AppHeader() {
             </div>
           ) : (
             <button
-              onClick={() => navigate({ to: "/" })}
+              onClick={() => {
+                if (isAlifbaGame) navigate({ to: "/alifba/games" });
+                else if (isAlifbaSubRoute) navigate({ to: "/alifba/" });
+                else navigate({ to: "/" });
+              }}
               className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
               aria-label={t.nav.back}
             >
@@ -393,7 +403,7 @@ function RootDocument({ children }: { children: ReactNode }) {
   }, [navigate]);
 
   return (
-    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
+    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('loading')` }} />
