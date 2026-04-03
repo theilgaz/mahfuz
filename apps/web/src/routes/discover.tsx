@@ -93,7 +93,7 @@ function HubPage() {
 
         {/* Elifba Öğren */}
         <HubCard
-          to="/alifba"
+          to="/alifba/"
           title={t.hub.alifba}
           description={t.hub.alifbaDesc}
           icon={

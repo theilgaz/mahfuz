@@ -247,7 +247,7 @@ function AppHeader() {
                       { to: "/recite", label: "Tilavet", icon: "🎙️" },
                       { to: "/discover", label: t.hub.listenMemorize, icon: "🎧" },
                       { to: "/discover", label: t.hub.apps, icon: "📦" },
-                      { to: "/alifba", label: t.hub.alifba, icon: "ا ب" },
+                      { to: "/alifba/", label: t.hub.alifba, icon: "ا ب" },
                     ].map((item) => (
                       <Link
                         key={item.label}

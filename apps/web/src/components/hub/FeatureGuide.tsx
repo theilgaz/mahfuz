@@ -82,7 +82,7 @@ const FEATURES: Feature[] = [
   {
     titleKey: "alifbaFeature",
     descKey: "alifbaFeatureDesc",
-    to: "/alifba",
+    to: "/alifba/",
     icon: (
       <span className="text-base font-bold text-[var(--color-accent)]" style={{ fontFamily: "var(--font-arabic)" }}>ا ب</span>
     ),

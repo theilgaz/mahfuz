@@ -17,7 +17,6 @@ import { Route as HifzRouteImport } from './routes/hifz'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
-import { Route as AlifbaRouteImport } from './routes/alifba'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlifbaIndexRouteImport } from './routes/alifba/index'
 import { Route as SurahSurahSlugRouteImport } from './routes/surah/$surahSlug'
@@ -75,20 +74,15 @@ const BookmarksRoute = BookmarksRouteImport.update({
   path: '/bookmarks',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AlifbaRoute = AlifbaRouteImport.update({
-  id: '/alifba',
-  path: '/alifba',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlifbaIndexRoute = AlifbaIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AlifbaRoute,
+  id: '/alifba/',
+  path: '/alifba/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SurahSurahSlugRoute = SurahSurahSlugRouteImport.update({
   id: '/surah/$surahSlug',
@@ -116,19 +110,19 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlifbaGamesRoute = AlifbaGamesRouteImport.update({
-  id: '/games',
-  path: '/games',
-  getParentRoute: () => AlifbaRoute,
+  id: '/alifba/games',
+  path: '/alifba/games',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AlifbaExamRoute = AlifbaExamRouteImport.update({
-  id: '/exam',
-  path: '/exam',
-  getParentRoute: () => AlifbaRoute,
+  id: '/alifba/exam',
+  path: '/alifba/exam',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AlifbaLetterIdRoute = AlifbaLetterIdRouteImport.update({
-  id: '/$letterId',
-  path: '/$letterId',
-  getParentRoute: () => AlifbaRoute,
+  id: '/alifba/$letterId',
+  path: '/alifba/$letterId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -136,14 +130,14 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlifbaQuizVoiceRoute = AlifbaQuizVoiceRouteImport.update({
-  id: '/quiz/voice',
-  path: '/quiz/voice',
-  getParentRoute: () => AlifbaRoute,
+  id: '/alifba/quiz/voice',
+  path: '/alifba/quiz/voice',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AlifbaQuizFormsRoute = AlifbaQuizFormsRouteImport.update({
-  id: '/quiz/forms',
-  path: '/quiz/forms',
-  getParentRoute: () => AlifbaRoute,
+  id: '/alifba/quiz/forms',
+  path: '/alifba/quiz/forms',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AlifbaGamesSpeedRoute = AlifbaGamesSpeedRouteImport.update({
   id: '/speed',
@@ -163,7 +157,6 @@ const AlifbaGamesFillRoute = AlifbaGamesFillRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/alifba': typeof AlifbaRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
@@ -217,7 +210,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/alifba': typeof AlifbaRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
@@ -246,7 +238,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/alifba'
     | '/bookmarks'
     | '/changelog'
     | '/discover'
@@ -299,7 +290,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/alifba'
     | '/bookmarks'
     | '/changelog'
     | '/discover'
@@ -327,7 +317,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AlifbaRoute: typeof AlifbaRouteWithChildren
   BookmarksRoute: typeof BookmarksRoute
   ChangelogRoute: typeof ChangelogRoute
   DiscoverRoute: typeof DiscoverRoute
@@ -336,11 +325,17 @@ export interface RootRouteChildren {
   ReciteRoute: typeof ReciteRoute
   SearchRoute: typeof SearchRoute
   StatsRoute: typeof StatsRoute
+  AlifbaLetterIdRoute: typeof AlifbaLetterIdRoute
+  AlifbaExamRoute: typeof AlifbaExamRoute
+  AlifbaGamesRoute: typeof AlifbaGamesRouteWithChildren
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
   JuzJuzIdRoute: typeof JuzJuzIdRoute
   PagePageNumberRoute: typeof PagePageNumberRoute
   SurahSurahSlugRoute: typeof SurahSurahSlugRoute
+  AlifbaIndexRoute: typeof AlifbaIndexRoute
+  AlifbaQuizFormsRoute: typeof AlifbaQuizFormsRoute
+  AlifbaQuizVoiceRoute: typeof AlifbaQuizVoiceRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -402,13 +397,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookmarksRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/alifba': {
-      id: '/alifba'
-      path: '/alifba'
-      fullPath: '/alifba'
-      preLoaderRoute: typeof AlifbaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -418,10 +406,10 @@ declare module '@tanstack/react-router' {
     }
     '/alifba/': {
       id: '/alifba/'
-      path: '/'
+      path: '/alifba'
       fullPath: '/alifba/'
       preLoaderRoute: typeof AlifbaIndexRouteImport
-      parentRoute: typeof AlifbaRoute
+      parentRoute: typeof rootRouteImport
     }
     '/surah/$surahSlug': {
       id: '/surah/$surahSlug'
@@ -460,24 +448,24 @@ declare module '@tanstack/react-router' {
     }
     '/alifba/games': {
       id: '/alifba/games'
-      path: '/games'
+      path: '/alifba/games'
       fullPath: '/alifba/games'
       preLoaderRoute: typeof AlifbaGamesRouteImport
-      parentRoute: typeof AlifbaRoute
+      parentRoute: typeof rootRouteImport
     }
     '/alifba/exam': {
       id: '/alifba/exam'
-      path: '/exam'
+      path: '/alifba/exam'
       fullPath: '/alifba/exam'
       preLoaderRoute: typeof AlifbaExamRouteImport
-      parentRoute: typeof AlifbaRoute
+      parentRoute: typeof rootRouteImport
     }
     '/alifba/$letterId': {
       id: '/alifba/$letterId'
-      path: '/$letterId'
+      path: '/alifba/$letterId'
       fullPath: '/alifba/$letterId'
       preLoaderRoute: typeof AlifbaLetterIdRouteImport
-      parentRoute: typeof AlifbaRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -488,17 +476,17 @@ declare module '@tanstack/react-router' {
     }
     '/alifba/quiz/voice': {
       id: '/alifba/quiz/voice'
-      path: '/quiz/voice'
+      path: '/alifba/quiz/voice'
       fullPath: '/alifba/quiz/voice'
       preLoaderRoute: typeof AlifbaQuizVoiceRouteImport
-      parentRoute: typeof AlifbaRoute
+      parentRoute: typeof rootRouteImport
     }
     '/alifba/quiz/forms': {
       id: '/alifba/quiz/forms'
-      path: '/quiz/forms'
+      path: '/alifba/quiz/forms'
       fullPath: '/alifba/quiz/forms'
       preLoaderRoute: typeof AlifbaQuizFormsRouteImport
-      parentRoute: typeof AlifbaRoute
+      parentRoute: typeof rootRouteImport
     }
     '/alifba/games/speed': {
       id: '/alifba/games/speed'
@@ -540,30 +528,8 @@ const AlifbaGamesRouteWithChildren = AlifbaGamesRoute._addFileChildren(
   AlifbaGamesRouteChildren,
 )
 
-interface AlifbaRouteChildren {
-  AlifbaLetterIdRoute: typeof AlifbaLetterIdRoute
-  AlifbaExamRoute: typeof AlifbaExamRoute
-  AlifbaGamesRoute: typeof AlifbaGamesRouteWithChildren
-  AlifbaIndexRoute: typeof AlifbaIndexRoute
-  AlifbaQuizFormsRoute: typeof AlifbaQuizFormsRoute
-  AlifbaQuizVoiceRoute: typeof AlifbaQuizVoiceRoute
-}
-
-const AlifbaRouteChildren: AlifbaRouteChildren = {
-  AlifbaLetterIdRoute: AlifbaLetterIdRoute,
-  AlifbaExamRoute: AlifbaExamRoute,
-  AlifbaGamesRoute: AlifbaGamesRouteWithChildren,
-  AlifbaIndexRoute: AlifbaIndexRoute,
-  AlifbaQuizFormsRoute: AlifbaQuizFormsRoute,
-  AlifbaQuizVoiceRoute: AlifbaQuizVoiceRoute,
-}
-
-const AlifbaRouteWithChildren =
-  AlifbaRoute._addFileChildren(AlifbaRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AlifbaRoute: AlifbaRouteWithChildren,
   BookmarksRoute: BookmarksRoute,
   ChangelogRoute: ChangelogRoute,
   DiscoverRoute: DiscoverRoute,
@@ -572,11 +538,17 @@ const rootRouteChildren: RootRouteChildren = {
   ReciteRoute: ReciteRoute,
   SearchRoute: SearchRoute,
   StatsRoute: StatsRoute,
+  AlifbaLetterIdRoute: AlifbaLetterIdRoute,
+  AlifbaExamRoute: AlifbaExamRoute,
+  AlifbaGamesRoute: AlifbaGamesRouteWithChildren,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,
   JuzJuzIdRoute: JuzJuzIdRoute,
   PagePageNumberRoute: PagePageNumberRoute,
   SurahSurahSlugRoute: SurahSurahSlugRoute,
+  AlifbaIndexRoute: AlifbaIndexRoute,
+  AlifbaQuizFormsRoute: AlifbaQuizFormsRoute,
+  AlifbaQuizVoiceRoute: AlifbaQuizVoiceRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
