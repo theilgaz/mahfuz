@@ -76,9 +76,9 @@ export function VerseEndMarker({
       >
         <defs>
           <radialGradient id={gradId} cx="38%" cy="35%" r="65%" fx="38%" fy="35%">
-            <stop offset="0%"   stopColor="var(--marker-g1, #d4a24e)" />
-            <stop offset="55%"  stopColor="var(--marker-g2, #b8860b)" />
-            <stop offset="100%" stopColor="var(--marker-g3, #7a5800)" />
+            <stop offset="0%"   style={{ stopColor: "var(--marker-g1, #d4a24e)" }} />
+            <stop offset="55%"  style={{ stopColor: "var(--marker-g2, #b8860b)" }} />
+            <stop offset="100%" style={{ stopColor: "var(--marker-g3, #7a5800)" }} />
           </radialGradient>
         </defs>
 
@@ -95,8 +95,8 @@ export function VerseEndMarker({
           y={mid}
           dy="0.38em"
           textAnchor="middle"
-          fill="var(--marker-text, #fdf3d8)"
           style={{
+            fill: "var(--marker-text, #fdf3d8)",
             fontFamily: "var(--font-arabic)",
             fontSize: `${fontSize}px`,
             fontWeight: 700,
