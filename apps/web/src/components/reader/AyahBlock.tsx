@@ -300,8 +300,8 @@ export const AyahBlock = memo(function AyahBlock({
                     onClick={wbwWord ? (e) => {
                       e.stopPropagation();
                       if (isTooltipOpen) { setTooltip(null); return; }
-                      const rect = blockRef.current?.getBoundingClientRect();
-                      if (rect) setTooltip({ word: wbwWord, rect });
+                      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                      setTooltip({ word: wbwWord, rect });
                     } : undefined}
                   >
                     {word}{" "}

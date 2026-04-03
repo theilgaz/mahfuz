@@ -1,9 +1,10 @@
 /**
- * Kelime tooltip — Arapça kelimeye tap/hover'da transliterasyon + anlam gösterir.
- * Fixed pozisyonlu, RTL metin içinde de doğru çalışır.
+ * Kelime tooltip — Arapça kelimeye tap/click'te transliterasyon + anlam gösterir.
+ * createPortal ile document.body'e render edilir — RTL/transform container'larından etkilenmez.
  */
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { WbwWord } from "~/hooks/useWbwData";
 
 interface WordTooltipProps {
@@ -22,33 +23,37 @@ export function WordTooltip({ word, anchorRect, onClose }: WordTooltipProps) {
         onClose();
       }
     };
-    document.addEventListener("mousedown", handler);
-    document.addEventListener("touchstart", handler);
+    // Slight delay so the opening click/tap doesn't immediately close
+    const id = setTimeout(() => {
+      document.addEventListener("mousedown", handler);
+      document.addEventListener("touchstart", handler);
+    }, 50);
     return () => {
+      clearTimeout(id);
       document.removeEventListener("mousedown", handler);
       document.removeEventListener("touchstart", handler);
     };
   }, [onClose]);
 
-  // Ayah bloğunun merkezine hizala, viewport dışına taşıma
   const viewportW = window.innerWidth;
   const tipW = 160;
   let left = anchorRect.left + anchorRect.width / 2 - tipW / 2;
   left = Math.max(8, Math.min(left, viewportW - tipW - 8));
 
-  // Yukarı yeterli yer yoksa aşağıya yerleştir
-  const tipH = 60;
-  const above = anchorRect.top >= tipH + 16;
+  // Kelimenin üstünde yeterli yer varsa yukarı, yoksa aşağıya
+  const tipH = 64;
+  const above = anchorRect.top >= tipH + 12;
   const top = above
-    ? anchorRect.top - tipH - 10
-    : anchorRect.bottom + 10;
+    ? anchorRect.top - tipH - 8
+    : anchorRect.bottom + 8;
 
-  return (
+  const content = (
     <div
       ref={tooltipRef}
-      className="fixed z-[200] bg-[var(--color-surface)] border border-[var(--color-accent)]/30 rounded-xl shadow-xl px-3 py-2 text-center pointer-events-auto"
+      className="fixed z-[9999] bg-[var(--color-surface)] border border-[var(--color-accent)]/40 rounded-xl shadow-2xl px-3 py-2 text-center pointer-events-auto"
       style={{ left, top, width: tipW }}
       onClick={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
     >
       {word.transliteration && (
         <p
@@ -66,14 +71,16 @@ export function WordTooltip({ word, anchorRect, onClose }: WordTooltipProps) {
           {word.translation}
         </p>
       )}
-      {/* Ok */}
+      {/* Ok işareti */}
       <div
         className={`absolute left-1/2 -translate-x-1/2 w-0 h-0 ${
           above
-            ? "bottom-0 translate-y-full border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-[var(--color-accent)]/30"
-            : "top-0 -translate-y-full border-l-[5px] border-r-[5px] border-b-[5px] border-l-transparent border-r-transparent border-b-[var(--color-accent)]/30"
+            ? "bottom-0 translate-y-full border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-[var(--color-accent)]/40"
+            : "top-0 -translate-y-full border-l-[5px] border-r-[5px] border-b-[5px] border-l-transparent border-r-transparent border-b-[var(--color-accent)]/40"
         }`}
       />
     </div>
   );
+
+  return createPortal(content, document.body);
 }
