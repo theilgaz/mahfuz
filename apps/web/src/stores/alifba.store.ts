@@ -26,7 +26,7 @@ export interface ExamResult {
 }
 
 /** Mini oyun türleri */
-export type MiniGame = "memory" | "speed" | "fill";
+export type MiniGame = "memory" | "speed" | "fill" | "word";
 
 interface AlifbaState {
   /** Harf ID → ilerleme (alif, ba, ta, ...) */
@@ -64,7 +64,7 @@ const DEFAULT_LETTER_PROGRESS: LetterProgress = {
 const INITIAL_STATE: AlifbaState = {
   progress: {},
   examHistory: [],
-  gameHighScores: { memory: 0, speed: 0, fill: 0 },
+  gameHighScores: { memory: 0, speed: 0, fill: 0, word: 0 },
   totalDays: 0,
   lastStudyDate: null,
   streak: 0,

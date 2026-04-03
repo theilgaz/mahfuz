@@ -78,10 +78,14 @@ function ExamPage() {
   const currentQuestions = phase === "lastChance" ? lcQuestions : questions;
   const q = currentQuestions[index];
   const audioHandleRef = useRef<LetterAudioHandle | null>(null);
+  const playedKeyRef = useRef<string | null>(null);
 
   // Auto-play audio when a voice question appears
   useEffect(() => {
     if (!started || phase === "done" || !q || q.qtype !== "voice") return;
+    const key = `${phase}-${index}`;
+    if (playedKeyRef.current === key) return;
+    playedKeyRef.current = key;
     audioHandleRef.current = playLetterAudio(q.letter.arabic, q.letter.id, () => {});
     return () => {
       audioHandleRef.current?.stop();

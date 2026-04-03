@@ -29,6 +29,53 @@ export function getLetterForms(letter: string) {
   };
 }
 
+/**
+ * Groups of visually similar letters (same base shape, differ in dots or diacritics).
+ * Used to generate harder, more educational quiz distractors.
+ */
+export const SIMILAR_LETTERS: Record<string, string[]> = {
+  alif:  ["lam", "waw", "dal"],
+  ba:    ["ta", "tha", "nun", "ya"],
+  ta:    ["ba", "tha", "nun", "ya"],
+  tha:   ["ba", "ta", "nun", "ya"],
+  jim:   ["ha", "kha"],
+  ha:    ["jim", "kha", "haa"],
+  kha:   ["jim", "ha"],
+  dal:   ["dhal", "ra", "zay"],
+  dhal:  ["dal", "ra", "zay"],
+  ra:    ["zay", "dal", "dhal", "waw"],
+  zay:   ["ra", "dal", "dhal"],
+  sin:   ["shin", "sad", "dad"],
+  shin:  ["sin", "sad", "dad"],
+  sad:   ["dad", "taa", "sin", "shin"],
+  dad:   ["sad", "taa", "dhaa", "sin", "shin"],
+  taa:   ["dhaa", "sad", "dad"],
+  dhaa:  ["taa", "sad", "dad"],
+  ayn:   ["ghayn"],
+  ghayn: ["ayn"],
+  fa:    ["qaf", "waw"],
+  qaf:   ["fa"],
+  kaf:   ["lam", "alif"],
+  lam:   ["alif", "kaf"],
+  mim:   ["waw", "haa"],
+  nun:   ["ba", "ta", "tha", "ya"],
+  haa:   ["ha", "mim"],
+  waw:   ["ra", "zay", "fa"],
+  ya:    ["ba", "ta", "tha", "nun"],
+};
+
+/**
+ * Returns `count` distractor letters that are visually similar to the given letter,
+ * falling back to random letters if not enough similar ones exist.
+ */
+export function getSimilarDistractors(letterId: string, count: number): ArabicLetter[] {
+  const similarIds = SIMILAR_LETTERS[letterId] ?? [];
+  const pool = [...ARABIC_LETTERS].sort(() => Math.random() - 0.5);
+  const similar = pool.filter((l) => similarIds.includes(l.id));
+  const rest = pool.filter((l) => l.id !== letterId && !similarIds.includes(l.id));
+  return [...similar, ...rest].slice(0, count);
+}
+
 export const ARABIC_LETTERS: ArabicLetter[] = [
   { id: "alif", arabic: "ا", name: "Elif", nameAr: "أَلِف", order: 1 },
   { id: "ba", arabic: "ب", name: "Ba", nameAr: "بَاء", order: 2 },
@@ -52,7 +99,7 @@ export const ARABIC_LETTERS: ArabicLetter[] = [
   { id: "fa", arabic: "ف", name: "Fe", nameAr: "فَاء", order: 20 },
   { id: "qaf", arabic: "ق", name: "Kaf", nameAr: "قَاف", order: 21 },
   { id: "kaf", arabic: "ك", name: "Kef", nameAr: "كَاف", order: 22 },
-  { id: "lam", arabic: "ل", name: "Lam", nameAr: "لَام", order: 23 },
+  { id: "lam", arabic: "ل", name: "Lem", nameAr: "لَام", order: 23 },
   { id: "mim", arabic: "م", name: "Mim", nameAr: "مِيم", order: 24 },
   { id: "nun", arabic: "ن", name: "Nun", nameAr: "نُون", order: 25 },
   { id: "haa", arabic: "ه", name: "He", nameAr: "هَاء", order: 26 },

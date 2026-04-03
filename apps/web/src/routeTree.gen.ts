@@ -27,9 +27,11 @@ import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AlifbaGamesRouteImport } from './routes/alifba/games'
 import { Route as AlifbaExamRouteImport } from './routes/alifba/exam'
 import { Route as AlifbaLetterIdRouteImport } from './routes/alifba/$letterId'
+import { Route as AlifbaGamesIndexRouteImport } from './routes/alifba/games/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AlifbaQuizVoiceRouteImport } from './routes/alifba/quiz/voice'
 import { Route as AlifbaQuizFormsRouteImport } from './routes/alifba/quiz/forms'
+import { Route as AlifbaGamesWordRouteImport } from './routes/alifba/games/word'
 import { Route as AlifbaGamesSpeedRouteImport } from './routes/alifba/games/speed'
 import { Route as AlifbaGamesMemoryRouteImport } from './routes/alifba/games/memory'
 import { Route as AlifbaGamesFillRouteImport } from './routes/alifba/games/fill'
@@ -124,6 +126,11 @@ const AlifbaLetterIdRoute = AlifbaLetterIdRouteImport.update({
   path: '/alifba/$letterId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlifbaGamesIndexRoute = AlifbaGamesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AlifbaGamesRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -138,6 +145,11 @@ const AlifbaQuizFormsRoute = AlifbaQuizFormsRouteImport.update({
   id: '/alifba/quiz/forms',
   path: '/alifba/quiz/forms',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AlifbaGamesWordRoute = AlifbaGamesWordRouteImport.update({
+  id: '/word',
+  path: '/word',
+  getParentRoute: () => AlifbaGamesRoute,
 } as any)
 const AlifbaGamesSpeedRoute = AlifbaGamesSpeedRouteImport.update({
   id: '/speed',
@@ -177,9 +189,11 @@ export interface FileRoutesByFullPath {
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
   '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
+  '/alifba/games/word': typeof AlifbaGamesWordRoute
   '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/alifba/games/': typeof AlifbaGamesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -193,7 +207,6 @@ export interface FileRoutesByTo {
   '/stats': typeof StatsRoute
   '/alifba/$letterId': typeof AlifbaLetterIdRoute
   '/alifba/exam': typeof AlifbaExamRoute
-  '/alifba/games': typeof AlifbaGamesRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
@@ -203,9 +216,11 @@ export interface FileRoutesByTo {
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
   '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
+  '/alifba/games/word': typeof AlifbaGamesWordRoute
   '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/alifba/games': typeof AlifbaGamesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -230,9 +245,11 @@ export interface FileRoutesById {
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
   '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
+  '/alifba/games/word': typeof AlifbaGamesWordRoute
   '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/alifba/games/': typeof AlifbaGamesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -258,9 +275,11 @@ export interface FileRouteTypes {
     | '/alifba/games/fill'
     | '/alifba/games/memory'
     | '/alifba/games/speed'
+    | '/alifba/games/word'
     | '/alifba/quiz/forms'
     | '/alifba/quiz/voice'
     | '/api/auth/$'
+    | '/alifba/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -274,7 +293,6 @@ export interface FileRouteTypes {
     | '/stats'
     | '/alifba/$letterId'
     | '/alifba/exam'
-    | '/alifba/games'
     | '/auth/callback'
     | '/auth/login'
     | '/juz/$juzId'
@@ -284,9 +302,11 @@ export interface FileRouteTypes {
     | '/alifba/games/fill'
     | '/alifba/games/memory'
     | '/alifba/games/speed'
+    | '/alifba/games/word'
     | '/alifba/quiz/forms'
     | '/alifba/quiz/voice'
     | '/api/auth/$'
+    | '/alifba/games'
   id:
     | '__root__'
     | '/'
@@ -310,9 +330,11 @@ export interface FileRouteTypes {
     | '/alifba/games/fill'
     | '/alifba/games/memory'
     | '/alifba/games/speed'
+    | '/alifba/games/word'
     | '/alifba/quiz/forms'
     | '/alifba/quiz/voice'
     | '/api/auth/$'
+    | '/alifba/games/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -467,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlifbaLetterIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alifba/games/': {
+      id: '/alifba/games/'
+      path: '/'
+      fullPath: '/alifba/games/'
+      preLoaderRoute: typeof AlifbaGamesIndexRouteImport
+      parentRoute: typeof AlifbaGamesRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -487,6 +516,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/alifba/quiz/forms'
       preLoaderRoute: typeof AlifbaQuizFormsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/alifba/games/word': {
+      id: '/alifba/games/word'
+      path: '/word'
+      fullPath: '/alifba/games/word'
+      preLoaderRoute: typeof AlifbaGamesWordRouteImport
+      parentRoute: typeof AlifbaGamesRoute
     }
     '/alifba/games/speed': {
       id: '/alifba/games/speed'
@@ -516,12 +552,16 @@ interface AlifbaGamesRouteChildren {
   AlifbaGamesFillRoute: typeof AlifbaGamesFillRoute
   AlifbaGamesMemoryRoute: typeof AlifbaGamesMemoryRoute
   AlifbaGamesSpeedRoute: typeof AlifbaGamesSpeedRoute
+  AlifbaGamesWordRoute: typeof AlifbaGamesWordRoute
+  AlifbaGamesIndexRoute: typeof AlifbaGamesIndexRoute
 }
 
 const AlifbaGamesRouteChildren: AlifbaGamesRouteChildren = {
   AlifbaGamesFillRoute: AlifbaGamesFillRoute,
   AlifbaGamesMemoryRoute: AlifbaGamesMemoryRoute,
   AlifbaGamesSpeedRoute: AlifbaGamesSpeedRoute,
+  AlifbaGamesWordRoute: AlifbaGamesWordRoute,
+  AlifbaGamesIndexRoute: AlifbaGamesIndexRoute,
 }
 
 const AlifbaGamesRouteWithChildren = AlifbaGamesRoute._addFileChildren(

@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { playCorrect, playWrong } from "~/lib/quiz-sounds";
 import { ARABIC_LETTERS } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
@@ -67,8 +68,10 @@ function SpeedGamePage() {
       if (isCorrect) {
         setScore((s) => s + 1);
         setFlash("correct");
+        playCorrect();
       } else {
         setFlash("wrong");
+        playWrong();
       }
       setTimeout(() => {
         setFlash(null);
@@ -97,7 +100,7 @@ function SpeedGamePage() {
           {t.nav.back}
         </Link>
         <div className="text-center mt-8">
-          <span className="text-5xl">⚡</span>
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <h1 className="text-xl font-semibold mt-3 mb-2">{t.alifba.speedGame}</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">{GAME_DURATION} {t.alifba.speedGameDesc2}</p>
         </div>
@@ -111,7 +114,7 @@ function SpeedGamePage() {
   if (done) {
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-4">
-        <span className="text-5xl">⚡</span>
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         <h2 className="text-lg font-semibold">{t.alifba.quizComplete}</h2>
         <p className="text-2xl font-bold text-[var(--color-accent)]">{score}</p>
         <p className="text-sm text-[var(--color-text-secondary)]">{t.alifba.score}</p>

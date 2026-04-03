@@ -153,7 +153,7 @@ function AlifbaIndexPage() {
               to="/alifba/$letterId"
               params={{ letterId: letter.id }}
               className={[
-                "relative flex flex-col min-w-0 h-20 overflow-hidden rounded-2xl border",
+                "relative flex flex-col min-w-0 h-[5.75rem] overflow-hidden rounded-2xl border",
                 "transition-all duration-150 ease-out active:scale-95",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                 isMastered
@@ -167,7 +167,7 @@ function AlifbaIndexPage() {
               }}
             >
               {/* Sıra numarası */}
-              <span className="absolute top-1 left-1 text-[8px] text-[var(--color-text-secondary)]/40 leading-none font-mono select-none">
+              <span className="absolute top-2 left-2 text-[8px] text-[var(--color-text-secondary)]/40 leading-none font-mono select-none">
                 {letter.order}
               </span>
 

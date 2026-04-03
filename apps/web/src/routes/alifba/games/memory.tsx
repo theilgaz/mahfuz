@@ -6,6 +6,7 @@
 import { useState, useCallback } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ARABIC_LETTERS } from "~/lib/kids-constants";
+import { playCorrect, playWrong } from "~/lib/quiz-sounds";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 
@@ -53,6 +54,7 @@ function MemoryGamePage() {
         setLocked(true);
         const [a, b] = newFlipped.map((id) => cards.find((c) => c.uid === id)!);
         if (a.letterId === b.letterId) {
+          playCorrect();
           const newMatched = new Set(matched);
           newMatched.add(a.uid);
           newMatched.add(b.uid);
@@ -65,6 +67,7 @@ function MemoryGamePage() {
             setDone(true);
           }
         } else {
+          playWrong();
           setTimeout(() => {
             setFlipped([]);
             setLocked(false);
@@ -91,9 +94,9 @@ function MemoryGamePage() {
     const score = Math.max(0, 200 - moves * 5);
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-4">
-        <span className="text-5xl">🎉</span>
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2"/><path d="M8 21h8M12 17v4M6 3h12v10a6 6 0 0 1-12 0V3z"/></svg>
         <h2 className="text-lg font-semibold">{t.alifba.quizComplete}</h2>
-        <p className="text-sm text-[var(--color-text-secondary)]">{moves} hamle · {t.alifba.score}: {score}</p>
+        <p className="text-sm text-[var(--color-text-secondary)]">{moves} {t.alifba.moves} · {t.alifba.score}: {score}</p>
         <div className="flex gap-3">
           <Link to="/alifba/games" className="px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
             {t.nav.back}

@@ -24,7 +24,7 @@ function buildQuestions() {
   return shuffle(ARABIC_LETTERS).map((letter) => {
     const nc = NON_CONNECTORS.has(letter.arabic);
     const availableForms: FormType[] = nc
-      ? (["isolated", "final"] as FormType[])
+      ? (["final"] as FormType[])
       : (["initial", "medial", "final"] as FormType[]);
     const formType = availableForms[Math.floor(Math.random() * availableForms.length)];
     const forms = getLetterForms(letter.arabic);
@@ -39,7 +39,7 @@ function buildLastChanceQuestions(wrongLetterIds: string[]) {
     const letter = ARABIC_LETTERS.find((l) => l.id === id)!;
     const nc = NON_CONNECTORS.has(letter.arabic);
     const availableForms: FormType[] = nc
-      ? (["isolated", "final"] as FormType[])
+      ? (["final"] as FormType[])
       : (["initial", "medial", "final"] as FormType[]);
     const formType = availableForms[Math.floor(Math.random() * availableForms.length)];
     const forms = getLetterForms(letter.arabic);
@@ -172,7 +172,7 @@ function FormsQuizPage() {
       {/* Son Şans banner */}
       {phase === "lastChance" && (
         <div className="mb-4 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
-          <span className="text-base">⚡</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-amber-500 shrink-0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <div>
             <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{t.alifba.lastChance}</p>
             <p className="text-[10px] text-[var(--color-text-secondary)]">{t.alifba.lastChanceDesc}</p>
@@ -222,7 +222,6 @@ function FormsQuizPage() {
           return (
             <button key={choice.id} onClick={() => handleChoice(choice.id)} className={cls}>
               <span className="text-3xl" style={{ fontFamily: "var(--font-arabic)" }}>{choice.arabic}</span>
-              <span className="text-xs text-[var(--color-text-secondary)]">{choice.name}</span>
             </button>
           );
         })}

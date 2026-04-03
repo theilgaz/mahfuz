@@ -56,17 +56,17 @@ export function playLetterAudio(
   onEnd: () => void,
 ): LetterAudioHandle {
   const audio = new Audio(`/kids/audio/${id}.mp3`);
+  let spoken = false;
 
-  audio.onended = onEnd;
-  audio.onerror = () => {
-    // MP3 yok — Web Speech ile harfin kendisini oku
+  const speak = () => {
+    if (spoken) return;
+    spoken = true;
     speakArabic(arabic, onEnd);
   };
 
-  audio.play().catch(() => {
-    // Autoplay policy engeli — Web Speech dene
-    speakArabic(arabic, onEnd);
-  });
+  audio.onended = onEnd;
+  audio.onerror = speak;
+  audio.play().catch(speak);
 
   return {
     stop: () => {
