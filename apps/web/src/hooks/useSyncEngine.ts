@@ -26,10 +26,16 @@ const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 min
 function applyPull(data: PullResult) {
   const { settings, hifzMemorized, bookmarks, readingPositions } = data;
 
-  // Settings
+  // Settings — sadece gerçekten farklı olan değerleri güncelle
+  // (aynı değerle setState yapmak yeni dizi referansı oluşturur → gereksiz re-render)
   const settingsPatch: Record<string, any> = {};
+  const currentSettings = useSettingsStore.getState();
   for (const [key, value] of Object.entries(settings)) {
-    if (value !== undefined) settingsPatch[key] = value;
+    if (value === undefined) continue;
+    const currentVal = (currentSettings as any)[key];
+    if (JSON.stringify(currentVal) !== JSON.stringify(value)) {
+      settingsPatch[key] = value;
+    }
   }
   if (Object.keys(settingsPatch).length > 0) {
     useSettingsStore.setState(settingsPatch);

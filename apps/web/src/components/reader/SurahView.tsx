@@ -4,9 +4,10 @@
  */
 
 import { useSettingsStore } from "~/stores/settings.store";
+import { useShallow } from "zustand/react/shallow";
 import { useReadingStore } from "~/stores/reading.store";
-import { useSurahData, useTajweed, useImlaei, translationSourcesQueryOptions, useSurahs } from "~/hooks/useQuranQuery";
-import { useQuery } from "@tanstack/react-query";
+import { useTajweed, useImlaei, translationSourcesQueryOptions, useSurahs, surahDataQueryOptions } from "~/hooks/useQuranQuery";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useWbwData } from "~/hooks/useWbwData";
 import { cleanImlaei } from "~/lib/strip-diacritics";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -28,7 +29,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const showTranslation = useSettingsStore((s) => s.showTranslation);
   const readingMode = useSettingsStore((s) => s.readingMode);
   const showTajweed = useSettingsStore((s) => s.showTajweed);
-  const translationSlugs = useSettingsStore((s) => s.translationSlugs);
+  const translationSlugs = useSettingsStore(useShallow((s) => s.translationSlugs));
   const textStyle = useSettingsStore((s) => s.textStyle);
   const useBasic = textStyle === "basic";
   const isWbw = readingMode === "wbw";
@@ -36,7 +37,12 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   // Tecvid: WBW modunda çalışmaz (HTML renderı WBW kelime kartlarıyla çakışır)
   const effectiveTajweed = showTajweed && !useBasic && !isWbw;
   const savePosition = useReadingStore((s) => s.savePosition);
-  const { data } = useSurahData(surahId, translationSlugs);
+  // keepPreviousData: translationSlugs değiştiğinde askıya almak yerine
+  // eski veriyi göster — sync veya ayar güncellemelerinde "reload" görüntüsünü önler
+  const { data } = useQuery({
+    ...surahDataQueryOptions(surahId, translationSlugs),
+    placeholderData: keepPreviousData,
+  });
   const { data: tajweedData } = useTajweed(surahId, effectiveTajweed);
   const { data: imlaeiData } = useImlaei(surahId, useBasic);
   // WBW verisi: WBW modunda kelime kartları, verse modunda tooltip için
