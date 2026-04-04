@@ -25,7 +25,7 @@ export function LetterFormsPanel({ arabic, letterId: _letterId }: LetterFormsPan
 
   return (
     <div className="grid grid-cols-4 gap-3">
-      {items.map(({ label, form, limited }) => (
+      {[...items].reverse().map(({ label, form, limited }) => (
         <div key={label} className="flex flex-col items-center gap-2">
           {/* Label above card */}
           <span className="text-[10px] font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
