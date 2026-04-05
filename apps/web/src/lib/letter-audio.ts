@@ -22,14 +22,14 @@ function getArabicVoice(): SpeechSynthesisVoice | null {
   return arabicVoice;
 }
 
-function speakArabic(text: string, onEnd: () => void): void {
+export function speakArabic(text: string, onEnd: () => void, rate = 0.75): void {
   if (!("speechSynthesis" in window)) { onEnd(); return; }
 
   speechSynthesis.cancel();
 
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "ar-SA";
-  utter.rate = 0.75;
+  utter.rate = rate;
   utter.pitch = 1.05;
 
   const voice = getArabicVoice();

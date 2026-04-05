@@ -8,7 +8,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
 import { playLetterAudio, type LetterAudioHandle } from "~/lib/letter-audio";
-import { ARABIC_LETTERS, LETTER_EXAMPLES } from "~/lib/kids-constants";
+import { ARABIC_LETTERS, LETTER_EXAMPLES, shuffle } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 
@@ -16,9 +16,6 @@ export const Route = createFileRoute("/alifba/games/fill")({
   component: FillGamePage,
 });
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
 
 interface SpotChoice {
   arabic: string;

@@ -70,6 +70,6 @@ export function playWrong() {
   if (!ctx) return;
 
   // Two soft descending tones, triangle wave for warmth
-  playTone(ctx, 440, 0,    0.22, 0.15, "triangle");
+  playTone(ctx, 440, 0, 0.22, 0.15, "triangle");
   playTone(ctx, 329.63, 0.14, 0.25, 0.12, "triangle");
 }

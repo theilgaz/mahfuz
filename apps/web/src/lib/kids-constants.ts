@@ -16,6 +16,10 @@ export interface LetterExample {
 /** Letters that do not connect to the following letter (only have isolated & final forms) */
 export const NON_CONNECTORS = new Set(["ا", "د", "ذ", "ر", "ز", "و"]);
 
+export function shuffle<T>(arr: T[]): T[] {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
 const ZWJ = "\u200D"; // Zero Width Joiner
 
 /** Get the four positional forms of an Arabic letter */
@@ -70,7 +74,7 @@ export const SIMILAR_LETTERS: Record<string, string[]> = {
  */
 export function getSimilarDistractors(letterId: string, count: number): ArabicLetter[] {
   const similarIds = SIMILAR_LETTERS[letterId] ?? [];
-  const pool = [...ARABIC_LETTERS].sort(() => Math.random() - 0.5);
+  const pool = shuffle([...ARABIC_LETTERS]);
   const similar = pool.filter((l) => similarIds.includes(l.id));
   const rest = pool.filter((l) => l.id !== letterId && !similarIds.includes(l.id));
   return [...similar, ...rest].slice(0, count);

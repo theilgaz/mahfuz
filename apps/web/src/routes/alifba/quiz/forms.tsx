@@ -5,7 +5,7 @@
 
 import { useState, useCallback } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ARABIC_LETTERS, getLetterForms, getSimilarDistractors, NON_CONNECTORS } from "~/lib/kids-constants";
+import { ARABIC_LETTERS, getLetterForms, getSimilarDistractors, NON_CONNECTORS, shuffle } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
@@ -16,9 +16,6 @@ export const Route = createFileRoute("/alifba/quiz/forms")({
 
 type FormType = "isolated" | "initial" | "medial" | "final";
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
 
 function buildQuestions() {
   return shuffle(ARABIC_LETTERS).map((letter) => {

@@ -6,7 +6,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
-import { ARABIC_LETTERS, LETTER_EXAMPLES, type LetterExample } from "~/lib/kids-constants";
+import { speakArabic } from "~/lib/letter-audio";
+import { ARABIC_LETTERS, LETTER_EXAMPLES, shuffle, type LetterExample } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 
@@ -16,16 +17,12 @@ export const Route = createFileRoute("/alifba/games/word")({
 
 const QUESTION_COUNT = 15;
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
 
 interface WordQuestion {
   correct: LetterExample;
   choices: LetterExample[];
 }
 
-/** Tüm kelime havuzu */
 function getAllWords(): LetterExample[] {
   return ARABIC_LETTERS.flatMap((l) => LETTER_EXAMPLES[l.id] ?? []);
 }
@@ -39,35 +36,9 @@ function buildQuestions(): WordQuestion[] {
   });
 }
 
-/** Web Speech API ile Arapça kelime oku */
-let arabicVoice: SpeechSynthesisVoice | null | undefined = undefined;
-function getArabicVoice(): SpeechSynthesisVoice | null {
-  if (arabicVoice !== undefined) return arabicVoice;
-  if (!("speechSynthesis" in window)) return (arabicVoice = null);
-  const voices = speechSynthesis.getVoices();
-  arabicVoice =
-    voices.find((v) => v.lang === "ar-SA") ??
-    voices.find((v) => v.lang.startsWith("ar")) ??
-    null;
-  return arabicVoice;
-}
-
 function playWordAudio(arabic: string): () => void {
-  if (!("speechSynthesis" in window)) return () => {};
-  speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(arabic);
-  utter.lang = "ar-SA";
-  utter.rate = 0.7;
-  utter.pitch = 1.0;
-  const voice = getArabicVoice();
-  if (voice) utter.voice = voice;
-  speechSynthesis.speak(utter);
-  return () => speechSynthesis.cancel();
-}
-
-// prefetch voices
-if (typeof window !== "undefined" && "speechSynthesis" in window) {
-  speechSynthesis.addEventListener("voiceschanged", () => { arabicVoice = undefined; });
+  speakArabic(arabic, () => {}, 0.7);
+  return () => { if ("speechSynthesis" in window) speechSynthesis.cancel(); };
 }
 
 function WordGamePage() {
@@ -95,7 +66,6 @@ function WordGamePage() {
     return () => { clearTimeout(t); stop(); };
   }, [q]);
 
-  // auto-play on new question
   useEffect(() => {
     if (done || !q) return;
     const cleanup = playAudio();

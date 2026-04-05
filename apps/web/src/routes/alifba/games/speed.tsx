@@ -7,7 +7,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
-import { ARABIC_LETTERS } from "~/lib/kids-constants";
+import { ARABIC_LETTERS, shuffle } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 
@@ -17,9 +17,6 @@ export const Route = createFileRoute("/alifba/games/speed")({
 
 const GAME_DURATION = 30; // seconds
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
 
 function nextQuestion() {
   const letter = ARABIC_LETTERS[Math.floor(Math.random() * ARABIC_LETTERS.length)];

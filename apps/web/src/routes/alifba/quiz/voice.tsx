@@ -5,7 +5,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ARABIC_LETTERS, getSimilarDistractors } from "~/lib/kids-constants";
+import { ARABIC_LETTERS, getSimilarDistractors, shuffle } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { LetterAudioButton } from "~/components/alifba/LetterAudioButton";
@@ -16,9 +16,6 @@ export const Route = createFileRoute("/alifba/quiz/voice")({
   component: VoiceQuizPage,
 });
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
 
 function buildQuestions() {
   return shuffle(ARABIC_LETTERS).map((letter) => {
