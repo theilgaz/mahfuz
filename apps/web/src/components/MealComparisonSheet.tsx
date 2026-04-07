@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import { getTranslationSources, getTranslationsForVerse } from "~/lib/quran-service";
-import { getAcikKuranTranslations } from "~/lib/analyse-service";
+import { getAcikKuranTranslations, ACIK_KURAN_AUTHORS } from "~/lib/analyse-service";
 
 // Desteklenen mealciler (slug → görünen ad)
 const SUPPORTED_TRANSLATORS: Record<string, { name: string; author: string; lang: string; era?: string }> = {
@@ -23,6 +23,16 @@ const SUPPORTED_TRANSLATORS: Record<string, { name: string; author: string; lang
   "haleem-en": { name: "Abdel Haleem", author: "M.A.S. Abdel Haleem", lang: "EN" },
   "yusufali-en": { name: "Yusuf Ali", author: "Abdullah Yusuf Ali", lang: "EN" },
 };
+
+const PREFERRED_TRANSLATOR_ORDER = [
+  "omer-celik",
+  "muhammed-esed",
+  "diyanet",
+  "elmali-yeni",
+  "pickthall-en",
+  "sahih-international",
+  "yusufali-en",
+];
 
 interface Props {
   surahId: number;
@@ -57,13 +67,25 @@ function useVerseTranslations(surahId: number, ayahNumber: number, slugs: string
 export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, inline = false }: Props) {
   const { data: allSources } = useAvailableTranslators();
 
-  // Available slugs that are both in DB and in our supported list
+  // Available slugs that are both in DB and in our supported list, sorted by preferred order
   const availableSlugs = (allSources ?? [])
     .map((s) => s.slug)
-    .filter((slug) => slug in SUPPORTED_TRANSLATORS);
+    .filter((slug) => slug in SUPPORTED_TRANSLATORS)
+    .sort((a, b) => {
+      const ai = PREFERRED_TRANSLATOR_ORDER.indexOf(a);
+      const bi = PREFERRED_TRANSLATOR_ORDER.indexOf(b);
+      if (ai === -1 && bi === -1) return 0;
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
 
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>(
     availableSlugs.slice(0, 3)
+  );
+
+  const [selectedAcikKuranIds, setSelectedAcikKuranIds] = useState<number[]>(
+    ACIK_KURAN_AUTHORS.map((a) => a.id)
   );
 
   const { data: translations, isLoading } = useVerseTranslations(surahId, ayahNumber, selectedSlugs);
@@ -86,6 +108,16 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
           : prev
     );
   }
+
+  function toggleAcikKuranId(id: number) {
+    setSelectedAcikKuranIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  }
+
+  const filteredAcikKuran = (acikKuranData ?? []).filter((t) =>
+    selectedAcikKuranIds.includes(t.authorId)
+  );
 
   const content = (
     <div className={inline ? "space-y-4" : "overflow-y-auto flex-1 px-4 py-3 space-y-4"}>
@@ -171,64 +203,93 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
             </div>
           )}
 
-          {/* Farklı Yorumlar (Açık Kuran API) */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
+          {/* Farklı Yorumlar seçici */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
               <p className="text-xs text-[var(--color-text-secondary)] font-medium">Farklı Yorumlar</p>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/20">
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-semibold border border-[var(--color-accent)]/20">
                 Alternatif
               </span>
             </div>
-            {acikKuranLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-xl border border-[var(--color-border)] p-3 animate-pulse">
-                    <div className="h-3 w-32 rounded bg-[var(--color-border)] mb-2" />
-                    <div className="h-4 w-full rounded bg-[var(--color-border)] mb-1" />
-                    <div className="h-4 w-2/3 rounded bg-[var(--color-border)]" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {(acikKuranData ?? []).map((t) => (
-                  <div
-                    key={t.authorId}
-                    className="rounded-xl border border-amber-500/15 bg-amber-500/5 p-3 space-y-1.5"
+            <div className="flex flex-wrap gap-2">
+              {ACIK_KURAN_AUTHORS.map((author) => {
+                const selected = selectedAcikKuranIds.includes(author.id);
+                return (
+                  <button
+                    key={author.id}
+                    type="button"
+                    onClick={() => toggleAcikKuranId(author.id)}
+                    className={`relative pt-3 pb-1.5 px-3 rounded-lg border text-xs transition-colors ${
+                      selected
+                        ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium"
+                        : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)]"
+                    }`}
                   >
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                        {t.tag}
-                      </span>
-                      <span className="text-xs font-semibold text-[var(--color-text-primary)]">
-                        {t.authorName}
-                      </span>
-                      <span className="text-[10px] text-[var(--color-text-secondary)]">
-                        {t.description}
-                      </span>
-                    </div>
-                    <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
-                      {t.text}
-                    </p>
-                    {t.footnotes && t.footnotes.length > 0 && (
-                      <details className="mt-0.5">
-                        <summary className="text-[10px] text-[var(--color-accent)] cursor-pointer select-none">
-                          {t.footnotes.length} dipnot
-                        </summary>
-                        <div className="mt-1.5 space-y-1">
-                          {t.footnotes.map((fn) => (
-                            <p key={fn.id} className="text-[10px] text-[var(--color-text-secondary)] leading-relaxed pl-2 border-l border-[var(--color-border)]">
-                              {fn.text}
-                            </p>
-                          ))}
-                        </div>
-                      </details>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                    <span className="absolute top-0.5 right-1.5 text-[8px] font-bold opacity-60 leading-none">
+                      {author.tag}
+                    </span>
+                    {author.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Farklı Yorumlar sonuçları */}
+          {acikKuranLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-xl border border-[var(--color-border)] p-3 animate-pulse">
+                  <div className="h-3 w-32 rounded bg-[var(--color-border)] mb-2" />
+                  <div className="h-4 w-full rounded bg-[var(--color-border)] mb-1" />
+                  <div className="h-4 w-2/3 rounded bg-[var(--color-border)]" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredAcikKuran.map((t) => (
+                <div
+                  key={t.authorId}
+                  className="rounded-xl border border-[var(--color-accent)]/15 bg-[var(--color-accent)]/5 p-3 space-y-1.5"
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-accent)]/15 text-[var(--color-accent)]">
+                      {t.tag}
+                    </span>
+                    <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+                      {t.authorName}
+                    </span>
+                    <span className="text-[10px] text-[var(--color-text-secondary)]">
+                      {t.description}
+                    </span>
+                  </div>
+                  <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+                    {t.text}
+                  </p>
+                  {t.footnotes && t.footnotes.length > 0 && (
+                    <details className="mt-0.5">
+                      <summary className="text-[10px] text-[var(--color-accent)] cursor-pointer select-none">
+                        {t.footnotes.length} dipnot
+                      </summary>
+                      <div className="mt-1.5 space-y-1">
+                        {t.footnotes.map((fn) => (
+                          <p key={fn.id} className="text-[10px] text-[var(--color-text-secondary)] leading-relaxed pl-2 border-l border-[var(--color-border)]">
+                            {fn.text}
+                          </p>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </div>
+              ))}
+              {filteredAcikKuran.length === 0 && selectedAcikKuranIds.length > 0 && !acikKuranLoading && (
+                <p className="text-sm text-[var(--color-text-secondary)] text-center py-2">
+                  Veri yüklenemedi.
+                </p>
+              )}
+            </div>
+          )}
 
       <div className="h-4" />
     </div>

@@ -20,26 +20,36 @@ export function BottomNav() {
 
   const user = session?.user;
 
-  // Devam et popup
+  // Meem popup
   const [popupOpen, setPopupOpen] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const popupContentRef = useRef<HTMLDivElement>(null);
   const closePopup = useCallback(() => setPopupOpen(false), []);
   useFocusTrap(popupContentRef, popupOpen, closePopup);
 
+  // Devam et popup
+  const [continueOpen, setContinueOpen] = useState(false);
+  const continueRef = useRef<HTMLDivElement>(null);
+  const continueContentRef = useRef<HTMLDivElement>(null);
+  const closeContine = useCallback(() => setContinueOpen(false), []);
+  useFocusTrap(continueContentRef, continueOpen, closeContine);
+
   useEffect(() => {
-    if (!popupOpen) return;
+    if (!popupOpen && !continueOpen) return;
     function handleClick(e: MouseEvent) {
       if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
         setPopupOpen(false);
       }
+      if (continueRef.current && !continueRef.current.contains(e.target as Node)) {
+        setContinueOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [popupOpen]);
+  }, [popupOpen, continueOpen]);
 
   // Popup açıkken route değişirse kapat
-  useEffect(() => { setPopupOpen(false); }, [pathname]);
+  useEffect(() => { setPopupOpen(false); setContinueOpen(false); }, [pathname]);
 
   return (
     <nav aria-label="Mahfuz" className="fixed bottom-0 inset-x-0 z-30 bg-[var(--color-bg)] border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom)]">
@@ -59,20 +69,82 @@ export function BottomNav() {
           <span className="text-[10px]">{t.nav.home}</span>
         </Link>
 
-        {/* 2. Keşfet */}
-        <Link
-          to="/discover"
-          aria-current={pathname === "/discover" ? "page" : undefined}
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 relative ${
-            pathname === "/discover" ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"
-          }`}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" />
-          </svg>
-          <span className="text-[10px]">{t.nav.hub}</span>
-        </Link>
+        {/* 2. Devam Et */}
+        <div className="relative" ref={continueRef}>
+          <button
+            onClick={() => setContinueOpen((v) => !v)}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 transition-colors ${
+              continueOpen ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"
+            }`}
+            aria-label={t.nav.continueReading}
+            aria-haspopup="true"
+            aria-expanded={continueOpen}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 6C2 6 4 4 8 4C12 4 14 6 14 6V20C14 20 12 18 8 18C4 18 2 20 2 20V6Z" />
+              <path d="M14 6C14 6 16 4 20 4C22 4 22 4 22 4V18C22 18 21 18 20 18C16 18 14 20 14 20V6Z" />
+            </svg>
+            <span className="text-[10px]">{t.nav.continueReading}</span>
+          </button>
+
+          {continueOpen && (
+            <div
+              ref={continueContentRef}
+              role="menu"
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-60 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-2xl z-50 overflow-hidden"
+            >
+              <div className="px-2 pt-2 pb-2">
+                <p className="text-[9px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider px-3 mb-1.5">{t.home.continueReading}</p>
+                {recentPositions.length === 0 ? (
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setContinueOpen(false);
+                      navigate({ to: "/page/$pageNumber", params: { pageNumber: "1" }, search: { ayah: undefined } });
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-[var(--color-accent)] hover:bg-[var(--color-surface)] rounded-xl transition-colors"
+                  >
+                    Okumaya basla
+                  </button>
+                ) : (
+                  recentPositions.map((pos, i) => {
+                    const name = getSurahName(pos.surahId, locale) || `Sure ${pos.surahId}`;
+                    return (
+                      <button
+                        key={pos.surahId}
+                        role="menuitem"
+                        onClick={() => {
+                          setContinueOpen(false);
+                          navigate({
+                            to: "/surah/$surahSlug",
+                            params: { surahSlug: surahSlug(pos.surahId) },
+                            search: { ayah: pos.ayahNumber > 1 ? pos.ayahNumber : undefined },
+                          });
+                        }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors text-left ${
+                          i === 0
+                            ? "bg-[var(--color-accent)]/5 hover:bg-[var(--color-accent)]/10"
+                            : "hover:bg-[var(--color-surface)]"
+                        }`}
+                      >
+                        <span className="text-[10px] font-mono text-[var(--color-text-secondary)] w-5 text-right shrink-0">{pos.surahId}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium truncate ${i === 0 ? "text-[var(--color-accent)]" : "text-[var(--color-text-primary)]"}`}>{name}</p>
+                          <p className="text-[10px] text-[var(--color-text-secondary)]">{t.common.verse} {pos.ayahNumber}</p>
+                        </div>
+                        {i === 0 && (
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-accent)] shrink-0">
+                            <path d="M4 2l4 4-4 4" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* 3. Meem — hub popup */}
         <div className="relative" ref={popupRef}>
@@ -93,92 +165,46 @@ export function BottomNav() {
             <div
               ref={popupContentRef}
               role="menu"
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 overflow-hidden"
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-2xl z-50 overflow-hidden"
             >
-              {/* Keşfet */}
-              <Link
-                to="/discover"
-                role="menuitem"
-                onClick={() => setPopupOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
-              >
-                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--color-surface)]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" />
-                  </svg>
-                </span>
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.nav.hub}</p>
-                  <p className="text-[10px] text-[var(--color-text-secondary)]">Tecvid, Elif-Ba, Hatim</p>
-                </div>
-              </Link>
+              {/* Nav linkleri */}
+              <div className="p-2 space-y-0.5">
+                <Link
+                  to="/discover"
+                  role="menuitem"
+                  onClick={() => setPopupOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[var(--color-surface)] transition-colors"
+                >
+                  <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--color-accent)]/10 text-[var(--color-accent)] shrink-0">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" />
+                    </svg>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">{t.nav.hub}</p>
+                    <p className="text-[10px] text-[var(--color-text-secondary)] truncate">{t.nav.hubDesc}</p>
+                  </div>
+                </Link>
 
-              {/* Oyunlar */}
-              <Link
-                to="/games"
-                role="menuitem"
-                onClick={() => setPopupOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
-              >
-                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--color-surface)]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="6" width="20" height="12" rx="2" />
-                    <path d="M7 10v4M5 12h4" />
-                    <path d="M17 10h.01M19 12h.01" />
-                  </svg>
-                </span>
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-text-primary)]">Oyunlar</p>
-                  <p className="text-[10px] text-[var(--color-text-secondary)]">Kelime, sure tanıma ve daha fazlası</p>
-                </div>
-              </Link>
-
-              {/* Devam et */}
-              <div className="px-3 pt-2 pb-1">
-                <p className="text-[10px] text-[var(--color-text-secondary)] px-1 mb-1">{t.home.continueReading}</p>
-                {recentPositions.length === 0 ? (
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      setPopupOpen(false);
-                      navigate({ to: "/page/$pageNumber", params: { pageNumber: "1" }, search: { ayah: undefined } });
-                    }}
-                    className="w-full text-left px-2 py-2 text-sm text-[var(--color-accent)] hover:bg-[var(--color-surface)] rounded-lg transition-colors"
-                  >
-                    Okumaya başla →
-                  </button>
-                ) : (
-                  recentPositions.map((pos, i) => {
-                    const name = getSurahName(pos.surahId, locale) || `Sure ${pos.surahId}`;
-                    return (
-                      <button
-                        key={pos.surahId}
-                        role="menuitem"
-                        onClick={() => {
-                          setPopupOpen(false);
-                          navigate({
-                            to: "/surah/$surahSlug",
-                            params: { surahSlug: surahSlug(pos.surahId) },
-                            search: { ayah: pos.ayahNumber > 1 ? pos.ayahNumber : undefined },
-                          });
-                        }}
-                        className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[var(--color-surface)] transition-colors text-left mb-0.5"
-                      >
-                        <span className="text-[10px] text-[var(--color-text-secondary)] w-5 text-right shrink-0">{pos.surahId}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium truncate ${i === 0 ? "text-[var(--color-accent)]" : "text-[var(--color-text-primary)]"}`}>{name}</p>
-                          <p className="text-[10px] text-[var(--color-text-secondary)]">{t.common.verse} {pos.ayahNumber}</p>
-                        </div>
-                        {i === 0 && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-accent)] shrink-0">
-                            <path d="M4 2l4 4-4 4" />
-                          </svg>
-                        )}
-                      </button>
-                    );
-                  })
-                )}
+                <Link
+                  to="/games"
+                  role="menuitem"
+                  onClick={() => setPopupOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[var(--color-surface)] transition-colors"
+                >
+                  <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--color-accent)]/10 text-[var(--color-accent)] shrink-0">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="6" width="20" height="12" rx="2" />
+                      <path d="M7 10v4M5 12h4" />
+                      <path d="M17 10h.01M19 12h.01" />
+                    </svg>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">{t.nav.games}</p>
+                    <p className="text-[10px] text-[var(--color-text-secondary)] truncate">{t.nav.gamesDesc}</p>
+                  </div>
+                </Link>
               </div>
             </div>
           )}

@@ -16,13 +16,13 @@ import { getVerseByAuthors } from "~/lib/acik-kuran-client";
 
 // Aykırı / alternatif mealci ID'leri (Açık Kuran API)
 export const ACIK_KURAN_AUTHORS = [
-  { id: 30, name: "Yaşar Nuri Öztürk", desc: "Kur'an-ı Kerim Meali", tag: "Modernist" },
   { id: 38, name: "Mustafa İslamoğlu", desc: "Hayat Kitabı Kur'an", tag: "Modernist" },
   { id: 104, name: "Edip Yüksel", desc: "Mesaj: Kuran Çevirisi", tag: "Kur'anist" },
+  { id: 30, name: "Yaşar Nuri Öztürk", desc: "Kur'an-ı Kerim Meali", tag: "Modernist" },
+  { id: 107, name: "Mehmet Okuyan", desc: "Kur'an Meal-Tefsir", tag: "Akademik" },
+  { id: 52, name: "Süleymaniye Vakfı", desc: "Süleymaniye Vakfı Meali", tag: "Rasyonalist" },
   { id: 8, name: "Bayraktar Bayraklı", desc: "Yeni Anlayışın Işığında", tag: "Reformist" },
   { id: 3, name: "Ahmed Hulusi", desc: "Kur'an Çözümü", tag: "Sufi" },
-  { id: 52, name: "Süleymaniye Vakfı", desc: "Süleymaniye Vakfı Meali", tag: "Rasyonalist" },
-  { id: 107, name: "Mehmet Okuyan", desc: "Kur'an Meal-Tefsir", tag: "Akademik" },
   { id: 22, name: "Muhammed Esed", desc: "Kur'an Mesajı", tag: "Modernist" },
   { id: 27, name: "Süleyman Ateş", desc: "Kur'an-ı Kerim ve Yüce Meali", tag: "Sufi" },
   { id: 26, name: "Suat Yıldırım", desc: "Kur'an-ı Kerim ve Meali", tag: "Akademik" },

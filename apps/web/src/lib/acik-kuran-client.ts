@@ -36,10 +36,30 @@ async function apiFetch<T>(path: string): Promise<T> {
 }
 
 export async function searchRootByLatin(latinChars: string): Promise<AcikKuranRootResult[]> {
-  // e.g. "sbr" → ص-ب-ر  — API returns a single root object, not an array
-  const encoded = encodeURIComponent(latinChars.toLowerCase().trim());
-  const data = await apiFetch<{ data: AcikKuranRootResult | null }>(`/root/latin/${encoded}`);
-  return data.data ? [data.data] : [];
+  // API /root/latin/{chars} returns a single root. "h" maps to both ه (he) and ح (ha),
+  // so we try both lowercase and H-capitalized variants and merge results.
+  const normalized = latinChars.toLowerCase().trim();
+
+  const queries = new Set([normalized]);
+  if (normalized.includes("h")) {
+    queries.add(normalized.replace(/h/g, "H"));
+  }
+
+  const results = await Promise.all(
+    Array.from(queries).map(async (q) => {
+      const data = await apiFetch<{ data: AcikKuranRootResult | null }>(
+        `/root/latin/${encodeURIComponent(q)}`,
+      );
+      return data.data;
+    }),
+  );
+
+  const seen = new Set<number>();
+  return results.filter((r): r is AcikKuranRootResult => {
+    if (!r || seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
+  });
 }
 
 export async function getRootVerses(rootId: number): Promise<AcikKuranRootVerse[]> {
