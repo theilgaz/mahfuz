@@ -1,10 +1,11 @@
 /**
- * Latin harfli Arapça kök araması — Açık Kuran API ile.
+ * Latin harfli Arapça kök araması (Açık Kuran API).
  * Türk kullanıcılar "sbr" yazarak sabır kökünü bulabilir.
  */
 
 import { useState, useTransition } from "react";
 import { searchRootByLatin, type AcikKuranRootResult } from "~/lib/acik-kuran-client";
+import { useTranslation } from "~/hooks/useTranslation";
 
 const EXAMPLES = [
   { latin: "sbr", tr: "sabır" },
@@ -16,6 +17,7 @@ const EXAMPLES = [
 ];
 
 export function LatinRootSearch() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<AcikKuranRootResult[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export function LatinRootSearch() {
         const res = await searchRootByLatin(q);
         setResults(res);
       } catch {
-        setError("Arama yapılamadı.");
+        setError(t.hub.rootSearchError);
       }
     });
   }
@@ -42,7 +44,7 @@ export function LatinRootSearch() {
     <div className="space-y-3">
       {/* Açıklama */}
       <div className="text-xs text-[var(--color-text-secondary)] bg-[var(--color-surface)] rounded-xl px-3 py-2 border border-[var(--color-border)]">
-        Latin harfleriyle Arapça kök arayın: <span className="font-mono text-[var(--color-accent)]">sbr</span> → صبر
+        {t.hub.rootSearchHint.split("sbr")[0]}<span className="font-mono text-[var(--color-accent)]">sbr</span>{t.hub.rootSearchHint.split("sbr")[1]}
       </div>
 
       {/* Arama kutusu */}
@@ -51,7 +53,7 @@ export function LatinRootSearch() {
           type="text"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Kök ara: sbr, hmd, ktb..."
+          placeholder={t.hub.rootSearchPlaceholder}
           className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-secondary)] text-sm font-mono focus:outline-none focus:border-[var(--color-accent)] transition-colors"
         />
         {isPending && (
@@ -72,7 +74,7 @@ export function LatinRootSearch() {
               className="px-3 py-1 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-xs hover:border-[var(--color-accent)] transition-colors"
             >
               <span className="font-mono text-[var(--color-accent)]">{ex.latin}</span>
-              <span className="text-[var(--color-text-secondary)] ml-1.5">— {ex.tr}</span>
+              <span className="text-[var(--color-text-secondary)] ml-1.5">· {ex.tr}</span>
             </button>
           ))}
         </div>
@@ -113,7 +115,7 @@ export function LatinRootSearch() {
 
       {results.length === 0 && query.length >= 2 && !isPending && !error && (
         <p className="text-sm text-[var(--color-text-secondary)] text-center py-4">
-          "{query}" için sonuç bulunamadı
+          {t.hub.rootSearchNoResults} "{query}"
         </p>
       )}
     </div>

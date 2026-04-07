@@ -97,46 +97,14 @@ function HubPage() {
           }
         />
 
-        {/* Dinleyerek Ezberle */}
-        <HubCard
-          to="/discover"
-          disabled={!labsEnabled}
-          title={t.hub.listenMemorize}
-          description={t.hub.listenMemorizeDesc}
-          labs={labsEnabled}
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 18V12A9 9 0 0121 12V18" />
-              <path d="M21 19C21 20.1 20.1 21 19 21H18C16.9 21 16 20.1 16 19V16C16 14.9 16.9 14 18 14H21V19Z" />
-              <path d="M3 19C3 20.1 3.9 21 5 21H6C7.1 21 8 20.1 8 19V16C8 14.9 7.1 14 6 14H3V19Z" />
-            </svg>
-          }
-        />
-
-        {/* Kuran Uygulamaları */}
-        <HubCard
-          to="/discover"
-          disabled={!labsEnabled}
-          title={t.hub.apps}
-          description={t.hub.appsDesc}
-          labs={labsEnabled}
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" rx="1.5" />
-              <rect x="14" y="3" width="7" height="7" rx="1.5" />
-              <rect x="3" y="14" width="7" height="7" rx="1.5" />
-              <rect x="14" y="14" width="7" height="7" rx="1.5" />
-            </svg>
-          }
-        />
       </div>
 
       {/* Oyunlar */}
       <div className="mt-2">
         <HubCard
           to="/games"
-          title="Oyunlar"
-          description="Kelime, sure tanıma ve daha fazlası"
+          title={t.hub.games}
+          description={t.hub.gamesDesc}
           icon={
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="6" width="20" height="12" rx="2" />
@@ -151,8 +119,8 @@ function HubPage() {
       <div className="mt-2">
         <HubCard
           to="/savunma"
-          title="Bağlamsal Açıklamalar"
-          description="Yanlış anlaşılan ayetler için tarihsel bağlam ve akademik yanıtlar"
+          title={t.hub.contextual}
+          description={t.hub.contextualDesc}
           icon={
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -166,7 +134,7 @@ function HubPage() {
       {/* Kok Aramasi */}
       <div className="mt-6">
         <p className="text-xs font-semibold tracking-widest text-[var(--color-text-secondary)] uppercase mb-3">
-          Kök Ara
+          {t.hub.rootSearch}
         </p>
         <LatinRootSearch />
       </div>
