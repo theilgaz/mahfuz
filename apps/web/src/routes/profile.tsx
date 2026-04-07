@@ -202,6 +202,26 @@ function ProfilePage() {
             <path d="M6 4l4 4-4 4" />
           </svg>
         </Link>
+
+        <Link
+          to="/about"
+          className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-colors"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">Uygulama Hakkında</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">Sürüm, katkıcılar, açık kaynak</p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-text-secondary)] shrink-0">
+            <path d="M6 4l4 4-4 4" />
+          </svg>
+        </Link>
       </div>
     </div>
   );

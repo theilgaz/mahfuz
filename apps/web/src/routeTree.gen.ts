@@ -23,6 +23,7 @@ import { Route as GamesRouteImport } from './routes/games'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HatimIndexRouteImport } from './routes/hatim/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
@@ -119,6 +120,11 @@ const ChangelogRoute = ChangelogRouteImport.update({
 const BookmarksRoute = BookmarksRouteImport.update({
   id: '/bookmarks',
   path: '/bookmarks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -259,6 +265,7 @@ const AlifbaGamesFillRoute = AlifbaGamesFillRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
@@ -302,6 +309,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
@@ -344,6 +352,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/bookmarks'
     | '/changelog'
     | '/discover'
@@ -432,6 +442,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/bookmarks'
     | '/changelog'
     | '/discover'
@@ -473,6 +484,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/bookmarks'
     | '/changelog'
     | '/discover'
@@ -517,6 +529,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   BookmarksRoute: typeof BookmarksRoute
   ChangelogRoute: typeof ChangelogRoute
   DiscoverRoute: typeof DiscoverRoute
@@ -646,6 +659,13 @@ declare module '@tanstack/react-router' {
       path: '/bookmarks'
       fullPath: '/bookmarks'
       preLoaderRoute: typeof BookmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -882,6 +902,7 @@ const AlifbaGamesRouteWithChildren = AlifbaGamesRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   BookmarksRoute: BookmarksRoute,
   ChangelogRoute: ChangelogRoute,
   DiscoverRoute: DiscoverRoute,

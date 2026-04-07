@@ -21,18 +21,36 @@ interface RepoInfo {
 
 const REPO = "theilgaz/mahfuz";
 const CACHE_TTL = 24 * 60 * 60 * 1000;
+const LS_CONTRIBUTORS_KEY = "mahfuz:gh-contributors";
+const LS_REPO_KEY = "mahfuz:gh-repo";
 
 interface StatsContributor {
   author: { login: string; avatar_url: string; html_url: string };
   total: number;
 }
 
+interface LSEntry<T> { data: T; ts: number }
+
+function lsRead<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const entry: LSEntry<T> = JSON.parse(raw);
+    if (Date.now() - entry.ts > CACHE_TTL) return null;
+    return entry.data;
+  } catch { return null; }
+}
+
+function lsWrite<T>(key: string, data: T) {
+  try { localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); } catch { /* quota */ }
+}
+
 /** 202 = GitHub computing stats — bekle ve tekrar dene */
-async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
+async function fetchWithRetry(url: string, retries = 4): Promise<Response> {
   for (let i = 0; i < retries; i++) {
     const res = await fetch(url);
     if (res.status !== 202) return res;
-    await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+    await new Promise((r) => setTimeout(r, 2500 * (i + 1)));
   }
   return fetch(url);
 }
@@ -46,7 +64,7 @@ function useContributors() {
       );
       if (!res.ok || res.status === 202) throw new Error("GitHub API error");
       const stats: StatsContributor[] = await res.json();
-      return stats
+      const data = stats
         .map((s) => ({
           login: s.author.login,
           avatar_url: s.author.avatar_url,
@@ -54,7 +72,10 @@ function useContributors() {
           contributions: s.total,
         }))
         .sort((a, b) => b.contributions - a.contributions);
+      lsWrite(LS_CONTRIBUTORS_KEY, data);
+      return data;
     },
+    initialData: () => lsRead<Contributor[]>(LS_CONTRIBUTORS_KEY) ?? undefined,
     staleTime: CACHE_TTL,
     gcTime: CACHE_TTL,
     retry: 2,
@@ -69,8 +90,11 @@ function useRepoInfo() {
       const res = await fetch(`https://api.github.com/repos/${REPO}`);
       if (!res.ok) throw new Error("GitHub API error");
       const r = await res.json();
-      return { stargazers_count: r.stargazers_count, forks_count: r.forks_count };
+      const data = { stargazers_count: r.stargazers_count, forks_count: r.forks_count };
+      lsWrite(LS_REPO_KEY, data);
+      return data;
     },
+    initialData: () => lsRead<RepoInfo>(LS_REPO_KEY) ?? undefined,
     staleTime: CACHE_TTL,
     gcTime: CACHE_TTL,
     retry: 1,
