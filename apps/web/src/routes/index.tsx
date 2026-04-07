@@ -74,8 +74,13 @@ function HomePage() {
         to="/hatim/"
         className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-colors group"
       >
-        <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center shrink-0 text-lg">
-          📖
+        <div className="w-9 h-9 rounded-lg bg-[var(--color-accent)]/15 flex items-center justify-center shrink-0 group-hover:bg-[var(--color-accent)]/25 transition-colors">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+            <path d="M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z" />
+            <path d="M9 7h6" />
+            <path d="M9 11h4" />
+          </svg>
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-[var(--color-text-primary)]">Hatim Grubu</p>
