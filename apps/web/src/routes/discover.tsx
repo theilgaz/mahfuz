@@ -118,7 +118,7 @@ function HubPage() {
       {/* Baglamsal Aciklamalar */}
       <div className="mt-2">
         <HubCard
-          to="/savunma"
+          to="/context"
           title={t.hub.contextual}
           description={t.hub.contextualDesc}
           icon={

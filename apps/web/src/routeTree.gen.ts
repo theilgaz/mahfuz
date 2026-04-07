@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TajweedRouteImport } from './routes/tajweed'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as SearchRouteImport } from './routes/search'
-import { Route as SavunmaRouteImport } from './routes/savunma'
 import { Route as ReciteRouteImport } from './routes/recite'
 import { Route as QaidaRouteImport } from './routes/qaida'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -21,6 +20,7 @@ import { Route as NotesRouteImport } from './routes/notes'
 import { Route as HifzRouteImport } from './routes/hifz'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as ContextRouteImport } from './routes/context'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as AboutRouteImport } from './routes/about'
@@ -67,11 +67,6 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SavunmaRoute = SavunmaRouteImport.update({
-  id: '/savunma',
-  path: '/savunma',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ReciteRoute = ReciteRouteImport.update({
   id: '/recite',
   path: '/recite',
@@ -110,6 +105,11 @@ const GamesRoute = GamesRouteImport.update({
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContextRoute = ContextRouteImport.update({
+  id: '/context',
+  path: '/context',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChangelogRoute = ChangelogRouteImport.update({
@@ -268,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
+  '/context': typeof ContextRoute
   '/discover': typeof DiscoverRoute
   '/games': typeof GamesRouteWithChildren
   '/hifz': typeof HifzRoute
@@ -276,7 +277,6 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/qaida': typeof QaidaRoute
   '/recite': typeof ReciteRoute
-  '/savunma': typeof SavunmaRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
@@ -312,6 +312,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
+  '/context': typeof ContextRoute
   '/discover': typeof DiscoverRoute
   '/hifz': typeof HifzRoute
   '/notes': typeof NotesRoute
@@ -319,7 +320,6 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/qaida': typeof QaidaRoute
   '/recite': typeof ReciteRoute
-  '/savunma': typeof SavunmaRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
@@ -355,6 +355,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
+  '/context': typeof ContextRoute
   '/discover': typeof DiscoverRoute
   '/games': typeof GamesRouteWithChildren
   '/hifz': typeof HifzRoute
@@ -363,7 +364,6 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/qaida': typeof QaidaRoute
   '/recite': typeof ReciteRoute
-  '/savunma': typeof SavunmaRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
@@ -401,6 +401,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/bookmarks'
     | '/changelog'
+    | '/context'
     | '/discover'
     | '/games'
     | '/hifz'
@@ -409,7 +410,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/qaida'
     | '/recite'
-    | '/savunma'
     | '/search'
     | '/stats'
     | '/tajweed'
@@ -445,6 +445,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/bookmarks'
     | '/changelog'
+    | '/context'
     | '/discover'
     | '/hifz'
     | '/notes'
@@ -452,7 +453,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/qaida'
     | '/recite'
-    | '/savunma'
     | '/search'
     | '/stats'
     | '/tajweed'
@@ -487,6 +487,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/bookmarks'
     | '/changelog'
+    | '/context'
     | '/discover'
     | '/games'
     | '/hifz'
@@ -495,7 +496,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/qaida'
     | '/recite'
-    | '/savunma'
     | '/search'
     | '/stats'
     | '/tajweed'
@@ -532,6 +532,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BookmarksRoute: typeof BookmarksRoute
   ChangelogRoute: typeof ChangelogRoute
+  ContextRoute: typeof ContextRoute
   DiscoverRoute: typeof DiscoverRoute
   GamesRoute: typeof GamesRouteWithChildren
   HifzRoute: typeof HifzRoute
@@ -540,7 +541,6 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   QaidaRoute: typeof QaidaRoute
   ReciteRoute: typeof ReciteRoute
-  SavunmaRoute: typeof SavunmaRoute
   SearchRoute: typeof SearchRoute
   StatsRoute: typeof StatsRoute
   TajweedRoute: typeof TajweedRoute
@@ -582,13 +582,6 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/savunma': {
-      id: '/savunma'
-      path: '/savunma'
-      fullPath: '/savunma'
-      preLoaderRoute: typeof SavunmaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recite': {
@@ -645,6 +638,13 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/context': {
+      id: '/context'
+      path: '/context'
+      fullPath: '/context'
+      preLoaderRoute: typeof ContextRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/changelog': {
@@ -905,6 +905,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BookmarksRoute: BookmarksRoute,
   ChangelogRoute: ChangelogRoute,
+  ContextRoute: ContextRoute,
   DiscoverRoute: DiscoverRoute,
   GamesRoute: GamesRouteWithChildren,
   HifzRoute: HifzRoute,
@@ -913,7 +914,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   QaidaRoute: QaidaRoute,
   ReciteRoute: ReciteRoute,
-  SavunmaRoute: SavunmaRoute,
   SearchRoute: SearchRoute,
   StatsRoute: StatsRoute,
   TajweedRoute: TajweedRoute,

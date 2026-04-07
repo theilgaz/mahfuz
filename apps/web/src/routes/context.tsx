@@ -1,5 +1,5 @@
 /**
- * Bağlamsal Açıklamalar — /savunma
+ * Bağlamsal Açıklamalar — /context
  * Sıkça yanlış anlaşılan ayetler: tarihsel bağlam, klasik tefsir, akademik yanıtlar.
  * Giriş: 4 haneli PIN (2255 = Bakara:255 Ayetel Kursi)
  */
@@ -21,7 +21,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   cennet: "Ahiret Tasvirleri",
 };
 
-export const Route = createFileRoute("/savunma")({
+export const Route = createFileRoute("/context")({
   component: SavunmaPage,
 });
 
