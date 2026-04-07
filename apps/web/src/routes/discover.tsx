@@ -131,6 +131,22 @@ function HubPage() {
         />
       </div>
 
+      {/* Oyunlar */}
+      <div className="mt-2">
+        <HubCard
+          to="/games"
+          title="Oyunlar"
+          description="Kelime, sure tanıma ve daha fazlası"
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2" />
+              <path d="M7 10v4M5 12h4" />
+              <path d="M17 10h.01M19 12h.01" />
+            </svg>
+          }
+        />
+      </div>
+
       {/* Baglamsal Aciklamalar */}
       <div className="mt-2">
         <HubCard
