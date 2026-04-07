@@ -17,6 +17,15 @@ export const Route = createFileRoute("/games/fill-blank")({
 type GameState = "playing" | "correct" | "wrong" | "loading";
 type Screen = "setup" | "game";
 
+// ── Ön tanımlı gruplar ───────────────────────────────────
+
+const PRESETS = [
+  { label: "Son 10",       range: [105, 114] },
+  { label: "Duha → Nas",  range: [93,  114] },
+  { label: "Amme Cüzü",   range: [78,  114] },
+  { label: "Tebareke",    range: [67,   77] },
+] as const;
+
 // ── Sure Seçim Ekranı ────────────────────────────────────
 
 function SurahPicker({
@@ -51,6 +60,17 @@ function SurahPicker({
 
   const selectAll = () => setSelected(new Set(surahs.map((s) => s.id)));
   const clearAll = () => setSelected(new Set());
+
+  const applyPreset = (range: readonly [number, number]) => {
+    const [from, to] = range;
+    setSelected(new Set(surahs.filter((s) => s.id >= from && s.id <= to).map((s) => s.id)));
+    setSearch("");
+  };
+
+  const activePreset = PRESETS.find(({ range: [from, to] }) => {
+    const ids = surahs.filter((s) => s.id >= from && s.id <= to).map((s) => s.id);
+    return ids.length > 0 && ids.every((id) => selected.has(id)) && selected.size === ids.length;
+  });
 
   const handleStart = () => {
     onStart(selected.size > 0 ? [...selected] : []);
@@ -95,6 +115,26 @@ function SurahPicker({
             </button>
           )}
         </div>
+      </div>
+
+      {/* Ön tanımlı gruplar */}
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {PRESETS.map((preset) => {
+          const isActive = activePreset?.label === preset.label;
+          return (
+            <button
+              key={preset.label}
+              onClick={() => applyPreset(preset.range)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                isActive
+                  ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white"
+                  : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/50 hover:text-[var(--color-accent)]"
+              }`}
+            >
+              {preset.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Arama */}
