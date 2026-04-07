@@ -20,7 +20,6 @@ import { Route as NotesRouteImport } from './routes/notes'
 import { Route as HifzRouteImport } from './routes/hifz'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as DiscoverRouteImport } from './routes/discover'
-import { Route as ContextRouteImport } from './routes/context'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as AboutRouteImport } from './routes/about'
@@ -43,6 +42,7 @@ import { Route as AnalyseVerseKeyRouteImport } from './routes/analyse/$verseKey'
 import { Route as AlifbaGamesRouteImport } from './routes/alifba/games'
 import { Route as AlifbaExamRouteImport } from './routes/alifba/exam'
 import { Route as AlifbaLetterIdRouteImport } from './routes/alifba/$letterId'
+import { Route as ContextDisabledRouteImport } from './routes/_context.disabled'
 import { Route as AlifbaGamesIndexRouteImport } from './routes/alifba/games/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AlifbaQuizVoiceRouteImport } from './routes/alifba/quiz/voice'
@@ -105,11 +105,6 @@ const GamesRoute = GamesRouteImport.update({
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContextRoute = ContextRouteImport.update({
-  id: '/context',
-  path: '/context',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChangelogRoute = ChangelogRouteImport.update({
@@ -222,6 +217,11 @@ const AlifbaLetterIdRoute = AlifbaLetterIdRouteImport.update({
   path: '/alifba/$letterId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContextDisabledRoute = ContextDisabledRouteImport.update({
+  id: '/_context/disabled',
+  path: '/disabled',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlifbaGamesIndexRoute = AlifbaGamesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -268,7 +268,6 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
-  '/context': typeof ContextRoute
   '/discover': typeof DiscoverRoute
   '/games': typeof GamesRouteWithChildren
   '/hifz': typeof HifzRoute
@@ -280,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
+  '/disabled': typeof ContextDisabledRoute
   '/alifba/$letterId': typeof AlifbaLetterIdRoute
   '/alifba/exam': typeof AlifbaExamRoute
   '/alifba/games': typeof AlifbaGamesRouteWithChildren
@@ -312,7 +312,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
-  '/context': typeof ContextRoute
   '/discover': typeof DiscoverRoute
   '/hifz': typeof HifzRoute
   '/notes': typeof NotesRoute
@@ -323,6 +322,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
+  '/disabled': typeof ContextDisabledRoute
   '/alifba/$letterId': typeof AlifbaLetterIdRoute
   '/alifba/exam': typeof AlifbaExamRoute
   '/analyse/$verseKey': typeof AnalyseVerseKeyRoute
@@ -355,7 +355,6 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
-  '/context': typeof ContextRoute
   '/discover': typeof DiscoverRoute
   '/games': typeof GamesRouteWithChildren
   '/hifz': typeof HifzRoute
@@ -367,6 +366,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
+  '/_context/disabled': typeof ContextDisabledRoute
   '/alifba/$letterId': typeof AlifbaLetterIdRoute
   '/alifba/exam': typeof AlifbaExamRoute
   '/alifba/games': typeof AlifbaGamesRouteWithChildren
@@ -401,7 +401,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/bookmarks'
     | '/changelog'
-    | '/context'
     | '/discover'
     | '/games'
     | '/hifz'
@@ -413,6 +412,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/stats'
     | '/tajweed'
+    | '/disabled'
     | '/alifba/$letterId'
     | '/alifba/exam'
     | '/alifba/games'
@@ -445,7 +445,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/bookmarks'
     | '/changelog'
-    | '/context'
     | '/discover'
     | '/hifz'
     | '/notes'
@@ -456,6 +455,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/stats'
     | '/tajweed'
+    | '/disabled'
     | '/alifba/$letterId'
     | '/alifba/exam'
     | '/analyse/$verseKey'
@@ -487,7 +487,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/bookmarks'
     | '/changelog'
-    | '/context'
     | '/discover'
     | '/games'
     | '/hifz'
@@ -499,6 +498,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/stats'
     | '/tajweed'
+    | '/_context/disabled'
     | '/alifba/$letterId'
     | '/alifba/exam'
     | '/alifba/games'
@@ -532,7 +532,6 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BookmarksRoute: typeof BookmarksRoute
   ChangelogRoute: typeof ChangelogRoute
-  ContextRoute: typeof ContextRoute
   DiscoverRoute: typeof DiscoverRoute
   GamesRoute: typeof GamesRouteWithChildren
   HifzRoute: typeof HifzRoute
@@ -544,6 +543,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   StatsRoute: typeof StatsRoute
   TajweedRoute: typeof TajweedRoute
+  ContextDisabledRoute: typeof ContextDisabledRoute
   AlifbaLetterIdRoute: typeof AlifbaLetterIdRoute
   AlifbaExamRoute: typeof AlifbaExamRoute
   AlifbaGamesRoute: typeof AlifbaGamesRouteWithChildren
@@ -638,13 +638,6 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof DiscoverRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/context': {
-      id: '/context'
-      path: '/context'
-      fullPath: '/context'
-      preLoaderRoute: typeof ContextRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/changelog': {
@@ -801,6 +794,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlifbaLetterIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_context/disabled': {
+      id: '/_context/disabled'
+      path: '/disabled'
+      fullPath: '/disabled'
+      preLoaderRoute: typeof ContextDisabledRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/alifba/games/': {
       id: '/alifba/games/'
       path: '/'
@@ -905,7 +905,6 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BookmarksRoute: BookmarksRoute,
   ChangelogRoute: ChangelogRoute,
-  ContextRoute: ContextRoute,
   DiscoverRoute: DiscoverRoute,
   GamesRoute: GamesRouteWithChildren,
   HifzRoute: HifzRoute,
@@ -917,6 +916,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   StatsRoute: StatsRoute,
   TajweedRoute: TajweedRoute,
+  ContextDisabledRoute: ContextDisabledRoute,
   AlifbaLetterIdRoute: AlifbaLetterIdRoute,
   AlifbaExamRoute: AlifbaExamRoute,
   AlifbaGamesRoute: AlifbaGamesRouteWithChildren,

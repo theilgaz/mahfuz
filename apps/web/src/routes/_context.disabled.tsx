@@ -21,7 +21,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   cennet: "Ahiret Tasvirleri",
 };
 
-export const Route = createFileRoute("/context")({
+export const Route = createFileRoute("/_context/disabled")({
   component: SavunmaPage,
 });
 
