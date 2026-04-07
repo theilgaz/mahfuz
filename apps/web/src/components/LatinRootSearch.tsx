@@ -14,6 +14,8 @@ const EXAMPLES = [
   { latin: "rhm", tr: "rahmet" },
   { latin: "slm", tr: "selam/barış" },
   { latin: "ilm", tr: "ilim" },
+  { latin: "fth", tr: "fetih/açmak" },
+  { latin: "nzl", tr: "inmek/nazil" },
 ];
 
 export function LatinRootSearch() {

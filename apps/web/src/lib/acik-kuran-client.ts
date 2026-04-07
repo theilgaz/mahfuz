@@ -35,15 +35,25 @@ async function apiFetch<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function searchRootByLatin(latinChars: string): Promise<AcikKuranRootResult[]> {
-  // API /root/latin/{chars} returns a single root. "h" maps to both ه (he) and ح (ha),
-  // so we try both lowercase and H-capitalized variants and merge results.
-  const normalized = latinChars.toLowerCase().trim();
+/**
+ * Açık Kuran API Latin encoding:
+ * lowercase = standard consonants (س ب ت ر ز د ك ل م ن و ي ف ج ذ ش ق ه)
+ * uppercase = emphatic/pharyngeal: S=ص H=ح D=ض T=ط Z=ظ G=غ E=ع
+ * We generate all 2^n case permutations so "sbr" finds "Sbr" (صبر), "ilm" finds "Elm" (علم), etc.
+ */
+function casePermutations(s: string): string[] {
+  if (s.length === 0) return [""];
+  const rest = casePermutations(s.slice(1));
+  const lo = s[0].toLowerCase();
+  const hi = lo.toUpperCase();
+  if (lo === hi) return rest.map((r) => lo + r);
+  return [...rest.map((r) => lo + r), ...rest.map((r) => hi + r)];
+}
 
-  const queries = new Set([normalized]);
-  if (normalized.includes("h")) {
-    queries.add(normalized.replace(/h/g, "H"));
-  }
+export async function searchRootByLatin(latinChars: string): Promise<AcikKuranRootResult[]> {
+  const normalized = latinChars.toLowerCase().trim();
+  // Cap at 4 chars to keep permutations ≤ 16
+  const queries = new Set(casePermutations(normalized.slice(0, 4)));
 
   const results = await Promise.all(
     Array.from(queries).map(async (q) => {
