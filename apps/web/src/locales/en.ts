@@ -207,6 +207,7 @@ export const en: Messages = {
     verseActions: "Verse {n} actions",
     sajdah: "Sajdah verse",
     pageJumpTitle: "Go to Page",
+    verseJumpTitle: "Go to Verse",
     prevVerse: "Previous verse",
     nextVerse: "Next verse",
     playSurah: "Play surah",

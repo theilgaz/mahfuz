@@ -216,6 +216,88 @@ export const getPageData = createServerFn({ method: "GET" })
     };
   });
 
+// ── Günün Ayeti ──────────────────────────────────────────
+// Tarihe göre deterministik — gün boyunca aynı ayet, gece yarısı değişir.
+
+export const getDailyVerse = createServerFn({ method: "GET" }).handler(async () => {
+  const TOTAL_VERSES = 6236;
+  const dayIndex = Math.floor(Date.now() / 86_400_000); // ms → gün sayısı
+  const verseOffset = dayIndex % TOTAL_VERSES;
+
+  // Tüm ayetleri id sırasına göre orderla, offset'teki ayeti al
+  const [verse] = await db
+    .select()
+    .from(ayahs)
+    .orderBy(asc(ayahs.id))
+    .limit(1)
+    .offset(verseOffset);
+
+  if (!verse) return null;
+
+  // Türkçe meali çek
+  const [source] = await db
+    .select()
+    .from(translationSources)
+    .where(eq(translationSources.isDefault, true));
+
+  const [translation] = source
+    ? await db
+        .select()
+        .from(translations)
+        .where(
+          and(
+            eq(translations.surahId, verse.surahId),
+            eq(translations.ayahNumber, verse.ayahNumber),
+            eq(translations.sourceId, source.id),
+          ),
+        )
+    : [];
+
+  const [surah] = await db
+    .select()
+    .from(surahs)
+    .where(eq(surahs.id, verse.surahId));
+
+  return {
+    verse,
+    translation: translation ?? null,
+    surah: surah ?? null,
+  };
+});
+
+// ── Çoklu Meal (Karşılaştırma için) ─────────────────────
+
+export const getTranslationsForVerse = createServerFn({ method: "GET" })
+  .inputValidator((input: { surahId: number; ayahNumber: number; sourceSlugs: string[] }) => input)
+  .handler(async ({ data: { surahId, ayahNumber, sourceSlugs } }) => {
+    if (sourceSlugs.length === 0) return [];
+
+    const sources = await db
+      .select()
+      .from(translationSources)
+      .where(inArray(translationSources.slug, sourceSlugs));
+
+    if (sources.length === 0) return [];
+
+    const sourceIds = sources.map((s) => s.id);
+    const rows = await db
+      .select()
+      .from(translations)
+      .where(
+        and(
+          eq(translations.surahId, surahId),
+          eq(translations.ayahNumber, ayahNumber),
+          inArray(translations.sourceId, sourceIds),
+        ),
+      );
+
+    // Join with source info for display
+    return rows.map((r) => ({
+      ...r,
+      source: sources.find((s) => s.id === r.sourceId) ?? null,
+    }));
+  });
+
 // ── Sure verisini komple getir ───────────────────────────
 
 export const getSurahData = createServerFn({ method: "GET" })

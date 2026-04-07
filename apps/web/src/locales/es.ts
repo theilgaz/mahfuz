@@ -171,6 +171,7 @@ export const es: Messages = {
     removeBookmark: "Quitar marcador",
     verseActions: "Acciones del versículo {n}",
     sajdah: "Verso de sajda",
+    verseJumpTitle: "Ir al Versículo",
   },
 
   error: {

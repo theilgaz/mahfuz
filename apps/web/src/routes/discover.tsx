@@ -10,6 +10,7 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
 import { getAllLocaleConfigs, loadLocaleMessages, type Locale } from "~/locales/registry";
 import { Credits } from "~/components/hub/Credits";
+import { LatinRootSearch } from "~/components/LatinRootSearch";
 
 const GitHubContributors = lazy(() =>
   import("~/components/hub/GitHubContributors").then((m) => ({ default: m.GitHubContributors }))
@@ -133,6 +134,30 @@ function HubPage() {
             </svg>
           }
         />
+      </div>
+
+      {/* Baglamsal Aciklamalar */}
+      <div className="mt-2">
+        <HubCard
+          to="/savunma"
+          title="Bağlamsal Açıklamalar"
+          description="Yanlış anlaşılan ayetler için tarihsel bağlam ve akademik yanıtlar"
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="M12 8v4" />
+              <path d="M12 16h.01" />
+            </svg>
+          }
+        />
+      </div>
+
+      {/* Kok Aramasi */}
+      <div className="mt-6">
+        <p className="text-xs font-semibold tracking-widest text-[var(--color-text-secondary)] uppercase mb-3">
+          Kök Ara
+        </p>
+        <LatinRootSearch />
       </div>
 
       <Suspense fallback={null}>

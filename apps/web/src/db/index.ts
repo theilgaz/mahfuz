@@ -4,6 +4,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as authSchema from "./schema";
 import * as quranSchema from "./quran-schema";
+import * as ikraSchema from "./ikra-schema";
 
 function resolveDbUrl(): string {
   const envUrl = process.env.TURSO_DATABASE_URL;
@@ -21,10 +22,11 @@ const client = createClient({
 });
 
 export const db = drizzle(client, {
-  schema: { ...authSchema, ...quranSchema },
+  schema: { ...authSchema, ...quranSchema, ...ikraSchema },
 });
 
 export type Database = typeof db;
 
 export * from "./schema";
 export * from "./quran-schema";
+export * from "./ikra-schema";

@@ -11,6 +11,8 @@ import {
   getSurahData,
   getTranslationSources,
   getReciters,
+  getDailyVerse,
+  getTranslationsForVerse,
 } from "~/lib/quran-service";
 
 // ── Query Keys ───────────────────────────────────────────
@@ -163,4 +165,29 @@ export function useMushafLines(pageNumber: number, enabled: boolean) {
     ...mushafLinesQueryOptions(pageNumber),
     enabled,
   });
+}
+
+export function dailyVerseQueryOptions() {
+  return queryOptions({
+    queryKey: ["daily-verse", new Date().toDateString()],
+    queryFn: () => getDailyVerse(),
+    staleTime: 1000 * 60 * 60, // 1 saat
+  });
+}
+
+export function useDailyVerse() {
+  return useQuery(dailyVerseQueryOptions());
+}
+
+export function multiTranslationQueryOptions(surahId: number, ayahNumber: number, sourceSlugs: string[]) {
+  return queryOptions({
+    queryKey: ["translations", "multi", surahId, ayahNumber, sourceSlugs],
+    queryFn: () => getTranslationsForVerse({ data: { surahId, ayahNumber, sourceSlugs } }),
+    staleTime: Infinity,
+    enabled: sourceSlugs.length > 0,
+  });
+}
+
+export function useMultiTranslations(surahId: number, ayahNumber: number, sourceSlugs: string[]) {
+  return useQuery(multiTranslationQueryOptions(surahId, ayahNumber, sourceSlugs));
 }

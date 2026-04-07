@@ -19,6 +19,7 @@ import { useReadingStore } from "~/stores/reading.store";
 import { SettingsPanel } from "~/components/reader/SettingsPanel";
 import { ReadingProgressBar } from "~/components/reader/ReadingProgressBar";
 import { SurahPicker } from "~/components/reader/SurahPicker";
+import { VerseJumpDialog } from "~/components/reader/VerseJumpDialog";
 import { SmartPlayButton } from "~/components/reader/SmartPlayButton";
 import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
@@ -122,6 +123,7 @@ function AppHeader() {
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [labsMenuOpen, setLabsMenuOpen] = useState(false);
+  const [verseJumpOpen, setVerseJumpOpen] = useState(false);
   const { session } = useRouteContext({ from: "__root__" });
   const labsMenuRef = useRef<HTMLDivElement>(null);
   const labsDropdownRef = useRef<HTMLDivElement>(null);
@@ -136,6 +138,9 @@ function AppHeader() {
   const surahSlugMatch = path.match(/^\/surah\/(.+)$/);
   const pageNumMatch = path.match(/^\/page\/(\d+)$/);
   const isReadingRoute = !!(surahSlugMatch || pageNumMatch);
+  const { data: surahsForJump } = useSurahs();
+  const currentSurahId = surahSlugMatch ? (surahIdFromSlug(surahSlugMatch[1]) ?? 1) : 1;
+  const currentAyahCount = surahsForJump.find((s) => s.id === currentSurahId)?.ayahCount ?? 286;
 
   const lastPosition = useReadingStore.getState().lastPosition;
   const currentPage = pageNumMatch ? parseInt(pageNumMatch[1], 10) : undefined;
@@ -277,6 +282,22 @@ function AppHeader() {
             </div>
           )}
 
+          {/* Ayete git — sadece sure rotasında */}
+          {surahSlugMatch && (
+            <button
+              onClick={() => setVerseJumpOpen(true)}
+              className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
+              aria-label={t.reader.verseJumpTitle}
+            >
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="7" x2="15" y2="7" />
+                <line x1="5" y1="13" x2="15" y2="13" />
+                <line x1="8" y1="4" x2="6" y2="16" />
+                <line x1="14" y1="4" x2="12" y2="16" />
+              </svg>
+            </button>
+          )}
+
           {/* Akıllı oynat — sadece okuma rotalarında */}
           {surahSlugMatch && (
             <SmartPlayButton mode="surah" surahId={surahIdFromSlug(surahSlugMatch[1]) ?? 1} />
@@ -306,6 +327,14 @@ function AppHeader() {
         onClose={() => setSettingsOpen(false)}
         context={settingsContext}
       />
+      {surahSlugMatch && (
+        <VerseJumpDialog
+          open={verseJumpOpen}
+          onClose={() => setVerseJumpOpen(false)}
+          surahId={currentSurahId}
+          ayahCount={currentAyahCount}
+        />
+      )}
     </>
   );
 }

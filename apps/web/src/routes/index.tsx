@@ -5,16 +5,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
-import { useSurahs, surahsQueryOptions } from "~/hooks/useQuranQuery";
+import { useSurahs, surahsQueryOptions, dailyVerseQueryOptions } from "~/hooks/useQuranQuery";
 import { SurahList } from "~/components/SurahList";
 import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
+import { DailyVerseCard } from "~/components/DailyVerseCard";
 import { SettingsButton } from "~/components/SettingsButton";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
 import { useShallow } from "zustand/react/shallow";
 
 export const Route = createFileRoute("/")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(surahsQueryOptions()),
+  loader: ({ context }) => Promise.all([
+    context.queryClient.ensureQueryData(surahsQueryOptions()),
+    context.queryClient.prefetchQuery(dailyVerseQueryOptions()),
+  ]),
   component: HomePage,
   pendingComponent: HomePageSkeleton,
 });
@@ -63,6 +67,25 @@ function HomePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
+      <DailyVerseCard />
+
+      {/* Hatim Grubu hızlı erişim */}
+      <Link
+        to="/hatim/"
+        className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-colors group"
+      >
+        <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center shrink-0 text-lg">
+          📖
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-[var(--color-text-primary)]">Hatim Grubu</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">Beraber hatim yapın, ilerleme takibi</p>
+        </div>
+        <svg className="w-4 h-4 text-[var(--color-text-secondary)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </Link>
+
       {/* Labs: Tilavet kartı */}
       {labsEnabled && (
         <Link

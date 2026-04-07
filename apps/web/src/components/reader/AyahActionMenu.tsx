@@ -4,11 +4,13 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { Link } from "@tanstack/react-router";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useAudioStore } from "~/stores/audio.store";
 import { useSettingsStore } from "~/stores/settings.store";
 import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
+import { VerseNoteSheet } from "~/components/VerseNoteSheet";
 
 interface AyahActionMenuProps {
   open: boolean;
@@ -40,6 +42,7 @@ export function AyahActionMenu({
   const reciterSlug = useSettingsStore((s) => s.reciterSlug);
   const [audioLoading, setAudioLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [noteOpen, setNoteOpen] = useState(false);
 
   void anchorRect;
 
@@ -149,6 +152,18 @@ export function AyahActionMenu({
       ),
       onClick: share,
     },
+    {
+      key: "note",
+      label: "Not",
+      active: noteOpen,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 4h12v9l-4 4H4V4z" />
+          <path d="M8 8h4M8 11h2" />
+        </svg>
+      ),
+      onClick: () => setNoteOpen(true),
+    },
   ];
 
   // Kopyala eylemleri — yatay chip'ler
@@ -231,7 +246,27 @@ export function AyahActionMenu({
             </button>
           ))}
         </div>
+
+        {/* Tahlil linki */}
+        <Link
+          to="/analyse/$verseKey"
+          params={{ verseKey: `${surahId}:${ayahNumber}` }}
+          search={{ tab: "meal" }}
+          onClick={onClose}
+          className="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20 hover:bg-[var(--color-accent)]/20 transition-colors shadow-md"
+        >
+          Ayet Tahlili
+        </Link>
       </div>
+
+      {/* Verse Note Sheet */}
+      {noteOpen && (
+        <VerseNoteSheet
+          verseKey={`${surahId}:${ayahNumber}`}
+          verseText={textUthmani}
+          onClose={() => setNoteOpen(false)}
+        />
+      )}
     </>
   );
 }

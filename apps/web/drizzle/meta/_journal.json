@@ -29,6 +29,20 @@
       "when": 1774820270844,
       "tag": "0003_busy_mach_iv",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1775423595704,
+      "tag": "0004_condemned_the_initiative",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1775500000000,
+      "tag": "0005_verse_similarity",
+      "breakpoints": true
     }
   ]
 }

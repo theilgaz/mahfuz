@@ -202,6 +202,15 @@ export const AyahBlock = memo(function AyahBlock({
       onTouchEnd={cancelLongPress}
       onTouchMove={cancelLongPress}
     >
+      {/* Ayet numarası — büyük silik watermark */}
+      <span
+        className="absolute top-1 right-2 select-none pointer-events-none font-bold text-[var(--color-text-secondary)]"
+        style={{ fontSize: "3.5rem", lineHeight: 1, opacity: 0.07, fontFamily: "var(--font-ui)" }}
+        aria-hidden="true"
+      >
+        {ayahNumber}
+      </span>
+
       {/* Yer imi butonu — hover'da görünür */}
       {surahId && (
         <button

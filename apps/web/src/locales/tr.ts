@@ -205,6 +205,7 @@ export const tr = {
     verseActions: "Ayet {n} eylemleri",
     sajdah: "Secde ayeti",
     pageJumpTitle: "Sayfaya Git",
+    verseJumpTitle: "Ayete Git",
     prevVerse: "Önceki ayet",
     nextVerse: "Sonraki ayet",
     playSurah: "Sureyi dinle",
