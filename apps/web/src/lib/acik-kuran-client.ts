@@ -47,10 +47,14 @@ export async function searchRootByLatin(latinChars: string): Promise<AcikKuranRo
 
   const results = await Promise.all(
     Array.from(queries).map(async (q) => {
-      const data = await apiFetch<{ data: AcikKuranRootResult | null }>(
-        `/root/latin/${encodeURIComponent(q)}`,
-      );
-      return data.data;
+      try {
+        const data = await apiFetch<{ data: AcikKuranRootResult | null }>(
+          `/root/latin/${encodeURIComponent(q)}`,
+        );
+        return data.data;
+      } catch {
+        return null;
+      }
     }),
   );
 
