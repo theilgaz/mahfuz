@@ -1,14 +1,25 @@
 /**
- * Savunma — yaygın yanlış anlaşılan ayetlerin baglamsal açıklamaları.
+ * Bağlamsal Açıklamalar — /savunma
+ * Sıkça yanlış anlaşılan ayetler: tarihsel bağlam, klasik tefsir, akademik yanıtlar.
  * Giriş: 4 haneli PIN (2255 = Bakara:255 Ayetel Kursi)
  */
 
 import { useState, useRef, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getAllVerseContexts, VERSE_CATEGORIES } from "~/lib/verse-context-data";
+import { getAllVerseContexts } from "~/lib/verse-context-data";
 
 const CORRECT_PIN = "2255";
 const SESSION_KEY = "savunma_unlocked";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  siddet: "Silahlı Çatışma ve Savaş",
+  kadin: "Kadın Hakları",
+  cinsellik: "Evlilik ve Cinsellik",
+  ceza: "Ceza Hukuku",
+  din: "Dini Özgürlük",
+  kolelik: "Kölelik ve Özgürlük",
+  cennet: "Ahiret Tasvirleri",
+};
 
 export const Route = createFileRoute("/savunma")({
   component: SavunmaPage,
@@ -61,9 +72,8 @@ function PinGate({ onUnlock }: { onUnlock: () => void }) {
   return (
     <div className="min-h-[80dvh] flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-xs flex flex-col items-center gap-6">
-        {/* Kilit ikonu */}
-        <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" />
             <path d="M7 11V7a5 5 0 0110 0v4" />
           </svg>
@@ -74,9 +84,10 @@ function PinGate({ onUnlock }: { onUnlock: () => void }) {
           <p className="text-xs text-[var(--color-text-secondary)]">Devam etmek için şifreyi girin</p>
         </div>
 
-        {/* PIN kutucukları */}
-        <div className={`flex gap-3 ${shake ? "animate-[wiggle_0.4s_ease-in-out]" : ""}`}
-          style={shake ? { animation: "wiggle 0.4s ease-in-out" } : {}}>
+        <div
+          className="flex gap-3"
+          style={shake ? { animation: "wiggle 0.4s ease-in-out" } : {}}
+        >
           {digits.map((d, i) => (
             <input
               key={i}
@@ -87,7 +98,7 @@ function PinGate({ onUnlock }: { onUnlock: () => void }) {
               value={d}
               onChange={(e) => handleDigit(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className={`w-14 h-14 text-center text-xl font-bold rounded-xl border-2 bg-[var(--color-surface)] outline-none transition-all
+              className={`w-13 h-13 text-center text-xl font-bold rounded-xl border-2 bg-[var(--color-surface)] outline-none transition-all
                 ${error
                   ? "border-red-400 text-red-500"
                   : d
@@ -124,88 +135,103 @@ function PinGate({ onUnlock }: { onUnlock: () => void }) {
 function SavunmaContent() {
   const all = getAllVerseContexts();
 
+  // Sure bazında grupla, sure numarasına göre sırala
+  const grouped = all.reduce<Record<string, { surahName: string; surahNumber: number; verses: typeof all }>>((acc, v) => {
+    const surahNumber = parseInt(v.verseKey.split(":")[0]);
+    if (!acc[v.surahName]) {
+      acc[v.surahName] = { surahName: v.surahName, surahNumber, verses: [] };
+    }
+    acc[v.surahName].verses.push(v);
+    return acc;
+  }, {});
+
+  const groups = Object.values(grouped).sort((a, b) => a.surahNumber - b.surahNumber);
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
+
       {/* Başlık */}
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-[var(--color-text-primary)] mb-1">
+      <div className="mb-8">
+        <h1 className="text-lg font-bold text-[var(--color-text-primary)] tracking-tight">
           Bağlamsal Açıklamalar
         </h1>
-        <p className="text-sm text-[var(--color-text-secondary)]">
+        <p className="text-xs text-[var(--color-text-secondary)] mt-1 leading-relaxed">
           Sıkça yanlış anlaşılan {all.length} ayet için tarihsel bağlam, klasik tefsir görüşleri ve akademik yanıtlar.
         </p>
       </div>
 
-      {/* Kategoriler */}
-      <div className="space-y-6">
-        {VERSE_CATEGORIES.map((cat) => {
-          const verses = all.filter((v) => v.category === cat.id);
-          if (verses.length === 0) return null;
+      {/* Sure bazında gruplar */}
+      <div className="space-y-8">
+        {groups.map(({ surahName, surahNumber, verses }) => (
+          <section key={surahName}>
 
-          return (
-            <div key={cat.id}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">{cat.icon}</span>
-                <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                  {cat.label}
-                </h2>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)]">
-                  {verses.length}
-                </span>
+            {/* Sure başlığı */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="shrink-0 w-8 h-8 rounded-lg bg-[var(--color-accent)]/8 flex items-center justify-center">
+                <span className="text-[11px] font-bold text-[var(--color-accent)]">{surahNumber}</span>
               </div>
+              <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                {surahName} Suresi
+              </h2>
+              <span className="text-[10px] text-[var(--color-text-secondary)] px-1.5 py-0.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)]">
+                {verses.length} konu
+              </span>
+              <div className="flex-1 h-px bg-[var(--color-border)]" />
+            </div>
 
-              <div className="space-y-2">
-                {verses.map((ctx) => (
+            {/* Ayet kartları */}
+            <div className="space-y-1.5">
+              {verses.map((ctx) => {
+                const ayahNum = ctx.verseKey.split(":")[1];
+                const categoryLabel = CATEGORY_LABELS[ctx.category] ?? ctx.category;
+                return (
                   <Link
                     key={ctx.verseKey}
                     to="/analyse/$verseKey"
                     params={{ verseKey: ctx.verseKey }}
                     search={{ tab: "bagit" }}
-                    className="flex items-start gap-3 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 transition-all group"
+                    className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 hover:bg-[var(--color-accent)]/3 transition-all group"
                   >
+                    {/* Ayet numarası */}
+                    <div className="shrink-0 w-9 h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] flex flex-col items-center justify-center gap-px">
+                      <span className="text-[8px] text-[var(--color-text-secondary)] leading-none uppercase tracking-wide">ayet</span>
+                      <span className="text-sm font-bold text-[var(--color-text-primary)] leading-none">{ayahNum}</span>
+                    </div>
+
+                    {/* Konu ve kategori */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-xs font-semibold text-[var(--color-accent)]">
-                          {ctx.surahName} {ctx.verseKey.split(":")[1]}
-                        </span>
-                        <span className="text-[10px] text-[var(--color-text-secondary)]">
-                          {ctx.verseKey}
-                        </span>
-                      </div>
-                      <p className="text-sm text-[var(--color-text-primary)] font-medium leading-snug">
+                      <p className="text-sm font-medium text-[var(--color-text-primary)] leading-snug">
                         {ctx.topic}
                       </p>
-                      <p className="text-xs text-[var(--color-text-secondary)] mt-1 leading-relaxed line-clamp-2">
-                        {ctx.misconceptions[0]?.claim}
+                      <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">
+                        {categoryLabel}
+                        <span className="mx-1.5 opacity-40">·</span>
+                        {ctx.misconceptions.length} itiraz yanıtı
                       </p>
                     </div>
-                    <div className="shrink-0 flex items-center gap-1 mt-0.5">
-                      <span className="text-[10px] text-[var(--color-text-secondary)]">
-                        {ctx.misconceptions.length} itiraz
-                      </span>
-                      <svg
-                        className="w-4 h-4 text-[var(--color-text-secondary)] group-hover:text-[var(--color-accent)] transition-colors"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
+
+                    {/* Ok */}
+                    <svg
+                      className="w-4 h-4 shrink-0 text-[var(--color-border)] group-hover:text-[var(--color-accent)] transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                    </svg>
                   </Link>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          );
-        })}
+          </section>
+        ))}
       </div>
 
       {/* Alt bilgi */}
-      <div className="mt-8 px-4 py-4 rounded-xl border border-dashed border-[var(--color-border)] text-center">
-        <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+      <div className="mt-10 px-5 py-4 rounded-xl border border-[var(--color-border)]">
+        <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed text-center">
           Açıklamalar klasik tefsir, hadis kaynakları ve akademik çalışmalar esas alınarak hazırlanmıştır.
-          <br />
-          Tek bir ayet, Kur'an bütününden koparılarak incelenemez.
+          Kur'an bütünlük içinde anlaşılır; hiçbir ayet bağlamından koparılarak değerlendirilemez.
         </p>
       </div>
     </div>
