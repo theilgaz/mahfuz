@@ -11,6 +11,7 @@ import { useSettingsStore } from "~/stores/settings.store";
 import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 import { VerseNoteSheet } from "~/components/VerseNoteSheet";
+import { MealComparisonSheet } from "~/components/MealComparisonSheet";
 
 interface AyahActionMenuProps {
   open: boolean;
@@ -43,6 +44,7 @@ export function AyahActionMenu({
   const [audioLoading, setAudioLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [mealsOpen, setMealsOpen] = useState(false);
 
   void anchorRect;
 
@@ -164,6 +166,17 @@ export function AyahActionMenu({
       ),
       onClick: () => setNoteOpen(true),
     },
+    {
+      key: "meals",
+      label: "Mealler",
+      active: mealsOpen,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 5h12M4 10h8M4 15h10" />
+        </svg>
+      ),
+      onClick: () => setMealsOpen(true),
+    },
   ];
 
   // Kopyala eylemleri — yatay chip'ler
@@ -265,6 +278,16 @@ export function AyahActionMenu({
           verseKey={`${surahId}:${ayahNumber}`}
           verseText={textUthmani}
           onClose={() => setNoteOpen(false)}
+        />
+      )}
+
+      {/* Meal Karşılaştırma Sheet */}
+      {mealsOpen && (
+        <MealComparisonSheet
+          surahId={surahId}
+          ayahNumber={ayahNumber}
+          ayahText={textUthmani}
+          onClose={() => setMealsOpen(false)}
         />
       )}
     </>
