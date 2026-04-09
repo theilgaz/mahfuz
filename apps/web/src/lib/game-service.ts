@@ -59,33 +59,39 @@ export const getRandomVerseForGame = createServerFn({ method: "GET" })
     throw new Error("Uygun ayet bulunamadı");
   });
 
-export const getVerseGuessQuestion = createServerFn({ method: "GET" }).handler(async () => {
-  const [ayah] = await db
-    .select()
-    .from(ayahs)
-    .orderBy(sql`RANDOM()`)
-    .where(sql`length(${ayahs.textUthmani}) BETWEEN 30 AND 100`)
-    .limit(1);
+export const getVerseGuessQuestion = createServerFn({ method: "GET" })
+  .inputValidator((input: { surahIds?: number[] }) => input)
+  .handler(async ({ data }) => {
+    const surahFilter = data.surahIds && data.surahIds.length > 0
+      ? and(sql`length(${ayahs.textUthmani}) BETWEEN 30 AND 100`, inArray(ayahs.surahId, data.surahIds))
+      : sql`length(${ayahs.textUthmani}) BETWEEN 30 AND 100`;
 
-  const [correctSurah] = await db
-    .select()
-    .from(surahs)
-    .where(eq(surahs.id, ayah.surahId));
+    const [ayah] = await db
+      .select()
+      .from(ayahs)
+      .orderBy(sql`RANDOM()`)
+      .where(surahFilter)
+      .limit(1);
 
-  const wrongSurahs = await db
-    .select()
-    .from(surahs)
-    .where(sql`${surahs.id} != ${ayah.surahId}`)
-    .orderBy(sql`RANDOM()`)
-    .limit(3);
+    const [correctSurah] = await db
+      .select()
+      .from(surahs)
+      .where(eq(surahs.id, ayah.surahId));
 
-  const options = [...wrongSurahs, correctSurah].sort(() => Math.random() - 0.5);
+    const wrongSurahs = await db
+      .select()
+      .from(surahs)
+      .where(sql`${surahs.id} != ${ayah.surahId}`)
+      .orderBy(sql`RANDOM()`)
+      .limit(3);
 
-  return {
-    verseText: ayah.textUthmani,
-    verseNum: ayah.ayahNumber,
-    correctSurahId: correctSurah.id,
-    correctSurahName: correctSurah.nameSimple,
-    options: options.map((s) => ({ id: s.id, name: s.nameSimple, arabic: s.nameArabic })),
-  };
-});
+    const options = [...wrongSurahs, correctSurah].sort(() => Math.random() - 0.5);
+
+    return {
+      verseText: ayah.textUthmani,
+      verseNum: ayah.ayahNumber,
+      correctSurahId: correctSurah.id,
+      correctSurahName: correctSurah.nameSimple,
+      options: options.map((s) => ({ id: s.id, name: s.nameSimple, arabic: s.nameArabic })),
+    };
+  });

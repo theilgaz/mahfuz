@@ -3,20 +3,38 @@
  * Bir ayetin ardından hangi ayet gelir? 4 seçenekten doğruyu bul.
  */
 
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
 import { STATIC_QUESTIONS } from "~/lib/verse-chain-data";
 import type { ChainQuestion } from "~/lib/verse-chain-data";
+import { submitScore } from "~/lib/score-service";
+import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 
 export const Route = createFileRoute("/games/verse-chain")({
   component: VerseChainPage,
 });
 
 type GameState = "playing" | "correct" | "wrong" | "gameover";
+type Screen = "setup" | "game";
 
-function VerseChainGame() {
+/** Verilen sure ID'lerine göre soruları filtrele. Eşleşen yoksa tüm sorular döner. */
+function filterQuestions(surahIds: number[]): ChainQuestion[] {
+  if (surahIds.length === 0) return STATIC_QUESTIONS;
+  const idSet = new Set(surahIds);
+  const filtered = STATIC_QUESTIONS.filter((q) => {
+    const surahId = parseInt(q.currentVerse.verseKey.split(":")[0], 10);
+    return idSet.has(surahId);
+  });
+  return filtered.length > 0 ? filtered : STATIC_QUESTIONS;
+}
+
+function VerseChainGame({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => void }) {
+  const questions = filterQuestions(surahIds);
+
   const [questionIndex, setQuestionIndex] = useState(0);
   const [state, setState] = useState<GameState>("playing");
+  const submittedRef = useRef(false);
+  const sessionStart = useRef(Date.now());
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -24,7 +42,7 @@ function VerseChainGame() {
   const [chainLength, setChainLength] = useState(0);
   const [revealedSurahs, setRevealedSurahs] = useState<Set<number>>(new Set());
 
-  const question = STATIC_QUESTIONS[questionIndex % STATIC_QUESTIONS.length];
+  const question = questions[questionIndex % questions.length];
 
   const handleAnswer = (idx: number) => {
     if (state !== "playing") return;
@@ -74,6 +92,14 @@ function VerseChainGame() {
     setRevealedSurahs(new Set());
   };
 
+  // Gameover'da skoru kaydet (bir kez)
+  useEffect(() => {
+    if (state === "gameover" && score > 0 && !submittedRef.current) {
+      submittedRef.current = true;
+      submitScore({ data: { gameId: "verse-chain", score, durationMs: Date.now() - sessionStart.current } }).catch(() => {});
+    }
+  }, [state, score]);
+
   // Game Over
   if (state === "gameover") {
     return (
@@ -92,6 +118,14 @@ function VerseChainGame() {
           Tekrar Oyna
         </button>
         <div className="mt-4">
+          <button
+            onClick={onSetup}
+            className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]"
+          >
+            Sure seçimini değiştir
+          </button>
+        </div>
+        <div className="mt-2">
           <Link
             to="/games"
             className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]"
@@ -112,14 +146,15 @@ function VerseChainGame() {
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
-        <Link
-          to="/games"
+        <button
+          onClick={onSetup}
           className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+          title="Sure seçimini değiştir"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-        </Link>
+        </button>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-[var(--color-text-primary)]">Ayet Zinciri</h1>
           <p className="text-xs text-[var(--color-text-secondary)]">Hangi ayet devam ediyor?</p>
@@ -279,5 +314,17 @@ function VerseChainGame() {
 }
 
 function VerseChainPage() {
-  return <VerseChainGame />;
+  const [screen, setScreen] = useState<Screen>("setup");
+  const [surahIds, setSurahIds] = useState<number[]>([]);
+
+  const handleStart = (ids: number[]) => {
+    setSurahIds(ids);
+    setScreen("game");
+  };
+
+  if (screen === "setup") {
+    return <SurahPickerScreen gameTitle="Ayet Zinciri" onStart={handleStart} />;
+  }
+
+  return <VerseChainGame surahIds={surahIds} onSetup={() => setScreen("setup")} />;
 }

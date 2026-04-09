@@ -6,10 +6,13 @@ export interface ArabicLetter {
   order: number;
 }
 
+export type FormPosition = "isolated" | "initial" | "medial" | "final";
+
 export interface LetterExample {
   arabic: string;
   transliteration: string;
   meaning: string;
+  position: FormPosition;
   verseRef?: string; // "1:1" format
 }
 
@@ -111,146 +114,180 @@ export const ARABIC_LETTERS: ArabicLetter[] = [
   { id: "ya", arabic: "ي", name: "Ye", nameAr: "يَاء", order: 28 },
 ];
 
-/** Kuran'dan her harf için örnek kelimeler */
+/**
+ * Kuran'dan her harf için konum örneği.
+ *
+ * Seçim kuralı: örnek kelimede hedef harf belirtilen konumda açıkça görünmeli.
+ *
+ * BAĞLANMA MANTIĞI:
+ *   initial  → kelime başında, sola bağlanır         (hedef harf ilk harf)
+ *   medial   → ortada, sağdan bağ alır + sola bağlar (hedef harf tam ortada)
+ *   final    → sağdan bağ alır, solda bağ yok        (hedef harf son harf veya bağlanmaz harfin hemen önü)
+ *   isolated → hiçbir yandan bağ yok                 (kelime başında veya bağlanmaz harften sonra)
+ *
+ * BAĞLANMAZ HARFLER (ا د ذ ر ز و): yalnızca isolated + final.
+ */
 export const LETTER_EXAMPLES: Record<string, LetterExample[]> = {
+  // ا — bağlanmaz; isolated: kelime başında / final: connector → ا
   alif: [
-    { arabic: "ٱللَّهِ", transliteration: "Allāhi", meaning: "Allah'ın", verseRef: "1:1" },
-    { arabic: "ٱلْحَمْدُ", transliteration: "al-ḥamdu", meaning: "Hamd", verseRef: "1:2" },
-    { arabic: "إِيَّاكَ", transliteration: "iyyāka", meaning: "Sana", verseRef: "1:5" },
+    { arabic: "أَحَدٌ",  transliteration: "aḥad",  meaning: "Bir",    position: "isolated", verseRef: "112:1" },
+    { arabic: "يَا",    transliteration: "yā",    meaning: "Ey",     position: "final",    verseRef: "2:21"  },
   ],
+  // ب — connector
   ba: [
-    { arabic: "بِسْمِ", transliteration: "bismi", meaning: "Adıyla", verseRef: "1:1" },
-    { arabic: "رَبِّ", transliteration: "rabbi", meaning: "Rabb", verseRef: "1:2" },
-    { arabic: "بِٱلْغَيْبِ", transliteration: "bil-ghaybi", meaning: "Gayba", verseRef: "2:3" },
+    { arabic: "بِسْمِ",  transliteration: "bismi",  meaning: "Adıyla",     position: "initial", verseRef: "1:1"   },
+    { arabic: "نَبِيٌّ", transliteration: "nabī",   meaning: "Peygamber",  position: "medial",  verseRef: "2:61"  },
+    { arabic: "كَتَبَ",  transliteration: "kataba", meaning: "Yazdı",      position: "final",   verseRef: "2:79"  },
   ],
+  // ت — connector
   ta: [
-    { arabic: "تَوَّابٌ", transliteration: "tawwāb", meaning: "Tövbeleri kabul eden", verseRef: "2:37" },
-    { arabic: "ٱلتَّوَّابُ", transliteration: "at-tawwābu", meaning: "Tevvab", verseRef: "2:128" },
-    { arabic: "تَعْلَمُونَ", transliteration: "taʿlamūn", meaning: "Bilirsiniz", verseRef: "2:31" },
+    { arabic: "تَوْبَةٌ", transliteration: "tawbah", meaning: "Tövbe", position: "initial", verseRef: "2:37"  },
+    { arabic: "كِتَابٌ", transliteration: "kitāb",  meaning: "Kitap", position: "medial",  verseRef: "2:2"   },
+    { arabic: "بَيْتٌ",  transliteration: "bayt",   meaning: "Ev",    position: "final",   verseRef: "2:125" },
   ],
+  // ث — connector
   tha: [
-    { arabic: "مَثَلُ", transliteration: "mathalu", meaning: "Örneği", verseRef: "2:17" },
-    { arabic: "ثَمَرَةٍ", transliteration: "thamaratin", meaning: "Meyve", verseRef: "2:25" },
-    { arabic: "ثُمَّ", transliteration: "thumma", meaning: "Sonra", verseRef: "2:28" },
+    { arabic: "ثَمَرَةٍ", transliteration: "thamara", meaning: "Meyve",  position: "initial", verseRef: "2:25" },
+    { arabic: "مِيثَٰقٌ", transliteration: "mīthāq", meaning: "Misak",  position: "medial",  verseRef: "2:27" },
+    { arabic: "حَدِيثٌ",  transliteration: "ḥadīth", meaning: "Söz",    position: "final",   verseRef: "4:87" },
   ],
+  // ج — connector
   jim: [
-    { arabic: "جَنَّةٌ", transliteration: "jannah", meaning: "Cennet", verseRef: "2:25" },
-    { arabic: "جَعَلَ", transliteration: "jaʿala", meaning: "Yarattı", verseRef: "2:22" },
-    { arabic: "جَمِيعًا", transliteration: "jamīʿan", meaning: "Hepsi", verseRef: "2:29" },
+    { arabic: "جَنَّةٌ", transliteration: "jannah", meaning: "Cennet",      position: "initial", verseRef: "2:25"  },
+    { arabic: "سَجَدَ",  transliteration: "sajada", meaning: "Secde etti",  position: "medial",  verseRef: "3:43"  },
+    { arabic: "حَجٌّ",   transliteration: "ḥajj",   meaning: "Hac",         position: "final",   verseRef: "2:197" },
   ],
+  // ح — connector; dikkat: ر bağlanmaz → الرحمن'de ح initial'dir, medial değil
   ha: [
-    { arabic: "ٱلرَّحْمَٰنِ", transliteration: "ar-raḥmāni", meaning: "Rahman", verseRef: "1:1" },
-    { arabic: "ٱلرَّحِيمِ", transliteration: "ar-raḥīmi", meaning: "Rahim", verseRef: "1:1" },
-    { arabic: "رَحِيمٌ", transliteration: "raḥīm", meaning: "Merhametli", verseRef: "2:37" },
+    { arabic: "حَقٌّ",     transliteration: "ḥaqq",    meaning: "Hak",   position: "initial", verseRef: "2:26" },
+    { arabic: "سَحَابٌ",   transliteration: "saḥāb",   meaning: "Bulut", position: "medial",  verseRef: "2:19" },
+    { arabic: "سَبَّحَ",   transliteration: "sabbaḥa", meaning: "Tesbih etti", position: "final", verseRef: "57:1" },
   ],
+  // خ — connector
   kha: [
-    { arabic: "خَلَقَ", transliteration: "khalaqa", meaning: "Yarattı", verseRef: "2:21" },
-    { arabic: "خَتَمَ", transliteration: "khatama", meaning: "Mühürledi", verseRef: "2:7" },
-    { arabic: "خَيْرٌ", transliteration: "khayr", meaning: "Hayır/İyi", verseRef: "2:54" },
+    { arabic: "خَلَقَ",  transliteration: "khalaqa", meaning: "Yarattı",   position: "initial", verseRef: "2:21"  },
+    { arabic: "نَخِيلٌ", transliteration: "nakhīl",  meaning: "Hurmalık",  position: "medial",  verseRef: "13:4"  },
+    { arabic: "نَسَخَ",  transliteration: "nasakha", meaning: "Neshetti",  position: "final",   verseRef: "2:106" },
   ],
+  // د — bağlanmaz; isolated: kelime başında / final: connector → د
   dal: [
-    { arabic: "دِينِ", transliteration: "dīni", meaning: "Din", verseRef: "1:4" },
-    { arabic: "دُعَآءَ", transliteration: "duʿāʾ", meaning: "Dua", verseRef: "2:186" },
-    { arabic: "دُنْيَا", transliteration: "dunyā", meaning: "Dünya", verseRef: "2:85" },
+    { arabic: "دِينِ", transliteration: "dīn",  meaning: "Din",      position: "isolated", verseRef: "1:4" },
+    { arabic: "هُدًى", transliteration: "hudā", meaning: "Hidayet",  position: "final",    verseRef: "2:2" },
   ],
+  // ذ — bağlanmaz
   dhal: [
-    { arabic: "ذَٰلِكَ", transliteration: "dhālika", meaning: "İşte bu", verseRef: "2:1" },
-    { arabic: "ٱلَّذِينَ", transliteration: "alladhīna", meaning: "O kimseler", verseRef: "1:7" },
-    { arabic: "ذِكْرَ", transliteration: "dhikra", meaning: "Zikir", verseRef: "2:152" },
+    { arabic: "ذَٰلِكَ", transliteration: "dhālika", meaning: "İşte bu", position: "isolated", verseRef: "2:2"  },
+    { arabic: "هَٰذَا",  transliteration: "hādhā",   meaning: "Bu",      position: "final",    verseRef: "2:35" },
   ],
+  // ر — bağlanmaz
   ra: [
-    { arabic: "ٱلرَّحْمَٰنِ", transliteration: "ar-raḥmān", meaning: "Rahman", verseRef: "1:1" },
-    { arabic: "رَبِّ", transliteration: "rabbi", meaning: "Rab", verseRef: "1:2" },
-    { arabic: "رَحْمَةً", transliteration: "raḥmatan", meaning: "Rahmet", verseRef: "2:157" },
+    { arabic: "رَبِّ",  transliteration: "rabb",  meaning: "Rab",    position: "isolated", verseRef: "1:2"  },
+    { arabic: "خَيْرٌ", transliteration: "khayr", meaning: "Hayır",  position: "final",    verseRef: "2:54" },
   ],
+  // ز — bağlanmaz
   zay: [
-    { arabic: "رِزْقًا", transliteration: "rizqan", meaning: "Rızık", verseRef: "2:22" },
-    { arabic: "زَيَّنَّا", transliteration: "zayyannā", meaning: "Süsledik", verseRef: "67:5" },
-    { arabic: "زَكَٰةَ", transliteration: "zakāh", meaning: "Zekat", verseRef: "2:43" },
+    { arabic: "زَكَوٰةَ", transliteration: "zakāh",  meaning: "Zekat",  position: "isolated", verseRef: "2:43"  },
+    { arabic: "عَزِيزٌ",  transliteration: "ʿazīz",  meaning: "Güçlü",  position: "final",    verseRef: "2:129" },
   ],
+  // س — connector
   sin: [
-    { arabic: "سَمِيعٌ", transliteration: "samīʿ", meaning: "İşiten", verseRef: "2:137" },
-    { arabic: "سَوَآءٌ", transliteration: "sawāʾ", meaning: "Eşit", verseRef: "2:6" },
-    { arabic: "سُبْحَٰنَ", transliteration: "subḥāna", meaning: "Tesbih", verseRef: "17:1" },
+    { arabic: "سَمِيعٌ",   transliteration: "samīʿ",  meaning: "İşiten", position: "initial", verseRef: "2:137" },
+    { arabic: "إِنْسَانٌ", transliteration: "insān",  meaning: "İnsan",  position: "medial",  verseRef: "95:4"  },
+    { arabic: "شَمْسٌ",    transliteration: "shams",  meaning: "Güneş",  position: "final",   verseRef: "91:1"  },
   ],
+  // ش — connector
   shin: [
-    { arabic: "شَيْءٍ", transliteration: "shayʾ", meaning: "Şey", verseRef: "2:20" },
-    { arabic: "شَهِيدٌ", transliteration: "shahīd", meaning: "Şahit", verseRef: "2:143" },
-    { arabic: "شُكْرًا", transliteration: "shukran", meaning: "Şükür", verseRef: "2:52" },
+    { arabic: "شَيْءٍ",   transliteration: "shayʾ",   meaning: "Şey",     position: "initial", verseRef: "2:20"  },
+    { arabic: "بَشِيرٌ",  transliteration: "bashīr",  meaning: "Müjdeci", position: "medial",  verseRef: "2:119" },
+    { arabic: "قُرَيْشٌ", transliteration: "Quraysh", meaning: "Kureyş",  position: "final",   verseRef: "106:1" },
   ],
+  // ص — connector
   sad: [
-    { arabic: "ٱلصِّرَٰطَ", transliteration: "aṣ-ṣirāṭa", meaning: "Yolu", verseRef: "1:6" },
-    { arabic: "صَٰدِقِينَ", transliteration: "ṣādiqīn", meaning: "Doğru sözlüler", verseRef: "2:23" },
-    { arabic: "صَلَوٰةَ", transliteration: "ṣalāh", meaning: "Namaz", verseRef: "2:3" },
+    { arabic: "صَلَوٰةَ",   transliteration: "ṣalāh",     meaning: "Namaz",       position: "initial", verseRef: "2:3"   },
+    { arabic: "ٱلصِّرَٰطَ", transliteration: "aṣ-ṣirāṭ",  meaning: "Yol",         position: "medial",  verseRef: "1:6"   },
+    { arabic: "حَرِيصٌ",    transliteration: "ḥarīṣ",     meaning: "Çok isteyen", position: "final",   verseRef: "9:128" },
   ],
+  // ض — connector
   dad: [
-    { arabic: "ٱلضَّآلِّينَ", transliteration: "aḍ-ḍāllīn", meaning: "Sapıtanlar", verseRef: "1:7" },
-    { arabic: "ضَرَبَ", transliteration: "ḍaraba", meaning: "Vurdu/Örnek verdi", verseRef: "2:26" },
-    { arabic: "ضَعِيفًا", transliteration: "ḍaʿīf", meaning: "Zayıf", verseRef: "4:28" },
+    { arabic: "ضَرَبَ",        transliteration: "ḍaraba",     meaning: "Vurdu",       position: "initial", verseRef: "2:26" },
+    { arabic: "ٱلضَّآلِّينَ", transliteration: "aḍ-ḍāllīn",  meaning: "Sapıtanlar",  position: "medial",  verseRef: "1:7"  },
+    { arabic: "نَقَضَ",        transliteration: "naqaḍa",     meaning: "Bozdu",       position: "final",   verseRef: "2:27" },
   ],
+  // ط — connector
   taa: [
-    { arabic: "طَيِّبًا", transliteration: "ṭayyiban", meaning: "Hoş/Helal", verseRef: "2:57" },
-    { arabic: "ٱلطَّيِّبَٰتِ", transliteration: "aṭ-ṭayyibāt", meaning: "Temizler", verseRef: "2:168" },
-    { arabic: "طُورِ", transliteration: "ṭūr", meaning: "Tur (dağı)", verseRef: "2:63" },
+    { arabic: "طَيِّبًا",      transliteration: "ṭayyib",       meaning: "Helal/Hoş", position: "initial", verseRef: "2:57"  },
+    { arabic: "ٱلطَّيِّبَٰتِ", transliteration: "aṭ-ṭayyibāt", meaning: "Temizler",  position: "medial",  verseRef: "2:168" },
+    { arabic: "بَسَطَ",        transliteration: "basaṭa",       meaning: "Uzattı",    position: "final",   verseRef: "2:245" },
   ],
+  // ظ — connector
   dhaa: [
-    { arabic: "ظَٰلِمِينَ", transliteration: "ẓālimīn", meaning: "Zalimler", verseRef: "2:35" },
-    { arabic: "ظَنَّ", transliteration: "ẓanna", meaning: "Zannetti", verseRef: "2:46" },
-    { arabic: "عَظِيمٌ", transliteration: "ʿaẓīm", meaning: "Büyük", verseRef: "2:49" },
+    { arabic: "ظَٰلِمِينَ", transliteration: "ẓālimīn", meaning: "Zalimler",   position: "initial", verseRef: "2:35"  },
+    { arabic: "عَظِيمٌ",   transliteration: "ʿaẓīm",   meaning: "Büyük",      position: "medial",  verseRef: "2:49"  },
+    { arabic: "حَفِيظٌ",   transliteration: "ḥafīẓ",   meaning: "Koruyucu",   position: "final",   verseRef: "11:57" },
   ],
+  // ع — connector
   ayn: [
-    { arabic: "عَٰلَمِينَ", transliteration: "ʿālamīn", meaning: "Alemler", verseRef: "1:2" },
-    { arabic: "عَلِيمٌ", transliteration: "ʿalīm", meaning: "Bilen", verseRef: "2:29" },
-    { arabic: "عَبَدَ", transliteration: "ʿabada", meaning: "İbadet etti", verseRef: "1:5" },
+    { arabic: "عَٰلَمِينَ", transliteration: "ʿālamīn", meaning: "Alemler", position: "initial", verseRef: "1:2"  },
+    { arabic: "نِعْمَةٌ",   transliteration: "niʿmah",  meaning: "Nimet",   position: "medial",  verseRef: "2:211"},
+    { arabic: "جَمِيعٌ",   transliteration: "jamīʿ",   meaning: "Hepsi",   position: "final",   verseRef: "2:29" },
   ],
+  // غ — connector
   ghayn: [
-    { arabic: "غَيْرِ", transliteration: "ghayri", meaning: "Başkasının", verseRef: "1:7" },
-    { arabic: "مَغْضُوبِ", transliteration: "maghḍūb", meaning: "Gazaba uğramış", verseRef: "1:7" },
-    { arabic: "غَفُورٌ", transliteration: "ghafūr", meaning: "Bağışlayan", verseRef: "2:173" },
+    { arabic: "غَيْرِ",    transliteration: "ghayri",   meaning: "Başka",             position: "initial", verseRef: "1:7"   },
+    { arabic: "مَغْضُوبِ", transliteration: "maghḍūb",  meaning: "Gazaba uğramış",    position: "medial",  verseRef: "1:7"   },
+    { arabic: "مَبْلَغٌ",  transliteration: "mablagha", meaning: "Ulaşma noktası",    position: "final",   verseRef: "18:60" },
   ],
+  // ف — connector; dikkat: فِيهَا'da ف initial'dir (kelime başı), medial değil
   fa: [
-    { arabic: "فَاطِرِ", transliteration: "fāṭir", meaning: "Yaratan", verseRef: "12:101" },
-    { arabic: "فِيهَا", transliteration: "fīhā", meaning: "İçinde", verseRef: "2:25" },
-    { arabic: "فُرْقَانَ", transliteration: "furqān", meaning: "Furkan", verseRef: "2:53" },
+    { arabic: "فَاطِرِ",    transliteration: "fāṭir",    meaning: "Yaratan",    position: "initial", verseRef: "12:101" },
+    { arabic: "مُفْلِحُونَ", transliteration: "mufliḥūn", meaning: "Kurtulanlar", position: "medial", verseRef: "2:5"    },
+    { arabic: "كَشَفَ",     transliteration: "kashafa",  meaning: "Kaldırdı",   position: "final",   verseRef: "7:134"  },
   ],
+  // ق — connector
   qaf: [
-    { arabic: "قُلْ", transliteration: "qul", meaning: "De ki", verseRef: "112:1" },
-    { arabic: "قِبْلَةً", transliteration: "qiblatan", meaning: "Kıble", verseRef: "2:142" },
-    { arabic: "قُرْءَانَ", transliteration: "qurʾān", meaning: "Kuran", verseRef: "2:185" },
+    { arabic: "قُلْ",       transliteration: "qul",      meaning: "De ki",          position: "initial", verseRef: "112:1" },
+    { arabic: "مُتَّقِينَ", transliteration: "muttaqīn", meaning: "Takva sahipleri", position: "medial", verseRef: "2:2"   },
+    { arabic: "حَقٌّ",      transliteration: "ḥaqq",     meaning: "Hak",            position: "final",   verseRef: "2:26"  },
   ],
+  // ك — connector
   kaf: [
-    { arabic: "كِتَٰبُ", transliteration: "kitāb", meaning: "Kitap", verseRef: "2:2" },
-    { arabic: "كُفُّوًا", transliteration: "kufuwan", meaning: "Denk", verseRef: "112:4" },
-    { arabic: "كَرِيمٌ", transliteration: "karīm", meaning: "Kerim", verseRef: "27:40" },
+    { arabic: "كِتَابٌ", transliteration: "kitāb",  meaning: "Kitap",    position: "initial", verseRef: "2:2"  },
+    { arabic: "شَكَرَ",  transliteration: "shakara", meaning: "Şükretti", position: "medial",  verseRef: "2:52" },
+    { arabic: "مَلِكٌ",  transliteration: "malik",  meaning: "Kral",     position: "final",   verseRef: "1:4"  },
   ],
+  // ل — connector
   lam: [
-    { arabic: "لِلَّهِ", transliteration: "lillāhi", meaning: "Allah'a", verseRef: "1:2" },
-    { arabic: "لَا إِلَٰهَ", transliteration: "lā ilāha", meaning: "İlah yok", verseRef: "2:163" },
-    { arabic: "لَيْلَةِ", transliteration: "laylati", meaning: "Geceye", verseRef: "97:1" },
+    { arabic: "لِلَّهِ", transliteration: "lillāhi", meaning: "Allah'a", position: "initial", verseRef: "1:2"   },
+    { arabic: "عَلِيمٌ", transliteration: "ʿalīm",   meaning: "Bilen",   position: "medial",  verseRef: "2:29"  },
+    { arabic: "قُلْ",    transliteration: "qul",     meaning: "De ki",   position: "final",   verseRef: "112:1" },
   ],
+  // م — connector
   mim: [
-    { arabic: "مَٰلِكِ", transliteration: "māliki", meaning: "Sahibi", verseRef: "1:4" },
-    { arabic: "مُسْتَقِيمَ", transliteration: "mustaqīm", meaning: "Doğru yol", verseRef: "1:6" },
-    { arabic: "مُتَّقِينَ", transliteration: "muttaqīn", meaning: "Takva sahipleri", verseRef: "2:2" },
+    { arabic: "مَٰلِكِ",    transliteration: "mālik",   meaning: "Sahibi",    position: "initial", verseRef: "1:4"  },
+    { arabic: "حِكْمَةٌ",   transliteration: "ḥikma",   meaning: "Hikmet",    position: "medial",  verseRef: "2:129"},
+    { arabic: "مُسْتَقِيمَ", transliteration: "mustaqīm", meaning: "Doğru yol", position: "final",  verseRef: "1:6"  },
   ],
+  // ن — connector
   nun: [
-    { arabic: "نَعْبُدُ", transliteration: "naʿbudu", meaning: "İbadet ederiz", verseRef: "1:5" },
-    { arabic: "نَسْتَعِينُ", transliteration: "nastaʿīn", meaning: "Yardım dileriz", verseRef: "1:5" },
-    { arabic: "نُورٌ", transliteration: "nūr", meaning: "Nur/Işık", verseRef: "24:35" },
+    { arabic: "نَعْبُدُ", transliteration: "naʿbudu", meaning: "İbadet ederiz", position: "initial", verseRef: "1:5" },
+    { arabic: "مِنَّا",   transliteration: "minnā",   meaning: "Bizden",        position: "medial",  verseRef: "2:32"},
+    { arabic: "مُؤْمِنٌ", transliteration: "muʾmin",  meaning: "Mümin",         position: "final",   verseRef: "2:8" },
   ],
+  // ه — connector
   haa: [
-    { arabic: "هُوَ", transliteration: "huwa", meaning: "O", verseRef: "112:1" },
-    { arabic: "هُدًى", transliteration: "hudan", meaning: "Hidayet", verseRef: "2:2" },
-    { arabic: "هَٰذَا", transliteration: "hādhā", meaning: "Bu", verseRef: "2:35" },
+    { arabic: "هُوَ",     transliteration: "huwa",     meaning: "O",          position: "initial", verseRef: "112:1" },
+    { arabic: "جَهَنَّمُ", transliteration: "jahannam", meaning: "Cehennem",   position: "medial",  verseRef: "2:206" },
+    { arabic: "ٱللَّهِ",  transliteration: "Allāhi",   meaning: "Allah'ın",   position: "final",   verseRef: "1:1"   },
   ],
+  // و — bağlanmaz; isolated: kelime başında / final: connector → و
   waw: [
-    { arabic: "وَلَا", transliteration: "walā", meaning: "Ve ne", verseRef: "1:7" },
-    { arabic: "وَرَحْمَةٌ", transliteration: "wa-raḥmah", meaning: "Ve rahmet", verseRef: "2:157" },
-    { arabic: "وَٱلْعَصْرِ", transliteration: "wal-ʿaṣr", meaning: "Asra yemin", verseRef: "103:1" },
+    { arabic: "وَلَا",   transliteration: "walā",   meaning: "Ve de",   position: "isolated", verseRef: "1:7"   },
+    { arabic: "تَقْوَى", transliteration: "taqwā",  meaning: "Takva",   position: "final",    verseRef: "2:197" },
   ],
+  // ي — connector
   ya: [
-    { arabic: "يَوْمِ", transliteration: "yawmi", meaning: "Günü", verseRef: "1:4" },
-    { arabic: "إِيَّاكَ", transliteration: "iyyāka", meaning: "Sana", verseRef: "1:5" },
-    { arabic: "يُؤْمِنُونَ", transliteration: "yuʾminūn", meaning: "İman ederler", verseRef: "2:3" },
+    { arabic: "يَوْمِ",  transliteration: "yawm",   meaning: "Günü",       position: "initial", verseRef: "1:4"   },
+    { arabic: "رَحِيمٌ", transliteration: "raḥīm",  meaning: "Merhametli", position: "medial",  verseRef: "1:1"   },
+    { arabic: "وَلِيٌّ", transliteration: "walī",   meaning: "Dost",       position: "final",   verseRef: "2:257" },
   ],
 };

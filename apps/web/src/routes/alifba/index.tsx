@@ -1,11 +1,12 @@
 /**
  * Elifba ana sayfası — /alifba
- * Harf ızgarası + modül giriş kartları (sesli quiz, form quizi, sınav, oyunlar).
+ * Harf ızgarası + harf formları referansı + sıradaki adım.
  */
 
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { ARABIC_LETTERS } from "~/lib/kids-constants";
+import { ARABIC_LETTERS, LETTER_EXAMPLES, getLetterForms, NON_CONNECTORS } from "~/lib/kids-constants";
+import type { FormPosition } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore, computeAlifbaStats } from "~/stores/alifba.store";
 import { useShallow } from "zustand/react/shallow";
@@ -13,6 +14,184 @@ import { useShallow } from "zustand/react/shallow";
 export const Route = createFileRoute("/alifba/")({
   component: AlifbaIndexPage,
 });
+
+// Sütun sırası: soldan sağa → Sonda | Ortada | Başta | Tek başına
+const FORM_COLS: { label: string; key: FormPosition; formFn: (f: ReturnType<typeof getLetterForms>) => string }[] = [
+  { label: "Sonda",      key: "final",    formFn: (f) => f.final    },
+  { label: "Ortada",     key: "medial",   formFn: (f) => f.medial   },
+  { label: "Başta",      key: "initial",  formFn: (f) => f.initial  },
+  { label: "Tek başına", key: "isolated", formFn: (f) => f.isolated },
+];
+
+function LetterFormsSection() {
+  return (
+    <section className="mt-8">
+      <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-0.5">Harf Formları</h2>
+      <p className="text-xs text-[var(--color-text-secondary)] mb-3">
+        Her harf, kelime içindeki konumuna göre farklı yazılır
+      </p>
+
+      {/* Kolon başlıkları */}
+      <div className="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] px-3 mb-1">
+        <div />
+        {FORM_COLS.map(({ label }) => (
+          <div key={label} className="text-[9px] text-center text-[var(--color-text-secondary)] font-medium uppercase tracking-wide">
+            {label}
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-xl border border-[var(--color-border)] overflow-hidden">
+        {ARABIC_LETTERS.map((letter, i) => {
+          const forms = getLetterForms(letter.arabic);
+          const isNonConnector = NON_CONNECTORS.has(letter.arabic);
+          const examples = LETTER_EXAMPLES[letter.id] ?? [];
+
+          return (
+            <Link
+              key={letter.id}
+              to="/alifba/$letterId"
+              params={{ letterId: letter.id }}
+              className={`block hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] transition-colors ${
+                i < ARABIC_LETTERS.length - 1 ? "border-b border-[var(--color-border)]" : ""
+              }`}
+            >
+              {/* Harf + formlar */}
+              <div className="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] items-center px-3 py-2">
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="text-[10px] text-[var(--color-text-secondary)] leading-none">{letter.name}</span>
+                  <span
+                    className="text-lg leading-none text-[var(--color-text-primary)]"
+                    style={{ fontFamily: "var(--font-arabic)" }}
+                  >
+                    {letter.arabic}
+                  </span>
+                </div>
+
+                {FORM_COLS.map(({ key, formFn }) => {
+                  const isDisabled = isNonConnector && (key === "initial" || key === "medial");
+                  const form = formFn(forms);
+                  return (
+                    <div key={key} className="flex items-center justify-center">
+                      <span
+                        className={`text-xl leading-none transition-opacity ${
+                          isDisabled ? "text-[var(--color-text-secondary)]/30" : "text-[var(--color-text-primary)]"
+                        }`}
+                        style={{ fontFamily: "var(--font-arabic)" }}
+                        dir="rtl"
+                        title={isDisabled ? `${letter.name} bağlanmaz` : undefined}
+                      >
+                        {isDisabled ? letter.arabic : form}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Örnek kelimeler — her sütunun altında hizalı */}
+              {examples.length > 0 && (
+                <div className="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] px-3 pb-2">
+                  <div />
+                  {FORM_COLS.map(({ key }) => {
+                    const ex = examples.find((e) => e.position === key);
+                    if (!ex) return <div key={key} />;
+                    return (
+                      <div key={key} className="flex flex-col items-center gap-0.5 text-center">
+                        <span
+                          className="text-sm text-[var(--color-accent)]"
+                          style={{ fontFamily: "var(--font-arabic)" }}
+                          dir="rtl"
+                        >
+                          {ex.arabic}
+                        </span>
+                        <span className="text-[10px] text-[var(--color-text-secondary)] leading-tight">
+                          {ex.meaning}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+
+      <p className="text-[10px] text-[var(--color-text-secondary)] mt-2 px-1">
+        * Soldan bağlanmayan harflerde (ا، د، ذ، ر، ز، و) başta ve ortada formu yoktur.
+      </p>
+    </section>
+  );
+}
+
+function NextStepsSection() {
+  return (
+    <section className="mt-8">
+      <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">Sıradaki Adım</h2>
+      <p className="text-xs text-[var(--color-text-secondary)] mb-3">Harfleri öğrendikten sonra ne yapmalısın?</p>
+
+      <div className="space-y-2">
+        <Link
+          to="/qaida"
+          className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
+        >
+          <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0 text-[var(--color-accent)]">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">Kaide ile Devam Et</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">10 adımlı okuma müfredatı</p>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-border)] shrink-0">
+            <path d="M5 3l4 4-4 4" />
+          </svg>
+        </Link>
+
+        <Link
+          to="/games"
+          className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
+        >
+          <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0 text-[var(--color-accent)]">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <rect x="2" y="6" width="20" height="12" rx="4" />
+              <path d="M7 12h4M9 10v4" />
+              <circle cx="16" cy="12" r="1" fill="currentColor" />
+              <circle cx="19" cy="12" r="1" fill="currentColor" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">Elifba Oyunları</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">Sesli quiz, form quizi ve mini oyunlar</p>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-border)] shrink-0">
+            <path d="M5 3l4 4-4 4" />
+          </svg>
+        </Link>
+
+        <Link
+          to="/surah/$surahSlug"
+          params={{ surahSlug: "al-fatiha" }}
+          search={{ ayah: undefined }}
+          className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
+        >
+          <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0 text-[var(--color-accent)]">
+            <span className="text-base leading-none" style={{ fontFamily: "var(--font-arabic)" }}>ا</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">Kuran'ı Oku</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">Fatiha'dan başla</p>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-border)] shrink-0">
+            <path d="M5 3l4 4-4 4" />
+          </svg>
+        </Link>
+      </div>
+    </section>
+  );
+}
 
 function AlifbaIndexPage() {
   const { t } = useTranslation();
@@ -29,65 +208,6 @@ function AlifbaIndexPage() {
     () => computeAlifbaStats({ progress, streak, examHistory, gameHighScores, totalDays: 0, lastStudyDate: null }),
     [progress, streak, examHistory, gameHighScores],
   );
-
-  const modules = [
-    {
-      id: "voice-quiz",
-      to: "/alifba/quiz/voice" as const,
-      label: t.alifba.voiceQuiz,
-      desc: t.alifba.voiceQuizDesc,
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 2h6v12a3 3 0 0 1-6 0V2z" />
-          <path d="M5 10a7 7 0 0 0 14 0" />
-          <path d="M12 17v4" />
-          <path d="M8 21h8" />
-        </svg>
-      ),
-    },
-    {
-      id: "forms-quiz",
-      to: "/alifba/quiz/forms" as const,
-      label: t.alifba.formsQuiz,
-      desc: t.alifba.formsQuizDesc,
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="8" height="8" rx="2" />
-          <rect x="13" y="3" width="8" height="8" rx="2" />
-          <rect x="3" y="13" width="8" height="8" rx="2" />
-          <rect x="13" y="13" width="8" height="8" rx="2" />
-        </svg>
-      ),
-    },
-    {
-      id: "exam",
-      to: "/alifba/exam" as const,
-      label: t.alifba.mixedExam,
-      desc: t.alifba.mixedExamDesc,
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 12l2 2 4-4" />
-          <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-        </svg>
-      ),
-      badge: stats.bestExam != null ? `${stats.bestExam}/28` : undefined,
-    },
-    {
-      id: "games",
-      to: "/alifba/games" as const,
-      label: t.alifba.games,
-      desc: t.alifba.gamesDesc,
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="6" width="20" height="12" rx="4" />
-          <path d="M7 12h4" />
-          <path d="M9 10v4" />
-          <circle cx="16" cy="12" r="1" fill="currentColor" />
-          <circle cx="19" cy="12" r="1" fill="currentColor" />
-        </svg>
-      ),
-    },
-  ];
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
@@ -111,30 +231,6 @@ function AlifbaIndexPage() {
             <p className="text-[10px] text-[var(--color-text-secondary)]">{t.alifba.streak}</p>
           </div>
         </div>
-      </div>
-
-      {/* Modül kartları */}
-      <div className="grid grid-cols-2 gap-2 mb-5">
-        {modules.map((mod) => (
-          <Link
-            key={mod.id}
-            to={mod.to}
-            className="flex flex-col gap-2 p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors active:scale-[0.98]"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--color-accent)]">{mod.icon}</span>
-              {mod.badge && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium">
-                  {mod.badge}
-                </span>
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-medium">{mod.label}</p>
-              <p className="text-[11px] text-[var(--color-text-secondary)] leading-snug mt-0.5">{mod.desc}</p>
-            </div>
-          </Link>
-        ))}
       </div>
 
       {/* Harf ızgarası */}
@@ -166,12 +262,10 @@ function AlifbaIndexPage() {
                   : "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
               }}
             >
-              {/* Sıra numarası */}
               <span className="absolute top-2 left-2 text-[8px] text-[var(--color-text-secondary)]/40 leading-none font-mono select-none">
                 {letter.order}
               </span>
 
-              {/* Ustalaşıldı rozeti */}
               {isMastered && (
                 <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[var(--color-accent)] flex items-center justify-center">
                   <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
@@ -180,7 +274,6 @@ function AlifbaIndexPage() {
                 </span>
               )}
 
-              {/* Harf — kart üst kısmını dolduruyor */}
               <div className="flex-1 flex items-center justify-center">
                 <span
                   className={`text-4xl leading-none select-none ${isMastered ? "text-[var(--color-accent)]" : ""}`}
@@ -190,25 +283,24 @@ function AlifbaIndexPage() {
                 </span>
               </div>
 
-              {/* Alt şerit — descender'ları örter, ismi içinde taşır */}
-              <div className={`shrink-0 w-full flex items-center justify-center py-1 border-t ${
+              <div className={`shrink-0 w-full flex items-center justify-center py-1 border-t-2 ${
                 isMastered
-                  ? "bg-[var(--color-accent)]/12 border-[var(--color-accent)]/20"
-                  : "bg-[var(--color-surface)] border-[var(--color-border)]/50"
+                  ? "bg-[var(--color-accent)]/12 border-[var(--color-accent)]/40"
+                  : isSeen
+                  ? "bg-[var(--color-surface)] border-[var(--color-accent)]/60"
+                  : "bg-[var(--color-surface)] border-transparent"
               }`}>
                 <span className="text-[9px] font-medium tracking-wide uppercase text-[var(--color-text-secondary)] leading-none select-none">
                   {letter.name}
                 </span>
               </div>
-
-              {/* Görüldü çizgisi */}
-              {isSeen && !isMastered && (
-                <span className="absolute bottom-0 inset-x-0 h-[2px] bg-[var(--color-accent)]/60" />
-              )}
             </Link>
           );
         })}
       </div>
+
+      <LetterFormsSection />
+      <NextStepsSection />
     </div>
   );
 }

@@ -103,6 +103,8 @@ export const tr = {
     appsDesc: "Hatim, tefsir ve daha fazlası",
     games: "Oyunlar",
     gamesDesc: "Kelime, sure tanıma ve daha fazlası",
+    hatim: "Hatim Grubu",
+    hatimDesc: "Grup oluştur, katıl ve birlikte hatim tamamla",
     contextual: "Bağlamsal Açıklamalar",
     contextualDesc: "Yanlış anlaşılan ayetler için tarihsel bağlam ve akademik yanıtlar",
     rootSearch: "Kök Ara",

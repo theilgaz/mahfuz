@@ -3,9 +3,11 @@
  */
 
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getVerseGuessQuestion } from "~/lib/game-service";
+import { submitScore } from "~/lib/score-service";
+import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 
 // ── Route ────────────────────────────────────────────────
 
@@ -14,17 +16,20 @@ export const Route = createFileRoute("/games/surah-guess")({
 });
 
 type GameState = "playing" | "correct" | "wrong";
+type Screen = "setup" | "game";
 
-function SurahGuessGame() {
+function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => void }) {
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
+  const submittedScore = useRef(0);
+  const sessionStart = useRef(Date.now());
   const [refreshKey, setRefreshKey] = useState(0);
   const [gameState, setGameState] = useState<GameState>("playing");
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const { data: question, isLoading } = useQuery({
-    queryKey: ["surah-guess", refreshKey],
-    queryFn: () => getVerseGuessQuestion(),
+    queryKey: ["surah-guess", refreshKey, surahIds],
+    queryFn: () => getVerseGuessQuestion({ data: { surahIds } }),
     staleTime: 0,
   });
 
@@ -46,6 +51,13 @@ function SurahGuessGame() {
     setRefreshKey((k) => k + 1);
   };
 
+  // Doğru cevapta 3s sonra otomatik ilerle
+  useEffect(() => {
+    if (gameState !== "correct") return;
+    const t = setTimeout(nextRound, 3000);
+    return () => clearTimeout(t);
+  }, [gameState]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (isLoading || !question) {
     return (
       <div className="max-w-lg mx-auto px-4 py-10 text-center">
@@ -59,11 +71,21 @@ function SurahGuessGame() {
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Link to="/games" className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
+        <button
+          onClick={() => {
+            if (score > submittedScore.current) {
+              submittedScore.current = score;
+              submitScore({ data: { gameId: "surah-guess", score, durationMs: Date.now() - sessionStart.current } }).catch(() => {});
+            }
+            onSetup();
+          }}
+          className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+          title="Sure seçimini değiştir"
+        >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-        </Link>
+        </button>
         <div className="text-center">
           <p className="text-xs text-[var(--color-text-secondary)]">Sure Tanıma</p>
           <p className="text-sm font-bold text-[var(--color-accent)]">Soru {round}</p>
@@ -119,16 +141,18 @@ function SurahGuessGame() {
         })}
       </div>
 
-      {/* Sonuç */}
-      {gameState !== "playing" && (
+      {gameState === "correct" && (
+        <div className="px-4 py-3 rounded-xl text-center bg-green-50 border border-green-100">
+          <p className="text-sm font-semibold text-green-700">✓ Doğru! +10 puan</p>
+          <p className="text-xs text-green-600 mt-1">Sonraki soru geliyor…</p>
+        </div>
+      )}
+
+      {gameState === "wrong" && (
         <>
-          <div className={`px-4 py-3 rounded-xl mb-4 text-center ${
-            gameState === "correct" ? "bg-green-50 border border-green-100" : "bg-red-50 border border-red-100"
-          }`}>
-            <p className={`text-sm font-semibold ${gameState === "correct" ? "text-green-700" : "text-red-600"}`}>
-              {gameState === "correct"
-                ? "✓ Doğru! +10 puan"
-                : `✗ Yanlış. Bu ayet "${question.correctSurahName}" suresinden`}
+          <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3">
+            <p className="text-sm font-semibold text-red-600">
+              ✗ Yanlış. Bu ayet &ldquo;{question.correctSurahName}&rdquo; suresinden
             </p>
           </div>
           <button
@@ -141,4 +165,20 @@ function SurahGuessGame() {
       )}
     </div>
   );
+}
+
+function SurahGuessGame() {
+  const [screen, setScreen] = useState<Screen>("setup");
+  const [surahIds, setSurahIds] = useState<number[]>([]);
+
+  const handleStart = (ids: number[]) => {
+    setSurahIds(ids);
+    setScreen("game");
+  };
+
+  if (screen === "setup") {
+    return <SurahPickerScreen gameTitle="Sure Tanıma" onStart={handleStart} />;
+  }
+
+  return <GameScreen surahIds={surahIds} onSetup={() => setScreen("setup")} />;
 }
