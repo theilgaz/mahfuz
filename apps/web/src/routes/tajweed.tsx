@@ -2,8 +2,9 @@
  * Tecvid Öğrenme — 16 temel kural, örnekli, interaktif.
  */
 
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/tajweed")({
   component: TajweedPage,
@@ -14,310 +15,432 @@ interface TajweedRule {
   name: string;
   arabic: string;
   definition: string;
-  color: string;
+  accent: string; // hex color
   examples: { arabic: string; highlight: string; transliteration: string }[];
   conditions: string[];
   duration?: string;
 }
 
-const TAJWEED_RULES: TajweedRule[] = [
+type T = ReturnType<typeof useTranslation>["t"];
+
+const STATIC_RULE_DATA: {
+  id: string;
+  arabic: string;
+  accent: string;
+  examples: { arabic: string; highlight: string; transliteration: string }[];
+  duration?: string;
+  nameKey: keyof T["tajweedPage"];
+  defKey: keyof T["tajweedPage"];
+  condsKey: keyof T["tajweedPage"];
+}[] = [
   {
     id: "madd-tabii",
-    name: "Med-i Tabii",
     arabic: "مَدُّ طَبِيعِي",
-    definition: "Uzatma harflerinin (ا و ي) olduğu yerde 2 elif (1 elif = 1 hareke süresi) uzatılır.",
-    color: "bg-blue-100 text-blue-700 border-blue-200",
+    accent: "#7C9CBF",
     examples: [
       { arabic: "قَالَ", highlight: "ا", transliteration: "kāle" },
       { arabic: "يَقُولُ", highlight: "و", transliteration: "yekūlu" },
     ],
-    conditions: ["Uzatma harfi med harfi olmalı", "Akabinde hemze veya sükun gelmemeli"],
-    duration: "2 hareke",
+    duration: "2 haraka",
+    nameKey: "maddTabiiName",
+    defKey: "maddTabiiDef",
+    condsKey: "maddTabiiConds",
   },
   {
     id: "madd-muttasil",
-    name: "Med-i Muttasıl",
     arabic: "مَدُّ مُتَّصِل",
-    definition: "Med harfinden sonra aynı kelimede hemze gelirse 4-5 hareke uzatılır.",
-    color: "bg-purple-100 text-purple-700 border-purple-200",
+    accent: "#E05555",
     examples: [
       { arabic: "جَاءَ", highlight: "اء", transliteration: "cāe" },
       { arabic: "السَّمَاءِ", highlight: "اء", transliteration: "es-semāi" },
     ],
-    conditions: ["Med harfi ve hemze aynı kelimede", "4 veya 5 hareke"],
-    duration: "4-5 hareke",
+    duration: "4-5 haraka",
+    nameKey: "maddMuttasilName",
+    defKey: "maddMuttasilDef",
+    condsKey: "maddMuttasilConds",
   },
   {
     id: "madd-munfasil",
-    name: "Med-i Munfasıl",
     arabic: "مَدُّ مُنْفَصِل",
-    definition: "Birinci kelimenin sonunda med harfi, ikinci kelimenin başında hemze varsa 4-5 hareke.",
-    color: "bg-violet-100 text-violet-700 border-violet-200",
+    accent: "#C0602A",
     examples: [
       { arabic: "إِنَّا أَنْزَلْنَاهُ", highlight: "ا أ", transliteration: "innā enzelnāhu" },
     ],
-    conditions: ["Med harfi ve hemze ayrı kelimelerde", "Vasl halinde 4-5 hareke"],
-    duration: "4-5 hareke",
-  },
-  {
-    id: "idgam",
-    name: "İdgam",
-    arabic: "إِدْغَام",
-    definition: "Tenvinli harften veya nun-i sakineden sonra (ي ر م ل و ن) harfleri gelirse bu harflere katmak.",
-    color: "bg-green-100 text-green-700 border-green-200",
-    examples: [
-      { arabic: "مِن رَّبِّهِمْ", highlight: "نر", transliteration: "mir-rabbihim" },
-      { arabic: "يَوْمَئِذٍ نَّاعِمَةٌ", highlight: "نن", transliteration: "nāime" },
-    ],
-    conditions: ["Nun-i sakin veya tenvin", "Sonra idgam harfi (ينملو) gelir"],
-  },
-  {
-    id: "ihfa",
-    name: "İhfa",
-    arabic: "إِخْفَاء",
-    definition: "Nun-i sakin veya tenvinle ihfa harfleri arasında; ne tam nun ne de tam idgam — arası bir ses.",
-    color: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    examples: [
-      { arabic: "مِن قَبْلِ", highlight: "نق", transliteration: "min kable" },
-      { arabic: "عَنصُرٍ", highlight: "نص", transliteration: "anṣur" },
-    ],
-    conditions: ["15 ihfa harfi", "Günne (genizleşme) ile okunur"],
-  },
-  {
-    id: "izhar",
-    name: "İzhar",
-    arabic: "إِظْهَار",
-    definition: "Nun-i sakin veya tenvinle boğaz harfleri (ء هـ ع غ ح خ) gelirse açık okunur.",
-    color: "bg-orange-100 text-orange-700 border-orange-200",
-    examples: [
-      { arabic: "مَنْ عَمِلَ", highlight: "نع", transliteration: "men amile" },
-      { arabic: "أَنْهَارٌ", highlight: "نه", transliteration: "enhārun" },
-    ],
-    conditions: ["6 boğaz harfi", "Günnesiz, açık okuma"],
-  },
-  {
-    id: "iqlab",
-    name: "İklab",
-    arabic: "إِقْلاَب",
-    definition: "Nun-i sakin veya tenvinle (ب) gelirse نُ → م gibi çevirip idgam et.",
-    color: "bg-red-100 text-red-700 border-red-200",
-    examples: [
-      { arabic: "مِنۢ بَعْدِ", highlight: "نب", transliteration: "mim-badi" },
-      { arabic: "أَنبِئُونِي", highlight: "نب", transliteration: "embiūnī" },
-    ],
-    conditions: ["Yalnızca (ب) harfinde", "م sesi çıkar, günne yapılır"],
-  },
-  {
-    id: "qalqala",
-    name: "Kalkalah",
-    arabic: "قَلْقَلَة",
-    definition: "Sükun halinde (ق ط ب ج د) harflerine güçlü titreşim/sıçrama ses verilir.",
-    color: "bg-teal-100 text-teal-700 border-teal-200",
-    examples: [
-      { arabic: "يَلْهَثْ ذَّٰلِكَ", highlight: "ث", transliteration: "yelheẕ żālike" },
-      { arabic: "قُلْ أَعُوذُ", highlight: "ل", transliteration: "kul euzu" },
-    ],
-    conditions: ["5 kalkalah harfi: قطبجد", "Sükun veya vakıf halinde"],
-  },
-  {
-    id: "shaddah-ghunnah",
-    name: "Şedde-i Günne",
-    arabic: "شَدَّةُ الغُنَّة",
-    definition: "Şeddeli م ve ن harflerine günne (2 hareke genizleşme) yapılır.",
-    color: "bg-pink-100 text-pink-700 border-pink-200",
-    examples: [
-      { arabic: "إِنَّ", highlight: "نّ", transliteration: "inne" },
-      { arabic: "ثُمَّ", highlight: "مّ", transliteration: "ṡümme" },
-    ],
-    conditions: ["Şeddeli م veya ن", "2 hareke günne"],
-    duration: "2 hareke",
-  },
-  {
-    id: "tafkhim",
-    name: "Tefhim",
-    arabic: "تَفْخِيم",
-    definition: "Kalın seslendirme — ر harfi, استعلاء harfleri (خ ص ض غ ط ق ظ) ve lam-i celale uygulanır.",
-    color: "bg-amber-100 text-amber-700 border-amber-200",
-    examples: [
-      { arabic: "اللَّهُ", highlight: "ل", transliteration: "allāhu" },
-      { arabic: "الصَّلَاةُ", highlight: "ص", transliteration: "eṣ-ṣalātu" },
-    ],
-    conditions: ["7 isti'la harfi", "Ağız arka kısmı kullanılır"],
-  },
-  {
-    id: "tarqiq",
-    name: "Terkik",
-    arabic: "تَرْقِيق",
-    definition: "İnce seslendirme — isti'la harfleri dışındakilere ve bazı ر durumlarına uygulanır.",
-    color: "bg-sky-100 text-sky-700 border-sky-200",
-    examples: [
-      { arabic: "رَحِيمٌ", highlight: "ر", transliteration: "rahīmun" },
-      { arabic: "بِسْمِ", highlight: "ب", transliteration: "bismi" },
-    ],
-    conditions: ["Fethalı ر çoğunlukla kalın", "Kesralı ر ince"],
-  },
-  {
-    id: "waqf-ibtida",
-    name: "Vakıf ve İbtida",
-    arabic: "وَقْف وَابْتِدَاء",
-    definition: "Vakıf: uygun yerde durmak. İbtida: uygun yerde başlamak. Manayı bozmadan durmak esastır.",
-    color: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    examples: [
-      { arabic: "لَا رَيْبَ فِيهِ", highlight: "ۛ", transliteration: "lā raybe fīhi" },
-    ],
-    conditions: ["مـ = gerekli vakıf", "ط = mutlak vakıf", "ج = caiz vakıf", "لا = vakıf yapma"],
-  },
-  {
-    id: "hamzatul-wasl",
-    name: "Hemze-i Vasl",
-    arabic: "هَمْزَةُ الوَصْل",
-    definition: "Kelimenin başındaki hemze, ortada okunurken düşer. Cümle başında okunur.",
-    color: "bg-indigo-100 text-indigo-700 border-indigo-200",
-    examples: [
-      { arabic: "اقْرَأْ بِاسْمِ", highlight: "ا ا", transliteration: "ikra' bismi" },
-    ],
-    conditions: ["Vasl: hemze düşer", "İbtida: hemze okunur"],
-  },
-  {
-    id: "idgam-mutajanisayn",
-    name: "İdgam-ı Mütecaniseyn",
-    arabic: "إِدْغَام مُتَجَانِسَيْن",
-    definition: "Mahreçleri farklı, sıfatları aynı iki harf yan yana gelince birincisi ikinciye katılır.",
-    color: "bg-rose-100 text-rose-700 border-rose-200",
-    examples: [
-      { arabic: "قَدْ تَبَيَّنَ", highlight: "دت", transliteration: "kat-tebeyyen" },
-      { arabic: "وَقَالَت طَّائِفَةٌ", highlight: "تط", transliteration: "wekālet-tāifetun" },
-    ],
-    conditions: ["د→ت، ت→ط، ث→ذ çiftleri", "İkinci harfe tam katma"],
+    duration: "4-5 haraka",
+    nameKey: "maddMunfasilName",
+    defKey: "maddMunfasilDef",
+    condsKey: "maddMunfasilConds",
   },
   {
     id: "madd-lazim",
-    name: "Med-i Lazım",
     arabic: "مَدُّ لاَزِم",
-    definition: "Med harfinden sonra sükun-u lazım (kalıcı sükun) gelince 6 hareke uzatılır.",
-    color: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200",
+    accent: "#8B2020",
     examples: [
       { arabic: "آلۤمۤ", highlight: "ل", transliteration: "elif lām mīm" },
       { arabic: "الۤمۤر", highlight: "ل", transliteration: "elif lām mīm rā" },
     ],
-    conditions: ["6 hareke — en uzun med", "Sure başı harflerinde"],
-    duration: "6 hareke",
+    duration: "6 haraka",
+    nameKey: "maddLazimName",
+    defKey: "maddLazimDef",
+    condsKey: "maddLazimConds",
+  },
+  {
+    id: "idgam",
+    arabic: "إِدْغَام",
+    accent: "#2E7D32",
+    examples: [
+      { arabic: "مِن رَّبِّهِمْ", highlight: "نر", transliteration: "mir-rabbihim" },
+      { arabic: "يَوْمَئِذٍ نَّاعِمَةٌ", highlight: "نن", transliteration: "nāime" },
+    ],
+    nameKey: "idgamName",
+    defKey: "idgamDef",
+    condsKey: "idgamConds",
+  },
+  {
+    id: "ihfa",
+    arabic: "إِخْفَاء",
+    accent: "#558B2F",
+    examples: [
+      { arabic: "مِن قَبْلِ", highlight: "نق", transliteration: "min kable" },
+      { arabic: "عَنصُرٍ", highlight: "نص", transliteration: "anṣur" },
+    ],
+    nameKey: "ihfaName",
+    defKey: "ihfaDef",
+    condsKey: "ihfaConds",
+  },
+  {
+    id: "izhar",
+    arabic: "إِظْهَار",
+    accent: "#5C6BC0",
+    examples: [
+      { arabic: "مَنْ عَمِلَ", highlight: "نع", transliteration: "men amile" },
+      { arabic: "أَنْهَارٌ", highlight: "نه", transliteration: "enhārun" },
+    ],
+    nameKey: "izharName",
+    defKey: "izharDef",
+    condsKey: "izharConds",
+  },
+  {
+    id: "iqlab",
+    arabic: "إِقْلاَب",
+    accent: "#00ACC1",
+    examples: [
+      { arabic: "مِنۢ بَعْدِ", highlight: "نب", transliteration: "mim-badi" },
+      { arabic: "أَنبِئُونِي", highlight: "نب", transliteration: "embiūnī" },
+    ],
+    nameKey: "iqlabName",
+    defKey: "iqlabDef",
+    condsKey: "iqlabConds",
+  },
+  {
+    id: "qalqala",
+    arabic: "قَلْقَلَة",
+    accent: "#1565C0",
+    examples: [
+      { arabic: "يَلْهَثْ ذَّٰلِكَ", highlight: "ث", transliteration: "yelheẕ żālike" },
+      { arabic: "قُلْ أَعُوذُ", highlight: "ل", transliteration: "kul euzu" },
+    ],
+    nameKey: "qalqalaName",
+    defKey: "qalqalaDef",
+    condsKey: "qalqalaConds",
+  },
+  {
+    id: "shaddah-ghunnah",
+    arabic: "شَدَّةُ الغُنَّة",
+    accent: "#AD1457",
+    examples: [
+      { arabic: "إِنَّ", highlight: "نّ", transliteration: "inne" },
+      { arabic: "ثُمَّ", highlight: "مّ", transliteration: "ṡümme" },
+    ],
+    duration: "2 haraka",
+    nameKey: "shaddahGhunnahName",
+    defKey: "shaddahGhunnahDef",
+    condsKey: "shaddahGhunnahConds",
+  },
+  {
+    id: "tafkhim",
+    arabic: "تَفْخِيم",
+    accent: "#E65100",
+    examples: [
+      { arabic: "اللَّهُ", highlight: "ل", transliteration: "allāhu" },
+      { arabic: "الصَّلَاةُ", highlight: "ص", transliteration: "eṣ-ṣalātu" },
+    ],
+    nameKey: "tafkhimName",
+    defKey: "tafkhimDef",
+    condsKey: "tafkhimConds",
+  },
+  {
+    id: "tarqiq",
+    arabic: "تَرْقِيق",
+    accent: "#00838F",
+    examples: [
+      { arabic: "رَحِيمٌ", highlight: "ر", transliteration: "rahīmun" },
+      { arabic: "بِسْمِ", highlight: "ب", transliteration: "bismi" },
+    ],
+    nameKey: "tarqiqName",
+    defKey: "tarqiqDef",
+    condsKey: "tarqiqConds",
+  },
+  {
+    id: "waqf-ibtida",
+    arabic: "وَقْف وَابْتِدَاء",
+    accent: "#2E7D32",
+    examples: [
+      { arabic: "لَا رَيْبَ فِيهِ", highlight: "ۛ", transliteration: "lā raybe fīhi" },
+    ],
+    nameKey: "waqfIbtidaName",
+    defKey: "waqfIbtidaDef",
+    condsKey: "waqfIbtidaConds",
+  },
+  {
+    id: "hamzatul-wasl",
+    arabic: "هَمْزَةُ الوَصْل",
+    accent: "#757575",
+    examples: [
+      { arabic: "اقْرَأْ بِاسْمِ", highlight: "ا ا", transliteration: "ikra' bismi" },
+    ],
+    nameKey: "hamzatulWaslName",
+    defKey: "hamzatulWaslDef",
+    condsKey: "hamzatulWaslConds",
+  },
+  {
+    id: "idgam-mutajanisayn",
+    arabic: "إِدْغَام مُتَجَانِسَيْن",
+    accent: "#546E7A",
+    examples: [
+      { arabic: "قَدْ تَبَيَّنَ", highlight: "دت", transliteration: "kat-tebeyyen" },
+      { arabic: "وَقَالَت طَّائِفَةٌ", highlight: "تط", transliteration: "wekālet-tāifetun" },
+    ],
+    nameKey: "idgamMutajanisaynName",
+    defKey: "idgamMutajanisaynDef",
+    condsKey: "idgamMutajanisaynConds",
   },
   {
     id: "ra-ahkam",
-    name: "Ra Harfinin Ahkamı",
     arabic: "أَحْكَامُ الرَّاء",
-    definition: "ر harfi fethalı veya zammalıysa kalın; kesralı ya da öncesinde kesra varsa ince okunur.",
-    color: "bg-cyan-100 text-cyan-700 border-cyan-200",
+    accent: "#6A1E8A",
     examples: [
-      { arabic: "رَبِّ", highlight: "ر", transliteration: "rabbi (kalın)" },
-      { arabic: "رِزْقٌ", highlight: "ر", transliteration: "rızkun (ince)" },
+      { arabic: "رَبِّ", highlight: "ر", transliteration: "rabbi (heavy)" },
+      { arabic: "رِزْقٌ", highlight: "ر", transliteration: "rızkun (light)" },
     ],
-    conditions: ["Fethalı/zammalı → kalın", "Kesralı → ince", "İstisnalar: استعلاء harfleriyle"],
+    nameKey: "raAhkamName",
+    defKey: "raAhkamDef",
+    condsKey: "raAhkamConds",
   },
 ];
 
-const CATEGORY_GROUPS = [
-  { label: "Nun ve Tenvin", ids: ["idgam", "ihfa", "izhar", "iqlab"] },
-  { label: "Med (Uzatma)", ids: ["madd-tabii", "madd-muttasil", "madd-munfasil", "madd-lazim"] },
-  { label: "Sese Özel", ids: ["qalqala", "shaddah-ghunnah", "tafkhim", "tarqiq", "ra-ahkam"] },
-  { label: "Okuma Kuralları", ids: ["waqf-ibtida", "hamzatul-wasl", "idgam-mutajanisayn"] },
-];
+function makeRules(t: T): TajweedRule[] {
+  return STATIC_RULE_DATA.map((r) => ({
+    id: r.id,
+    arabic: r.arabic,
+    accent: r.accent,
+    examples: r.examples,
+    duration: r.duration,
+    name: t.tajweedPage[r.nameKey] as string,
+    definition: t.tajweedPage[r.defKey] as string,
+    conditions: (t.tajweedPage[r.condsKey] as string).split("|||"),
+  }));
+}
+
+function makeCategories(t: T) {
+  return [
+    { label: t.tajweedPage.catNunTanween, ids: ["idgam", "ihfa", "izhar", "iqlab"] },
+    { label: t.tajweedPage.catMadd, ids: ["madd-tabii", "madd-muttasil", "madd-munfasil", "madd-lazim"] },
+    { label: t.tajweedPage.catSpecial, ids: ["qalqala", "shaddah-ghunnah", "tafkhim", "tarqiq", "ra-ahkam"] },
+    { label: t.tajweedPage.catReading, ids: ["waqf-ibtida", "hamzatul-wasl", "idgam-mutajanisayn"] },
+  ];
+}
+
+// hex → rgba helper
+function alpha(hex: string, a: number) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
 
 function RuleCard({ rule, onSelect }: { rule: TajweedRule; onSelect: () => void }) {
   return (
     <button
       onClick={onSelect}
-      className={`w-full text-left flex items-start gap-3 px-4 py-3.5 rounded-xl border transition-all hover:shadow-sm ${rule.color}`}
+      className="w-full text-left flex items-center gap-0 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-sm active:scale-[0.99] transition-all duration-150 overflow-hidden"
     >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-sm font-bold">{rule.name}</p>
+      {/* Arabic badge */}
+      <div
+        className="w-14 self-stretch flex items-center justify-center shrink-0"
+        style={{ backgroundColor: alpha(rule.accent, 0.08) }}
+      >
+        <span
+          className="text-sm leading-none font-bold"
+          dir="rtl"
+          lang="ar"
+          style={{ fontFamily: "var(--font-arabic)", color: rule.accent }}
+        >
+          {rule.arabic.split(" ")[0]}
+        </span>
+      </div>
+
+      {/* Separator */}
+      <div className="w-px self-stretch" style={{ backgroundColor: "var(--color-border)" }} />
+
+      {/* Content */}
+      <div className="flex-1 min-w-0 px-4 py-3.5">
+        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+          <p className="text-sm font-semibold text-[var(--color-text-primary)]">{rule.name}</p>
           {rule.duration && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/60 font-semibold">
+            <span
+              className="text-[9px] px-1.5 py-0.5 rounded-full font-bold tracking-wide shrink-0"
+              style={{ backgroundColor: alpha(rule.accent, 0.12), color: rule.accent }}
+            >
               {rule.duration}
             </span>
           )}
         </div>
-        <p className="text-xs mt-0.5 opacity-80 font-arabic" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
-          {rule.arabic}
+        <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed line-clamp-1">
+          {rule.definition}
         </p>
-        <p className="text-xs mt-1 opacity-70 leading-relaxed line-clamp-2">{rule.definition}</p>
       </div>
-      <svg className="w-4 h-4 shrink-0 mt-0.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+
+      <svg className="w-4 h-4 text-[var(--color-border)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
       </svg>
     </button>
   );
 }
 
-function RuleDetail({ rule, onBack }: { rule: TajweedRule; onBack: () => void }) {
+function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void; t: T }) {
   return (
-    <div className="space-y-4">
-      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
+    <div className="space-y-3">
+      {/* Back */}
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors mb-1"
+      >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        Geri
+        {t.tajweedPage.back}
       </button>
 
-      {/* Başlık */}
-      <div className={`px-5 py-4 rounded-2xl border ${rule.color}`}>
-        <p className="text-xl font-bold">{rule.name}</p>
-        <p className="text-2xl mt-1" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{rule.arabic}</p>
-        {rule.duration && (
-          <span className="mt-2 inline-block text-xs px-2 py-0.5 rounded-full bg-white/60 font-semibold">
-            Süre: {rule.duration}
-          </span>
-        )}
+      {/* Hero */}
+      <div
+        className="rounded-2xl px-5 pt-5 pb-4 border"
+        style={{
+          background: `linear-gradient(135deg, ${alpha(rule.accent, 0.08)} 0%, ${alpha(rule.accent, 0.03)} 100%)`,
+          borderColor: alpha(rule.accent, 0.25),
+        }}
+      >
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <p className="text-lg font-bold text-[var(--color-text-primary)] leading-tight">{rule.name}</p>
+            {rule.duration && (
+              <span
+                className="mt-1.5 inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide"
+                style={{ backgroundColor: alpha(rule.accent, 0.15), color: rule.accent }}
+              >
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                </svg>
+                {rule.duration}
+              </span>
+            )}
+          </div>
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+            style={{ backgroundColor: alpha(rule.accent, 0.12) }}
+          >
+            <span
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ backgroundColor: rule.accent }}
+            />
+          </div>
+        </div>
+
+        {/* Arabic */}
+        <div className="text-center py-5 border-t border-b" style={{ borderColor: alpha(rule.accent, 0.15) }}>
+          <p
+            className="text-4xl leading-loose"
+            dir="rtl"
+            lang="ar"
+            style={{ fontFamily: "var(--font-arabic)", color: rule.accent }}
+          >
+            {rule.arabic}
+          </p>
+        </div>
+
+        {/* Definition */}
+        <p className="mt-4 text-sm text-[var(--color-text-primary)] leading-relaxed">
+          {rule.definition}
+        </p>
       </div>
 
-      {/* Tanım */}
-      <div className="px-4 py-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-2">Tanım</p>
-        <p className="text-sm text-[var(--color-text-primary)] leading-relaxed">{rule.definition}</p>
-      </div>
-
-      {/* Koşullar */}
-      <div className="px-4 py-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-2">Uygulama Koşulları</p>
-        <ul className="space-y-1">
+      {/* Conditions */}
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+        <div className="px-4 py-2.5 border-b border-[var(--color-border)] flex items-center gap-2">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: rule.accent }}>
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+          <p className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
+            {t.tajweedPage.sectionConditions}
+          </p>
+        </div>
+        <ul className="divide-y divide-[var(--color-border)]">
           {rule.conditions.map((c, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-[var(--color-text-primary)]">
-              <span className="text-[var(--color-accent)] shrink-0 font-bold">·</span>
-              {c}
+            <li key={i} className="flex items-start gap-3 px-4 py-3">
+              <span
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
+                style={{ backgroundColor: alpha(rule.accent, 0.12), color: rule.accent }}
+              >
+                {i + 1}
+              </span>
+              <span className="text-sm text-[var(--color-text-primary)] leading-relaxed">{c}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Örnekler */}
-      <div>
-        <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-2">Örnekler</p>
-        <div className="space-y-2">
+      {/* Examples */}
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+        <div className="px-4 py-2.5 border-b border-[var(--color-border)] flex items-center gap-2">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: rule.accent }}>
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          <p className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
+            {t.tajweedPage.sectionExamples}
+          </p>
+        </div>
+        <div className="divide-y divide-[var(--color-border)]">
           {rule.examples.map((ex, i) => (
-            <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-              <div>
+            <div key={i} className="flex items-center gap-4 px-4 py-4">
+              {/* Full verse */}
+              <div className="flex-1 min-w-0">
                 <p
-                  className="text-2xl text-right text-[var(--color-text-primary)]"
+                  className="text-2xl text-[var(--color-text-primary)] leading-loose"
                   dir="rtl"
                   lang="ar"
                   style={{ fontFamily: "var(--font-arabic)" }}
                 >
                   {ex.arabic}
                 </p>
-                <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{ex.transliteration}</p>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 font-mono">{ex.transliteration}</p>
               </div>
-              <div className="ml-auto text-right">
-                <p className="text-xs text-[var(--color-text-secondary)]">Kural uygulandığı yer</p>
-                <p
-                  className="text-xl text-[var(--color-accent)] font-bold"
-                  dir="rtl"
-                  lang="ar"
-                  style={{ fontFamily: "var(--font-arabic)" }}
+
+              {/* Highlighted letters */}
+              <div className="shrink-0 text-center">
+                <p className="text-[10px] text-[var(--color-text-secondary)] mb-1">{t.tajweedPage.ruleApplied}</p>
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: alpha(rule.accent, 0.1) }}
                 >
-                  {ex.highlight}
-                </p>
+                  <span
+                    className="text-xl font-bold"
+                    dir="rtl"
+                    lang="ar"
+                    style={{ fontFamily: "var(--font-arabic)", color: rule.accent }}
+                  >
+                    {ex.highlight}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
@@ -328,35 +451,46 @@ function RuleDetail({ rule, onBack }: { rule: TajweedRule; onBack: () => void })
 }
 
 function TajweedPage() {
+  const { t } = useTranslation();
   const [selectedRule, setSelectedRule] = useState<TajweedRule | null>(null);
+
+  const TAJWEED_RULES = makeRules(t);
+  const CATEGORY_GROUPS = makeCategories(t);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
       {selectedRule ? (
-        <RuleDetail rule={selectedRule} onBack={() => setSelectedRule(null)} />
+        <RuleDetail rule={selectedRule} onBack={() => setSelectedRule(null)} t={t} />
       ) : (
         <>
-          {/* Başlık */}
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center text-xl">
-              🎯
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+              </svg>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Tecvid Öğren</h1>
+              <h1 className="text-xl font-bold text-[var(--color-text-primary)]">{t.tajweedPage.title}</h1>
               <p className="text-xs text-[var(--color-text-secondary)]">
-                {TAJWEED_RULES.length} kural · Örnekli anlatım
+                {t.tajweedPage.subtitle.replace("{count}", String(TAJWEED_RULES.length))}
               </p>
             </div>
           </div>
 
-          {/* Gruplar */}
+          {/* Categories */}
           {CATEGORY_GROUPS.map((group) => {
             const rules = group.ids.map((id) => TAJWEED_RULES.find((r) => r.id === id)!).filter(Boolean);
             return (
               <div key={group.label} className="mb-6">
-                <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-2">
-                  {group.label}
-                </h2>
+                <div className="flex items-center gap-2 mb-2">
+                  <h2 className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
+                    {group.label}
+                  </h2>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-medium">
+                    {rules.length}
+                  </span>
+                </div>
                 <div className="space-y-2">
                   {rules.map((rule) => (
                     <RuleCard key={rule.id} rule={rule} onSelect={() => setSelectedRule(rule)} />
@@ -366,12 +500,17 @@ function TajweedPage() {
             );
           })}
 
-          {/* Yakında: Quiz */}
-          <div className="px-4 py-4 rounded-2xl border border-dashed border-[var(--color-border)] text-center">
-            <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">🎮 Tecvid Quizi</p>
-            <p className="text-xs text-[var(--color-text-secondary)]">
-              Öğrendiklerini test et — yakında Premium ile
-            </p>
+          {/* Quiz teaser */}
+          <div className="px-5 py-4 rounded-2xl border border-dashed border-[var(--color-border)] flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1"/><circle cx="18" cy="13" r="1"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--color-text-primary)]">{t.tajweedPage.quizTitle}</p>
+              <p className="text-xs text-[var(--color-text-secondary)]">{t.tajweedPage.quizDesc}</p>
+            </div>
           </div>
         </>
       )}
