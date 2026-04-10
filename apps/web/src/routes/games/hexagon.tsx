@@ -6,6 +6,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
 import { useTranslation } from "~/hooks/useTranslation";
+import { GameHeader } from "~/components/GameHeader";
+import { GAME_THEMES } from "~/lib/game-themes";
+
+const THEME = GAME_THEMES["hexagon"];
+const P = THEME.primary; // "#4A9B6A"
 
 export const Route = createFileRoute("/games/hexagon")({
   component: HexagonPage,
@@ -198,31 +203,21 @@ function WordGame({
   const isSuccess = status === "success";
 
   return (
-    <div className={`max-w-md mx-auto px-4 py-6 pb-24 flex flex-col items-center${shake ? " animate-[shake_0.3s_ease]" : ""}`}>
+    <div className={`max-w-md mx-auto pb-24 flex flex-col items-center${shake ? " animate-[shake_0.3s_ease]" : ""}`}>
 
-      {/* Başlık */}
-      <div className="w-full flex items-center gap-3 mb-5">
-        <button
-          onClick={onBack}
-          className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div className="flex-1">
-          <h1 className="text-base font-bold text-[var(--color-text-primary)]">{t.hexagonGame.title}</h1>
-          <p className="text-xs text-[var(--color-text-secondary)]">{t.hexagonGame.gameSubtitle}</p>
-        </div>
-        <span
-          className="text-sm text-[var(--color-text-secondary)]"
-          dir="rtl"
-          lang="ar"
-          style={{ fontFamily: "var(--font-arabic)" }}
-        >
-          {puzzle.label}
-        </span>
-      </div>
+      {/* Colored header */}
+      <GameHeader
+        img={THEME.img}
+        bg={THEME.bg}
+        isDark={THEME.isDark}
+        title={t.hexagonGame.title}
+        onBack={onBack}
+        right={
+          <span className="text-xs opacity-80" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
+            {puzzle.label}
+          </span>
+        }
+      />
 
       {/* Ayet */}
       <div
@@ -239,7 +234,8 @@ function WordGame({
           {letters.map((_, i) => (
             <span
               key={i}
-              className={`w-2 h-2 rounded-full transition-colors duration-300 ${isSuccess ? "bg-green-500" : "bg-[var(--color-accent)]/40"}`}
+              className="w-2 h-2 rounded-full transition-colors duration-300"
+              style={{ backgroundColor: isSuccess ? P : `${P}50` }}
             />
           ))}
         </span>
@@ -260,16 +256,17 @@ function WordGame({
               key={i}
               onClick={() => letter && handleSlotClick(i)}
               disabled={!letter || !isSuccess}
-              className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-2xl font-medium transition-all duration-150 ${
-                letter
-                  ? isSuccess
-                    ? "border-green-500 bg-green-50 text-green-700"
-                    : "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-text-primary)] active:scale-95 cursor-pointer"
-                  : "border-dashed border-[var(--color-border)] bg-transparent"
-              }`}
+              className="w-12 h-12 rounded-xl border-2 flex items-center justify-center text-2xl font-medium transition-all duration-150"
               dir="rtl"
               lang="ar"
-              style={{ fontFamily: "var(--font-arabic)" }}
+              style={{
+                fontFamily: "var(--font-arabic)",
+                ...(letter
+                  ? isSuccess
+                    ? { borderColor: P, backgroundColor: `${P}18`, color: P }
+                    : { borderColor: "var(--color-accent)" }
+                  : { borderStyle: "dashed", borderColor: "var(--color-border)" }),
+              }}
             >
               {letter ?? ""}
             </button>
@@ -279,17 +276,19 @@ function WordGame({
 
       {/* Başarı */}
       {isSuccess && (
-        <div className="mb-6 px-5 py-4 rounded-2xl bg-green-50 border border-green-200 text-center w-full">
-          <p className="text-green-700 font-semibold text-sm">{t.hexagonGame.correct}</p>
+        <div
+          className="mb-6 px-5 py-4 rounded-2xl border text-center w-full"
+          style={{ backgroundColor: `${P}15`, borderColor: `${P}50` }}
+        >
+          <p className="font-semibold text-sm" style={{ color: P }}>{t.hexagonGame.correct}</p>
           <p
-            className="text-3xl text-green-800 my-1 leading-loose"
-            dir="rtl"
-            lang="ar"
-            style={{ fontFamily: "var(--font-arabic)" }}
+            className="text-3xl my-1 leading-loose"
+            dir="rtl" lang="ar"
+            style={{ fontFamily: "var(--font-arabic)", color: P }}
           >
             {puzzle.targetWord}
           </p>
-          <p className="text-xs text-green-600">{puzzle.meaning}</p>
+          <p className="text-xs" style={{ color: `${P}cc` }}>{puzzle.meaning}</p>
         </div>
       )}
 
@@ -354,23 +353,19 @@ function WordGame({
 function PuzzleSelect({ onSelect }: { onSelect: (p: WordPuzzle, idx: number) => void }) {
   const { t } = useTranslation();
   return (
-    <div className="max-w-md mx-auto px-4 py-6 pb-24">
-      <div className="flex items-center gap-3 mb-6">
-        <Link
-          to="/games"
-          className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">{t.hexagonGame.title}</h1>
-          <p className="text-sm text-[var(--color-text-secondary)]">{t.hexagonGame.listSubtitle}</p>
-        </div>
+    <div className="max-w-md mx-auto pb-24">
+      <GameHeader
+        img={THEME.img}
+        bg={THEME.bg}
+        isDark={THEME.isDark}
+        title={t.hexagonGame.title}
+        onBack={() => window.history.back()}
+      />
+      <div className="px-4 pt-2 mb-4">
+        <p className="text-sm text-[var(--color-text-secondary)]">{t.hexagonGame.listSubtitle}</p>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 px-4">
         {PUZZLES.map((puzzle, idx) => (
           <button
             key={puzzle.id}

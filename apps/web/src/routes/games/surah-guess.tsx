@@ -8,6 +8,11 @@ import { useQuery } from "@tanstack/react-query";
 import { getVerseGuessQuestion } from "~/lib/game-service";
 import { submitScore } from "~/lib/score-service";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
+import { GameHeader } from "~/components/GameHeader";
+import { GAME_THEMES } from "~/lib/game-themes";
+
+const THEME = GAME_THEMES["surah-guess"];
+const P = THEME.primary; // "#4A7A40"
 
 // ── Route ────────────────────────────────────────────────
 
@@ -67,34 +72,31 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
     );
   }
 
+  const onBack = () => {
+    if (score > submittedScore.current) {
+      submittedScore.current = score;
+      submitScore({ data: { gameId: "surah-guess", score, durationMs: Date.now() - sessionStart.current } }).catch(() => {});
+    }
+    onSetup();
+  };
+
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 pb-24">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => {
-            if (score > submittedScore.current) {
-              submittedScore.current = score;
-              submitScore({ data: { gameId: "surah-guess", score, durationMs: Date.now() - sessionStart.current } }).catch(() => {});
-            }
-            onSetup();
-          }}
-          className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-          title="Sure seçimini değiştir"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div className="text-center">
-          <p className="text-xs text-[var(--color-text-secondary)]">Sure Tanıma</p>
-          <p className="text-sm font-bold text-[var(--color-accent)]">Soru {round}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-[var(--color-text-secondary)]">Puan</p>
-          <p className="text-sm font-bold text-[var(--color-text-primary)]">{score}</p>
-        </div>
-      </div>
+    <div className="max-w-lg mx-auto pb-24">
+      {/* Colored header */}
+      <GameHeader
+        img={THEME.img}
+        bg={THEME.bg}
+        isDark={THEME.isDark}
+        title="Sure Tanıma"
+        onBack={onBack}
+        right={
+          <div className="text-right">
+            <p className="text-xs opacity-70">Soru {round}</p>
+            <p className="text-sm font-bold tabular-nums">{score}</p>
+          </div>
+        }
+      />
+      <div className="px-4 pt-2">
 
       {/* Soru */}
       <div className="px-5 py-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] mb-6">
@@ -114,26 +116,30 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
       {/* Seçenekler */}
       <div className="grid grid-cols-2 gap-2 mb-5">
         {question.options.map((opt) => {
+          const isCorrect = opt.id === question.correctSurahId;
+          const isSelected = opt.id === selectedId;
           let cls = "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)]";
+          let style: React.CSSProperties = {};
           if (gameState !== "playing") {
-            if (opt.id === question.correctSurahId) cls = "border-green-500 bg-green-50 text-green-700";
-            else if (opt.id === selectedId) cls = "border-red-400 bg-red-50 text-red-600";
-            else cls = "border-[var(--color-border)]/50 opacity-40 text-[var(--color-text-secondary)]";
+            if (isCorrect) {
+              cls = "border-2";
+              style = { borderColor: `${P}80`, backgroundColor: `${P}15`, color: P };
+            } else if (isSelected) {
+              cls = "border-red-400 bg-red-50 text-red-600";
+            } else {
+              cls = "border-[var(--color-border)]/50 opacity-40 text-[var(--color-text-secondary)]";
+            }
           }
           return (
             <button
               key={opt.id}
               onClick={() => handleSelect(opt.id)}
               disabled={gameState !== "playing"}
+              style={style}
               className={`px-4 py-3.5 rounded-xl border transition-all text-left ${cls}`}
             >
               <p className="text-sm font-medium">{opt.name}</p>
-              <p
-                className="text-base"
-                dir="rtl"
-                lang="ar"
-                style={{ fontFamily: "var(--font-arabic)" }}
-              >
+              <p className="text-base" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
                 {opt.arabic}
               </p>
             </button>
@@ -142,17 +148,21 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
       </div>
 
       {gameState === "correct" && (
-        <div className="px-4 py-3 rounded-xl text-center bg-green-50 border border-green-100">
-          <p className="text-sm font-semibold text-green-700">✓ Doğru! +10 puan</p>
-          <p className="text-xs text-green-600 mt-1">Sonraki soru geliyor…</p>
+        <div className="px-4 py-3 rounded-xl text-center border" style={{ backgroundColor: `${P}12`, borderColor: `${P}40` }}>
+          <p className="text-sm font-semibold flex items-center justify-center gap-1.5" style={{ color: P }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+            Doğru! +10 puan
+          </p>
+          <p className="text-xs mt-1" style={{ color: `${P}cc` }}>Sonraki soru geliyor…</p>
         </div>
       )}
 
       {gameState === "wrong" && (
         <>
           <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3">
-            <p className="text-sm font-semibold text-red-600">
-              ✗ Yanlış. Bu ayet &ldquo;{question.correctSurahName}&rdquo; suresinden
+            <p className="text-sm font-semibold text-red-600 flex items-center justify-center gap-1.5">
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+              Yanlış. Bu ayet &ldquo;{question.correctSurahName}&rdquo; suresinden
             </p>
           </div>
           <button
@@ -163,6 +173,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
           </button>
         </>
       )}
+      </div>
     </div>
   );
 }

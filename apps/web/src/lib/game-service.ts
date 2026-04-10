@@ -5,17 +5,26 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "~/db";
 import { ayahs, surahs } from "~/db/quran-schema";
-import { sql, eq, inArray, and } from "drizzle-orm";
+import { sql, eq, inArray, and, or } from "drizzle-orm";
+
+export type VerseFilter = { surahId: number; verseNums: number[] }[];
 
 export const getRandomVerseForGame = createServerFn({ method: "GET" })
-  .inputValidator((input: { surahIds?: number[] }) => input)
+  .inputValidator((input: { surahIds?: number[]; verseFilter?: VerseFilter }) => input)
   .handler(async ({ data }) => {
-    const surahFilter = data.surahIds && data.surahIds.length > 0
-      ? inArray(ayahs.surahId, data.surahIds)
-      : undefined;
+    // Ayet bazında filtre (ezber modu) varsa öncelikli olarak kullan
+    let scopeFilter;
+    if (data.verseFilter && data.verseFilter.length > 0) {
+      const conditions = data.verseFilter.map(({ surahId, verseNums }) =>
+        and(eq(ayahs.surahId, surahId), inArray(ayahs.ayahNumber, verseNums))
+      );
+      scopeFilter = conditions.length === 1 ? conditions[0] : or(...conditions);
+    } else if (data.surahIds && data.surahIds.length > 0) {
+      scopeFilter = inArray(ayahs.surahId, data.surahIds);
+    }
 
-    const whereClause = surahFilter
-      ? and(sql`length(${ayahs.textUthmani}) BETWEEN 20 AND 80`, surahFilter)
+    const whereClause = scopeFilter
+      ? and(sql`length(${ayahs.textUthmani}) BETWEEN 20 AND 80`, scopeFilter)
       : sql`length(${ayahs.textUthmani}) BETWEEN 20 AND 80`;
 
     // Yeterli kelimeli ayet bulana kadar dene (max 5 deneme)
