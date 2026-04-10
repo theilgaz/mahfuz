@@ -61,7 +61,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
   if (isLoading || !question) {
     return (
       <div className="max-w-lg mx-auto px-4 py-10 text-center">
-        <div className="text-4xl mb-4 animate-pulse">🎧</div>
+        <div className="w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
         <p className="text-[var(--color-text-secondary)] text-sm">Ayet yükleniyor...</p>
       </div>
     );

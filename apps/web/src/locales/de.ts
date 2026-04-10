@@ -1,6 +1,6 @@
-import type { Messages } from "./types";
+import type { PartialMessages } from "./types";
 
-export const de: Messages = {
+export const de: PartialMessages = {
   settings: {
     title: "Einstellungen",
     close: "Schließen",

@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getRandomVerseForGame } from "~/lib/game-service";
 import { submitScore } from "~/lib/score-service";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
+import { useTranslation } from "~/hooks/useTranslation";
 
 // ── Route ────────────────────────────────────────────────
 
@@ -23,6 +24,7 @@ type Screen = "setup" | "game";
 const OPTION_LABELS = ["A", "B", "C", "D"];
 
 function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => void }) {
+  const { t } = useTranslation();
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -68,11 +70,31 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
     setRefreshKey((k) => k + 1);
   };
 
+  // Keyboard: A/B/C/D → select option, Enter/Space → next round
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!verse) return;
+      const key = e.key.toLowerCase();
+      if (gameState === "playing") {
+        const idx = ["a", "b", "c", "d"].indexOf(key);
+        if (idx !== -1 && verse.options[idx] !== undefined) {
+          e.preventDefault();
+          handleSelect(verse.options[idx]);
+        }
+      } else if (key === "enter" || key === " ") {
+        e.preventDefault();
+        nextRound();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [gameState, verse, handleSelect]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (isLoading || !verse) {
     return (
       <div className="max-w-lg mx-auto px-4 py-10 text-center">
         <div className="w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-[var(--color-text-secondary)] text-sm">Ayet yükleniyor…</p>
+        <p className="text-[var(--color-text-secondary)] text-sm">{t.fillBlankGame.loadingVerse}</p>
       </div>
     );
   }
@@ -92,7 +114,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
             onSetup();
           }}
           className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors text-[var(--color-text-secondary)]"
-          title="Sure seçimini değiştir"
+          title={t.fillBlankGame.changeSurah}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -115,8 +137,11 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
         {/* Score + streak */}
         <div className="flex items-center gap-2 shrink-0">
           {streak >= 2 && (
-            <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">
-              🔥 {streak}
+            <span className="flex items-center gap-1 text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C10 5.5 6.5 7 6.5 12a5.5 5.5 0 0011 0C17.5 7 14 5.5 12 2zm0 14a3 3 0 01-3-3c0-2 3-5.5 3-5.5s3 3.5 3 5.5a3 3 0 01-3 3z"/>
+              </svg>
+              {streak}
             </span>
           )}
           <span className="text-sm font-bold text-[var(--color-text-primary)]">{score}</span>
@@ -126,7 +151,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
       {/* ── Sure etiketi ── */}
       <div className="flex items-center justify-center gap-2 mb-4">
         <span className="text-xs font-medium text-[var(--color-text-secondary)] bg-[var(--color-surface)] border border-[var(--color-border)] px-3 py-1 rounded-full">
-          {verse.surahName} · {verse.verseNum}. Ayet
+          {t.fillBlankGame.verseLabel.replace("{surahName}", verse.surahName).replace("{verseNum}", String(verse.verseNum))}
         </span>
       </div>
 
@@ -230,21 +255,34 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
             : "bg-red-50 border-red-200"
         }`}>
           <div className="flex items-center gap-3">
-            <span className={`text-2xl ${gameState === "correct" ? "" : ""}`}>
-              {gameState === "correct" ? "✓" : "✗"}
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${gameState === "correct" ? "bg-emerald-500" : "bg-red-400"}`}>
+              {gameState === "correct" ? (
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
             </span>
             <div>
               <p className={`text-sm font-bold ${gameState === "correct" ? "text-emerald-700" : "text-red-600"}`}>
-                {gameState === "correct" ? "Doğru!" : "Yanlış"}
+                {gameState === "correct" ? t.fillBlankGame.correct : t.fillBlankGame.wrong}
               </p>
               {gameState === "wrong" && (
                 <p className="text-xs text-red-500 mt-0.5">
-                  Doğru cevap:{" "}
+                  {t.fillBlankGame.correctAnswer}{" "}
                   <span style={{ fontFamily: "var(--font-arabic)" }}>{verse.correctWord}</span>
                 </p>
               )}
               {gameState === "correct" && streak >= 2 && (
-                <p className="text-xs text-emerald-600 mt-0.5">{streak} doğru üst üste 🔥</p>
+                <p className="text-xs text-emerald-600 mt-0.5 flex items-center gap-1">
+                  {t.fillBlankGame.streak.replace("{count}", String(streak))}
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="text-orange-500" aria-hidden="true">
+                    <path d="M12 2C10 5.5 6.5 7 6.5 12a5.5 5.5 0 0011 0C17.5 7 14 5.5 12 2zm0 14a3 3 0 01-3-3c0-2 3-5.5 3-5.5s3 3.5 3 5.5a3 3 0 01-3 3z"/>
+                  </svg>
+                </p>
               )}
             </div>
           </div>
@@ -255,7 +293,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
               gameState === "correct" ? "bg-emerald-500" : "bg-[var(--color-accent)]"
             }`}
           >
-            Devam →
+            {t.fillBlankGame.next}
           </button>
         </div>
       )}
@@ -266,6 +304,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
 // ── Ana Bileşen ──────────────────────────────────────────
 
 function FillBlankGame() {
+  const { t } = useTranslation();
   const [screen, setScreen] = useState<Screen>("setup");
   const [surahIds, setSurahIds] = useState<number[]>([]);
 
@@ -275,7 +314,7 @@ function FillBlankGame() {
   };
 
   if (screen === "setup") {
-    return <SurahPickerScreen gameTitle="Kelime Doldurma" onStart={handleStart} />;
+    return <SurahPickerScreen gameTitle={t.gamesHub.fillBlankTitle} onStart={handleStart} />;
   }
 
   return <GameScreen surahIds={surahIds} onSetup={() => setScreen("setup")} />;

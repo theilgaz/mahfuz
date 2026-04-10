@@ -59,8 +59,8 @@ function HomePageSkeleton() {
 function HomePage() {
   const { session } = Route.useRouteContext();
   const { t } = useTranslation();
-  const { readingMode, labsEnabled } = useSettingsStore(
-    useShallow((s) => ({ readingMode: s.readingMode, labsEnabled: s.labsEnabled }))
+  const { readingMode } = useSettingsStore(
+    useShallow((s) => ({ readingMode: s.readingMode }))
   );
   const bookmarks = useBookmarksStore((s) => s.bookmarks);
   const { data: surahs } = useSurahs();
@@ -69,51 +69,8 @@ function HomePage() {
     <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
       <DailyVerseCard />
 
-      {/* Hatim Grubu hızlı erişim */}
-      <Link
-        to="/hatim/"
-        className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-colors group"
-      >
-        <div className="w-9 h-9 rounded-lg bg-[var(--color-accent)]/15 flex items-center justify-center shrink-0 group-hover:bg-[var(--color-accent)]/25 transition-colors">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-            <path d="M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z" />
-            <path d="M9 7h6" />
-            <path d="M9 11h4" />
-          </svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-[var(--color-text-primary)]">Hatim Grubu</p>
-          <p className="text-xs text-[var(--color-text-secondary)]">Beraber hatim yapın, ilerleme takibi</p>
-        </div>
-        <svg className="w-4 h-4 text-[var(--color-text-secondary)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </Link>
 
-      {/* Labs: Tilavet kartı */}
-      {labsEnabled && (
-        <Link
-          to="/recite"
-          className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 hover:bg-[var(--color-accent)]/10 transition-colors group"
-        >
-          <div className="w-9 h-9 rounded-lg bg-[var(--color-accent)]/15 flex items-center justify-center shrink-0 group-hover:bg-[var(--color-accent)]/25 transition-colors">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="2" width="6" height="12" rx="3" />
-              <path d="M5 10a7 7 0 0 0 14 0" />
-              <path d="M12 17v4" />
-              <path d="M8 21h8" />
-            </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">Tilavet</p>
-            <p className="text-xs text-[var(--color-text-secondary)]">Okuma pratiği yap</p>
-          </div>
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-semibold tracking-wide shrink-0">BETA</span>
-        </Link>
-      )}
-
-      {/* Yer imleri */}
+{/* Yer imleri */}
       {bookmarks.length > 0 && (() => {
         const surahMap = new Map(surahs.map((s) => [s.id, s]));
         const visible = bookmarks.slice(0, 8);

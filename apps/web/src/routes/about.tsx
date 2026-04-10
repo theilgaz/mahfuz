@@ -6,6 +6,7 @@
 import { Suspense, lazy } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Credits } from "~/components/hub/Credits";
+import { useTranslation } from "~/hooks/useTranslation";
 
 const GitHubContributors = lazy(() =>
   import("~/components/hub/GitHubContributors").then((m) => ({ default: m.GitHubContributors }))
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
+  const { t } = useTranslation();
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-32">
       {/* Header */}
@@ -29,7 +31,7 @@ function AboutPage() {
           </svg>
         </Link>
         <div>
-          <h1 className="text-base font-semibold text-[var(--color-text-primary)]">Uygulama Hakkında</h1>
+          <h1 className="text-base font-semibold text-[var(--color-text-primary)]">{t.about.title}</h1>
           <p className="text-xs text-[var(--color-text-secondary)]">mahfuz.ilg.az</p>
         </div>
       </div>

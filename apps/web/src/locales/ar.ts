@@ -1,6 +1,6 @@
-import type { Messages } from "./types";
+import type { PartialMessages } from "./types";
 
-export const ar: Messages = {
+export const ar: PartialMessages = {
   settings: {
     title: "الإعدادات",
     close: "إغلاق",

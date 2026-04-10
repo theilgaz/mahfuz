@@ -5,6 +5,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/games/hexagon")({
   component: HexagonPage,
@@ -140,6 +141,7 @@ function WordGame({
   onBack: () => void;
   onNext?: () => void;
 }) {
+  const { t } = useTranslation();
   const letters = [...puzzle.targetWord];
   const n = letters.length;
 
@@ -209,8 +211,8 @@ function WordGame({
           </svg>
         </button>
         <div className="flex-1">
-          <h1 className="text-base font-bold text-[var(--color-text-primary)]">Kelime Dizme</h1>
-          <p className="text-xs text-[var(--color-text-secondary)]">Harfleri doğru sıraya diz</p>
+          <h1 className="text-base font-bold text-[var(--color-text-primary)]">{t.hexagonGame.title}</h1>
+          <p className="text-xs text-[var(--color-text-secondary)]">{t.hexagonGame.gameSubtitle}</p>
         </div>
         <span
           className="text-sm text-[var(--color-text-secondary)]"
@@ -278,7 +280,7 @@ function WordGame({
       {/* Başarı */}
       {isSuccess && (
         <div className="mb-6 px-5 py-4 rounded-2xl bg-green-50 border border-green-200 text-center w-full">
-          <p className="text-green-700 font-semibold text-sm">Doğru!</p>
+          <p className="text-green-700 font-semibold text-sm">{t.hexagonGame.correct}</p>
           <p
             className="text-3xl text-green-800 my-1 leading-loose"
             dir="rtl"
@@ -323,7 +325,7 @@ function WordGame({
           disabled={selected.length === 0}
           className="px-6 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-secondary)] disabled:opacity-40 hover:border-[var(--color-accent)]/50 transition-all"
         >
-          Temizle
+          {t.hexagonGame.clear}
         </button>
       ) : (
         <div className="flex gap-3">
@@ -331,14 +333,14 @@ function WordGame({
             onClick={onBack}
             className="px-5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/50 transition-all"
           >
-            Listeye Dön
+            {t.hexagonGame.backToList}
           </button>
           {onNext && (
             <button
               onClick={onNext}
               className="px-6 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-90 transition-all"
             >
-              Sonraki →
+              {t.hexagonGame.next}
             </button>
           )}
         </div>
@@ -350,6 +352,7 @@ function WordGame({
 // ── Bulmaca Listesi ───────────────────────────────────────
 
 function PuzzleSelect({ onSelect }: { onSelect: (p: WordPuzzle, idx: number) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="max-w-md mx-auto px-4 py-6 pb-24">
       <div className="flex items-center gap-3 mb-6">
@@ -362,8 +365,8 @@ function PuzzleSelect({ onSelect }: { onSelect: (p: WordPuzzle, idx: number) => 
           </svg>
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Kelime Dizme</h1>
-          <p className="text-sm text-[var(--color-text-secondary)]">Ayetteki kelimeyi tamamla</p>
+          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">{t.hexagonGame.title}</h1>
+          <p className="text-sm text-[var(--color-text-secondary)]">{t.hexagonGame.listSubtitle}</p>
         </div>
       </div>
 
@@ -378,7 +381,7 @@ function PuzzleSelect({ onSelect }: { onSelect: (p: WordPuzzle, idx: number) => 
               <span className="text-lg font-bold text-amber-700" style={{ fontFamily: "var(--font-arabic)" }}>
                 {toAr([...puzzle.targetWord].length)}
               </span>
-              <span className="text-[9px] text-amber-600">harf</span>
+              <span className="text-[9px] text-amber-600">{t.hexagonGame.letterUnit}</span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
@@ -395,7 +398,7 @@ function PuzzleSelect({ onSelect }: { onSelect: (p: WordPuzzle, idx: number) => 
                   puzzle.difficulty === "medium" ? "bg-yellow-100 text-yellow-700" :
                   "bg-red-100 text-red-700"
                 }`}>
-                  {puzzle.difficulty === "easy" ? "Kolay" : puzzle.difficulty === "medium" ? "Orta" : "Zor"}
+                  {puzzle.difficulty === "easy" ? t.hexagonGame.diffEasy : puzzle.difficulty === "medium" ? t.hexagonGame.diffMedium : t.hexagonGame.diffHard}
                 </span>
               </div>
               <p className="text-xs text-[var(--color-text-secondary)]">{puzzle.meaning}</p>

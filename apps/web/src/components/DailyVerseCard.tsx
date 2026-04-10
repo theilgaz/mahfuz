@@ -33,7 +33,7 @@ export function DailyVerseCard() {
       {/* Üst şerit */}
       <div className="px-4 pt-3 pb-0 flex items-center justify-between">
         <span className="text-[10px] font-semibold tracking-widest text-[var(--color-accent)] uppercase opacity-70">
-          Günün Ayeti
+          {t.home.dailyVerse}
         </span>
         {surah && (
           <span className="text-[10px] text-[var(--color-text-secondary)]">
@@ -70,7 +70,7 @@ export function DailyVerseCard() {
             search={{ ayah: verse.ayahNumber }}
             className="text-xs font-medium text-[var(--color-accent)] hover:underline"
           >
-            Surede oku →
+            {t.home.readInSurah}
           </Link>
           <span className="text-[var(--color-border)]">·</span>
           <Link
@@ -79,7 +79,7 @@ export function DailyVerseCard() {
             search={{ tab: "meal" }}
             className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
           >
-            Tahlil
+            {t.home.analyse}
           </Link>
           <span className="text-[var(--color-border)]">·</span>
           <button
@@ -94,7 +94,7 @@ export function DailyVerseCard() {
             }}
             className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
           >
-            Paylaş
+            {t.home.share}
           </button>
         </div>
       )}

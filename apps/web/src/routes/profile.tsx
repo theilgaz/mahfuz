@@ -215,8 +215,8 @@ function ProfilePage() {
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">Uygulama Hakkında</p>
-            <p className="text-xs text-[var(--color-text-secondary)]">Sürüm, katkıcılar, açık kaynak</p>
+            <p className="text-sm font-medium">{t.about.title}</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">{t.about.subtitle}</p>
           </div>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-text-secondary)] shrink-0">
             <path d="M6 4l4 4-4 4" />

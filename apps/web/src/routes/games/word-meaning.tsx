@@ -6,6 +6,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/games/word-meaning")({
   component: WordMeaningGame,
@@ -198,6 +199,7 @@ function getRandomQuestion(seenIndices: Set<number>) {
 type GameState = "playing" | "correct" | "wrong";
 
 function WordMeaningGame() {
+  const { t } = useTranslation();
   const [seenIndices, setSeenIndices] = useState<Set<number>>(new Set());
   const [score, setScore] = useState(0);
   const submittedRef = useRef(false);
@@ -260,21 +262,25 @@ function WordMeaningGame() {
   if (allDone) {
     return (
       <div className="max-w-lg mx-auto px-4 py-12 text-center">
-        <div className="text-5xl mb-4">🎉</div>
-        <h2 className="text-xl font-bold text-[var(--color-text-primary)] mb-2">Tebrikler!</h2>
+        <div className="w-16 h-16 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center mx-auto mb-4 text-[var(--color-accent)]">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M8 21h8M12 17v4M7 4h10l1 7H6L7 4z"/><path d="M6 11s-1 2 0 4 6 2 6 2 5 0 6-2 0-4 0-4"/>
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-[var(--color-text-primary)] mb-2">{t.wordMeaningGame.allDoneTitle}</h2>
         <p className="text-sm text-[var(--color-text-secondary)] mb-1">
-          Tüm <strong>{WORD_PAIRS.length}</strong> kelimeyi doğru bildin.
+          <strong>{t.wordMeaningGame.allDoneDesc.replace("{count}", String(WORD_PAIRS.length))}</strong>
         </p>
-        <p className="text-2xl font-bold text-[var(--color-accent)] mb-6">{score} puan</p>
+        <p className="text-2xl font-bold text-[var(--color-accent)] mb-6">{t.wordMeaningGame.points.replace("{score}", String(score))}</p>
         <button
           onClick={resetSession}
           className="px-8 py-3 rounded-2xl bg-[var(--color-accent)] text-white font-semibold text-sm hover:opacity-90 transition-all"
         >
-          Yeniden Başla
+          {t.wordMeaningGame.restart}
         </button>
         <div className="mt-4">
           <Link to="/games" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]">
-            Oyunlara dön
+            {t.wordMeaningGame.backToGames}
           </Link>
         </div>
       </div>
@@ -293,18 +299,18 @@ function WordMeaningGame() {
           </svg>
         </Link>
         <div className="text-center">
-          <p className="text-xs text-[var(--color-text-secondary)]">Kelime Anlamı</p>
-          <p className="text-sm font-bold text-[var(--color-accent)]">Soru {round}</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">{t.wordMeaningGame.title}</p>
+          <p className="text-sm font-bold text-[var(--color-accent)]">{t.wordMeaningGame.roundLabel.replace("{round}", String(round))}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs text-[var(--color-text-secondary)]">Puan</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">{t.wordMeaningGame.scoreLabel}</p>
           <p className="text-sm font-bold text-[var(--color-text-primary)]">{score}</p>
         </div>
       </div>
 
       {/* Soru */}
       <div className="px-5 py-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] mb-6 text-center">
-        <p className="text-xs text-[var(--color-text-secondary)] mb-8">Bu kelimenin anlamı nedir?</p>
+        <p className="text-xs text-[var(--color-text-secondary)] mb-8">{t.wordMeaningGame.questionPrompt}</p>
         <p
           className="text-5xl font-bold text-[var(--color-text-primary)] leading-[1.6]"
           dir="rtl"
@@ -314,7 +320,7 @@ function WordMeaningGame() {
           {question.arabic}
         </p>
         <p className="text-[10px] text-[var(--color-text-secondary)] mt-4">
-          {remaining} kelime kaldı
+          {t.wordMeaningGame.remainingWords.replace("{count}", String(remaining))}
         </p>
       </div>
 
@@ -342,22 +348,22 @@ function WordMeaningGame() {
 
       {gameState === "correct" && (
         <div className="px-4 py-3 rounded-xl text-center bg-green-50 border border-green-100">
-          <p className="text-sm font-semibold text-green-700">✓ Doğru! +10 puan</p>
-          <p className="text-xs text-green-600 mt-1">Sonraki soru geliyor…</p>
+          <p className="text-sm font-semibold text-green-700">{t.wordMeaningGame.correct}</p>
+          <p className="text-xs text-green-600 mt-1">{t.wordMeaningGame.correctNext}</p>
         </div>
       )}
 
       {gameState === "wrong" && (
         <>
           <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3">
-            <p className="text-sm font-semibold text-red-600">✗ Yanlış. Doğrusu: {question.meaning}</p>
-            <p className="text-xs text-red-500 mt-1">Bu kelime tekrar gelecek</p>
+            <p className="text-sm font-semibold text-red-600">{t.wordMeaningGame.wrong.replace("{word}", question.meaning)}</p>
+            <p className="text-xs text-red-500 mt-1">{t.wordMeaningGame.wrongNote}</p>
           </div>
           <button
             onClick={nextRound}
             className="w-full py-3 rounded-xl bg-[var(--color-accent)] text-white font-semibold text-sm"
           >
-            Sonraki Soru →
+            {t.wordMeaningGame.nextQuestion}
           </button>
         </>
       )}

@@ -10,12 +10,13 @@ import { getSurahs } from "~/lib/quran-service";
 import { useSurahSelectionStore } from "~/stores/surahSelection.store";
 import { useHifzStore } from "~/stores/hifz.store";
 import { FixedBottomBar } from "~/components/FixedBottomBar";
+import { useTranslation } from "~/hooks/useTranslation";
 
-const PRESETS = [
-  { label: "Son 10",      range: [105, 114] },
-  { label: "Duha → Nas", range: [93,  114] },
-  { label: "Amme Cüzü",  range: [78,  114] },
-  { label: "Tebareke",   range: [67,   77] },
+const PRESET_RANGES = [
+  { key: "last10",    range: [105, 114] },
+  { key: "duhaToNas", range: [93,  114] },
+  { key: "amme",      range: [78,  114] },
+  { key: "tabaraka",  range: [67,   77] },
 ] as const;
 
 interface Props {
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Props) {
+  const { t } = useTranslation();
   const savedIds = useSurahSelectionStore((s) => s.selectedSurahIds);
   const saveIds = useSurahSelectionStore((s) => s.setSelectedSurahIds);
   const memorized = useHifzStore((s) => s.memorized);
@@ -67,7 +69,14 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
     setSearch("");
   };
 
-  const activePreset = PRESETS.find(({ range: [from, to] }) => {
+  const PRESETS = [
+    { key: "last10",    label: t.surahPicker.presetLast10,    range: [105, 114] },
+    { key: "duhaToNas", label: t.surahPicker.presetDuhaToNas, range: [93,  114] },
+    { key: "amme",      label: t.surahPicker.presetAmme,      range: [78,  114] },
+    { key: "tabaraka",  label: t.surahPicker.presetTabaraka,  range: [67,   77] },
+  ] as const;
+
+  const activePreset = PRESET_RANGES.find(({ range: [from, to] }) => {
     const ids = surahs.filter((s) => s.id >= from && s.id <= to).map((s) => s.id);
     return ids.length > 0 && ids.every((id) => selected.has(id)) && selected.size === ids.length;
   });
@@ -94,7 +103,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
         </Link>
         <div className="text-center">
           <p className="text-sm font-semibold text-[var(--color-text-primary)]">{gameTitle}</p>
-          <p className="text-xs text-[var(--color-text-secondary)]">Sure seç</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">{t.surahPicker.subtitle}</p>
         </div>
         <div className="w-5" />
       </div>
@@ -103,16 +112,16 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs text-[var(--color-text-secondary)]">
           {selected.size === 0
-            ? "Tüm Kuran'dan sorular gelir"
-            : `${selected.size} sure seçildi`}
+            ? t.surahPicker.allQuranHint
+            : t.surahPicker.selectedCount.replace("{count}", String(selected.size))}
         </p>
         <div className="flex gap-2">
           <button onClick={selectAll} className="text-xs text-[var(--color-accent)] hover:underline">
-            Tümü
+            {t.surahPicker.selectAll}
           </button>
           {selected.size > 0 && (
             <button onClick={clearAll} className="text-xs text-[var(--color-text-secondary)] hover:underline">
-              Temizle
+              {t.surahPicker.clear}
             </button>
           )}
         </div>
@@ -124,7 +133,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
         <button
           onClick={applyEzberim}
           disabled={memorizedSurahIds.length === 0}
-          title={memorizedSurahIds.length === 0 ? "Henüz ezberlediğin sure yok" : `${memorizedSurahIds.length} ezberlenen sure`}
+          title={memorizedSurahIds.length === 0 ? t.surahPicker.noMemorized : t.surahPicker.memorizedCount.replace("{count}", String(memorizedSurahIds.length))}
           className={`px-3 py-1 rounded-full text-xs font-medium border transition-all flex items-center gap-1 ${
             memorizedSurahIds.length === 0
               ? "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] opacity-40 cursor-not-allowed"
@@ -134,7 +143,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 4a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-4-4H7z" />
           </svg>
-          Ezberim
+          {t.surahPicker.myMemorized}
           {memorizedSurahIds.length > 0 && (
             <span className="text-[10px] text-[var(--color-accent)]">
               {memorizedSurahIds.length}
@@ -143,10 +152,10 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
         </button>
 
         {PRESETS.map((preset) => {
-          const isActive = activePreset?.label === preset.label;
+          const isActive = activePreset?.key === preset.key;
           return (
             <button
-              key={preset.label}
+              key={preset.key}
               onClick={() => applyPreset(preset.range)}
               className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
                 isActive
@@ -171,7 +180,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
         </svg>
         <input
           type="text"
-          placeholder="Sure ara..."
+          placeholder={t.surahPicker.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent)]/60"
@@ -181,7 +190,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
       {/* Sure listesi */}
       <div className="overflow-y-auto max-h-[55vh] space-y-1 mb-4 pr-1">
         {isLoading ? (
-          <p className="text-center text-sm text-[var(--color-text-secondary)] py-8">Yükleniyor...</p>
+          <p className="text-center text-sm text-[var(--color-text-secondary)] py-8">{t.surahPicker.loading}</p>
         ) : (
           filtered.map((s) => {
             const isSelected = selected.has(s.id);
@@ -229,7 +238,9 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
           onClick={handleStart}
           className="w-full max-w-lg mx-auto block py-3 rounded-xl bg-[var(--color-accent)] text-white font-semibold text-sm"
         >
-          {selected.size === 0 ? "Tüm Kuran'dan Başla" : `${selected.size} Sure ile Başla`}
+          {selected.size === 0
+            ? t.surahPicker.startAll
+            : t.surahPicker.startWithCount.replace("{count}", String(selected.size))}
         </button>
       </FixedBottomBar>
     </div>
