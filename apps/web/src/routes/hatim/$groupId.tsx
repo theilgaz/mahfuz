@@ -149,7 +149,12 @@ function GroupDashboardPage() {
             onClick={copyInviteCode}
             className="px-3.5 py-2 rounded-xl bg-[var(--color-accent)] text-white text-xs font-semibold transition-all"
           >
-            {inviteCopied ? "Kopyalandı ✓" : "Kopyala"}
+            {inviteCopied ? (
+              <span className="flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                Kopyalandı
+              </span>
+            ) : "Kopyala"}
           </button>
         </div>
         <p className="text-[10px] text-[var(--color-text-secondary)] mt-1.5">

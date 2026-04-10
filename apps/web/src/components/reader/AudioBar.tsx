@@ -60,7 +60,7 @@ export function AudioBar() {
     <div className="fixed bottom-18 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]" role="region" aria-label="Audio player">
       {/* Screen reader announcements */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {stateLabel} {verseDisplay} — {speed}x
+        {stateLabel} {verseDisplay} · {speed}x
       </div>
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg px-3 py-2">
         {/* Progress bar */}

@@ -378,7 +378,7 @@ export function HifzStatus() {
           <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
             <ProgressRing percentage={stats.percentage} size={48} />
             <span className="absolute text-[0.6rem] font-bold text-[var(--color-accent)]">
-              {stats.percentage > 0 ? `%${stats.percentage}` : "—"}
+              {stats.percentage > 0 ? `%${stats.percentage}` : ""}
             </span>
           </div>
           <div className="text-left">

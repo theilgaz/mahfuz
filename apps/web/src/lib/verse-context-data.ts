@@ -42,13 +42,13 @@ export interface VerseCategory {
 }
 
 export const VERSE_CATEGORIES: VerseCategory[] = [
-  { id: "siddet", label: "Silahlı Çatışma ve Savaş", icon: "⚔️" },
-  { id: "kadin", label: "Kadın Hakları", icon: "👩" },
-  { id: "cinsellik", label: "Evlilik ve Cinsellik", icon: "💍" },
-  { id: "ceza", label: "Ceza Hukuku", icon: "⚖️" },
-  { id: "din", label: "Dini Özgürlük", icon: "🕊️" },
-  { id: "kolelik", label: "Kölelik ve Özgürlük", icon: "🔓" },
-  { id: "cennet", label: "Ahiret Tasvirleri", icon: "🌿" },
+  { id: "siddet", label: "Silahlı Çatışma ve Savaş", icon: "shield" },
+  { id: "kadin", label: "Kadın Hakları", icon: "person" },
+  { id: "cinsellik", label: "Evlilik ve Cinsellik", icon: "heart" },
+  { id: "ceza", label: "Ceza Hukuku", icon: "scale" },
+  { id: "din", label: "Dini Özgürlük", icon: "globe" },
+  { id: "kolelik", label: "Kölelik ve Özgürlük", icon: "unlock" },
+  { id: "cennet", label: "Ahiret Tasvirleri", icon: "leaf" },
 ];
 
 const VERSE_CONTEXTS: VerseContext[] = [

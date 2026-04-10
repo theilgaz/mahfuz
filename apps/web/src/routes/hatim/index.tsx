@@ -52,8 +52,10 @@ function HatimPage() {
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
       {/* Başlık */}
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center text-xl">
-          📖
+        <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+          </svg>
         </div>
         <div>
           <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Hatim Grubu</h1>
@@ -98,7 +100,11 @@ function HatimPage() {
             </div>
           ) : groups.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-4xl mb-3">🕌</div>
+              <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center mx-auto mb-3 text-[var(--color-text-secondary)]">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 21h18M5 21V10l7-7 7 7v11M9 21v-6h6v6"/>
+              </svg>
+            </div>
               <p className="text-[var(--color-text-secondary)] text-sm mb-4">
                 Henüz bir hatim grubuna üye değilsiniz
               </p>
@@ -126,8 +132,16 @@ function HatimPage() {
                   params={{ groupId: g.id }}
                   className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-all"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center text-lg shrink-0">
-                    {g.scopeType === "full" ? "📗" : g.scopeType === "juz" ? "📋" : "📄"}
+                  <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)] shrink-0">
+                    {g.scopeType === "full" ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/>
+                      </svg>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
@@ -182,7 +196,17 @@ function HatimPage() {
                       : "border-[var(--color-border)] text-[var(--color-text-secondary)]"
                   }`}
                 >
-                  <div className="text-lg mb-0.5">{s === "full" ? "📗" : "📋"}</div>
+                  <div className="mb-1 text-[var(--color-accent)]">
+                    {s === "full" ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/>
+                      </svg>
+                    )}
+                  </div>
                   <div>{s === "full" ? "Tam Hatim" : "Seçili Cüzler"}</div>
                   <div className="text-[10px] opacity-70 mt-0.5">
                     {s === "full" ? "30 cüz, tüm Kuran" : "Belirli cüzler"}

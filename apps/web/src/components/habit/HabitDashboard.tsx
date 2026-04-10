@@ -1,6 +1,6 @@
 /**
  * Alışkanlık özeti — header satırında inline gösterilir.
- * 🔥 3 · 2/1s · Hatim ██░░ 3/604
+ * [streak] 3 · 2/1s · Hatim ██░░ 3/604
  */
 
 import { Suspense, useState, useRef, useEffect } from "react";
@@ -58,8 +58,16 @@ function HabitDashboardInner() {
   return (
     <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-text-secondary)]">
       {/* Streak */}
-      <span className="leading-none">
-        {currentStreak > 0 ? "\u{1F525}" : "\u{1F4D6}"}
+      <span className="leading-none flex items-center">
+        {currentStreak > 0 ? (
+          <svg className="w-3 h-3 text-orange-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C10 5.5 6.5 7 6.5 12a5.5 5.5 0 0011 0C17.5 7 14 5.5 12 2zm0 14a3 3 0 01-3-3c0-2 3-5.5 3-5.5s3 3.5 3 5.5a3 3 0 01-3 3z"/>
+          </svg>
+        ) : (
+          <svg className="w-3 h-3 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        )}
       </span>
       <span className="font-medium tabular-nums text-[var(--color-text-primary)]">
         {currentStreak}

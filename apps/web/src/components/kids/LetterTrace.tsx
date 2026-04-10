@@ -281,7 +281,7 @@ function LetterTraceInner({ letter, onComplete }: LetterTraceProps) {
         <span className="font-arabic text-lg" dir="rtl">
           {letter.arabic}
         </span>
-        {" — "}
+        {" · "}
         {letter.name}
       </p>
 

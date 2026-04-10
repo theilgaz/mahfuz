@@ -44,7 +44,7 @@ const CREDIT_GROUPS: CreditGroup[] = [
       </svg>
     ),
     items: [
-      { name: "Scheherazade New", url: "https://software.sil.org/scheherazade", desc: "Mushaf yazı tipi — SIL International" },
+      { name: "Scheherazade New", url: "https://software.sil.org/scheherazade", desc: "Mushaf yazı tipi · SIL International" },
       { name: "Inter", url: "https://rsms.me/inter", desc: "UI yazı tipi" },
     ],
   },

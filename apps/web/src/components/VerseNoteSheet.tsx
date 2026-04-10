@@ -69,7 +69,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
           {/* Başlık */}
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
-              Ayet Notu — {verseKey}
+              Ayet Notu · {verseKey}
             </h2>
             <button
               onClick={onClose}
@@ -114,7 +114,12 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
               disabled={!content.trim() || saveMutation.isPending}
               className="flex-1 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-semibold disabled:opacity-50 transition-opacity"
             >
-              {saved ? "Kaydedildi ✓" : saveMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+              {saved ? (
+                <span className="flex items-center justify-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                  Kaydedildi
+                </span>
+              ) : saveMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
             </button>
             {existingNote && (
               <button

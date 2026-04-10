@@ -97,13 +97,13 @@ export function AyahActionMenu({
   const reference = `${surahId}:${ayahNumber}`;
 
   async function copyText(text: string, label: string) {
-    await navigator.clipboard.writeText(`${text}\n\n— ${reference}`);
+    await navigator.clipboard.writeText(`${text}\n\n${reference}`);
     setCopied(label);
     setTimeout(() => onClose(), 600);
   }
 
   async function share() {
-    const text = [textUthmani, translation, `— ${reference}`].filter(Boolean).join("\n\n");
+    const text = [textUthmani, translation, `${reference}`].filter(Boolean).join("\n\n");
     if (navigator.share) {
       try { await navigator.share({ text }); } catch { /* cancelled */ }
     } else {

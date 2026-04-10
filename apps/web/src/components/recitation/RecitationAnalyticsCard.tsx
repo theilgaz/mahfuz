@@ -49,7 +49,7 @@ export function RecitationAnalyticsCard() {
         </div>
         <div className="rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] px-3 py-2.5 text-center">
           <p className="text-xl font-bold text-[var(--color-text-primary)]">
-            {avgScore > 0 ? `${Math.round(avgScore * 100)}%` : "—"}
+            {avgScore > 0 ? `${Math.round(avgScore * 100)}%` : "-"}
           </p>
           <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">Ort. Skor</p>
         </div>

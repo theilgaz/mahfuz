@@ -1,5 +1,5 @@
 /**
- * Qaida — Temel Kuran okuma müfredatı.
+ * Qaida · Temel Kuran okuma müfredatı.
  * Elifba'dan (harf tanıma) başlayıp Fatiha okumaya götüren 10 adımlı yol.
  */
 
@@ -13,14 +13,14 @@ const STEPS = [
   {
     id: 1,
     title: "Harfleri Tanı",
-    subtitle: "28 Arapça harf — izole form",
+    subtitle: "28 Arapça harf · izole form",
     icon: "ا",
     status: "available" as const,
     link: "/alifba",
   },
   {
     id: 2,
-    title: "Hareke — Kısa Sesli Harfler",
+    title: "Hareke · Kısa Sesli Harfler",
     subtitle: "Fetha (َ), Kesra (ِ), Damme (ُ)",
     icon: "بَ",
     status: "locked" as const,
@@ -29,7 +29,7 @@ const STEPS = [
   {
     id: 3,
     title: "Sükun ve Kapalı Heceler",
-    subtitle: "CVC yapısı — بَكْ, رَبْ",
+    subtitle: "CVC yapısı · بَكْ, رَبْ",
     icon: "رَبْ",
     status: "locked" as const,
     link: null,
@@ -37,7 +37,7 @@ const STEPS = [
   {
     id: 4,
     title: "Tenvin",
-    subtitle: "Nunlama — ً ٍ ٌ",
+    subtitle: "Nunlama · ً ٍ ٌ",
     icon: "كِتَابًا",
     status: "locked" as const,
     link: null,
@@ -45,7 +45,7 @@ const STEPS = [
   {
     id: 5,
     title: "Şedde",
-    subtitle: "Şeddeleme — الله, رَبَّ",
+    subtitle: "Şeddeleme · الله, رَبَّ",
     icon: "رَبَّ",
     status: "locked" as const,
     link: null,
@@ -53,7 +53,7 @@ const STEPS = [
   {
     id: 6,
     title: "Med Harfleri",
-    subtitle: "Uzatma — elif, vav, ye",
+    subtitle: "Uzatma · elif, vav, ye",
     icon: "قَالَ",
     status: "locked" as const,
     link: null,
@@ -77,7 +77,7 @@ const STEPS = [
   {
     id: 9,
     title: "Fatiha'yı Oku",
-    subtitle: "Büyük başarı — tam sure",
+    subtitle: "Büyük başarı · tam sure",
     icon: "الْفَاتِحَة",
     status: "locked" as const,
     link: null,
@@ -86,7 +86,7 @@ const STEPS = [
   {
     id: 10,
     title: "Tecvide Giriş",
-    subtitle: "Okuma kuralları — ileri adım",
+    subtitle: "Okuma kuralları · ileri adım",
     icon: "تَجْوِيد",
     status: "locked" as const,
     link: "/tajweed",
@@ -122,7 +122,10 @@ function StepCard({ step, index }: { step: (typeof STEPS)[0]; index: number }) {
         <p className={`text-sm font-semibold ${isAvailable ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)]"}`}>
           {step.title}
           {step.isMilestone && (
-            <span className="ml-2 text-[10px] text-[var(--color-accent)] font-bold">🎯 MİLESTONE</span>
+            <span className="ml-2 inline-flex items-center gap-0.5 text-[10px] text-[var(--color-accent)] font-bold">
+              <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21l1.9-5.7a8.5 8.5 0 113.8 3.8L3 21z"/></svg>
+              MİLESTONE
+            </span>
           )}
         </p>
         <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{step.subtitle}</p>
@@ -164,7 +167,7 @@ function QaidaPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Qaida</h1>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-          Sıfırdan Fatiha'ya — 10 adımlı temel okuma yolculuğu
+          Sıfırdan Fatiha'ya, 10 adımlı temel okuma yolculuğu
         </p>
       </div>
 
@@ -199,7 +202,11 @@ function QaidaPage() {
         to="/tajweed"
         className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-colors"
       >
-        <span className="text-2xl">🎯</span>
+        <div className="w-8 h-8 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+          <svg className="w-4 h-4 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+          </svg>
+        </div>
         <div className="flex-1">
           <p className="text-sm font-medium text-[var(--color-text-primary)]">Tecvid Kuralları</p>
           <p className="text-xs text-[var(--color-text-secondary)]">16 kural, örnekli anlatım</p>
