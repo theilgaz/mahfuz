@@ -162,7 +162,7 @@ export function GroupedMultiSelect({
           <div className="max-h-64 overflow-y-auto overscroll-contain p-1">
             {filtered.length === 0 ? (
               <p className="px-3 py-2 text-xs text-[var(--color-text-secondary)]">
-                {noResultsText || "—"}
+                {noResultsText || "Sonuç bulunamadı"}
               </p>
             ) : (
               sortedGroupKeys.map((groupKey) => (
