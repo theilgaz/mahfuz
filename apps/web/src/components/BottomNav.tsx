@@ -1,12 +1,11 @@
 /**
- * Alt navigasyon çubuğu — anasayfa, keşfet, devam et (popup), ara, profil.
+ * Alt navigasyon çubuğu — anasayfa, meem menü, profil.
  */
 
 import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useRouteContext } from "@tanstack/react-router";
 
 import { useReadingStore } from "~/stores/reading.store";
-import { useHifzStore, computeHifzStats } from "~/stores/hifz.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { surahSlug } from "~/lib/surah-slugs";
@@ -15,107 +14,51 @@ import { SettingsPanel } from "~/components/reader/SettingsPanel";
 
 // ── Menu item types ────────────────────────────────────────
 
+type IconColor = "accent" | "amber" | "neutral";
+
 interface MenuAction {
   id: string;
   label: string;
   icon: ReactNode;
+  /** true = icon is already styled (e.g. profile photo), skip the color wrapper */
+  rawIcon?: boolean;
   to?: string;
   onClick?: () => void;
 }
 
-// ── User Card ─────────────────────────────────────────────
+const ICON_COLOR_CLASSES: Record<IconColor, string> = {
+  accent: "bg-[var(--color-accent)] text-white",
+  amber: "bg-orange-600 text-white",
+  neutral: "bg-[var(--color-text-secondary)]/15 text-[var(--color-text-primary)]",
+};
 
-function StatPip({ label, value }: { label: string; value: string | number | undefined }) {
-  return (
-    <div className="flex flex-col items-center gap-0.5 min-w-0">
-      <span className="text-xs font-bold text-[var(--color-accent)] tabular-nums leading-none">{value ?? "-"}</span>
-      <span className="text-[9px] text-[var(--color-text-secondary)] leading-none">{label}</span>
-    </div>
-  );
+// ── Action Sheet ─────────────────────────────────────────
+
+interface MenuGroup {
+  label?: string;
+  iconColor: IconColor;
+  items: MenuAction[];
 }
 
-function UserCard({
-  user,
-  loginCta,
-  guestName,
-  onClose,
-}: {
-  user?: { id?: string; name?: string | null; email?: string | null; image?: string | null } | null;
-  loginCta: string;
-  guestName: string;
-  onClose: () => void;
-}) {
-  const memorized = useHifzStore((s) => s.memorized);
-  const hifz = computeHifzStats(memorized);
-
-
-  if (!user) {
-    return (
-      <Link to="/auth/login" search={{ redirect: "/" }} onClick={onClose}
-        className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[var(--color-surface)] hover:bg-[var(--color-border)]/30 transition-colors">
-        <span className="flex items-center justify-center w-11 h-11 rounded-full bg-[var(--color-accent)]/15 text-[var(--color-accent)] shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" />
-          </svg>
-        </span>
-        <span className="flex-1 text-sm font-semibold text-[var(--color-accent)]">{loginCta}</span>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-border)]">
-          <path d="M4 2l4 4-4 4" />
-        </svg>
-      </Link>
-    );
-  }
-
-  return (
-    <div className="rounded-2xl bg-[var(--color-surface)] overflow-hidden">
-      {/* Single compact row: avatar + name + stats + profile */}
-      <div className="flex items-center gap-3 px-3 py-2.5">
-        {user.image ? (
-          <img src={user.image} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
-        ) : (
-          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-accent)] text-white text-xs font-bold shrink-0">
-            {(user.name ?? guestName).charAt(0).toUpperCase()}
-          </span>
-        )}
-        <div className="min-w-0 shrink-0 w-28">
-          <p className="text-xs font-semibold text-[var(--color-text-primary)] truncate">{user.name ?? guestName}</p>
-          {user.email && <p className="text-[10px] text-[var(--color-text-secondary)] truncate">{user.email}</p>}
-        </div>
-
-        {/* Stats inline */}
-        <div className="flex flex-1 items-center justify-around min-w-0">
-          <StatPip label="Hıfz" value={`${hifz.percentage}%`} />
-          <div className="w-px h-6 bg-[var(--color-border)]" />
-          <StatPip label="Sure" value={hifz.completeSurahs} />
-          <div className="w-px h-6 bg-[var(--color-border)]" />
-          <StatPip label="Ayet" value={hifz.totalVerses} />
-        </div>
-
-        <Link to="/profile" onClick={onClose}
-          className="text-[10px] text-[var(--color-accent)] font-medium px-2 py-1 rounded-lg bg-[var(--color-accent)]/10 shrink-0">
-          →
-        </Link>
-      </div>
-    </div>
-  );
+interface HeroAction {
+  label: string;
+  desc?: string;
+  icon: ReactNode;
+  onClick: () => void;
 }
-
-// ── iOS-style Action Sheet ────────────────────────────────
 
 function ActionSheet({
   open,
   onClose,
+  hero,
   groups,
-  user,
-  loginCta,
-  guestName,
+  pathname,
 }: {
   open: boolean;
   onClose: () => void;
-  groups: { label?: string; items: MenuAction[] }[];
-  user?: { id?: string; name?: string | null; email?: string | null; image?: string | null } | null;
-  loginCta: string;
-  guestName: string;
+  hero: HeroAction;
+  groups: MenuGroup[];
+  pathname: string;
 }) {
   const sheetRef = useRef<HTMLDivElement>(null);
   useFocusTrap(sheetRef, open, onClose);
@@ -127,88 +70,95 @@ function ActionSheet({
     return () => document.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
+  const stagger = (i: number) =>
+    open ? { animation: `meem-item-in 350ms cubic-bezier(0.25,1,0.5,1) ${i * 40}ms both` } : undefined;
+
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity duration-250 ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        aria-hidden="true"
-      />
-
-      {/* Sheet */}
-      <div
-        ref={sheetRef}
-        role="dialog"
-        aria-modal="true"
-        className={`fixed bottom-0 inset-x-0 z-50 rounded-t-[28px] bg-[var(--color-bg)]/95 backdrop-blur-xl shadow-2xl transition-transform duration-300 ease-out pb-[calc(env(safe-area-inset-bottom)+8px)] ${open ? "translate-y-0" : "translate-y-full"}`}
-      >
-        {/* Handle */}
-        <div className="flex justify-center pt-2.5 pb-2">
-          <div className="w-8 h-[3px] rounded-full bg-[var(--color-border)]" />
-        </div>
-
-        {/* User card + Premium */}
-        <div className="px-3 pb-3 flex items-stretch gap-2">
-          <div className="flex-1 min-w-0">
-            <UserCard user={user} loginCta={loginCta} guestName={guestName} onClose={onClose} />
-          </div>
-          <Link
-            to="/premium"
-            onClick={onClose}
-            className="flex flex-col items-center justify-center gap-1 px-3 rounded-2xl bg-[var(--color-surface)] text-[var(--color-accent)] shrink-0 hover:bg-[var(--color-accent)]/10 transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-            <span className="text-[9px] font-semibold">Mürşid</span>
-          </Link>
-        </div>
-
-        {/* Groups */}
-        <div className="px-3 pb-4 grid grid-cols-1 md:grid-cols-3 gap-2.5 max-h-[60vh] overflow-y-auto">
-          {groups.map((group, gi) => (
-            <div key={gi}>
-              {group.label && (
-                <p className="text-[11px] font-medium text-[var(--color-text-secondary)] px-1 mb-1">
-                  {group.label}
-                </p>
-              )}
-              <div className="rounded-2xl overflow-hidden bg-[var(--color-surface)]">
-                {group.items.map((item, i) => {
-                  const inner = (
-                    <>
-                      <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-[var(--color-accent)] text-white shrink-0">
-                        {item.icon}
-                      </span>
-                      <span className="flex-1 text-sm font-medium text-[var(--color-text-primary)]">{item.label}</span>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-border)] shrink-0">
-                        <path d="M4 2l4 4-4 4" />
-                      </svg>
-                    </>
-                  );
-
-                  const cls = `flex items-center gap-3 px-3 py-2.5 active:bg-[var(--color-border)]/30 transition-colors ${i < group.items.length - 1 ? "border-b border-[var(--color-border)]/50" : ""}`;
-
-                  if (item.to) {
-                    return (
-                      <Link key={item.id} to={item.to as "/"} onClick={onClose} className={cls}>
-                        {inner}
-                      </Link>
-                    );
-                  }
-                  return (
-                    <button key={item.id} onClick={() => { item.onClick?.(); onClose(); }} className={`w-full text-left ${cls}`}>
-                      {inner}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
+    <div
+      ref={sheetRef}
+      role="dialog"
+      aria-modal="true"
+      className="rounded-[24px] bg-[var(--color-bg)]/90 backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.18)] overflow-hidden"
+      style={{
+        transition: "opacity 300ms cubic-bezier(0.25,1,0.5,1), transform 400ms cubic-bezier(0.25,1,0.5,1)",
+        opacity: open ? 1 : 0,
+        transform: open ? "translateY(0) scale(1)" : "translateY(16px) scale(0.96)",
+        pointerEvents: open ? "auto" : "none",
+      }}
+    >
+      {/* Handle */}
+      <div className="flex justify-center pt-3 pb-2">
+        <div className="w-9 h-[5px] rounded-full bg-[var(--color-border)]/50" />
       </div>
-    </>
+
+      {/* Hero CTA */}
+      <div className="px-4 pb-3.5" style={stagger(0)}>
+        <button
+          onClick={() => { hero.onClick(); onClose(); }}
+          className="w-full flex items-center gap-3 px-4 py-4 rounded-[18px] bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)]/85 text-white hover:brightness-110 active:scale-[0.98] transition-all duration-150 shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
+        >
+          <span className="flex items-center justify-center w-11 h-11 rounded-[13px] bg-white/20 shrink-0">
+            {hero.icon}
+          </span>
+          <div className="flex-1 text-left min-w-0">
+            <span className="text-[15px] font-semibold">{hero.label}</span>
+            {hero.desc && (
+              <p className="text-xs text-white/70 leading-tight mt-0.5 truncate">{hero.desc}</p>
+            )}
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 text-white/60">
+            <path d="M5 3l4 4-4 4" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Groups */}
+      <div className="px-4 pb-4 max-h-[55vh] overflow-y-auto">
+        {groups.map((group, gi) => (
+          <div key={gi} style={stagger(gi + 1)}>
+            {group.label && (
+              <p className="text-[15px] font-bold text-[var(--color-text-primary)] px-1 mb-2.5 mt-1 first:mt-0">
+                {group.label}
+              </p>
+            )}
+
+            <div className="flex flex-wrap gap-0 mb-4 last:mb-0">
+              {group.items.map((item) => {
+                const isActive = item.to ? pathname.startsWith(item.to) : false;
+                const iconEl = item.rawIcon ? (
+                  <span className="flex items-center justify-center w-12 h-12 rounded-[16px] shrink-0 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.08)]">{item.icon}</span>
+                ) : (
+                  <span className={`flex items-center justify-center w-12 h-12 rounded-[16px] shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.08)] ${ICON_COLOR_CLASSES[group.iconColor]}`}>{item.icon}</span>
+                );
+
+                const activeCls = isActive ? "bg-[var(--color-accent)]/8" : "";
+                const cls = `flex flex-col items-center text-center gap-0.5 px-1 py-1 rounded-2xl w-[64px] ${activeCls} active:scale-[0.93] transition-transform duration-150`;
+
+                const inner = (
+                  <>
+                    {iconEl}
+                    <span className="text-[11px] font-medium text-[var(--color-text-secondary)] leading-tight line-clamp-1">{item.label}</span>
+                  </>
+                );
+
+                if (item.to) {
+                  return (
+                    <Link key={item.id} to={item.to as "/"} onClick={onClose} className={cls}>
+                      {inner}
+                    </Link>
+                  );
+                }
+                return (
+                  <button key={item.id} onClick={() => { item.onClick?.(); onClose(); }} className={cls}>
+                    {inner}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -235,37 +185,42 @@ export function BottomNav() {
 
   const lastPos = recentPositions[0];
 
+  // Hero CTA — "Devam Et" extracted from groups
+  const heroAction: HeroAction = {
+    label: t.nav.continueReading,
+    desc: lastPos
+      ? `${getSurahName(lastPos.surahId, locale)}${lastPos.ayahNumber > 1 ? ` · ${lastPos.ayahNumber}. ayet` : ""}`
+      : undefined,
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 6C2 6 4 4 8 4C12 4 14 6 14 6V20C14 20 12 18 8 18C4 18 2 20 2 20V6Z" />
+        <path d="M14 6C14 6 16 4 20 4C22 4 22 4 22 4V18C22 18 21 18 20 18C16 18 14 20 14 20V6Z" />
+      </svg>
+    ),
+    onClick: () => {
+      if (lastPos) {
+        navigate({
+          to: "/surah/$surahSlug",
+          params: { surahSlug: surahSlug(lastPos.surahId) },
+          search: { ayah: lastPos.ayahNumber > 1 ? lastPos.ayahNumber : undefined },
+        });
+      } else {
+        navigate({ to: "/page/$pageNumber", params: { pageNumber: "1" }, search: { ayah: undefined } });
+      }
+    },
+  };
+
   // Action sheet groups
-  const menuGroups: { label?: string; items: MenuAction[] }[] = [
+  const menuGroups: MenuGroup[] = [
     {
       label: t.nav.menuReading,
+      iconColor: "accent",
       items: [
-        {
-          id: "continue",
-          label: t.nav.continueReading,
-          icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 6C2 6 4 4 8 4C12 4 14 6 14 6V20C14 20 12 18 8 18C4 18 2 20 2 20V6Z" />
-              <path d="M14 6C14 6 16 4 20 4C22 4 22 4 22 4V18C22 18 21 18 20 18C16 18 14 20 14 20V6Z" />
-            </svg>
-          ),
-          onClick: () => {
-            if (lastPos) {
-              navigate({
-                to: "/surah/$surahSlug",
-                params: { surahSlug: surahSlug(lastPos.surahId) },
-                search: { ayah: lastPos.ayahNumber > 1 ? lastPos.ayahNumber : undefined },
-              });
-            } else {
-              navigate({ to: "/page/$pageNumber", params: { pageNumber: "1" }, search: { ayah: undefined } });
-            }
-          },
-        },
         {
           id: "bookmarks",
           label: t.nav.bookmarks,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
             </svg>
           ),
@@ -275,7 +230,7 @@ export function BottomNav() {
           id: "notes",
           label: t.nav.notes,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
               <line x1="16" y1="13" x2="8" y2="13" />
@@ -286,26 +241,29 @@ export function BottomNav() {
           to: "/notes",
         },
         {
-          id: "search",
-          label: t.nav.search,
+          id: "hatim",
+          label: "Hatim",
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
           ),
-          to: "/search",
+          to: "/hatim",
         },
       ],
     },
     {
       label: t.nav.menuLearning,
+      iconColor: "amber",
       items: [
         {
           id: "alifba",
           label: t.nav.alifba,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="4 7 4 4 20 4 20 7" />
               <line x1="9" y1="20" x2="15" y2="20" />
               <line x1="12" y1="4" x2="12" y2="20" />
@@ -317,7 +275,7 @@ export function BottomNav() {
           id: "qaida",
           label: t.nav.qaida,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
             </svg>
@@ -328,7 +286,7 @@ export function BottomNav() {
           id: "tajweed",
           label: t.nav.tajweed,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
               <path d="M12 8v4l3 3" />
             </svg>
@@ -339,7 +297,7 @@ export function BottomNav() {
           id: "games",
           label: t.nav.games,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="6" width="20" height="12" rx="2" />
               <path d="M7 10v4M5 12h4" />
               <path d="M17 10h.01M19 12h.01" />
@@ -351,12 +309,13 @@ export function BottomNav() {
     },
     {
       label: t.nav.menuExplore,
+      iconColor: "neutral",
       items: [
         {
           id: "discover",
           label: t.nav.hub,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" />
             </svg>
@@ -364,34 +323,43 @@ export function BottomNav() {
           to: "/discover",
         },
         {
-          id: "hub",
-          label: "Hub", // proper name, no translation needed
+          id: "mursid",
+          label: "Mürşid",
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
             </svg>
           ),
-          to: "/hub",
+          to: "/premium",
         },
         {
-          id: "profile",
-          label: t.nav.profile,
+          id: "search",
+          label: t.nav.search,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           ),
-          to: user ? "/profile" : "/auth/login",
+          to: "/search",
+        },
+        {
+          id: "about",
+          label: "Hakkında",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+          ),
+          to: "/about",
         },
         {
           id: "settings",
           label: t.nav.settings,
           icon: (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
@@ -404,17 +372,33 @@ export function BottomNav() {
 
   return (
     <>
-      <ActionSheet open={sheetOpen} onClose={closeSheet} groups={menuGroups} user={user} loginCta={t.nav.loginCta} guestName={t.nav.guestName} />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
-      <nav aria-label="Mahfuz" className="fixed bottom-0 inset-x-0 z-30 bg-[var(--color-bg)] border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-center justify-around h-14 max-w-xs mx-auto">
+      {/* Backdrop — z-40, nav container z-50 ustunde kalir */}
+      <div
+        onClick={closeSheet}
+        className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-md transition-opacity duration-250 ${sheetOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        aria-hidden="true"
+      />
 
+      {/* Nav container — z-50, backdrop'un ustunde */}
+      <div className="fixed bottom-0 inset-x-0 z-50 flex flex-col items-center pointer-events-none pb-[max(env(safe-area-inset-bottom),12px)]">
+
+        {/* Action sheet — sits above the nav pill, same container width on desktop */}
+        <div className={`w-full max-w-lg px-3 mb-2 ${sheetOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+          <ActionSheet open={sheetOpen} onClose={closeSheet} hero={heroAction} groups={menuGroups} pathname={pathname} />
+        </div>
+
+        {/* Nav pill */}
+        <nav
+          aria-label="Mahfuz"
+          className="pointer-events-auto flex items-center gap-1 h-14 px-2 rounded-2xl bg-[var(--color-bg)]/90 backdrop-blur-xl border border-[var(--color-border)] shadow-[0_4px_24px_rgba(0,0,0,0.12)]"
+        >
           {/* 1. Ana sayfa */}
           <Link
             to="/"
             aria-current={pathname === "/" ? "page" : undefined}
-            className={`flex flex-col items-center gap-0.5 px-6 py-1 ${pathname === "/" ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
+            className={`flex flex-col items-center gap-0.5 w-16 py-1.5 rounded-xl transition-colors ${pathname === "/" ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"}`}
           >
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 11L11 3L19 11" />
@@ -423,11 +407,11 @@ export function BottomNav() {
             <span className="text-[10px]">{t.nav.home}</span>
           </Link>
 
-          {/* 2. Meem — action sheet */}
+          {/* 2. Meem — action sheet toggle */}
           <button
             onClick={() => setSheetOpen((v) => !v)}
-            className="flex flex-col items-center gap-0.5 px-6 py-1 transition-colors text-[var(--color-accent)]"
-            aria-label="Menü"
+            className="flex flex-col items-center gap-0.5 w-16 py-1.5 rounded-xl transition-colors text-[var(--color-accent)]"
+            aria-label="Menu"
             aria-haspopup="dialog"
             aria-expanded={sheetOpen}
           >
@@ -440,7 +424,7 @@ export function BottomNav() {
           <Link
             to={user ? "/profile" : "/auth/login"}
             aria-current={pathname === "/profile" ? "page" : undefined}
-            className={`flex flex-col items-center gap-0.5 px-6 py-1 ${pathname === "/profile" ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
+            className={`flex flex-col items-center gap-0.5 w-16 py-1.5 rounded-xl transition-colors ${pathname === "/profile" ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"}`}
           >
             {user?.image ? (
               <img
@@ -455,11 +439,10 @@ export function BottomNav() {
                 <path d="M4 19C4 15.134 7.134 12 11 12C14.866 12 18 15.134 18 19" />
               </svg>
             )}
-            <span className="text-[10px]">{t.nav.profile}</span>
+            <span className="text-[10px]">{user?.name?.split(" ")[0] ?? t.nav.profile}</span>
           </Link>
-
-        </div>
-      </nav>
+        </nav>
+      </div>
     </>
   );
 }

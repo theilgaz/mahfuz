@@ -24,6 +24,30 @@ export const Route = createFileRoute("/profile")({
   component: ProfilePage,
 });
 
+// Scalloped badge path (same as SurahList)
+const BADGE_PATH =
+  "M59.3,15.2 Q73,10.2 75.5,24.5 Q89.8,27 84.8,40.7 Q96,50 84.8,59.3 Q89.8,73 75.5,75.5 Q73,89.8 59.3,84.8 Q50,96 40.7,84.8 Q27,89.8 24.5,75.5 Q10.2,73 15.2,59.3 Q4,50 15.2,40.7 Q10.2,27 24.5,24.5 Q27,10.2 40.7,15.2 Q50,4 59.3,15.2Z";
+const CARD_CLIP = "polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%)";
+
+function ClippedCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div style={{ filter: "drop-shadow(0 0 0.5px var(--color-border)) drop-shadow(0 0 0.5px var(--color-border))" }}>
+      <div
+        className={className}
+        style={{ clipPath: CARD_CLIP }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function ProfilePage() {
   const { session } = Route.useRouteContext();
   const router = useRouter();
@@ -43,32 +67,37 @@ function ProfilePage() {
     <div className="max-w-lg mx-auto px-4 py-6 pb-32">
 
       {/* ── Kullanıcı kartı ───────────────────────────── */}
-      <div className="flex items-center gap-4 p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] mb-6">
-        {user.image ? (
-          <img
-            src={user.image}
-            alt={user.name || ""}
-            className="h-16 w-16 rounded-full object-cover shrink-0 ring-2 ring-[var(--color-accent)]/20"
-            referrerPolicy="no-referrer"
-          />
-        ) : (
-          <span className="h-16 w-16 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-2xl font-semibold text-white shrink-0">
-            {user.name?.[0]?.toUpperCase() || "?"}
-          </span>
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-base truncate">{user.name}</p>
-          <p className="text-xs text-[var(--color-text-secondary)] truncate mt-0.5">{user.email}</p>
+      <div className="mb-6">
+      <ClippedCard className="bg-[var(--color-surface)] p-5">
+        <div className="flex items-center gap-4">
+          {user.image ? (
+            <img
+              src={user.image}
+              alt={user.name || ""}
+              className="h-16 w-16 rounded-full object-cover shrink-0 ring-2 ring-[var(--color-accent)]/20"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <span className="h-16 w-16 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-2xl font-semibold text-white shrink-0">
+              {user.name?.[0]?.toUpperCase() || "?"}
+            </span>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-base truncate">{user.name}</p>
+            <p className="text-xs text-[var(--color-text-secondary)] truncate mt-0.5">{user.email}</p>
+          </div>
+          <button
+            onClick={async () => {
+              await signOut();
+              await router.invalidate();
+            }}
+            className="shrink-0 px-3 py-1.5 text-xs text-red-500 hover:bg-red-500/10 transition-colors"
+            style={{ clipPath: CARD_CLIP }}
+          >
+            {t.nav.signOut}
+          </button>
         </div>
-        <button
-          onClick={async () => {
-            await signOut();
-            await router.invalidate();
-          }}
-          className="shrink-0 px-3 py-1.5 rounded-lg text-xs text-red-500 hover:bg-red-500/10 transition-colors border border-red-500/20"
-        >
-          {t.nav.signOut}
-        </button>
+      </ClippedCard>
       </div>
 
       {/* ── Ezber Durumu ──────────────────────────────── */}
@@ -104,124 +133,91 @@ function ProfilePage() {
         </div>
 
         {bookmarks.length === 0 ? (
-          <div className="p-6 rounded-xl border border-dashed border-[var(--color-border)] text-center">
+          <ClippedCard className="bg-[var(--color-surface)] p-6 text-center">
             <svg width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1" className="text-[var(--color-border)] mx-auto mb-2">
               <path d="M5 3H15A1.5 1.5 0 0116.5 4.5V17.5L10.5 13.5L4.5 17.5V4.5A1.5 1.5 0 015 3Z" />
             </svg>
             <p className="text-xs text-[var(--color-text-secondary)]">{t.profile.noBookmarks}</p>
-          </div>
+          </ClippedCard>
         ) : (
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden divide-y divide-[var(--color-border)]">
-            {recentBookmarks.map((bm) => {
-              const name = getSurahName(bm.surahId, locale);
-              return (
-                <div key={`${bm.surahId}:${bm.ayahNumber}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-[var(--color-accent)]/3 transition-colors">
-                  {/* Sure/ayet bilgisi — tıklanabilir */}
-                  <Link
-                    to="/surah/$surahSlug"
-                    params={{ surahSlug: surahSlug(bm.surahId) }}
-                    search={{ ayah: bm.ayahNumber }}
-                    className="flex-1 min-w-0 flex items-center gap-2.5"
-                  >
-                    <span className="w-7 h-7 rounded-lg bg-[var(--color-accent)]/8 flex items-center justify-center text-[10px] font-bold text-[var(--color-accent)] shrink-0">
-                      {bm.surahId}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium truncate">{name}</p>
-                      <p className="text-[10px] text-[var(--color-text-secondary)]">
-                        {t.common.verse} {bm.ayahNumber}
-                      </p>
-                    </div>
-                  </Link>
+          <ClippedCard className="bg-[var(--color-surface)] overflow-hidden">
+            <div className="divide-y divide-[var(--color-border)]">
+              {recentBookmarks.map((bm) => {
+                const name = getSurahName(bm.surahId, locale);
+                return (
+                  <div key={`${bm.surahId}:${bm.ayahNumber}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-[var(--color-accent)]/3 transition-colors">
+                    <Link
+                      to="/surah/$surahSlug"
+                      params={{ surahSlug: surahSlug(bm.surahId) }}
+                      search={{ ayah: bm.ayahNumber }}
+                      className="flex-1 min-w-0 flex items-center gap-2.5"
+                    >
+                      {/* Scalloped badge */}
+                      <div className="relative shrink-0 w-8 h-8 flex items-center justify-center text-[var(--color-accent)]">
+                        <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" aria-hidden="true">
+                          <path d={BADGE_PATH} fill="currentColor" />
+                          <path d={BADGE_PATH} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="4" />
+                        </svg>
+                        <span className="relative z-10 text-[9px] font-black tabular-nums text-white">
+                          {String(bm.surahId).padStart(2, "0")}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium truncate">{name}</p>
+                        <p className="text-[10px] text-[var(--color-text-secondary)]">
+                          {t.common.verse} {bm.ayahNumber}
+                        </p>
+                      </div>
+                    </Link>
 
-                  {/* Kaldır butonu */}
-                  <button
-                    onClick={() => removeBookmark(bm.surahId, bm.ayahNumber)}
-                    className="shrink-0 p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                    aria-label="Kaldır"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                      <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
-                    </svg>
-                  </button>
-                </div>
-              );
-            })}
+                    <button
+                      onClick={() => removeBookmark(bm.surahId, bm.ayahNumber)}
+                      className="shrink-0 p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                      aria-label="Kaldır"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                        <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })}
 
-            {/* Tümünü gör linki */}
-            {bookmarks.length > 5 && (
-              <Link
-                to="/bookmarks"
-                className="flex items-center justify-center gap-1 px-3 py-2.5 text-xs text-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 transition-colors"
-              >
-                +{bookmarks.length - 5} {t.bookmarks.nMore.replace("{n}", "")}
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M4.5 2.5l3.5 3.5-3.5 3.5" />
-                </svg>
-              </Link>
-            )}
-          </div>
+              {bookmarks.length > 5 && (
+                <Link
+                  to="/bookmarks"
+                  className="flex items-center justify-center gap-1 px-3 py-2.5 text-xs text-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 transition-colors"
+                >
+                  +{bookmarks.length - 5} {t.bookmarks.nMore.replace("{n}", "")}
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M4.5 2.5l3.5 3.5-3.5 3.5" />
+                  </svg>
+                </Link>
+              )}
+            </div>
+          </ClippedCard>
         )}
       </section>
 
       {/* ── İstatistikler + Keşfet Linkleri ─────────── */}
       <div className="space-y-3">
-        <Link
-          to="/stats"
-          className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-colors"
-        >
-          <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/8 text-[var(--color-accent)] flex items-center justify-center shrink-0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
+        <ClippedCard className="bg-[var(--color-surface)]">
+          <Link to="/stats" className="flex items-center gap-3 p-4 hover:bg-[var(--color-accent)]/3 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/8 text-[var(--color-accent)] flex items-center justify-center shrink-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium">{t.stats.title}</p>
+              <p className="text-xs text-[var(--color-text-secondary)]">{t.stats.memorization}</p>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-text-secondary)] shrink-0">
+              <path d="M6 4l4 4-4 4" />
             </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">{t.stats.title}</p>
-            <p className="text-xs text-[var(--color-text-secondary)]">{t.stats.memorization}</p>
-          </div>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-text-secondary)] shrink-0">
-            <path d="M6 4l4 4-4 4" />
-          </svg>
-        </Link>
+          </Link>
+        </ClippedCard>
 
-        <Link
-          to="/discover"
-          className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-[var(--color-accent)]/8 to-transparent border border-[var(--color-accent)]/15 hover:border-[var(--color-accent)]/30 transition-colors"
-        >
-          <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/12 text-[var(--color-accent)] flex items-center justify-center shrink-0">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="10" cy="10" r="8" />
-              <path d="M13.5 6.5L8.5 8.5L6.5 13.5L11.5 11.5L13.5 6.5Z" />
-            </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">{t.hub.title}</p>
-            <p className="text-xs text-[var(--color-text-secondary)]">{t.hub.guide.subtitle}</p>
-          </div>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-accent)] shrink-0">
-            <path d="M6 4l4 4-4 4" />
-          </svg>
-        </Link>
-
-        <Link
-          to="/about"
-          className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-colors"
-        >
-          <div className="w-10 h-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] flex items-center justify-center shrink-0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 16v-4" />
-              <path d="M12 8h.01" />
-            </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">{t.about.title}</p>
-            <p className="text-xs text-[var(--color-text-secondary)]">{t.about.subtitle}</p>
-          </div>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-text-secondary)] shrink-0">
-            <path d="M6 4l4 4-4 4" />
-          </svg>
-        </Link>
       </div>
     </div>
   );

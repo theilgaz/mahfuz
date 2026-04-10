@@ -26,6 +26,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Readex Pro";
+  src: url("/fonts/readex-pro-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Tema: Papirüs (varsayılan) ─────────────────────── */
 
 :root,
@@ -418,6 +426,20 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
   background: var(--color-accent);
   border: 2px solid var(--color-bg);
   box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+
+/* ── Meem Menu Stagger Animation ─────────────────────── */
+
+@keyframes meem-item-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes meem-item-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 }
 
 /* ── View Transitions ────────────────────────────────── */

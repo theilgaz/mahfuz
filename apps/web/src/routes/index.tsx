@@ -12,6 +12,7 @@ import { DailyVerseCard } from "~/components/DailyVerseCard";
 import { SettingsButton } from "~/components/SettingsButton";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
+import { getSurahName } from "~/lib/surah-names-i18n";
 import { useShallow } from "zustand/react/shallow";
 
 export const Route = createFileRoute("/")({
@@ -58,7 +59,7 @@ function HomePageSkeleton() {
 
 function HomePage() {
   const { session } = Route.useRouteContext();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { readingMode } = useSettingsStore(
     useShallow((s) => ({ readingMode: s.readingMode }))
   );
@@ -85,7 +86,7 @@ function HomePage() {
               </span>
               {visible.map((bm) => {
                 const surah = surahMap.get(bm.surahId);
-                const name = surah?.nameSimple || String(bm.surahId);
+                const name = getSurahName(bm.surahId, locale) || String(bm.surahId);
                 const label = `${name} ${bm.ayahNumber}`;
                 const linkProps = readingMode !== "mushaf"
                   ? { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(bm.surahId) }, search: { ayah: bm.ayahNumber } }

@@ -3,8 +3,10 @@
  * TanStack Router calls this with { error, reset }.
  */
 
+import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "~/hooks/useTranslation";
+import { useSettingsStore } from "~/stores/settings.store";
 
 interface RouteErrorFallbackProps {
   error: Error;
@@ -12,6 +14,15 @@ interface RouteErrorFallbackProps {
 }
 
 export function RouteErrorFallback({ error, reset }: RouteErrorFallbackProps) {
+  // RootDocument may not render when this is the root error boundary,
+  // so apply the theme directly to ensure correct styling
+  useEffect(() => {
+    try {
+      const theme = useSettingsStore.getState().theme;
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch {}
+  }, []);
+
   let t: ReturnType<typeof useTranslation>["t"];
   try {
     ({ t } = useTranslation());

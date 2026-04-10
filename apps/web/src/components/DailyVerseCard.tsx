@@ -6,10 +6,11 @@ import { Link } from "@tanstack/react-router";
 import { useDailyVerse } from "~/hooks/useQuranQuery";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
+import { getSurahName } from "~/lib/surah-names-i18n";
 
 export function DailyVerseCard() {
   const { data, isLoading } = useDailyVerse();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   if (isLoading) {
     return (
@@ -37,7 +38,7 @@ export function DailyVerseCard() {
         </span>
         {surah && (
           <span className="text-[10px] text-[var(--color-text-secondary)]">
-            {surah.nameSimple} · {verse.ayahNumber}
+            {getSurahName(surah.id, locale)} · {verse.ayahNumber}
           </span>
         )}
       </div>
@@ -75,7 +76,7 @@ export function DailyVerseCard() {
           <button
             type="button"
             onClick={() => {
-              const text = `${verse.textUthmani}\n\n${translation?.text ?? ""}\n\n${surah?.nameSimple} ${verse.ayahNumber} · İkra`;
+              const text = `${verse.textUthmani}\n\n${translation?.text ?? ""}\n\n${getSurahName(surah.id, locale)} ${verse.ayahNumber} · İkra`;
               if (navigator.share) {
                 navigator.share({ text });
               } else {

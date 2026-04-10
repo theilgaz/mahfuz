@@ -106,7 +106,7 @@ export const ARABIC_LETTERS: ArabicLetter[] = [
   { id: "fa", arabic: "ف", name: "Fe", nameAr: "فَاء", order: 20 },
   { id: "qaf", arabic: "ق", name: "Kaf", nameAr: "قَاف", order: 21 },
   { id: "kaf", arabic: "ك", name: "Kef", nameAr: "كَاف", order: 22 },
-  { id: "lam", arabic: "ل", name: "Lem", nameAr: "لَام", order: 23 },
+  { id: "lam", arabic: "ل", name: "Lam", nameAr: "لَام", order: 23 },
   { id: "mim", arabic: "م", name: "Mim", nameAr: "مِيم", order: 24 },
   { id: "nun", arabic: "ن", name: "Nun", nameAr: "نُون", order: 25 },
   { id: "haa", arabic: "ه", name: "He", nameAr: "هَاء", order: 26 },

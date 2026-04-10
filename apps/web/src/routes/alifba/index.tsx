@@ -242,7 +242,7 @@ function AlifbaIndexPage() {
         {ARABIC_LETTERS.map((letter) => {
           const prog = progress[letter.id];
           const isSeen = prog?.seen;
-          const isMastered = prog?.seen && prog?.tracingDone && (prog?.voiceScore ?? 0) >= 80;
+          const isMastered = prog?.seen && prog?.tracingDone;
           return (
             <Link
               key={letter.id}

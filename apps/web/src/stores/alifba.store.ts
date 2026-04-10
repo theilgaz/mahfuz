@@ -74,9 +74,7 @@ const INITIAL_STATE: AlifbaState = {
 export function computeAlifbaStats(state: AlifbaState) {
   const letters = Object.values(state.progress);
   const seen = letters.filter((l) => l.seen).length;
-  const mastered = letters.filter(
-    (l) => l.seen && l.tracingDone && (l.voiceScore ?? 0) >= 80,
-  ).length;
+  const mastered = letters.filter((l) => l.seen && l.tracingDone).length;
   const bestExam = state.examHistory.length
     ? Math.max(...state.examHistory.map((e) => e.score))
     : null;

@@ -26,6 +26,7 @@ function LetterDetailPage() {
   const markSeen = useAlifbaStore((s) => s.markSeen);
   const markTracingDone = useAlifbaStore((s) => s.markTracingDone);
   const touchStreak = useAlifbaStore((s) => s.touchStreak);
+  const progress = useAlifbaStore((s) => s.progress);
 
   const letter = ARABIC_LETTERS.find((l) => l.id === letterId);
   const examples = LETTER_EXAMPLES[letterId] ?? [];
@@ -173,7 +174,26 @@ function LetterDetailPage() {
             />
           </Suspense>
         </div>
+
       </section>
+
+      {/* Öğrendim butonu */}
+      {!progress[letter.id]?.tracingDone && (
+        <button
+          type="button"
+          onClick={() => {
+            markTracingDone(letter.id);
+            if (nextLetter) {
+              navigate({ to: "/alifba/$letterId", params: { letterId: nextLetter.id } });
+            } else {
+              navigate({ to: "/alifba/" });
+            }
+          }}
+          className="mb-3 w-full py-3 rounded-xl bg-[var(--color-accent)] text-white font-medium text-sm hover:opacity-90 transition-colors"
+        >
+          {t.alifba.markSeen}
+        </button>
+      )}
 
       {/* Önceki / Sonraki navigasyon */}
       <div className="flex items-center gap-2">

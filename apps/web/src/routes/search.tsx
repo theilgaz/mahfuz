@@ -1,9 +1,10 @@
 /**
- * Arama route'u — /ara
+ * Arama route'u — /search
+ * Unified search: ayet/meal + app-ici sayfalar
  */
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchQuran, type SearchResult } from "~/lib/search-service";
 import { useSettingsStore } from "~/stores/settings.store";
@@ -15,6 +16,94 @@ import { surahSlug } from "~/lib/surah-slugs";
 export const Route = createFileRoute("/search")({
   component: SearchPage,
 });
+
+// ── App-ici aranabilir sayfalar ──────────────────────────
+
+interface AppPage {
+  id: string;
+  label: string;
+  keywords: string[];
+  route: string;
+  desc: string;
+  iconColor: string;
+  icon: ReactNode;
+}
+
+const APP_PAGES: AppPage[] = [
+  {
+    id: "alifba", label: "Elifba",
+    keywords: ["elif", "harf", "arapca", "alfabe", "letter", "arabic"],
+    route: "/alifba", desc: "Arap harflerini ogren",
+    iconColor: "bg-orange-600 text-white",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" y1="20" x2="15" y2="20" /><line x1="12" y1="4" x2="12" y2="20" /></svg>,
+  },
+  {
+    id: "qaida", label: "Kaide",
+    keywords: ["okuma", "kural", "reading", "qaida", "kaide"],
+    route: "/qaida", desc: "Kuran okuma rehberi",
+    iconColor: "bg-orange-600 text-white",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>,
+  },
+  {
+    id: "tajweed", label: "Tecvid",
+    keywords: ["tecvid", "kural", "ihfa", "idgam", "tajweed", "ihfaa", "iklap"],
+    route: "/tajweed", desc: "Tecvid kurallari",
+    iconColor: "bg-orange-600 text-white",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" /><path d="M12 8v4l3 3" /></svg>,
+  },
+  {
+    id: "games", label: "Oyunlar",
+    keywords: ["oyun", "quiz", "game", "kelime", "hexagon", "sure", "bilmece", "yarismak"],
+    route: "/games", desc: "Kuran oyunlari",
+    iconColor: "bg-orange-600 text-white",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" /><path d="M7 10v4M5 12h4" /><path d="M17 10h.01M19 12h.01" /></svg>,
+  },
+  {
+    id: "hatim", label: "Hatim",
+    keywords: ["hatim", "grup", "cuz", "okuma", "group"],
+    route: "/hatim", desc: "Hatim gruplari",
+    iconColor: "bg-[var(--color-accent)] text-white",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+  },
+  {
+    id: "bookmarks", label: "Yer Imleri",
+    keywords: ["yer imi", "kayit", "bookmark", "isaret", "favori"],
+    route: "/bookmarks", desc: "Kayitli ayetler",
+    iconColor: "bg-[var(--color-accent)] text-white",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>,
+  },
+  {
+    id: "notes", label: "Notlar",
+    keywords: ["not", "yazi", "note", "notlarim"],
+    route: "/notes", desc: "Ayet notlarin",
+    iconColor: "bg-[var(--color-accent)] text-white",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>,
+  },
+  {
+    id: "discover", label: "Kesfet",
+    keywords: ["kesfet", "kok", "latin", "discover", "arastir"],
+    route: "/discover", desc: "Kesfet ve arastir",
+    iconColor: "bg-[var(--color-text-secondary)]/15 text-[var(--color-text-primary)]",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" /></svg>,
+  },
+  {
+    id: "premium", label: "Mursid",
+    keywords: ["premium", "mursid", "plan", "abone", "subscribe"],
+    route: "/premium", desc: "Premium ozellikler",
+    iconColor: "bg-[var(--color-text-secondary)]/15 text-[var(--color-text-primary)]",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>,
+  },
+];
+
+function matchAppPages(q: string): AppPage[] {
+  if (!q || q.length < 2) return [];
+  const lower = q.toLowerCase();
+  return APP_PAGES.filter(
+    (p) => p.label.toLowerCase().includes(lower) || p.keywords.some((kw) => kw.includes(lower)),
+  );
+}
+
+// ── Main ────────────────────────────────────────────────
 
 function SearchPage() {
   const { t, locale } = useTranslation();
@@ -43,13 +132,16 @@ function SearchPage() {
     staleTime: 60_000,
   });
 
+  const appResults = useMemo(() => matchAppPages(query), [query]);
+  const hasAnyResults = (results && results.length > 0) || appResults.length > 0;
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
       {/* Arama kutusu */}
-      <div className="relative mb-6">
+      <div className="relative mb-8">
         <label htmlFor="search-quran" className="sr-only">{t.a11y?.searchQuran ?? t.search.placeholder}</label>
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
           width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
           aria-hidden="true"
         >
@@ -64,41 +156,76 @@ function SearchPage() {
           onChange={(e) => handleInput(e.target.value)}
           placeholder={t.search.placeholder}
           autoFocus
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-sm focus:outline-none focus:border-[var(--color-accent)] transition-colors"
+          className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-[var(--color-surface)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 transition-all"
         />
       </div>
 
-      {/* Öneriler — arama boşken */}
+      {/* Oneriler - arama bosken */}
       {!query && <SearchSuggestions onSelect={handleInput} locale={locale} t={t} />}
 
-      {/* Sonuçlar */}
+      {/* App sayfa sonuclari - anlik */}
+      {appResults.length > 0 && (
+        <section className="mb-6">
+          <h3 className="text-sm font-bold text-[var(--color-text-primary)] mb-3">
+            {locale === "tr" ? "Ozellikler" : "Features"}
+          </h3>
+          <div className="space-y-1.5">
+            {appResults.map((page) => (
+              <Link
+                key={page.id}
+                to={page.route as "/"}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[var(--color-surface)] hover:bg-[var(--color-surface)]/80 active:scale-[0.98] transition-all"
+              >
+                <span className={`flex items-center justify-center w-10 h-10 rounded-[12px] shrink-0 ${page.iconColor}`}>
+                  {page.icon}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-medium text-[var(--color-text-primary)]">{page.label}</span>
+                  <p className="text-xs text-[var(--color-text-secondary)] truncate">{page.desc}</p>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 text-[var(--color-text-secondary)]/50">
+                  <path d="M5 3l4 4-4 4" />
+                </svg>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Sonuclar */}
       <div aria-live="polite" aria-atomic="true">
         {isLoading && debouncedQuery.length >= 2 && (
-          <p className="text-sm text-[var(--color-text-secondary)] text-center py-4">
+          <p className="text-sm text-[var(--color-text-secondary)] text-center py-8 animate-pulse">
             {t.common.searching}
           </p>
         )}
 
-        {results && results.length === 0 && debouncedQuery.length >= 2 && (
-          <p className="text-sm text-[var(--color-text-secondary)] text-center py-4">
-            {t.common.noResults}
-          </p>
+        {!isLoading && results && results.length === 0 && debouncedQuery.length >= 2 && appResults.length === 0 && (
+          <div className="text-center py-12">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" className="mx-auto mb-3 text-[var(--color-text-secondary)]/30">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              {t.common.noResults}
+            </p>
+          </div>
         )}
       </div>
 
       {results && results.length > 0 && (
-        <GroupedResults results={results} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />
+        <GroupedResults results={results as SearchResult[]} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />
       )}
     </div>
   );
 }
 
-// ── Gruplandırılmış sonuçlar ─────────────────────────────
+// ── Gruplandirmis sonuclar ──────────────────────────────
 
 const GROUP_LABELS: Record<string, { tr: string; en: string }> = {
   surah: { tr: "Sureler", en: "Surahs" },
-  translation: { tr: "Meal Sonuçları", en: "Translation Results" },
-  arabic: { tr: "Arapça Metin", en: "Arabic Text" },
+  translation: { tr: "Meal Sonuclari", en: "Translation Results" },
+  arabic: { tr: "Arapca Metin", en: "Arabic Text" },
 };
 
 function GroupedResults({ results, readingMode, locale, t, navigate }: {
@@ -114,22 +241,21 @@ function GroupedResults({ results, readingMode, locale, t, navigate }: {
       const type = r.matchType ?? "translation";
       (map[type] ??= []).push(r);
     }
-    // Sıralama: surah → translation → arabic
     const order = ["surah", "translation", "arabic"];
     return order.filter((k) => map[k]?.length).map((k) => ({ type: k, items: map[k] }));
   }, [results]);
 
   return (
-    <section className="space-y-5" aria-label={`${results.length} ${t.common.results}`}>
+    <section className="space-y-6" aria-label={`${results.length} ${t.common.results}`}>
       <p className="text-xs text-[var(--color-text-secondary)]">
         {results.length} {t.common.results}
       </p>
       {groups.map((group) => (
         <section key={group.type}>
-          <h3 className="text-[11px] font-semibold text-[var(--color-text-secondary)] mb-2">
+          <h3 className="text-sm font-bold text-[var(--color-text-primary)] mb-3">
             {GROUP_LABELS[group.type]?.[locale as "tr" | "en"] ?? GROUP_LABELS[group.type]?.tr ?? group.type}
           </h3>
-          <ul className="space-y-2 list-none p-0">
+          <ul className="space-y-2.5 list-none p-0">
             {group.items.map((r) => (
               <li key={`${r.surahId}:${r.ayahNumber}`}>
                 <ResultCard r={r} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />
@@ -154,16 +280,18 @@ function ResultCard({ r, readingMode, locale, t, navigate }: {
           navigate({ to: "/page/$pageNumber", params: { pageNumber: String(r.pageNumber) }, search: { ayah: `${r.surahId}:${r.ayahNumber}` } });
         }
       }}
-      className="block w-full text-left p-3 rounded-xl border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors"
+      className="block w-full text-left p-4 rounded-2xl bg-[var(--color-surface)] hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] active:scale-[0.99] transition-all"
     >
-      <div className="flex items-center gap-2 mb-2 text-xs text-[var(--color-text-secondary)]">
-        <span>{r.surahNameSimple}</span>
-        <span>&middot;</span>
-        <span>{t.common.verse} {r.ayahNumber}</span>
-        <span>&middot;</span>
-        <span>{t.common.page} {r.pageNumber}</span>
+      <div className="flex items-center gap-2 mb-2.5">
+        <span className="text-sm font-semibold text-[var(--color-text-primary)]">{r.surahNameSimple}</span>
+        <span className="text-xs px-1.5 py-0.5 rounded-md bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium">
+          {r.ayahNumber}
+        </span>
+        <span className="ml-auto text-[11px] text-[var(--color-text-secondary)]">
+          {t.common.page} {r.pageNumber}
+        </span>
       </div>
-      <p className="text-base leading-[2.2] mb-1.5" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
+      <p className="text-base leading-[2.2] mb-2" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
         {r.textUthmani}
       </p>
       {r.translation && (
@@ -175,23 +303,23 @@ function ResultCard({ r, readingMode, locale, t, navigate }: {
   );
 }
 
-// ── Popüler sureler ve sık aranan kelimeler ──────────────
+// ── Populer sureler ve sik aranan kelimeler ─────────────
 
 const POPULAR_SURAHS = [
-  { id: 1, nameAr: "الفاتحة" },
-  { id: 36, nameAr: "يس" },
-  { id: 67, nameAr: "الملك" },
-  { id: 55, nameAr: "الرحمن" },
-  { id: 56, nameAr: "الواقعة" },
-  { id: 18, nameAr: "الكهف" },
-  { id: 112, nameAr: "الإخلاص" },
-  { id: 2, nameAr: "البقرة" },
-  { id: 48, nameAr: "الفتح" },
-  { id: 78, nameAr: "النبأ" },
+  { id: 1, nameAr: "\u0627\u0644\u0641\u0627\u062a\u062d\u0629" },
+  { id: 36, nameAr: "\u064a\u0633" },
+  { id: 67, nameAr: "\u0627\u0644\u0645\u0644\u0643" },
+  { id: 55, nameAr: "\u0627\u0644\u0631\u062d\u0645\u0646" },
+  { id: 56, nameAr: "\u0627\u0644\u0648\u0627\u0642\u0639\u0629" },
+  { id: 18, nameAr: "\u0627\u0644\u0643\u0647\u0641" },
+  { id: 112, nameAr: "\u0627\u0644\u0625\u062e\u0644\u0627\u0635" },
+  { id: 2, nameAr: "\u0627\u0644\u0628\u0642\u0631\u0629" },
+  { id: 48, nameAr: "\u0627\u0644\u0641\u062a\u062d" },
+  { id: 78, nameAr: "\u0627\u0644\u0646\u0628\u0623" },
 ];
 
 const SUGGESTED_KEYWORDS: Record<string, string[]> = {
-  tr: ["rahmet", "sabır", "namaz", "tövbe", "cennet", "şükür", "adalet", "ihsan", "tevekkül", "hidayet"],
+  tr: ["rahmet", "sabir", "namaz", "tovbe", "cennet", "sukur", "adalet", "ihsan", "tevekkul", "hidayet"],
   en: ["mercy", "patience", "prayer", "repentance", "paradise", "grateful", "justice", "faith", "guidance", "forgiveness"],
 };
 
@@ -199,20 +327,20 @@ function SearchSuggestions({ onSelect, locale, t }: { onSelect: (q: string) => v
   const keywords = SUGGESTED_KEYWORDS[locale] ?? SUGGESTED_KEYWORDS.tr;
 
   return (
-    <div className="space-y-5">
-      {/* Popüler sureler */}
+    <div className="space-y-6">
+      {/* Populer sureler */}
       <div>
-        <h3 className="text-[11px] font-semibold text-[var(--color-text-secondary)] mb-2">
+        <h3 className="text-[15px] font-bold text-[var(--color-text-primary)] mb-3">
           {t.search.popularSurahs}
         </h3>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {POPULAR_SURAHS.map((s) => (
             <button
               key={s.id}
               onClick={() => onSelect(getSurahName(s.id, locale) || s.nameAr)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-accent)] text-xs transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-surface)] hover:bg-[var(--color-accent)]/8 active:scale-[0.97] text-xs transition-all"
             >
-              <span dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "0.8rem" }}>{s.nameAr}</span>
+              <span dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "0.85rem" }}>{s.nameAr}</span>
               <span className="text-[var(--color-text-secondary)]">{getSurahName(s.id, locale)}</span>
             </button>
           ))}
@@ -221,15 +349,15 @@ function SearchSuggestions({ onSelect, locale, t }: { onSelect: (q: string) => v
 
       {/* Anahtar kelimeler */}
       <div>
-        <h3 className="text-[11px] font-semibold text-[var(--color-text-secondary)] mb-2">
+        <h3 className="text-[15px] font-bold text-[var(--color-text-primary)] mb-3">
           {t.search.suggestedKeywords}
         </h3>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {keywords.map((kw) => (
             <button
               key={kw}
               onClick={() => onSelect(kw)}
-              className="px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-accent)] text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+              className="px-3 py-1.5 rounded-full bg-[var(--color-accent)]/8 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/15 active:scale-[0.97] text-xs font-medium transition-all"
             >
               {kw}
             </button>

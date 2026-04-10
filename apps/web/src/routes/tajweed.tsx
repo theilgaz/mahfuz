@@ -3,7 +3,7 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/tajweed")({
@@ -263,9 +263,8 @@ function RuleCard({ rule, onSelect }: { rule: TajweedRule; onSelect: () => void 
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left flex items-center gap-0 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-sm active:scale-[0.99] transition-all duration-150 overflow-hidden"
+      className="w-full text-left flex items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-sm active:scale-[0.99] transition-all duration-150 overflow-hidden"
     >
-      {/* Arabic badge */}
       <div
         className="w-14 self-stretch flex items-center justify-center shrink-0"
         style={{ backgroundColor: alpha(rule.accent, 0.08) }}
@@ -280,10 +279,8 @@ function RuleCard({ rule, onSelect }: { rule: TajweedRule; onSelect: () => void 
         </span>
       </div>
 
-      {/* Separator */}
       <div className="w-px self-stretch" style={{ backgroundColor: "var(--color-border)" }} />
 
-      {/* Content */}
       <div className="flex-1 min-w-0 px-4 py-3.5">
         <div className="flex items-center gap-2 mb-0.5 flex-wrap">
           <p className="text-sm font-semibold text-[var(--color-text-primary)]">{rule.name}</p>
@@ -308,10 +305,22 @@ function RuleCard({ rule, onSelect }: { rule: TajweedRule; onSelect: () => void 
   );
 }
 
+function SectionHeader({ icon, label, accent }: { icon: ReactNode; label: string; accent: string }) {
+  return (
+    <div className="px-4 py-2.5 border-b border-[var(--color-border)] flex items-center gap-2">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: accent }}>
+        {icon}
+      </svg>
+      <p className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void; t: T }) {
   return (
     <div className="space-y-3">
-      {/* Back */}
       <button
         onClick={onBack}
         className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors mb-1"
@@ -322,7 +331,6 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
         {t.tajweedPage.back}
       </button>
 
-      {/* Hero */}
       <div
         className="rounded-2xl px-5 pt-5 pb-4 border"
         style={{
@@ -356,7 +364,6 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
           </div>
         </div>
 
-        {/* Arabic */}
         <div className="text-center py-5 border-t border-b" style={{ borderColor: alpha(rule.accent, 0.15) }}>
           <p
             className="text-4xl leading-loose"
@@ -368,22 +375,17 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
           </p>
         </div>
 
-        {/* Definition */}
         <p className="mt-4 text-sm text-[var(--color-text-primary)] leading-relaxed">
           {rule.definition}
         </p>
       </div>
 
-      {/* Conditions */}
       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-[var(--color-border)] flex items-center gap-2">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: rule.accent }}>
-            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-          </svg>
-          <p className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
-            {t.tajweedPage.sectionConditions}
-          </p>
-        </div>
+        <SectionHeader
+          icon={<><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></>}
+          label={t.tajweedPage.sectionConditions}
+          accent={rule.accent}
+        />
         <ul className="divide-y divide-[var(--color-border)]">
           {rule.conditions.map((c, i) => (
             <li key={i} className="flex items-start gap-3 px-4 py-3">
@@ -399,20 +401,15 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
         </ul>
       </div>
 
-      {/* Examples */}
       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-[var(--color-border)] flex items-center gap-2">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: rule.accent }}>
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
-          </svg>
-          <p className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
-            {t.tajweedPage.sectionExamples}
-          </p>
-        </div>
+        <SectionHeader
+          icon={<><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></>}
+          label={t.tajweedPage.sectionExamples}
+          accent={rule.accent}
+        />
         <div className="divide-y divide-[var(--color-border)]">
           {rule.examples.map((ex, i) => (
             <div key={i} className="flex items-center gap-4 px-4 py-4">
-              {/* Full verse */}
               <div className="flex-1 min-w-0">
                 <p
                   className="text-2xl text-[var(--color-text-primary)] leading-loose"
@@ -425,7 +422,6 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
                 <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 font-mono">{ex.transliteration}</p>
               </div>
 
-              {/* Highlighted letters */}
               <div className="shrink-0 text-center">
                 <p className="text-[10px] text-[var(--color-text-secondary)] mb-1">{t.tajweedPage.ruleApplied}</p>
                 <div
@@ -454,8 +450,8 @@ function TajweedPage() {
   const { t } = useTranslation();
   const [selectedRule, setSelectedRule] = useState<TajweedRule | null>(null);
 
-  const TAJWEED_RULES = makeRules(t);
-  const CATEGORY_GROUPS = makeCategories(t);
+  const TAJWEED_RULES = useMemo(() => makeRules(t), [t]);
+  const CATEGORY_GROUPS = useMemo(() => makeCategories(t), [t]);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
@@ -463,7 +459,6 @@ function TajweedPage() {
         <RuleDetail rule={selectedRule} onBack={() => setSelectedRule(null)} t={t} />
       ) : (
         <>
-          {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
               <svg className="w-5 h-5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -478,7 +473,6 @@ function TajweedPage() {
             </div>
           </div>
 
-          {/* Categories */}
           {CATEGORY_GROUPS.map((group) => {
             const rules = group.ids.map((id) => TAJWEED_RULES.find((r) => r.id === id)!).filter(Boolean);
             return (
@@ -500,7 +494,6 @@ function TajweedPage() {
             );
           })}
 
-          {/* Quiz teaser */}
           <div className="px-5 py-4 rounded-2xl border border-dashed border-[var(--color-border)] flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
               <svg className="w-4 h-4 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -10,6 +10,7 @@ import { useSurahs, surahsQueryOptions } from "~/hooks/useQuranQuery";
 import { BookmarkRow } from "~/components/BookmarkRow";
 
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-names-i18n";
 
 export const Route = createFileRoute("/bookmarks")({
   loader: ({ context }) => context.queryClient.ensureQueryData(surahsQueryOptions()),
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/bookmarks")({
 type SortMode = "surah" | "recent";
 
 function BookmarksPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const bookmarks = useBookmarksStore((s) => s.bookmarks);
   const { data: surahs } = useSurahs();
   const surahMap = useMemo(() => new Map(surahs.map((s) => [s.id, s])), [surahs]);
@@ -86,7 +87,7 @@ function BookmarksPage() {
               {/* Section header */}
               <div className="flex items-center gap-2 px-3 py-1.5 mb-0.5 sticky top-0 bg-[var(--color-bg)] z-10">
                 <span className="text-xs font-medium text-[var(--color-text-secondary)]">
-                  {surahId}. {surah?.nameSimple ?? `${t.common.surah} ${surahId}`}
+                  {surahId}. {getSurahName(surahId, locale) || `${t.common.surah} ${surahId}`}
                 </span>
                 {surah?.nameArabic && (
                   <span className="text-xs text-[var(--color-text-secondary)]" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
@@ -105,7 +106,7 @@ function BookmarksPage() {
                   surahId={bm.surahId}
                   ayahNumber={bm.ayahNumber}
                   pageNumber={bm.pageNumber}
-                  surahName={surah?.nameSimple || `${t.common.surah} ${bm.surahId}`}
+                  surahName={getSurahName(bm.surahId, locale) || `${t.common.surah} ${bm.surahId}`}
                   surahNameArabic={surah?.nameArabic}
                   showDivider={i < bms.length - 1}
                 />

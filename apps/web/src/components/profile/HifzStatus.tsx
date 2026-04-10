@@ -92,6 +92,11 @@ function versesToRangeText(verses: number[], total: number, allLabel: string): s
   return ranges.join(", ");
 }
 
+const CARD_CLIP = "polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)";
+const HEADER_CLIP = "polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%)";
+const BADGE_PATH =
+  "M59.3,15.2 Q73,10.2 75.5,24.5 Q89.8,27 84.8,40.7 Q96,50 84.8,59.3 Q89.8,73 75.5,75.5 Q73,89.8 59.3,84.8 Q50,96 40.7,84.8 Q27,89.8 24.5,75.5 Q10.2,73 15.2,59.3 Q4,50 15.2,40.7 Q10.2,27 24.5,24.5 Q27,10.2 40.7,15.2 Q50,4 59.3,15.2Z";
+
 /* ── Sure kartı ────────────────────────────────────── */
 
 function SurahCard({
@@ -106,77 +111,73 @@ function SurahCard({
   const h = t.profile.hifz;
 
   const verses = useHifzStore((s) => s.memorized[surahId]) ?? EMPTY_ARR;
-  const toggleAllVerses = useHifzStore((s) => s.toggleAllVerses);
 
   const total = SURAH_VERSE_COUNTS[surahId] ?? 0;
   const count = verses.length;
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-  const state = count === 0 ? "none" : count === total ? "complete" : "partial";
+  const isComplete = count === total && total > 0;
+  const isPartial = count > 0 && count < total;
   const name = getSurahName(surahId, locale);
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
-      className={`relative rounded-xl border transition-all cursor-pointer group ${
-        state === "complete"
-          ? "bg-[var(--color-accent)]/8 border-[var(--color-accent)]/25 hover:border-[var(--color-accent)]/40"
-          : state === "partial"
-            ? "bg-[var(--color-text-secondary)]/5 border-[var(--color-text-secondary)]/20 hover:border-[var(--color-text-secondary)]/35"
-            : "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)]/30"
+      onClick={onOpen}
+      className={`p-[1.5px] cursor-pointer active:scale-[0.98] transition-all ${
+        isComplete
+          ? "bg-[var(--color-accent)]/30"
+          : isPartial
+            ? "bg-[var(--color-accent)]/15"
+            : "bg-[var(--color-border)]"
       }`}
+      style={{ clipPath: CARD_CLIP }}
     >
-      {/* Kart içeriği — tıklayınca ayet detayı açar */}
-      <button
-        type="button"
-        onClick={onOpen}
-        className="w-full text-left p-3"
-      >
-        {/* Üst: numara + isim */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className="w-6 h-6 rounded-md bg-[var(--color-bg)] flex items-center justify-center text-[0.6rem] font-bold text-[var(--color-text-secondary)] shrink-0">
-            {surahId}
-          </span>
-          <span className={`text-sm font-medium truncate ${
-            state === "complete" ? "text-[var(--color-accent)] dark:text-[var(--color-accent)]"
-              : state === "partial" ? "text-[var(--color-text-secondary)] " : ""
-          }`}>
-            {name}
+    <div
+      className={`p-3 ${
+        isComplete
+          ? "bg-[var(--color-accent)]/8"
+          : "bg-[var(--color-surface)]"
+      }`}
+      style={{ clipPath: CARD_CLIP }}
+    >
+      <div className="flex items-center gap-2.5 mb-2">
+        <div className={`relative shrink-0 w-9 h-9 flex items-center justify-center ${
+          isComplete ? "text-[var(--color-accent)]" : "text-[var(--color-border)]"
+        }`}>
+          <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" aria-hidden="true">
+            <path d={BADGE_PATH} fill="currentColor" />
+            <path d={BADGE_PATH} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="4" />
+          </svg>
+          <span className="relative z-10 text-[9px] font-black tabular-nums text-white">
+            {String(surahId).padStart(2, "0")}
           </span>
         </div>
+        <span className={`flex-1 min-w-0 text-sm font-medium truncate ${
+          isComplete ? "text-[var(--color-accent)]" : ""
+        }`}>
+          {name}
+        </span>
+        {isComplete && (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 text-[var(--color-accent)]">
+            <path d="M3 7l2.5 2.5L11 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </div>
 
-        {/* Progress bar */}
-        <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden mb-1.5">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              state === "complete" ? "bg-[var(--color-accent)]" : state === "partial" ? "bg-[var(--color-text-secondary)]" : "bg-transparent"
-            }`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
+      <div className={`h-1 rounded-full overflow-hidden mb-1.5 ${isComplete || isPartial ? "bg-[var(--color-border)]/50" : "invisible"}`}>
+        <div
+          className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
 
-        {/* Alt: ayet sayısı + yüzde */}
-        <div className="flex items-center justify-between">
-          <span className="text-[0.6rem] text-[var(--color-text-secondary)]">
-            {count > 0 ? `${count}/${total}` : `${total} ${h.verses}`}
-          </span>
-          {count > 0 && (
-            <span className={`text-[0.6rem] font-bold ${
-              state === "complete" ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"
-            }`}>
-              %{pct}
-            </span>
-          )}
-        </div>
-      </button>
-
-      {/* Hızlı toggle — sol üst checkbox */}
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); toggleAllVerses(surahId); }}
-        className="absolute top-2 right-2 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-        aria-label={h.selectAll}
-      >
-        <CheckIcon state={state} />
-      </button>
+      <div className="flex items-center justify-between text-[10px] text-[var(--color-text-secondary)]">
+        <span>{count > 0 ? `${count}/${total} ${h.verses}` : `${total} ${h.verses}`}</span>
+        <span className={`font-bold ${isComplete ? "text-[var(--color-accent)]" : ""} ${count > 0 ? "" : "invisible"}`}>
+          %{pct}
+        </span>
+      </div>
+    </div>
     </div>
   );
 }
@@ -234,74 +235,111 @@ function VerseDetailSheet({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 animate-in fade-in duration-150" />
+      <div className="absolute inset-0 bg-black/40 animate-in fade-in duration-150" onClick={onClose} />
 
       {/* Sheet */}
       <div className="relative w-full sm:max-w-lg max-h-[85vh] bg-[var(--color-surface)] rounded-t-2xl sm:rounded-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="sticky top-0 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 py-3 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => toggleAllVerses(surahId)}
-            className="shrink-0"
-            aria-label={h.selectAll}
-          >
-            <CheckIcon state={checkState} />
-          </button>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{surahId}. {name}</p>
-            <p className="text-[0.65rem] text-[var(--color-text-secondary)]">
-              {count}/{totalVerses} {h.verses} · %{pct}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-[var(--color-bg)] transition-colors shrink-0"
-            aria-label={t.common.close}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <path d="M4 4l8 8M12 4l-8 8" />
-            </svg>
-          </button>
+        {/* Drag handle (mobile) */}
+        <div className="flex justify-center pt-2 pb-1 sm:hidden">
+          <div className="w-8 h-1 rounded-full bg-[var(--color-border)]" />
         </div>
 
-        <div className="overflow-y-auto p-4 space-y-3" style={{ maxHeight: "calc(85vh - 56px)" }}>
-          {/* Aralık ekleme */}
-          <div className="flex items-center gap-1.5">
-            <input
-              type="number"
-              min={1}
-              max={totalVerses}
-              value={rangeFrom}
-              onChange={(e) => setRangeFrom(e.target.value)}
-              placeholder={h.from}
-              className="w-16 px-2 py-1.5 text-xs rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-center"
-            />
-            <span className="text-[0.65rem] text-[var(--color-text-secondary)]">–</span>
-            <input
-              type="number"
-              min={1}
-              max={totalVerses}
-              value={rangeTo}
-              onChange={(e) => setRangeTo(e.target.value)}
-              placeholder={h.to}
-              className="w-16 px-2 py-1.5 text-xs rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-center"
-            />
+        {/* Header */}
+        <div className="sticky top-0 bg-[var(--color-surface)] px-4 pb-3 pt-2 sm:pt-4">
+          <div className="flex items-center gap-3 mb-3">
+            {/* Scalloped badge */}
+            <div className={`relative shrink-0 w-11 h-11 flex items-center justify-center ${
+              checkState === "complete" ? "text-[var(--color-accent)]" : "text-[var(--color-border)]"
+            }`}>
+              <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" aria-hidden="true">
+                <path d={BADGE_PATH} fill="currentColor" />
+                <path d={BADGE_PATH} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="4" />
+              </svg>
+              <span className="relative z-10 text-[11px] font-black tabular-nums text-white">
+                {String(surahId).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold truncate">{name}</p>
+              <p className="text-xs text-[var(--color-text-secondary)]">
+                {count}/{totalVerses} {h.verses}
+              </p>
+            </div>
             <button
               type="button"
-              onClick={handleAddRange}
-              disabled={!rangeFrom || !rangeTo}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--color-accent)] text-white disabled:opacity-30 transition-colors"
+              onClick={onClose}
+              className="p-1.5 rounded-lg hover:bg-[var(--color-bg)] transition-colors shrink-0"
+              aria-label={t.common.close}
             >
-              {h.addRange}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M4 4l8 8M12 4l-8 8" />
+              </svg>
             </button>
           </div>
 
+          {/* Progress bar + action row */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-2 rounded-full bg-[var(--color-border)]/50 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-500"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className={`text-xs font-bold shrink-0 ${checkState === "complete" ? "text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}>
+              %{pct}
+            </span>
+          </div>
+
+          {/* Quick actions */}
+          <div className="flex items-center gap-2 mt-3 border-b border-[var(--color-border)] pb-3">
+            <button
+              type="button"
+              onClick={() => toggleAllVerses(surahId)}
+              className={`flex-1 py-2 text-xs font-medium rounded-lg transition-colors ${
+                checkState === "complete"
+                  ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
+                  : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-accent)]"
+              }`}
+            >
+              {checkState === "complete" ? h.removeAll : h.selectAll}
+            </button>
+            <div className="flex items-center gap-1 flex-1">
+              <input
+                type="number"
+                min={1}
+                max={totalVerses}
+                value={rangeFrom}
+                onChange={(e) => setRangeFrom(e.target.value)}
+                placeholder={h.from}
+                className="w-full px-2 py-2 text-xs rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-center"
+              />
+              <span className="text-[0.65rem] text-[var(--color-text-secondary)] shrink-0">-</span>
+              <input
+                type="number"
+                min={1}
+                max={totalVerses}
+                value={rangeTo}
+                onChange={(e) => setRangeTo(e.target.value)}
+                placeholder={h.to}
+                className="w-full px-2 py-2 text-xs rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-center"
+              />
+              <button
+                type="button"
+                onClick={handleAddRange}
+                disabled={!rangeFrom || !rangeTo}
+                className="px-3 py-2 text-xs font-medium rounded-lg bg-[var(--color-accent)] text-white disabled:opacity-30 transition-colors shrink-0"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-y-auto px-4 pb-4 pt-3" style={{ maxHeight: "calc(85vh - 200px)" }}>
           {/* Ayet grid */}
           <div className="grid grid-cols-7 sm:grid-cols-10 gap-1.5">
             {Array.from({ length: totalVerses }, (_, i) => i + 1).map((v) => (
@@ -309,10 +347,10 @@ function VerseDetailSheet({
                 key={v}
                 type="button"
                 onClick={() => toggleVerse(surahId, v)}
-                className={`h-8 text-[0.65rem] font-medium rounded-lg transition-colors ${
+                className={`aspect-square flex items-center justify-center text-[0.65rem] font-medium rounded-lg transition-colors ${
                   memorizedSet.has(v)
                     ? "bg-[var(--color-accent)] text-white shadow-sm"
-                    : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)]/15"
+                    : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)]/15 active:bg-[var(--color-accent)]/25"
                 }`}
               >
                 {v}
@@ -322,11 +360,14 @@ function VerseDetailSheet({
 
           {/* Seçili aralık özeti */}
           {memorized.length > 0 && memorized.length < totalVerses && (
-            <p className="text-[0.65rem] text-[var(--color-text-secondary)] text-center">
+            <p className="text-[0.65rem] text-[var(--color-text-secondary)] text-center mt-3">
               {versesToRangeText(memorized, totalVerses, h.allVersesSelected)}
             </p>
           )}
         </div>
+
+        {/* Safe area padding for mobile */}
+        <div className="pb-[env(safe-area-inset-bottom)]" />
       </div>
     </div>
   );
@@ -369,34 +410,37 @@ export function HifzStatus() {
   return (
     <section className="mb-6">
       {/* Başlık kartı */}
-      <button
-        type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] transition-colors hover:bg-[var(--color-surface)]/80"
-      >
-        <div className="flex items-center gap-3">
-          <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
-            <ProgressRing percentage={stats.percentage} size={48} />
-            <span className="absolute text-[0.6rem] font-bold text-[var(--color-accent)]">
-              {stats.percentage > 0 ? `%${stats.percentage}` : ""}
-            </span>
-          </div>
-          <div className="text-left">
-            <p className="text-sm font-medium">{h.title}</p>
-            <p className="text-xs text-[var(--color-text-secondary)]">{summaryText}</p>
-          </div>
-        </div>
-        <svg
-          width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-          strokeWidth="1.5" strokeLinecap="round"
-          className={`text-[var(--color-text-secondary)] shrink-0 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+      <div style={{ filter: "drop-shadow(0 0 0.5px var(--color-border)) drop-shadow(0 0 0.5px var(--color-border))" }}>
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface)]/80"
+          style={{ clipPath: HEADER_CLIP }}
         >
-          <path d="M4 6l4 4 4-4" />
-        </svg>
-      </button>
+          <div className="flex items-center gap-3">
+            <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+              <ProgressRing percentage={stats.percentage} size={48} />
+              <span className="absolute text-[0.6rem] font-bold text-[var(--color-accent)]">
+                {stats.percentage > 0 ? `%${stats.percentage}` : ""}
+              </span>
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-medium">{h.title}</p>
+              <p className="text-xs text-[var(--color-text-secondary)]">{summaryText}</p>
+            </div>
+          </div>
+          <svg
+            width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+            strokeWidth="1.5" strokeLinecap="round"
+            className={`text-[var(--color-text-secondary)] shrink-0 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+          >
+            <path d="M4 6l4 4 4-4" />
+          </svg>
+        </button>
+      </div>
 
       {expanded && (
-        <div className="mt-2 p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+        <div className="relative z-10 mt-2 p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]">
           {/* Üst özet: ring + istatistikler yan yana */}
           <div className="flex items-center gap-5 mb-5">
             <div className="relative flex items-center justify-center shrink-0">
@@ -475,7 +519,7 @@ export function HifzStatus() {
           </div>
 
           {/* Sure kartları — grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {surahIds.map((id) => (
               <SurahCard
                 key={id}
