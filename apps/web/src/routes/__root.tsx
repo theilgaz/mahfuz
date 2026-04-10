@@ -17,7 +17,6 @@ import { BottomNav } from "~/components/BottomNav";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
 import { SettingsPanel } from "~/components/reader/SettingsPanel";
-import { ReadingProgressBar } from "~/components/reader/ReadingProgressBar";
 import { SurahPicker } from "~/components/reader/SurahPicker";
 import { VerseJumpDialog } from "~/components/reader/VerseJumpDialog";
 import { SmartPlayButton } from "~/components/reader/SmartPlayButton";
@@ -62,8 +61,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" },
-      { name: "theme-color", content: "#111111", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#eef3f2" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { title: "Mahfuz محفوظ" },
@@ -178,9 +176,6 @@ function AppHeader() {
   return (
     <>
       <div className="sticky top-0 z-40">
-        {/* Okuma ilerleme bandı */}
-        <ReadingProgressBar />
-
         {/* Main header */}
         <header className="flex items-center h-11 bg-[var(--color-bg)]/95 backdrop-blur-sm border-b border-[var(--color-border)]">
         <div className="flex items-center gap-1.5 w-full max-w-3xl mx-auto px-4">
@@ -258,12 +253,20 @@ function AppHeader() {
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setLabsMenuOpen(false)} />
                   <div ref={labsDropdownRef} role="menu" className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 py-1 overflow-hidden">
-                    {[
-                      { to: "/recite", label: "Tilavet", icon: "🎙️" },
-                      { to: "/discover", label: t.hub.listenMemorize, icon: "🎧" },
-                      { to: "/discover", label: t.hub.apps, icon: "📦" },
-                      { to: "/alifba/", label: t.hub.alifba, icon: "ا ب" },
-                    ].map((item) => (
+                    {([
+                      { to: "/recite", label: "Tilavet", icon: (
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                      )},
+                      { to: "/discover", label: t.hub.listenMemorize, icon: (
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 22V12h6v10"/></svg>
+                      )},
+                      { to: "/discover", label: t.hub.apps, icon: (
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth={1.5}/><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth={1.5}/><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={1.5}/><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={1.5}/></svg>
+                      )},
+                      { to: "/alifba/", label: t.hub.alifba, icon: (
+                        <span className="text-[10px] font-bold" style={{ fontFamily: "var(--font-arabic)" }}>ا ب</span>
+                      )},
+                    ] as { to: string; label: string; icon: ReactNode }[]).map((item) => (
                       <Link
                         key={item.label}
                         to={item.to}
@@ -271,7 +274,7 @@ function AppHeader() {
                         onClick={() => setLabsMenuOpen(false)}
                         className="flex items-center gap-2.5 px-3 py-2 text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors"
                       >
-                        <span className="w-5 text-center text-xs">{item.icon}</span>
+                        <span className="w-5 flex items-center justify-center text-[var(--color-text-secondary)]">{item.icon}</span>
                         <span>{item.label}</span>
                         <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium">Keşif</span>
                       </Link>
@@ -401,13 +404,27 @@ function RootDocument({ children }: { children: ReactNode }) {
   // Unified cross-device sync
   useSyncEngine(session);
 
-  // Tema uygula + FOUC engelle
+  // Tema uygula + FOUC engelle + favicon/theme-color senkronize et
   const theme = useSettingsStore((s) => s.theme);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     // CSS loaded — reveal content
     document.documentElement.classList.remove("loading");
     document.documentElement.classList.add("loaded");
+
+    // Read computed theme tokens (after setAttribute forces re-calc)
+    const cs = getComputedStyle(document.documentElement);
+    const bg = cs.getPropertyValue("--color-surface").trim() || "#e0eae6";
+    const fg = cs.getPropertyValue("--color-accent").trim() || "#0d7377";
+
+    // Generate SVG favicon with current theme colors
+    const MEEM_PATH = "M177,156.577c-8.706,1.423-15.241,6.257-17.357,8.65-2.167,2.441-6.147,6.7-7.332,16.905a22.5,22.5,0,0,0-6.146,1.177C141.051,185,133.3,188.382,128.5,196.9c-6.245,10.51-6.639,18.538-4.918,29.366a107.479,107.479,0,0,0,6.079,21.233,170.644,170.644,0,0,0,11.662,23.951c9,15.2,15.162,11.33,15.162,11.33s3.214-1.5,2.608-7.314c-.787-7.318-4.208-15.237-7.753-25.458-3.676-10.615-9.41-28.628-9.161-43.646a15.176,15.176,0,0,1,6.914.213c2.977.638,13.827,6.267,18.231,8.775,4.389,2.485,9.157,5.248,10.66,6s9.584,5.142,17.985,1.4c8.5-3.8,11.39-16.2,10.992-21.94-.426-5.931-9.2-26.056-12.387-31.049-2.946-4.645-7.724-13.344-15.709-13.344a10.621,10.621,0,0,0-1.863.158m-3,33.554c-2.086-1.209-5.535-3.129-5.535-3.129a39.562,39.562,0,0,1,2.981-18.02c.822.526,9.23,8.512,14.269,28.126-2.914-1.713-9.637-5.758-11.715-6.977";
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="${bg}"/><svg x="4" y="1" width="24" height="30" viewBox="118 152 93 138"><path fill="${fg}" d="${MEEM_PATH}"/></svg></svg>`;
+    const iconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"][type="image/svg+xml"]');
+    if (iconLink) iconLink.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+
+    // Sync browser chrome color
+    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => { m.content = bg; });
   }, [theme]);
 
   // Seher teması: gün doğumu/batımı bazlı otomatik geçiş
