@@ -63,7 +63,7 @@ export function DailyVerseCard() {
 
       {/* Devam et butonu */}
       {slug && (
-        <div className="px-4 pb-3 flex items-center gap-2">
+        <div className="px-4 pb-3 flex items-center justify-between">
           <Link
             to="/surah/$surahSlug"
             params={{ surahSlug: slug }}
@@ -72,20 +72,10 @@ export function DailyVerseCard() {
           >
             {t.home.readInSurah}
           </Link>
-          <span className="text-[var(--color-border)]">·</span>
-          <Link
-            to="/analyse/$verseKey"
-            params={{ verseKey: `${verse.surahId}:${verse.ayahNumber}` }}
-            search={{ tab: "meal" }}
-            className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
-          >
-            {t.home.analyse}
-          </Link>
-          <span className="text-[var(--color-border)]">·</span>
           <button
             type="button"
             onClick={() => {
-              const text = `${verse.textUthmani}\n\n${translation?.text ?? ""}\n\n— ${surah?.nameSimple} ${verse.ayahNumber} · İkra`;
+              const text = `${verse.textUthmani}\n\n${translation?.text ?? ""}\n\n${surah?.nameSimple} ${verse.ayahNumber} · İkra`;
               if (navigator.share) {
                 navigator.share({ text });
               } else {

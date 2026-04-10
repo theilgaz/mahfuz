@@ -52,7 +52,11 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
   if (!data || data.length === 0) {
     return (
       <div className="px-4 py-8 rounded-2xl border border-dashed border-[var(--color-border)] text-center">
-        <div className="text-3xl mb-3">🔗</div>
+        <div className="flex items-center justify-center mb-3">
+          <svg className="w-8 h-8 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+        </div>
         <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">
           Semantik Benzerlik
         </p>
@@ -115,7 +119,11 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
   if (!ctx) {
     return (
       <div className="px-4 py-8 rounded-2xl border border-dashed border-[var(--color-border)] text-center">
-        <div className="text-3xl mb-3">📖</div>
+        <div className="flex items-center justify-center mb-3">
+          <svg className="w-8 h-8 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
         <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">Bağlam & Savunma</p>
         <p className="text-xs text-[var(--color-text-secondary)]">
           Bu ayet için henüz bağlam notu eklenmemiş.
@@ -307,7 +315,9 @@ function ThemesTab({ surahId, translation }: { surahId: number; translation: str
               : "border-[var(--color-border)] bg-[var(--color-surface)]"
           }`}
         >
-          <span className="text-xl shrink-0">{theme.icon}</span>
+          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0 bg-[var(--color-border)]/60 text-[var(--color-text-secondary)]">
+            {theme.label.slice(0, 2)}
+          </span>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[var(--color-text-primary)]">{theme.label}</p>
             <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{theme.desc}</p>
@@ -422,12 +432,16 @@ function AnalysePage() {
       {/* Morfoloji */}
       {tab === "morfoloji" && (
         <div className="px-4 py-6 rounded-2xl border border-dashed border-[var(--color-border)] text-center">
-          <div className="text-3xl mb-3">🔬</div>
+          <div className="flex items-center justify-center mb-3">
+            <svg className="w-8 h-8 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
           <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">
             Morfoloji Analizi
           </p>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            Her kelimenin kök, vezin ve gramer rolü. Yakında Premium ile.
+            Her kelimenin kök, vezin ve gramer rolü. Yakında Mürşid ile.
           </p>
           <div
             className="mt-4 text-right text-lg leading-loose px-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]"
