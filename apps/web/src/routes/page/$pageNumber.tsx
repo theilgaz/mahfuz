@@ -6,7 +6,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import { MushafPage } from "~/components/reader/MushafPage";
-import { AudioBar } from "~/components/reader/AudioBar";
+
 import { pageDataQueryOptions } from "~/hooks/useQuranQuery";
 import { ScrollToTop } from "~/components/ScrollToTop";
 import { FontSizeControl } from "~/components/reader/FontSizeControl";
@@ -67,7 +67,6 @@ function PageRoute() {
     <div className="min-h-screen relative pb-20">
       <MushafPage pageNumber={page} highlightAyah={ayah} />
       <FontSizeControl mushaf />
-      <AudioBar />
       <ScrollToTop />
     </div>
   );

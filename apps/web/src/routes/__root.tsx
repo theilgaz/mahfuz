@@ -13,6 +13,7 @@ import { useLocaleStore } from "~/stores/locale.store";
 import { RouteErrorFallback } from "~/components/RouteErrorFallback";
 import { RecitationBar } from "~/components/recitation/RecitationBar";
 import { AudioProvider } from "~/components/reader/AudioProvider";
+import { AudioBar } from "~/components/reader/AudioBar";
 import { BottomNav } from "~/components/BottomNav";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
@@ -464,6 +465,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <main id="main-content">
           {children}
         </main>
+        <AudioBar />
         <RecitationBar />
         <BottomNav />
         <Scripts />

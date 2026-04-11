@@ -5,7 +5,7 @@
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { SurahView } from "~/components/reader/SurahView";
-import { AudioBar } from "~/components/reader/AudioBar";
+
 import { surahDataQueryOptions } from "~/hooks/useQuranQuery";
 import { ScrollToTop } from "~/components/ScrollToTop";
 import { FontSizeControl } from "~/components/reader/FontSizeControl";
@@ -48,7 +48,6 @@ function SurahRoute() {
     <div className="min-h-screen relative pb-20">
       <SurahView surahId={id} highlightAyah={ayah} />
       <FontSizeControl />
-      <AudioBar />
       <ScrollToTop />
     </div>
   );

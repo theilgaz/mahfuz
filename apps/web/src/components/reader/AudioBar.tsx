@@ -3,10 +3,13 @@
  * AudioEngine entegre: play/pause + ilerleme + hız kontrolü.
  */
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { useNavigate } from "@tanstack/react-router";
 import { useAudioStore } from "~/stores/audio.store";
 import { useTranslation } from "~/hooks/useTranslation";
+import { surahSlug } from "~/lib/surah-slugs";
+import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2] as const;
 
@@ -43,6 +46,34 @@ export function AudioBar() {
 
   const [showSpeed, setShowSpeed] = useState(false);
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // Space → play/pause (skip when typing in inputs)
+  useEffect(() => {
+    if (!isVisible) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.code !== "Space") return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (e.target as HTMLElement)?.isContentEditable) return;
+      e.preventDefault();
+      togglePlayPause();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isVisible, togglePlayPause]);
+
+  const handleVerseClick = useCallback(() => {
+    if (!currentVerseKey) return;
+    const [surahStr, verseStr] = currentVerseKey.split(":");
+    const surahId = parseInt(surahStr, 10);
+    if (!surahId || surahId < 1 || surahId > 114) return;
+    const ayah = parseInt(verseStr, 10) || undefined;
+    navigate({
+      to: "/surah/$surahSlug",
+      params: { surahSlug: surahSlug(surahId) },
+      search: { ayah },
+    });
+  }, [currentVerseKey, navigate]);
 
   if (!isVisible) return null;
 
@@ -51,7 +82,12 @@ export function AudioBar() {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   const verseDisplay = currentVerseKey
-    ? currentVerseKey.replace(":", " : ")
+    ? (() => {
+        const [surahStr, verseStr] = currentVerseKey.split(":");
+        const surahId = parseInt(surahStr, 10);
+        const name = SURAH_NAMES_TR[surahId] ?? chapterName ?? surahStr;
+        return `${name} : ${verseStr}`;
+      })()
     : chapterName ?? "";
 
   const stateLabel = isLoading ? "Loading" : isPlaying ? "Playing" : "Paused";
@@ -72,10 +108,14 @@ export function AudioBar() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Ayet bilgisi */}
-          <span className="text-xs text-[var(--color-text-secondary)] truncate flex-1 min-w-0">
+          {/* Ayet bilgisi — tıklanınca ilgili ayete git */}
+          <button
+            onClick={handleVerseClick}
+            disabled={!currentVerseKey}
+            className="text-xs text-[var(--color-text-secondary)] truncate flex-1 min-w-0 text-left hover:text-[var(--color-accent)] transition-colors disabled:hover:text-[var(--color-text-secondary)]"
+          >
             {verseDisplay}
-          </span>
+          </button>
 
           {/* Kontroller */}
           <div className="flex items-center gap-1">
