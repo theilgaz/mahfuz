@@ -40,19 +40,19 @@ type T = ReturnType<typeof useTranslation>["t"];
 const EDITORS_CHOICE_IDS = ["kelime-doldurma", "ayet-zinciri", "kelime-anlami", "hexagon-harf"];
 
 const GAME_IMGS: Record<string, string> = {
-  "kelime-doldurma":      "/images/games/mahfuz-fill-in-the-blank.png",
-  "ayet-zinciri":         "/images/games/mahfuz-verse-chain.png",
-  "kiraet-karaoke":       "/images/games/mahfuz-recitation-karaoke.png",
-  "sure-tanima":          "/images/games/mahfuz-surah-recognition.png",
-  "kelime-anlami":        "/images/games/mahfuz-word-meaning.png",
-  "hexagon-harf":         "/images/games/mahfuz-hexagon-letters.png",
-  "elifba-sesli-quiz":    "/images/games/mahfuz-voice-quiz.png",
-  "elifba-form-quiz":     "/images/games/mahfuz-form-quiz.png",
-  "elifba-karisik-sinav": "/images/games/mahfuz-mixed-exam.png",
-  "elifba-hafiza":        "/images/games/mahfuz-memory-game.png",
-  "elifba-hiz":           "/images/games/mahfuz-speed-game.png",
-  "elifba-harf-bul":      "/images/games/mahfuz-letter-find.png",
-  "elifba-kelime-bul":    "/images/games/mahfuz-word-find.png",
+  "kelime-doldurma":      "/images/games/mahfuz-fill-in-the-blank.webp",
+  "ayet-zinciri":         "/images/games/mahfuz-verse-chain.webp",
+  "kiraet-karaoke":       "/images/games/mahfuz-recitation-karaoke.webp",
+  "sure-tanima":          "/images/games/mahfuz-surah-recognition.webp",
+  "kelime-anlami":        "/images/games/mahfuz-word-meaning.webp",
+  "hexagon-harf":         "/images/games/mahfuz-hexagon-letters.webp",
+  "elifba-sesli-quiz":    "/images/games/mahfuz-voice-quiz.webp",
+  "elifba-form-quiz":     "/images/games/mahfuz-form-quiz.webp",
+  "elifba-karisik-sinav": "/images/games/mahfuz-mixed-exam.webp",
+  "elifba-hafiza":        "/images/games/mahfuz-memory-game.webp",
+  "elifba-hiz":           "/images/games/mahfuz-speed-game.webp",
+  "elifba-harf-bul":      "/images/games/mahfuz-letter-find.webp",
+  "elifba-kelime-bul":    "/images/games/mahfuz-word-find.webp",
 };
 
 const GAME_COLORS: Record<string, { bg: string; glow: string }> = {
@@ -114,15 +114,20 @@ function StarButton({ id, t }: { id: string; t: T }) {
   return (
     <button
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(id); }}
-      className="absolute top-0.5 right-0.5 p-1 z-10"
+      className="absolute top-0 right-0 z-10 w-8 h-8"
       aria-label={isFavorite ? t.gamesHub.removeFavorite : t.gamesHub.addFavorite}
     >
+      {/* Diagonal cut background */}
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 32 32" fill="none">
+        <path d="M32 0 L32 32 L0 0 Z" fill="black" fillOpacity="0.35" />
+      </svg>
+      {/* Star icon */}
       <svg
-        width="11" height="11" viewBox="0 0 24 24"
+        className={`absolute top-1.5 right-1.5 ${isFavorite ? "text-amber-400" : "text-white/70"}`}
+        width="12" height="12" viewBox="0 0 24 24"
         fill={isFavorite ? "currentColor" : "none"}
         stroke="currentColor" strokeWidth="2"
         strokeLinecap="round" strokeLinejoin="round"
-        className={isFavorite ? "text-amber-400" : "text-white/60 drop-shadow"}
       >
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
       </svg>
@@ -135,15 +140,15 @@ function AppIcon({ img, title, glow }: { img?: string; title: string; glow?: str
   if (img) {
     return (
       <img
-        src={img} alt={title}
-        className="w-full aspect-square object-cover rounded-[22%]"
+        src={img} alt={title} loading="lazy" decoding="async"
+        className="w-full aspect-square object-cover"
         draggable={false} style={shadowStyle}
       />
     );
   }
   return (
     <div
-      className="w-full aspect-square rounded-[22%] bg-[var(--color-accent)]/15 flex items-center justify-center"
+      className="w-full aspect-square bg-[var(--color-accent)]/15 flex items-center justify-center"
       style={shadowStyle}
     >
       <span className="text-xl text-[var(--color-accent)]">?</span>
@@ -159,7 +164,7 @@ function GameCard({ game, t, showStar = true }: { game: Game; t: T; showStar?: b
       to={game.link as "/recite"}
       className="relative flex flex-col items-center gap-1.5 active:opacity-70 transition-opacity"
     >
-      <div className="relative w-full">
+      <div className="relative w-full rounded-[22%] overflow-hidden">
         <AppIcon img={game.img} title={game.title} glow={game.colors?.glow} />
         {showStar && <StarButton id={game.id} t={t} />}
         {game.surahScoped && selectedSurahIds.length > 0 && (
@@ -215,7 +220,7 @@ function EditorChoiceCard({ game, t }: { game: Game; t: T }) {
           <div className="relative w-20 h-20 shrink-0">
             {game.img && (
               <img
-                src={game.img} alt={game.title}
+                src={game.img} alt={game.title} loading="eager" decoding="async"
                 className="w-full h-full object-cover rounded-[22%]"
                 draggable={false}
                 style={{ boxShadow: `0 4px 16px ${glow}60` }}

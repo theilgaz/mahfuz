@@ -14,29 +14,40 @@ import { SettingsPanel } from "~/components/reader/SettingsPanel";
 
 // ── Menu item types ────────────────────────────────────────
 
-type IconColor = "accent" | "amber" | "neutral";
-
 interface MenuAction {
   id: string;
   label: string;
   icon: ReactNode;
+  /** CSS gradient or color for the icon container */
+  gradient?: string;
   /** true = icon is already styled (e.g. profile photo), skip the color wrapper */
   rawIcon?: boolean;
   to?: string;
   onClick?: () => void;
 }
 
-const ICON_COLOR_CLASSES: Record<IconColor, string> = {
-  accent: "bg-[var(--color-accent)] text-white",
-  amber: "bg-orange-600 text-white",
-  neutral: "bg-[var(--color-text-secondary)]/15 text-[var(--color-text-primary)]",
+const ICON_GRADIENTS: Record<string, string> = {
+  // Okuma
+  bookmarks: "linear-gradient(135deg, #0d7377, #14b8a6)",
+  notes:     "linear-gradient(135deg, #0ea5e9, #6366f1)",
+  hatim:     "linear-gradient(135deg, #8b5cf6, #a855f7)",
+  // Ogrenme
+  alifba:    "linear-gradient(135deg, #f97316, #f59e0b)",
+  qaida:     "linear-gradient(135deg, #ef4444, #f97316)",
+  tajweed:   "linear-gradient(135deg, #ec4899, #f43f5e)",
+  games:     "linear-gradient(135deg, #10b981, #14b8a6)",
+  // Genel
+  discover:  "linear-gradient(135deg, #64748b, #94a3b8)",
+  mursid:    "linear-gradient(135deg, #eab308, #f59e0b)",
+  search:    "linear-gradient(135deg, #6b7280, #9ca3af)",
+  about:     "linear-gradient(135deg, #78716c, #a8a29e)",
+  settings:  "linear-gradient(135deg, #475569, #64748b)",
 };
 
 // ── Action Sheet ─────────────────────────────────────────
 
 interface MenuGroup {
   label?: string;
-  iconColor: IconColor;
   items: MenuAction[];
 }
 
@@ -125,10 +136,14 @@ function ActionSheet({
             <div className="flex flex-wrap gap-0 mb-4 last:mb-0">
               {group.items.map((item) => {
                 const isActive = item.to ? pathname.startsWith(item.to) : false;
+                const grad = item.gradient ?? ICON_GRADIENTS[item.id];
                 const iconEl = item.rawIcon ? (
-                  <span className="flex items-center justify-center w-12 h-12 rounded-[16px] shrink-0 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.08)]">{item.icon}</span>
+                  <span className="flex items-center justify-center w-12 h-12 rounded-[16px] shrink-0 overflow-hidden shadow-[0_2px_6px_rgba(0,0,0,0.12)]">{item.icon}</span>
                 ) : (
-                  <span className={`flex items-center justify-center w-12 h-12 rounded-[16px] shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.08)] ${ICON_COLOR_CLASSES[group.iconColor]}`}>{item.icon}</span>
+                  <span
+                    className="flex items-center justify-center w-12 h-12 rounded-[16px] shrink-0 text-white shadow-[0_2px_6px_rgba(0,0,0,0.12)]"
+                    style={{ background: grad }}
+                  >{item.icon}</span>
                 );
 
                 const activeCls = isActive ? "bg-[var(--color-accent)]/8" : "";
@@ -214,7 +229,6 @@ export function BottomNav() {
   const menuGroups: MenuGroup[] = [
     {
       label: t.nav.menuReading,
-      iconColor: "accent",
       items: [
         {
           id: "bookmarks",
@@ -257,7 +271,6 @@ export function BottomNav() {
     },
     {
       label: t.nav.menuLearning,
-      iconColor: "amber",
       items: [
         {
           id: "alifba",
@@ -309,7 +322,6 @@ export function BottomNav() {
     },
     {
       label: t.nav.menuExplore,
-      iconColor: "neutral",
       items: [
         {
           id: "discover",
