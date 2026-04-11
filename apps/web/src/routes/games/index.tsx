@@ -114,16 +114,16 @@ function StarButton({ id, t }: { id: string; t: T }) {
   return (
     <button
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(id); }}
-      className="absolute top-0 right-0 z-10 w-8 h-8"
+      className="absolute top-0 right-0 z-10 w-12 h-12"
       aria-label={isFavorite ? t.gamesHub.removeFavorite : t.gamesHub.addFavorite}
     >
       {/* Diagonal cut background */}
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 32 32" fill="none">
-        <path d="M32 0 L32 32 L0 0 Z" fill="black" fillOpacity="0.35" />
+        <path d="M32 0 L32 32 L0 0 Z" fill="black" fillOpacity="0.6" />
       </svg>
       {/* Star icon */}
       <svg
-        className={`absolute top-[5px] right-[5px] ${isFavorite ? "text-amber-400" : "text-white/70"}`}
+        className={`absolute top-[9px] right-[9px] ${isFavorite ? "text-amber-400" : "text-white/70"}`}
         width="12" height="12" viewBox="0 0 24 24"
         fill={isFavorite ? "currentColor" : "none"}
         stroke="currentColor" strokeWidth="2"
@@ -248,9 +248,7 @@ function EditorChoiceCard({ game, t }: { game: Game; t: T }) {
           </div>
 
           {/* Star */}
-          <div className="absolute top-2 right-2">
-            <StarButton id={game.id} t={t} />
-          </div>
+          <StarButton id={game.id} t={t} />
         </div>
       </div>
     </Link>
