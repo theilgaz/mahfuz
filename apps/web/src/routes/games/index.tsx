@@ -114,7 +114,7 @@ function StarButton({ id, t }: { id: string; t: T }) {
   return (
     <button
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(id); }}
-      className="absolute top-1 right-1 z-10 w-8 h-8"
+      className="absolute top-0 right-0 z-10 w-8 h-8"
       aria-label={isFavorite ? t.gamesHub.removeFavorite : t.gamesHub.addFavorite}
     >
       {/* Diagonal cut background */}
@@ -123,7 +123,7 @@ function StarButton({ id, t }: { id: string; t: T }) {
       </svg>
       {/* Star icon */}
       <svg
-        className={`absolute top-1.5 right-1.5 ${isFavorite ? "text-amber-400" : "text-white/70"}`}
+        className={`absolute top-[5px] right-[5px] ${isFavorite ? "text-amber-400" : "text-white/70"}`}
         width="12" height="12" viewBox="0 0 24 24"
         fill={isFavorite ? "currentColor" : "none"}
         stroke="currentColor" strokeWidth="2"
