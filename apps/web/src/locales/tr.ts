@@ -269,6 +269,11 @@ export const tr = {
     filterMakki: "Mekki",
     filterMadani: "Medeni",
     filterNuzul: "Nüzul",
+    curated: "Seçmeler",
+    curatedPrayer: "Namaz Sureleri",
+    curatedPopular: "Çok Okunan",
+    curatedAmma: "Amme Cüzü",
+    curatedTabaraka: "Tebâreke Cüzü",
   },
 
   changelog: {

@@ -134,5 +134,10 @@ export const de: PartialMessages = {
     filterAll: "Alle",
     filterMakki: "Mekkanisch",
     filterMadani: "Medinensisch",
+    curated: "Auswahl",
+    curatedPrayer: "Gebet-Suren",
+    curatedPopular: "Meistgelesen",
+    curatedAmma: "Dschuz Amma",
+    curatedTabaraka: "Dschuz Tabarak",
   },
 } as const;

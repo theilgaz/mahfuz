@@ -17,6 +17,16 @@ import { surahSlug } from "~/lib/surah-slugs";
 
 const ALL_JUZ = Array.from({ length: TOTAL_JUZ }, (_, i) => i + 1);
 
+/** Curated surah collections for quick access */
+const CURATED_COLLECTIONS = {
+  prayer: { surahIds: [1, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114], icon: "🕌" },
+  popular: { surahIds: [36, 48, 55, 56, 67, 18], icon: "⭐" },
+  amma: { surahIds: Array.from({ length: 37 }, (_, i) => 78 + i), icon: "30" },
+  tabaraka: { surahIds: Array.from({ length: 11 }, (_, i) => 67 + i), icon: "29" },
+} as const;
+
+type CollectionKey = keyof typeof CURATED_COLLECTIONS;
+
 // 12-bump scalloped badge path (100×100 viewBox, center 50,50)
 // Peaks at outerR=46, valleys at innerR=36 — quadratic bezier for smooth bumps
 const CARD_CLIP = "polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)";
@@ -72,6 +82,7 @@ export function SurahList({ surahs }: SurahListProps) {
 
   const [juzOpen, setJuzOpen] = useState(false);
   const [highlightSurahId, setHighlightSurahId] = useState<number | null>(null);
+  const [activeCollection, setActiveCollection] = useState<CollectionKey | null>(null);
   const juzPanelRef = useRef<HTMLDivElement>(null);
 
   // Cüzün suresine scroll + highlight
@@ -244,45 +255,116 @@ export function SurahList({ surahs }: SurahListProps) {
       <div ref={juzPanelRef} className="fixed right-4 bottom-20 z-20">
         {/* Genişleyen cüz paneli — butonun üstünde */}
         {juzOpen && (
-          <div className="absolute right-0 bottom-full mb-2 w-[260px] max-h-[60vh] overflow-y-auto rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl py-1">
-            {ALL_JUZ.map((juz) => {
-              const surahId = JUZ_FIRST_SURAH[juz];
-              const surah = surahId ? surahs.find((s) => s.id === surahId) : undefined;
-              const page = JUZ_FIRST_PAGE[juz];
-              return (
-                <div key={juz} className="flex items-center hover:bg-[var(--color-bg)] transition-colors">
+          <div className="absolute right-0 bottom-full mb-2 w-[280px] max-h-[60vh] flex flex-col rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl">
+            {/* Collection surah list or juz list */}
+            <div className="overflow-y-auto flex-1 py-1">
+              {activeCollection ? (
+                /* Filtered surah list for active collection */
+                CURATED_COLLECTIONS[activeCollection].surahIds.map((surahId) => {
+                  const surah = surahs.find((s) => s.id === surahId);
+                  if (!surah) return null;
+                  return (
+                    <div key={surahId} className="flex items-center hover:bg-[var(--color-bg)] transition-colors">
+                      <Link
+                        to={readingMode === "mushaf" ? "/page/$pageNumber" : "/surah/$surahSlug"}
+                        params={readingMode === "mushaf" ? { pageNumber: String(surah.pageStart) } : { surahSlug: surahSlug(surah.id) }}
+                        search={{ ayah: undefined }}
+                        onClick={() => setJuzOpen(false)}
+                        className="flex items-center gap-2 flex-1 px-3 py-2 text-left"
+                      >
+                        <span className="w-5 text-[11px] font-semibold text-[var(--color-text-secondary)] text-right shrink-0">{surahId}</span>
+                        <span className="text-xs truncate flex-1">{getSurahName(surahId, locale) || surah.nameSimple}</span>
+                        <span className="text-xs shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
+                          {surah.nameArabic}
+                        </span>
+                      </Link>
+                    </div>
+                  );
+                })
+              ) : (
+                /* Default juz list */
+                ALL_JUZ.map((juz) => {
+                  const surahId = JUZ_FIRST_SURAH[juz];
+                  const surah = surahId ? surahs.find((s) => s.id === surahId) : undefined;
+                  const page = JUZ_FIRST_PAGE[juz];
+                  return (
+                    <div key={juz} className="flex items-center hover:bg-[var(--color-bg)] transition-colors">
+                      <button
+                        onClick={() => handleJuzSurah(juz)}
+                        className="flex items-center gap-2 w-1/2 px-3 py-2 text-left"
+                      >
+                        <span className="w-5 text-[11px] font-semibold text-[var(--color-text-secondary)] text-right shrink-0">{juz}</span>
+                        <span className="text-xs truncate">{getSurahName(surahId!, locale) || surah?.nameSimple || ""}</span>
+                      </button>
+                      <Link
+                        to="/page/$pageNumber"
+                        params={{ pageNumber: String(page) }}
+                        search={{ ayah: undefined }}
+                        onClick={() => setJuzOpen(false)}
+                        className="flex items-center justify-end w-1/2 px-3 py-2 text-[11px] text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+                      >
+                        {t.common.page} {page}
+                      </Link>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Curated collection chips -- pinned at bottom */}
+            <div className="grid grid-cols-2 gap-1.5 px-2.5 py-2 border-t border-[var(--color-border)] shrink-0">
+              {(
+                [
+                  { key: "prayer" as CollectionKey, label: t.surahList.curatedPrayer },
+                  { key: "popular" as CollectionKey, label: t.surahList.curatedPopular },
+                  { key: "amma" as CollectionKey, label: t.surahList.curatedAmma },
+                  { key: "tabaraka" as CollectionKey, label: t.surahList.curatedTabaraka },
+                ] as const
+              ).map(({ key, label }) => {
+                const isSelected = activeCollection === key;
+                return (
                   <button
-                    onClick={() => handleJuzSurah(juz)}
-                    className="flex items-center gap-2 w-1/2 px-3 py-2 text-left"
+                    key={key}
+                    onClick={() => setActiveCollection(isSelected ? null : key)}
+                    className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
+                      isSelected
+                        ? "bg-[var(--color-accent)] text-white"
+                        : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                    }`}
                   >
-                    <span className="w-5 text-[11px] font-semibold text-[var(--color-text-secondary)] text-right shrink-0">{juz}</span>
-                    <span className="text-xs truncate">{getSurahName(surahId!, locale) || surah?.nameSimple || ""}</span>
+                    {isSelected && (
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2.5 6L5 8.5L9.5 3.5" />
+                      </svg>
+                    )}
+                    {label}
                   </button>
-                  <Link
-                    to="/page/$pageNumber"
-                    params={{ pageNumber: String(page) }}
-                    onClick={() => setJuzOpen(false)}
-                    className="flex items-center justify-end w-1/2 px-3 py-2 text-[11px] text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
-                  >
-                    {t.common.page} {page}
-                  </Link>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
 
-        {/* Ana buton */}
+        {/* Ana buton -- scalloped badge shape */}
         <button
-          onClick={() => setJuzOpen(!juzOpen)}
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold shadow-lg transition-all ${
-            juzOpen
-              ? "bg-[var(--color-accent)] text-white scale-110"
-              : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:shadow-xl"
-          }`}
+          onClick={() => { setJuzOpen(!juzOpen); if (juzOpen) setActiveCollection(null); }}
+          className="w-12 h-12 flex items-center justify-center transition-all hover:scale-105"
           aria-label={t.surahList.goToJuz}
         >
-          جز
+          <svg width="48" height="48" viewBox="0 0 100 100" className="drop-shadow-md" aria-hidden="true">
+            <path
+              d={BADGE_PATH}
+              className={juzOpen
+                ? "fill-[var(--color-accent)]"
+                : "fill-[var(--color-accent)]/80"
+              }
+            />
+            {/* Open book icon */}
+            <g fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M33 38C33 38 38 36 50 41C62 36 67 38 67 38L67 62C67 62 62 60 50 65C38 60 33 62 33 62Z" />
+              <path d="M50 41L50 65" />
+            </g>
+          </svg>
         </button>
       </div>
     </div>

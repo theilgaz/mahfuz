@@ -14,6 +14,16 @@ import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
 
+/** Curated surah collections */
+const CURATED_COLLECTIONS = {
+  prayer: [1, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114],
+  popular: [36, 48, 55, 56, 67, 18],
+  amma: Array.from({ length: 37 }, (_, i) => 78 + i), // 78-114
+  tabaraka: Array.from({ length: 11 }, (_, i) => 67 + i), // 67-77
+} as const;
+
+type CollectionKey = keyof typeof CURATED_COLLECTIONS;
+
 interface SurahPickerProps {
   /** Aktif sure ID (1-114) */
   currentSurahId: number;
@@ -36,7 +46,8 @@ export function SurahPicker({
 }: SurahPickerProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [tab, setTab] = useState<"surah" | "juz">("surah");
+  const [tab, setTab] = useState<"surah" | "juz" | "curated">("surah");
+  const [expandedCollection, setExpandedCollection] = useState<CollectionKey | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -136,9 +147,21 @@ export function SurahPicker({
             >
               {t.common.juz}
             </button>
+            <button
+              role="tab"
+              aria-selected={tab === "curated"}
+              onClick={() => setTab("curated")}
+              className={`flex-1 py-2 text-xs font-medium transition-colors ${
+                tab === "curated"
+                  ? "text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+            >
+              {t.surahList.curated}
+            </button>
           </div>
 
-          {tab === "surah" ? (
+          {tab === "surah" && (
             <>
               {/* Arama */}
               <div className="p-2 border-b border-[var(--color-border)]">
@@ -203,8 +226,10 @@ export function SurahPicker({
                 )}
               </div>
             </>
-          ) : (
-            /* Cüz listesi */
+          )}
+
+          {tab === "juz" && (
+            /* Cuz listesi */
             <div className="overflow-y-auto flex-1">
               {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => {
                 const isActive =
@@ -227,7 +252,7 @@ export function SurahPicker({
                       isActive ? "bg-[var(--color-accent)]/10" : "hover:bg-[var(--color-surface)]"
                     }`}
                   >
-                    {/* Sol %50 — sure navigasyonu */}
+                    {/* Sol %50 -- sure navigasyonu */}
                     <Link
                       {...surahTarget}
                       search={{ ayah: undefined }}
@@ -245,7 +270,7 @@ export function SurahPicker({
                         {getSurahName(firstSurahId, locale) || surah?.nameSimple || ""}
                       </span>
                     </Link>
-                    {/* Sağ %50 — sayfa navigasyonu */}
+                    {/* Sag %50 -- sayfa navigasyonu */}
                     <Link
                       to="/page/$pageNumber"
                       params={{ pageNumber: String(page) }}
@@ -258,6 +283,86 @@ export function SurahPicker({
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {tab === "curated" && (
+            /* Secmeler -- curated surah collections */
+            <div className="flex flex-col flex-1 overflow-hidden">
+              {/* Surah list for selected collection */}
+              <div className="overflow-y-auto flex-1">
+                {expandedCollection ? (
+                  CURATED_COLLECTIONS[expandedCollection].map((id) => {
+                    const surah = surahs.find((s) => s.id === id);
+                    if (!surah) return null;
+                    const isActive = id === currentSurahId;
+                    const target =
+                      mode === "page"
+                        ? { to: "/page/$pageNumber" as const, params: { pageNumber: String(surah.pageStart) }, search: { ayah: undefined } }
+                        : { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(id) }, search: { ayah: undefined } };
+                    return (
+                      <Link
+                        key={id}
+                        {...target}
+                        onClick={() => setOpen(false)}
+                        className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${
+                          isActive
+                            ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
+                            : "hover:bg-[var(--color-surface)]"
+                        }`}
+                      >
+                        <span className="w-6 h-6 rounded-full bg-[var(--color-surface)] flex items-center justify-center text-[10px] text-[var(--color-text-secondary)] shrink-0">
+                          {id}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm truncate">{getSurahName(id, locale) || surah.nameSimple}</span>
+                            <span className="text-xs shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
+                              {surah.nameArabic}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <p className="text-center text-sm text-[var(--color-text-secondary)] py-8">
+                    {t.surahList.curated}
+                  </p>
+                )}
+              </div>
+
+              {/* Collection chips -- pinned at bottom */}
+              <div className="grid grid-cols-2 gap-1.5 px-2.5 py-2 border-t border-[var(--color-border)] shrink-0">
+                {(
+                  [
+                    { key: "prayer" as CollectionKey, label: t.surahList.curatedPrayer },
+                    { key: "popular" as CollectionKey, label: t.surahList.curatedPopular },
+                    { key: "amma" as CollectionKey, label: t.surahList.curatedAmma },
+                    { key: "tabaraka" as CollectionKey, label: t.surahList.curatedTabaraka },
+                  ] as const
+                ).map(({ key, label }) => {
+                  const isSelected = expandedCollection === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setExpandedCollection(isSelected ? null : key)}
+                      className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
+                        isSelected
+                          ? "bg-[var(--color-accent)] text-white"
+                          : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                      }`}
+                    >
+                      {isSelected && (
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M2.5 6L5 8.5L9.5 3.5" />
+                        </svg>
+                      )}
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

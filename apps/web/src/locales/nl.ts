@@ -134,5 +134,10 @@ export const nl: PartialMessages = {
     filterAll: "Alle",
     filterMakki: "Mekkaans",
     filterMadani: "Medinens",
+    curated: "Selecties",
+    curatedPrayer: "Gebed Soera's",
+    curatedPopular: "Meest Gelezen",
+    curatedAmma: "Juz Amma",
+    curatedTabaraka: "Juz Tabarak",
   },
 } as const;

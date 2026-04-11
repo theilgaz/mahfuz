@@ -271,6 +271,11 @@ export const en: Messages = {
     filterMakki: "Makki",
     filterMadani: "Madani",
     filterNuzul: "Revelation",
+    curated: "Curated",
+    curatedPrayer: "Prayer Surahs",
+    curatedPopular: "Most Read",
+    curatedAmma: "Juz Amma",
+    curatedTabaraka: "Juz Tabarak",
   },
 
   changelog: {

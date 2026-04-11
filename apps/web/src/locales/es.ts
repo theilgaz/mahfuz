@@ -198,6 +198,11 @@ export const es: PartialMessages = {
     filterAll: "Todos",
     filterMakki: "Mequí",
     filterMadani: "Medinés",
+    curated: "Selecciones",
+    curatedPrayer: "Suras del Salat",
+    curatedPopular: "Más Leídas",
+    curatedAmma: "Yuz Amma",
+    curatedTabaraka: "Yuz Tabarak",
   },
 
   stats: {

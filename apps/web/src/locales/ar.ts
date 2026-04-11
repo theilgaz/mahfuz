@@ -134,5 +134,10 @@ export const ar: PartialMessages = {
     filterAll: "الكل",
     filterMakki: "مكي",
     filterMadani: "مدني",
+    curated: "مختارات",
+    curatedPrayer: "سور الصلاة",
+    curatedPopular: "الأكثر قراءة",
+    curatedAmma: "جزء عمّ",
+    curatedTabaraka: "جزء تبارك",
   },
 } as const;
