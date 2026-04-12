@@ -9,6 +9,9 @@ import {
   getMyHatimGroups,
   createHatimGroup,
   joinHatimGroup,
+  getMyProgress,
+  markSectionComplete,
+  unmarkSectionComplete,
 } from "~/lib/hatim-group-service";
 
 export const Route = createFileRoute("/hatim/")({
@@ -124,41 +127,9 @@ function HatimPage() {
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {groups.map((g) => (
-                <Link
-                  key={g.id}
-                  to="/hatim/$groupId"
-                  params={{ groupId: g.id }}
-                  className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-all"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)] shrink-0">
-                    {g.scopeType === "full" ? (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
-                      </svg>
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/>
-                      </svg>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
-                      {g.name}
-                    </p>
-                    <p className="text-xs text-[var(--color-text-secondary)]">
-                      {g.scopeType === "full" ? "Tam Hatim" : g.scopeType === "juz" ? "Cüz Hatmi" : "Sayfa Aralığı"}
-                      {" · "}
-                      <span className={`font-medium ${g.status === "active" ? "text-green-600" : "text-[var(--color-text-secondary)]"}`}>
-                        {g.status === "active" ? "Aktif" : "Tamamlandı"}
-                      </span>
-                    </p>
-                  </div>
-                  <svg className="w-4 h-4 text-[var(--color-text-secondary)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
+                <GroupCard key={g.id} group={g} />
               ))}
             </div>
           )}
@@ -254,6 +225,120 @@ function HatimPage() {
             {joinMutation.isPending ? "Katılınıyor..." : "Gruba Katıl"}
           </button>
         </div>
+      )}
+    </div>
+  );
+}
+
+// ── Grup Kartı + Cüz Beyanı ────────────────────────────
+
+function GroupCard({ group: g }: { group: { id: string; name: string; scopeType: string; status: string } }) {
+  const [open, setOpen] = useState(false);
+  const qc = useQueryClient();
+
+  const { data: myCompleted = [] } = useQuery({
+    queryKey: ["hatim-my-progress", g.id],
+    queryFn: () => getMyProgress({ data: g.id }),
+    enabled: open,
+  });
+
+  const completedSet = new Set(myCompleted);
+
+  const toggleJuz = useMutation({
+    mutationFn: async (juz: number) => {
+      const sectionId = `juz:${juz}`;
+      if (completedSet.has(sectionId)) {
+        await unmarkSectionComplete({ data: { groupId: g.id, sectionId } });
+      } else {
+        await markSectionComplete({ data: { groupId: g.id, sectionId } });
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["hatim-my-progress", g.id] });
+      qc.invalidateQueries({ queryKey: ["hatim-dashboard", g.id] });
+    },
+  });
+
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+      <Link
+        to="/hatim/$groupId"
+        params={{ groupId: g.id }}
+        className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--color-accent)]/5 transition-colors"
+      >
+        <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)] shrink-0">
+          {g.scopeType === "full" ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+            </svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/>
+            </svg>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate">{g.name}</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">
+            {g.scopeType === "full" ? "Tam Hatim" : g.scopeType === "juz" ? "Cuz Hatmi" : "Sayfa Araligi"}
+            {" · "}
+            <span className={`font-medium ${g.status === "active" ? "text-green-600" : "text-[var(--color-text-secondary)]"}`}>
+              {g.status === "active" ? "Aktif" : "Tamamlandi"}
+            </span>
+          </p>
+        </div>
+        <svg className="w-4 h-4 text-[var(--color-text-secondary)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </Link>
+
+      {g.status === "active" && (
+        <>
+          <button
+            onClick={(e) => { e.preventDefault(); setOpen(!open); }}
+            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-medium text-[var(--color-accent)] border-t border-[var(--color-border)] hover:bg-[var(--color-accent)]/5 transition-colors"
+          >
+            <svg
+              className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+            Cuz Beyani
+          </button>
+
+          {open && (
+            <div className="px-4 pb-4 pt-1">
+              <div className="grid grid-cols-6 gap-1.5">
+                {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => {
+                  const done = completedSet.has(`juz:${juz}`);
+                  return (
+                    <button
+                      key={juz}
+                      onClick={() => toggleJuz.mutate(juz)}
+                      disabled={toggleJuz.isPending}
+                      className={`relative aspect-square rounded-lg text-xs font-semibold transition-all ${
+                        done
+                          ? "bg-[var(--color-accent)] text-white"
+                          : "bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/50"
+                      }`}
+                    >
+                      {juz}
+                      {done && (
+                        <svg className="absolute top-0 right-0 w-2.5 h-2.5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-[var(--color-text-secondary)] mt-2 text-center">
+                {completedSet.size} / 30 cuz tamamlandi
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

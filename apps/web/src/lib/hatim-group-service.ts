@@ -201,3 +201,67 @@ export const markSectionComplete = createServerFn({ method: "POST" })
 
     return { alreadyCompleted: false };
   });
+
+// ── Bölüm tamamlanmadı olarak işaretle ──────────────────
+
+export const unmarkSectionComplete = createServerFn({ method: "POST" })
+  .inputValidator((input: { groupId: string; sectionId: string }) => input)
+  .handler(async ({ data: { groupId, sectionId } }) => {
+    const session = await getSession();
+    if (!session?.user?.id) throw new Error("Giriş yapmanız gerekiyor.");
+
+    await db
+      .delete(hatimGroupProgress)
+      .where(
+        and(
+          eq(hatimGroupProgress.groupId, groupId),
+          eq(hatimGroupProgress.userId, session.user.id),
+          eq(hatimGroupProgress.sectionId, sectionId),
+        )
+      );
+
+    return { ok: true };
+  });
+
+// ── Kullanıcının tamamladığı bölümler ───────────────────
+
+export const getMyProgress = createServerFn({ method: "GET" })
+  .inputValidator((groupId: string) => groupId)
+  .handler(async ({ data: groupId }) => {
+    const session = await getSession();
+    if (!session?.user?.id) return [];
+
+    const rows = await db
+      .select({ sectionId: hatimGroupProgress.sectionId })
+      .from(hatimGroupProgress)
+      .where(
+        and(
+          eq(hatimGroupProgress.groupId, groupId),
+          eq(hatimGroupProgress.userId, session.user.id),
+        )
+      );
+
+    return rows.map((r) => r.sectionId);
+  });
+
+// ── Kullanıcının aktif grupları (otomatik takip için) ────
+
+export const getMyActiveGroupIds = createServerFn({ method: "GET" }).handler(async () => {
+  const session = await getSession();
+  if (!session?.user?.id) return [];
+
+  const memberships = await db
+    .select({ groupId: hatimGroupMembers.groupId })
+    .from(hatimGroupMembers)
+    .where(eq(hatimGroupMembers.userId, session.user.id));
+
+  if (memberships.length === 0) return [];
+
+  const groupIds = memberships.map((m) => m.groupId);
+  const activeGroups = await db
+    .select({ id: hatimGroups.id })
+    .from(hatimGroups)
+    .where(and(inArray(hatimGroups.id, groupIds), eq(hatimGroups.status, "active")));
+
+  return activeGroups.map((g) => g.id);
+});

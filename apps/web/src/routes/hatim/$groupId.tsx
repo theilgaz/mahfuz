@@ -3,9 +3,14 @@
  */
 
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { getGroupDashboard } from "~/lib/hatim-group-service";
+import {
+  getGroupDashboard,
+  getMyProgress,
+  markSectionComplete,
+  unmarkSectionComplete,
+} from "~/lib/hatim-group-service";
 
 export const Route = createFileRoute("/hatim/$groupId")({
   component: GroupDashboardPage,
@@ -14,10 +19,33 @@ export const Route = createFileRoute("/hatim/$groupId")({
 function GroupDashboardPage() {
   const { groupId } = Route.useParams();
   const [inviteCopied, setInviteCopied] = useState(false);
+  const qc = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["hatim-dashboard", groupId],
     queryFn: () => getGroupDashboard({ data: groupId }),
+  });
+
+  const { data: myCompletedSections = [] } = useQuery({
+    queryKey: ["hatim-my-progress", groupId],
+    queryFn: () => getMyProgress({ data: groupId }),
+  });
+
+  const completedSet = new Set(myCompletedSections);
+
+  const toggleJuz = useMutation({
+    mutationFn: async (juz: number) => {
+      const sectionId = `juz:${juz}`;
+      if (completedSet.has(sectionId)) {
+        await unmarkSectionComplete({ data: { groupId, sectionId } });
+      } else {
+        await markSectionComplete({ data: { groupId, sectionId } });
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["hatim-my-progress", groupId] });
+      qc.invalidateQueries({ queryKey: ["hatim-dashboard", groupId] });
+    },
   });
 
   const copyInviteCode = () => {
@@ -137,6 +165,42 @@ function GroupDashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Cüz İlerleme */}
+      {group.status === "active" && (
+        <div className="mb-5">
+          <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
+            Cüz İlerlemem
+          </h2>
+          <div className="grid grid-cols-6 gap-1.5">
+            {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => {
+              const done = completedSet.has(`juz:${juz}`);
+              return (
+                <button
+                  key={juz}
+                  onClick={() => toggleJuz.mutate(juz)}
+                  disabled={toggleJuz.isPending}
+                  className={`relative aspect-square rounded-xl text-sm font-semibold transition-all ${
+                    done
+                      ? "bg-[var(--color-accent)] text-white shadow-sm"
+                      : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/50"
+                  }`}
+                >
+                  {juz}
+                  {done && (
+                    <svg className="absolute top-0.5 right-0.5 w-3 h-3 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-[var(--color-text-secondary)] mt-2 text-center">
+            Tamamladığınız cüze dokunun
+          </p>
+        </div>
+      )}
 
       {/* Davet Kodu */}
       <div className="px-4 py-4 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/50">
