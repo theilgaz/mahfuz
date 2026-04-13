@@ -221,7 +221,7 @@ function WordGame({
 
       {/* Ayet */}
       <div
-        className="w-full px-5 py-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] mb-6 text-center leading-loose"
+        className="w-full px-5 py-4 rounded bg-[var(--color-surface)] border border-[var(--color-border)] mb-6 text-center leading-loose"
         dir="rtl"
         lang="ar"
       >
@@ -256,7 +256,7 @@ function WordGame({
               key={i}
               onClick={() => letter && handleSlotClick(i)}
               disabled={!letter || !isSuccess}
-              className="w-12 h-12 rounded-xl border-2 flex items-center justify-center text-2xl font-medium transition-all duration-150"
+              className="w-12 h-12 rounded border-2 flex items-center justify-center text-2xl font-medium transition-all duration-150"
               dir="rtl"
               lang="ar"
               style={{
@@ -277,7 +277,7 @@ function WordGame({
       {/* Başarı */}
       {isSuccess && (
         <div
-          className="mb-6 px-5 py-4 rounded-2xl border text-center w-full"
+          className="mb-6 px-5 py-4 rounded border text-center w-full"
           style={{ backgroundColor: `${P}15`, borderColor: `${P}50` }}
         >
           <p className="font-semibold text-sm" style={{ color: P }}>{t.hexagonGame.correct}</p>
@@ -301,7 +301,7 @@ function WordGame({
               <button
                 key={idx}
                 onClick={() => handleCellClick(idx)}
-                className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center text-2xl font-medium transition-all duration-150 active:scale-95 ${
+                className={`w-14 h-14 rounded border-2 flex items-center justify-center text-2xl font-medium transition-all duration-150 active:scale-95 ${
                   isSel
                     ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white opacity-40 cursor-pointer"
                     : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-[var(--color-accent)]/60 cursor-pointer"
@@ -322,7 +322,7 @@ function WordGame({
         <button
           onClick={() => setSelected([])}
           disabled={selected.length === 0}
-          className="px-6 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-secondary)] disabled:opacity-40 hover:border-[var(--color-accent)]/50 transition-all"
+          className="px-6 py-2.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-secondary)] disabled:opacity-40 hover:border-[var(--color-accent)]/50 transition-all"
         >
           {t.hexagonGame.clear}
         </button>
@@ -330,14 +330,14 @@ function WordGame({
         <div className="flex gap-3">
           <button
             onClick={onBack}
-            className="px-5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/50 transition-all"
+            className="px-5 py-2.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/50 transition-all"
           >
             {t.hexagonGame.backToList}
           </button>
           {onNext && (
             <button
               onClick={onNext}
-              className="px-6 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-90 transition-all"
+              className="px-6 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-90 transition-all"
             >
               {t.hexagonGame.next}
             </button>
@@ -370,9 +370,9 @@ function PuzzleSelect({ onSelect }: { onSelect: (p: WordPuzzle, idx: number) => 
           <button
             key={puzzle.id}
             onClick={() => onSelect(puzzle, idx)}
-            className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:shadow-sm transition-all text-left"
+            className="w-full flex items-center gap-4 px-4 py-3.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:shadow-sm transition-all text-left"
           >
-            <div className="w-12 h-12 flex flex-col items-center justify-center rounded-xl bg-amber-50 border border-amber-200 shrink-0">
+            <div className="w-12 h-12 flex flex-col items-center justify-center rounded bg-amber-50 border border-amber-200 shrink-0">
               <span className="text-lg font-bold text-amber-700" style={{ fontFamily: "var(--font-arabic)" }}>
                 {toAr([...puzzle.targetWord].length)}
               </span>

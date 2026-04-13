@@ -41,7 +41,7 @@ function LetterFormsSection() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-[var(--color-border)] overflow-hidden">
+      <div className="rounded border border-[var(--color-border)] overflow-hidden">
         {ARABIC_LETTERS.map((letter, i) => {
           const forms = getLetterForms(letter.arabic);
           const isNonConnector = NON_CONNECTORS.has(letter.arabic);
@@ -133,7 +133,7 @@ function NextStepsSection() {
       <div className="space-y-2">
         <Link
           to="/qaida"
-          className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
+          className="flex items-center gap-3 px-4 py-3.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0 text-[var(--color-accent)]">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -152,7 +152,7 @@ function NextStepsSection() {
 
         <Link
           to="/games"
-          className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
+          className="flex items-center gap-3 px-4 py-3.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0 text-[var(--color-accent)]">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -175,7 +175,7 @@ function NextStepsSection() {
           to="/surah/$surahSlug"
           params={{ surahSlug: "al-fatiha" }}
           search={{ ayah: undefined }}
-          className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
+          className="flex items-center gap-3 px-4 py-3.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0 text-[var(--color-accent)]">
             <span className="text-base leading-none" style={{ fontFamily: "var(--font-arabic)" }}>ا</span>
@@ -249,7 +249,7 @@ function AlifbaIndexPage() {
               to="/alifba/$letterId"
               params={{ letterId: letter.id }}
               className={[
-                "relative flex flex-col min-w-0 h-[5.75rem] overflow-hidden rounded-2xl border",
+                "relative flex flex-col min-w-0 h-[5.75rem] overflow-hidden rounded border",
                 "transition-all duration-150 ease-out active:scale-95",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                 isMastered

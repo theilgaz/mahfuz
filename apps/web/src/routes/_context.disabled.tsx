@@ -72,7 +72,7 @@ function PinGate({ onUnlock }: { onUnlock: () => void }) {
   return (
     <div className="min-h-[80dvh] flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-xs flex flex-col items-center gap-6">
-        <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center">
+        <div className="w-14 h-14 rounded bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" />
             <path d="M7 11V7a5 5 0 0110 0v4" />
@@ -98,7 +98,7 @@ function PinGate({ onUnlock }: { onUnlock: () => void }) {
               value={d}
               onChange={(e) => handleDigit(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className={`w-13 h-13 text-center text-xl font-bold rounded-xl border-2 bg-[var(--color-surface)] outline-none transition-all
+              className={`w-13 h-13 text-center text-xl font-bold rounded border-2 bg-[var(--color-surface)] outline-none transition-all
                 ${error
                   ? "border-red-400 text-red-500"
                   : d
@@ -190,7 +190,7 @@ function SavunmaContent() {
                     to="/analyse/$verseKey"
                     params={{ verseKey: ctx.verseKey }}
                     search={{ tab: "bagit" }}
-                    className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 hover:bg-[var(--color-accent)]/3 transition-all group"
+                    className="flex items-center gap-3.5 px-4 py-3.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 hover:bg-[var(--color-accent)]/3 transition-all group"
                   >
                     {/* Ayet numarası */}
                     <div className="shrink-0 w-9 h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] flex flex-col items-center justify-center gap-px">
@@ -228,7 +228,7 @@ function SavunmaContent() {
       </div>
 
       {/* Alt bilgi */}
-      <div className="mt-10 px-5 py-4 rounded-xl border border-[var(--color-border)]">
+      <div className="mt-10 px-5 py-4 rounded border border-[var(--color-border)]">
         <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed text-center">
           Açıklamalar klasik tefsir, hadis kaynakları ve akademik çalışmalar esas alınarak hazırlanmıştır.
           Kur'an bütünlük içinde anlaşılır; hiçbir ayet bağlamından koparılarak değerlendirilemez.

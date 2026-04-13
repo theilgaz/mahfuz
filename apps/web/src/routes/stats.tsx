@@ -61,7 +61,7 @@ function StatsPage() {
   const isEmpty = bookmarks.length === 0 && hifzStats.totalVerses === 0 && recentPositions.length === 0;
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 pb-24">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
       {/* ── Header ──────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-6">
         <Link
@@ -79,7 +79,7 @@ function StatsPage() {
       {/* ── Empty state ─────────────────────────────── */}
       {isEmpty && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center mb-4">
+          <div className="w-14 h-14 rounded bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center mb-4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
             </svg>
@@ -122,7 +122,7 @@ function StatsPage() {
             <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
               {t.stats.memorization}
             </h2>
-            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+            <div className="py-3 px-1 border-b border-[var(--color-border)]">
               <div className="flex items-end justify-between mb-3">
                 <span className="text-3xl font-bold text-[var(--color-accent)] tabular-nums">{hifzStats.percentage}%</span>
                 <span className="text-xs text-[var(--color-text-secondary)] tabular-nums">
@@ -151,9 +151,9 @@ function StatsPage() {
               <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
                 {t.stats.surahProgress}
               </h2>
-              <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden divide-y divide-[var(--color-border)]">
+              <div>
                 {activeSurahs.map((s) => (
-                  <div key={s.surahId} className="flex items-center gap-3 px-3 py-2.5">
+                  <div key={s.surahId} className="flex items-center gap-3 py-2.5 px-1 border-b border-[var(--color-border)]">
                     <span className="w-7 h-7 rounded-lg bg-[var(--color-accent)]/8 flex items-center justify-center text-[10px] font-bold text-[var(--color-accent)] shrink-0 tabular-nums">
                       {s.surahId}
                     </span>
@@ -184,9 +184,9 @@ function StatsPage() {
               <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
                 {t.stats.topBookmarked}
               </h2>
-              <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden divide-y divide-[var(--color-border)]">
+              <div>
                 {bookmarksBySurah.map((s) => (
-                  <div key={s.surahId} className="flex items-center justify-between px-3 py-2.5">
+                  <div key={s.surahId} className="flex items-center justify-between py-2.5 px-1 border-b border-[var(--color-border)]">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span className="w-7 h-7 rounded-lg bg-[var(--color-accent)]/8 flex items-center justify-center text-[10px] font-bold text-[var(--color-accent)] shrink-0 tabular-nums">
                         {s.surahId}
@@ -208,14 +208,14 @@ function StatsPage() {
               <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
                 {t.stats.recentPositions}
               </h2>
-              <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden divide-y divide-[var(--color-border)]">
+              <div>
                 {recentPositions.map((pos, i) => (
                   <Link
                     key={`${pos.surahId}-${i}`}
                     to="/surah/$surahSlug"
                     params={{ surahSlug: surahSlug(pos.surahId) }}
                     search={{ ayah: pos.ayahNumber }}
-                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-[var(--color-accent)]/3 transition-colors"
+                    className="flex items-center gap-3 py-2.5 px-1 border-b border-[var(--color-border)] hover:bg-[var(--color-accent)]/3 transition-colors"
                   >
                     <span className="w-7 h-7 rounded-lg bg-[var(--color-accent)]/8 flex items-center justify-center text-[10px] font-bold text-[var(--color-accent)] shrink-0 tabular-nums">
                       {pos.surahId}
@@ -246,7 +246,7 @@ function StatsPage() {
 
 function StatCard({ label, value, suffix, icon }: { label: string; value: number; suffix?: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
+    <div className="py-3 px-1 border-b border-[var(--color-border)]">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-7 h-7 rounded-lg bg-[var(--color-accent)]/8 flex items-center justify-center text-[var(--color-accent)] shrink-0">
           {icon}

@@ -92,10 +92,6 @@ function versesToRangeText(verses: number[], total: number, allLabel: string): s
   return ranges.join(", ");
 }
 
-const CARD_CLIP = "polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)";
-const HEADER_CLIP = "polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%)";
-const BADGE_PATH =
-  "M59.3,15.2 Q73,10.2 75.5,24.5 Q89.8,27 84.8,40.7 Q96,50 84.8,59.3 Q89.8,73 75.5,75.5 Q73,89.8 59.3,84.8 Q50,96 40.7,84.8 Q27,89.8 24.5,75.5 Q10.2,73 15.2,59.3 Q4,50 15.2,40.7 Q10.2,27 24.5,24.5 Q27,10.2 40.7,15.2 Q50,4 59.3,15.2Z";
 
 /* ── Sure kartı ────────────────────────────────────── */
 
@@ -123,35 +119,22 @@ function SurahCard({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       onClick={onOpen}
-      className={`p-[1.5px] cursor-pointer active:scale-[0.98] transition-all ${
+      className={`p-3 rounded border cursor-pointer active:scale-[0.98] transition-all ${
         isComplete
-          ? "bg-[var(--color-accent)]/30"
+          ? "border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5"
           : isPartial
-            ? "bg-[var(--color-accent)]/15"
-            : "bg-[var(--color-border)]"
+            ? "border-[var(--color-accent)]/15 bg-[var(--color-surface)]"
+            : "border-[var(--color-border)] bg-[var(--color-surface)]"
       }`}
-      style={{ clipPath: CARD_CLIP }}
-    >
-    <div
-      className={`p-3 ${
-        isComplete
-          ? "bg-[var(--color-accent)]/8"
-          : "bg-[var(--color-surface)]"
-      }`}
-      style={{ clipPath: CARD_CLIP }}
     >
       <div className="flex items-center gap-2.5 mb-2">
-        <div className={`relative shrink-0 w-9 h-9 flex items-center justify-center ${
-          isComplete ? "text-[var(--color-accent)]" : "text-[var(--color-border)]"
+        <span className={`shrink-0 w-8 h-8 rounded border flex items-center justify-center text-[10px] font-bold tabular-nums ${
+          isComplete
+            ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+            : "border-[var(--color-border)] text-[var(--color-text-secondary)]"
         }`}>
-          <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" aria-hidden="true">
-            <path d={BADGE_PATH} fill="currentColor" />
-            <path d={BADGE_PATH} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="4" />
-          </svg>
-          <span className="relative z-10 text-[9px] font-black tabular-nums text-white">
-            {String(surahId).padStart(2, "0")}
-          </span>
-        </div>
+          {surahId}
+        </span>
         <span className={`flex-1 min-w-0 text-sm font-medium truncate ${
           isComplete ? "text-[var(--color-accent)]" : ""
         }`}>
@@ -177,7 +160,6 @@ function SurahCard({
           %{pct}
         </span>
       </div>
-    </div>
     </div>
   );
 }
@@ -242,7 +224,7 @@ function VerseDetailSheet({
       <div className="absolute inset-0 bg-black/40 animate-in fade-in duration-150" onClick={onClose} />
 
       {/* Sheet */}
-      <div className="relative w-full sm:max-w-lg max-h-[85vh] bg-[var(--color-surface)] rounded-t-2xl sm:rounded-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+      <div className="relative w-full sm:max-w-lg max-h-[85vh] bg-[var(--color-surface)] rounded-t sm:rounded overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
         {/* Drag handle (mobile) */}
         <div className="flex justify-center pt-2 pb-1 sm:hidden">
           <div className="w-8 h-1 rounded-full bg-[var(--color-border)]" />
@@ -251,18 +233,13 @@ function VerseDetailSheet({
         {/* Header */}
         <div className="sticky top-0 bg-[var(--color-surface)] px-4 pb-3 pt-2 sm:pt-4">
           <div className="flex items-center gap-3 mb-3">
-            {/* Scalloped badge */}
-            <div className={`relative shrink-0 w-11 h-11 flex items-center justify-center ${
-              checkState === "complete" ? "text-[var(--color-accent)]" : "text-[var(--color-border)]"
+            <span className={`shrink-0 w-10 h-10 rounded border flex items-center justify-center text-xs font-bold tabular-nums ${
+              checkState === "complete"
+                ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+                : "border-[var(--color-border)] text-[var(--color-text-secondary)]"
             }`}>
-              <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" aria-hidden="true">
-                <path d={BADGE_PATH} fill="currentColor" />
-                <path d={BADGE_PATH} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="4" />
-              </svg>
-              <span className="relative z-10 text-[11px] font-black tabular-nums text-white">
-                {String(surahId).padStart(2, "0")}
-              </span>
-            </div>
+              {surahId}
+            </span>
             <div className="flex-1 min-w-0">
               <p className="text-base font-semibold truncate">{name}</p>
               <p className="text-xs text-[var(--color-text-secondary)]">
@@ -409,13 +386,12 @@ export function HifzStatus() {
 
   return (
     <section className="mb-6">
-      {/* Başlık kartı */}
-      <div style={{ filter: "drop-shadow(0 0 0.5px var(--color-border)) drop-shadow(0 0 0.5px var(--color-border))" }}>
+      {/* Baslik karti */}
+      <div>
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface)]/80"
-          style={{ clipPath: HEADER_CLIP }}
+          className="w-full flex items-center justify-between p-4 rounded border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface)]/80"
         >
           <div className="flex items-center gap-3">
             <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
@@ -440,7 +416,7 @@ export function HifzStatus() {
       </div>
 
       {expanded && (
-        <div className="relative z-10 mt-2 p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+        <div className="relative z-10 mt-2 p-4 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
           {/* Üst özet: ring + istatistikler yan yana */}
           <div className="flex items-center gap-5 mb-5">
             <div className="relative flex items-center justify-center shrink-0">

@@ -267,7 +267,7 @@ function WordMeaningGame() {
   if (allDone) {
     return (
       <div className="max-w-lg mx-auto px-4 py-12 text-center">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${P}18`, color: P }}>
+        <div className="w-16 h-16 rounded flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${P}18`, color: P }}>
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M8 21h8M12 17v4M7 4h10l1 7H6L7 4z"/><path d="M6 11s-1 2 0 4 6 2 6 2 5 0 6-2 0-4 0-4"/>
           </svg>
@@ -279,7 +279,7 @@ function WordMeaningGame() {
         <p className="text-2xl font-bold text-[var(--color-accent)] mb-6">{t.wordMeaningGame.points.replace("{score}", String(score))}</p>
         <button
           onClick={resetSession}
-          className="px-8 py-3 rounded-2xl bg-[var(--color-accent)] text-white font-semibold text-sm hover:opacity-90 transition-all"
+          className="px-8 py-3 rounded bg-[var(--color-accent)] text-white font-semibold text-sm hover:opacity-90 transition-all"
         >
           {t.wordMeaningGame.restart}
         </button>
@@ -313,7 +313,7 @@ function WordMeaningGame() {
       <div className="px-4 pt-2">
 
       {/* Soru */}
-      <div className="px-5 py-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] mb-6 text-center">
+      <div className="px-5 py-8 rounded border border-[var(--color-border)] bg-[var(--color-surface)] mb-6 text-center">
         <p className="text-xs text-[var(--color-text-secondary)] mb-8">{t.wordMeaningGame.questionPrompt}</p>
         <p
           className="text-5xl font-bold text-[var(--color-text-primary)] leading-[1.6]"
@@ -349,7 +349,7 @@ function WordMeaningGame() {
               onClick={() => handleSelect(opt)}
               disabled={gameState !== "playing"}
               style={style}
-              className={`px-4 py-3.5 rounded-xl border text-sm font-medium transition-all ${cls}`}
+              className={`px-4 py-3.5 rounded border text-sm font-medium transition-all ${cls}`}
             >
               {opt}
             </button>
@@ -358,7 +358,7 @@ function WordMeaningGame() {
       </div>
 
       {gameState === "correct" && (
-        <div className="px-4 py-3 rounded-xl text-center border" style={{ backgroundColor: `${P}12`, borderColor: `${P}40` }}>
+        <div className="px-4 py-3 rounded text-center border" style={{ backgroundColor: `${P}12`, borderColor: `${P}40` }}>
           <p className="text-sm font-semibold" style={{ color: P }}>{t.wordMeaningGame.correct}</p>
           <p className="text-xs mt-1" style={{ color: `${P}cc` }}>{t.wordMeaningGame.correctNext}</p>
         </div>
@@ -366,13 +366,13 @@ function WordMeaningGame() {
 
       {gameState === "wrong" && (
         <>
-          <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3">
+          <div className="px-4 py-3 rounded text-center bg-red-50 border border-red-100 mb-3">
             <p className="text-sm font-semibold text-red-600">{t.wordMeaningGame.wrong.replace("{word}", question.meaning)}</p>
             <p className="text-xs text-red-500 mt-1">{t.wordMeaningGame.wrongNote}</p>
           </div>
           <button
             onClick={nextRound}
-            className="w-full py-3 rounded-xl text-white font-semibold text-sm"
+            className="w-full py-3 rounded text-white font-semibold text-sm"
             style={{ backgroundColor: P }}
           >
             {t.wordMeaningGame.nextQuestion}

@@ -103,7 +103,7 @@ function VerseChainGame({ surahIds, onSetup }: { surahIds: number[]; onSetup: ()
     return (
       <div className="max-w-md mx-auto px-4 py-12 text-center">
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+          className="w-16 h-16 rounded flex items-center justify-center mx-auto mb-4"
           style={{ backgroundColor: `${THEME.bg}30` }}
         >
           <svg className="w-8 h-8" fill="none" stroke={THEME.bg} viewBox="0 0 24 24">
@@ -118,7 +118,7 @@ function VerseChainGame({ surahIds, onSetup }: { surahIds: number[]; onSetup: ()
         </p>
         <button
           onClick={handleRestart}
-          className="px-8 py-3 rounded-2xl text-white font-semibold text-sm hover:opacity-90 transition-all"
+          className="px-8 py-3 rounded text-white font-semibold text-sm hover:opacity-90 transition-all"
           style={{ backgroundColor: P }}
         >
           Tekrar Oyna
@@ -187,7 +187,7 @@ function VerseChainGame({ surahIds, onSetup }: { surahIds: number[]; onSetup: ()
         </div>
 
         {/* Mevcut ayet */}
-        <div className="px-5 py-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] mb-4">
+        <div className="px-5 py-4 rounded border border-[var(--color-border)] bg-[var(--color-surface)] mb-4">
           <p className="text-xs text-[var(--color-text-secondary)] mb-2">
             {currentVerse.surahName} · {currentVerse.verseKey.split(":")[1]}. Ayet
           </p>
@@ -252,7 +252,7 @@ function VerseChainGame({ surahIds, onSetup }: { surahIds: number[]; onSetup: ()
                 onClick={() => handleAnswer(idx)}
                 disabled={state !== "playing"}
                 style={{ ...borderStyle, ...bgStyle }}
-                className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${borderClass} ${bgClass} ${
+                className={`w-full text-left px-4 py-3 rounded border-2 transition-all ${borderClass} ${bgClass} ${
                   state === "playing" ? "cursor-pointer" : "cursor-default"
                 }`}
               >

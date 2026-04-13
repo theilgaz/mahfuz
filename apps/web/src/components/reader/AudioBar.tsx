@@ -98,7 +98,7 @@ export function AudioBar() {
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {stateLabel} {verseDisplay} · {speed}x
       </div>
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-lg px-3 py-2">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded px-3 py-2">
         {/* Progress bar */}
         <div className="h-0.5 rounded-full bg-[var(--color-border)] overflow-hidden mb-2" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
           <div

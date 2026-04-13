@@ -41,7 +41,7 @@ function HomePageSkeleton() {
       {/* Sure listesi skeleton */}
       <div className="space-y-0.5">
         {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3 px-3 py-3 rounded-xl">
+          <div key={i} className="flex items-center gap-3 px-3 py-3 rounded">
             <div className="w-12 h-12 rounded-lg bg-[var(--color-surface)] animate-pulse shrink-0" />
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center justify-between">

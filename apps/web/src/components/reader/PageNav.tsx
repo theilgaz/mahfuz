@@ -31,30 +31,30 @@ export function PageNav({ pageNumber, enableSwipe = false, surahId, dropUp = fal
     [navigate],
   );
 
-  // Klavye navigasyonu
+  // Klavye navigasyonu (RTL: sola = onceki, saga = sonraki)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "ArrowLeft") goTo(pageNumber + 1);
-      if (e.key === "ArrowRight") goTo(pageNumber - 1);
+      if (e.key === "ArrowLeft") goTo(pageNumber - 1);
+      if (e.key === "ArrowRight") goTo(pageNumber + 1);
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [pageNumber, goTo]);
 
-  // Mobil swipe navigasyonu (sadece üst PageNav'da aktif — çift ateşlemeyi önlemek için)
+  // Mobil swipe navigasyonu (RTL: sola = onceki, saga = sonraki)
   useSwipeNav({
-    onSwipeLeft: enableSwipe ? () => goTo(pageNumber + 1) : () => {},
-    onSwipeRight: enableSwipe ? () => goTo(pageNumber - 1) : () => {},
+    onSwipeLeft: enableSwipe ? () => goTo(pageNumber - 1) : () => {},
+    onSwipeRight: enableSwipe ? () => goTo(pageNumber + 1) : () => {},
   });
 
   return (
     <div className="flex items-center justify-between px-4 py-2">
-      {/* Önceki sayfa */}
+      {/* Sonraki sayfa (sol taraf — RTL kitapta ileri yön) */}
       <button
-        onClick={() => goTo(pageNumber - 1)}
-        disabled={pageNumber <= 1}
+        onClick={() => goTo(pageNumber + 1)}
+        disabled={pageNumber >= TOTAL_PAGES}
         className="p-2 rounded-lg hover:bg-[var(--color-surface)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        aria-label={t.reader.prevPage}
+        aria-label={t.reader.nextPage}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5L7 10L12 15" />
@@ -76,12 +76,12 @@ export function PageNav({ pageNumber, enableSwipe = false, surahId, dropUp = fal
         </span>
       )}
 
-      {/* Sonraki sayfa */}
+      {/* Önceki sayfa (sağ taraf — RTL kitapta geri yön) */}
       <button
-        onClick={() => goTo(pageNumber + 1)}
-        disabled={pageNumber >= TOTAL_PAGES}
+        onClick={() => goTo(pageNumber - 1)}
+        disabled={pageNumber <= 1}
         className="p-2 rounded-lg hover:bg-[var(--color-surface)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        aria-label={t.reader.nextPage}
+        aria-label={t.reader.prevPage}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M8 5L13 10L8 15" />

@@ -201,7 +201,7 @@ export function AyahActionMenu({
         style={{ fontFamily: "var(--font-ui)" }}
       >
         {/* Ayet referansı badge */}
-        <div className="px-3 py-1 rounded-full bg-[var(--color-accent)] text-white text-[11px] font-semibold tracking-wide shadow-lg">
+        <div className="px-3 py-1 rounded-full bg-[var(--color-accent)] text-white text-[11px] font-semibold tracking-wide shadow-sm">
           {surahId}:{ayahNumber}
         </div>
 
@@ -214,7 +214,7 @@ export function AyahActionMenu({
               className="flex flex-col items-center gap-1.5"
               aria-label={action.label}
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm
                 ${action.active
                   ? "bg-[var(--color-accent)] text-white"
                   : "bg-[var(--color-bg)] text-[var(--color-text-primary)] border border-[var(--color-border)] hover:bg-[var(--color-accent)] hover:text-white hover:border-transparent hover:scale-110"
@@ -235,10 +235,10 @@ export function AyahActionMenu({
             <button
               key={action.key}
               onClick={() => copyText(action.text, action.key)}
-              className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200 shadow-md
+              className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200
                 ${copied === action.key
                   ? "bg-[var(--color-accent)] text-white scale-95"
-                  : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/40 hover:shadow-lg"
+                  : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/40"
                 }`}
             >
               {copied === action.key ? (

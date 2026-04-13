@@ -52,7 +52,7 @@ function RecitePage() {
           {/* Find My Verse */}
           <button
             onClick={handleFindVerse}
-            className="w-full text-left rounded-xl border border-[var(--color-border)] p-4 hover:border-[var(--color-accent)] transition-colors"
+            className="w-full text-left rounded border border-[var(--color-border)] p-4 hover:border-[var(--color-accent)] transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
@@ -75,7 +75,7 @@ function RecitePage() {
           {/* Memorization Verification */}
           <button
             onClick={() => setMode("verify")}
-            className="w-full text-left rounded-xl border border-[var(--color-border)] p-4 hover:border-[var(--color-accent)] transition-colors"
+            className="w-full text-left rounded border border-[var(--color-border)] p-4 hover:border-[var(--color-accent)] transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
@@ -99,7 +99,7 @@ function RecitePage() {
               setStoreMode("follow-along");
               showBar();
             }}
-            className="w-full text-left rounded-xl border border-[var(--color-border)] p-4 hover:border-[var(--color-accent)] transition-colors"
+            className="w-full text-left rounded border border-[var(--color-border)] p-4 hover:border-[var(--color-accent)] transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">

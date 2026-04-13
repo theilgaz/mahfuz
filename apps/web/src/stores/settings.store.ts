@@ -2,8 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 
-export type Theme = "papyrus" | "sea" | "night" | "seher";
-export type SeherOverride = "auto" | "light" | "dark";
+export type Theme = "sea" | "night" | "quran" | "tezhip";
 export type TextStyle = "uthmani" | "basic";
 export type WbwDisplay = "off" | "hover" | "on"; // geriye uyumluluk
 export type ReadingMode = "mushaf" | "verse" | "wbw";
@@ -20,8 +19,6 @@ export const COLOR_PALETTES: Record<ColorPaletteId, { name: string; nameAr: stri
 
 interface SettingsState {
   theme: Theme;
-  seherOverride: SeherOverride;
-  seherLocation: { lat: number; lon: number } | null;
   textStyle: TextStyle;
   translationSlugs: string[];
   showTranslation: boolean;
@@ -40,9 +37,7 @@ interface SettingsState {
 
 interface SettingsActions {
   setTheme: (theme: Theme) => void;
-  setSeherOverride: (mode: SeherOverride) => void;
-  setSeherLocation: (lat: number, lon: number) => void;
-  /** Bir meal ekle/çıkar (toggle) */
+  /** Bir meal ekle/cikar (toggle) */
   toggleTranslationSlug: (slug: string) => void;
   /** Seçili meali bir adım yukarı/aşağı taşı */
   moveTranslationSlug: (slug: string, direction: "up" | "down") => void;
@@ -68,9 +63,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
   persist(
     (set) => ({
       // Defaults
-      theme: "papyrus" as Theme,
-      seherOverride: "auto" as SeherOverride,
-      seherLocation: null,
+      theme: "sea" as Theme,
       translationSlugs: [DEFAULT_TRANSLATION_SLUG],
       showTranslation: true,
       showTranslit: false,
@@ -89,11 +82,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       // Actions
       setTheme: (theme) => {
         document.documentElement.setAttribute("data-theme", theme);
-        if (theme !== "seher") document.documentElement.removeAttribute("data-seher");
         set({ theme });
       },
-      setSeherOverride: (mode) => set({ seherOverride: mode }),
-      setSeherLocation: (lat, lon) => set({ seherLocation: { lat, lon } }),
       toggleTranslationSlug: (slug) =>
         set((s) => {
           const has = s.translationSlugs.includes(slug);
@@ -129,9 +119,9 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setLabsEnabled: (enabled) => set({ labsEnabled: enabled }),
       setMushafSizeMode: (mode) => set({ mushafSizeMode: mode }),
       resetToDefaults: () => {
-        document.documentElement.setAttribute("data-theme", "papyrus");
+        document.documentElement.setAttribute("data-theme", "sea");
         set({
-          theme: "papyrus",
+          theme: "sea",
           translationSlugs: [DEFAULT_TRANSLATION_SLUG],
           showTranslation: true,
           showTranslit: false,
@@ -150,21 +140,19 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     }),
     {
       name: "mahfuz-core-settings",
-      version: 2,
+      version: 3,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
       }),
       migrate: (persisted: any, version: number) => {
         if (version === 0) {
-          // v0 → v1: translationSlug (string) → translationSlugs (string[])
           if (persisted.translationSlug && !persisted.translationSlugs) {
             persisted.translationSlugs = [persisted.translationSlug];
             delete persisted.translationSlug;
           }
         }
         if (version < 2) {
-          // v1 → v2: "page"/"list" + showWbw → "mushaf"/"verse"/"wbw"
           const wasPage = persisted.readingMode === "page" || !persisted.readingMode;
           const hadWbw = persisted.showWbw === true;
           persisted.readingMode = wasPage ? "mushaf" : hadWbw ? "wbw" : "verse";
@@ -172,6 +160,14 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           delete persisted.showWbw;
           delete persisted.wbwTranslation;
           delete persisted.wbwTranslit;
+        }
+        if (version < 3) {
+          // v2 -> v3: 4 tema -> 3 tema, seher state kaldir
+          const theme = persisted.theme;
+          if (theme === "papyrus") persisted.theme = "quran";
+          else if (theme === "seher") persisted.theme = "sea";
+          delete persisted.seherOverride;
+          delete persisted.seherLocation;
         }
         return persisted as any;
       },

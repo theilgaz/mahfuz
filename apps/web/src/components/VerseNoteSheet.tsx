@@ -59,7 +59,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
       />
 
       {/* Sheet */}
-      <div className="fixed bottom-0 inset-x-0 z-50 max-w-xl mx-auto bg-[var(--color-bg)] border-t border-[var(--color-border)] rounded-t-2xl shadow-xl pb-[env(safe-area-inset-bottom)]">
+      <div className="fixed bottom-0 inset-x-0 z-50 max-w-xl mx-auto bg-[var(--color-bg)] border-t border-[var(--color-border)] rounded-t-2xl shadow-sm pb-[env(safe-area-inset-bottom)]">
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-2">
           <div className="w-10 h-1 rounded-full bg-[var(--color-border)]" />
@@ -95,7 +95,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
 
           {/* Not alanı */}
           {isLoading ? (
-            <div className="h-24 rounded-xl bg-[var(--color-surface)] animate-pulse" />
+            <div className="h-24 rounded bg-[var(--color-surface)] animate-pulse" />
           ) : (
             <textarea
               ref={textareaRef}
@@ -103,7 +103,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
               onChange={(e) => setContent(e.target.value)}
               placeholder="Bu ayet hakkında notlarınızı yazın..."
               rows={5}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 resize-none"
+              className="w-full px-3.5 py-2.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 resize-none"
             />
           )}
 
@@ -112,7 +112,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
             <button
               onClick={() => saveMutation.mutate()}
               disabled={!content.trim() || saveMutation.isPending}
-              className="flex-1 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-semibold disabled:opacity-50 transition-opacity"
+              className="flex-1 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-semibold disabled:opacity-50 transition-opacity"
             >
               {saved ? (
                 <span className="flex items-center justify-center gap-1.5">
@@ -125,7 +125,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
               <button
                 onClick={() => deleteMutation.mutate()}
                 disabled={deleteMutation.isPending}
-                className="px-3.5 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm hover:bg-red-50 transition-colors"
+                className="px-3.5 py-2.5 rounded border border-red-200 text-red-500 text-sm hover:bg-red-50 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

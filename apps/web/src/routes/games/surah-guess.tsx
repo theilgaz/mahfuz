@@ -99,7 +99,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
       <div className="px-4 pt-2">
 
       {/* Soru */}
-      <div className="px-5 py-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] mb-6">
+      <div className="px-5 py-5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] mb-6">
         <p className="text-xs text-[var(--color-text-secondary)] mb-3 text-center">
           Bu ayet hangi sureye ait?
         </p>
@@ -136,7 +136,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
               onClick={() => handleSelect(opt.id)}
               disabled={gameState !== "playing"}
               style={style}
-              className={`px-4 py-3.5 rounded-xl border transition-all text-left ${cls}`}
+              className={`px-4 py-3.5 rounded border transition-all text-left ${cls}`}
             >
               <p className="text-sm font-medium">{opt.name}</p>
               <p className="text-base" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
@@ -148,7 +148,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
       </div>
 
       {gameState === "correct" && (
-        <div className="px-4 py-3 rounded-xl text-center border" style={{ backgroundColor: `${P}12`, borderColor: `${P}40` }}>
+        <div className="px-4 py-3 rounded text-center border" style={{ backgroundColor: `${P}12`, borderColor: `${P}40` }}>
           <p className="text-sm font-semibold flex items-center justify-center gap-1.5" style={{ color: P }}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
             Doğru! +10 puan
@@ -159,7 +159,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
 
       {gameState === "wrong" && (
         <>
-          <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3">
+          <div className="px-4 py-3 rounded text-center bg-red-50 border border-red-100 mb-3">
             <p className="text-sm font-semibold text-red-600 flex items-center justify-center gap-1.5">
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
               Yanlış. Bu ayet &ldquo;{question.correctSurahName}&rdquo; suresinden
@@ -167,7 +167,7 @@ function GameScreen({ surahIds, onSetup }: { surahIds: number[]; onSetup: () => 
           </div>
           <button
             onClick={nextRound}
-            className="w-full py-3 rounded-xl bg-[var(--color-accent)] text-white font-semibold text-sm"
+            className="w-full py-3 rounded bg-[var(--color-accent)] text-white font-semibold text-sm"
           >
             Sonraki Soru →
           </button>

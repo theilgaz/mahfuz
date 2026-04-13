@@ -124,7 +124,7 @@ function FillGamePage() {
     const pct = Math.round((correct / questions.length) * 100);
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-5 mt-10">
-        <div className="w-16 h-16 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center">
+        <div className="w-16 h-16 rounded bg-[var(--color-accent)]/10 flex items-center justify-center">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="M15 5l4 4"/>
           </svg>
@@ -134,12 +134,12 @@ function FillGamePage() {
           <p className="text-sm text-[var(--color-text-secondary)]">{correct}/{questions.length} · {pct}%</p>
         </div>
         <div className="flex gap-3 mt-2">
-          <Link to="/alifba/games" className="px-5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium">
+          <Link to="/alifba/games" className="px-5 py-2.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium">
             {t.nav.back}
           </Link>
           <button
             onClick={() => { setIndex(0); setSelected(null); setCorrect(0); setDone(false); }}
-            className="px-5 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-medium"
+            className="px-5 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-medium"
           >
             {t.alifba.tryAgain}
           </button>
@@ -178,7 +178,7 @@ function FillGamePage() {
         <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-secondary)] mb-4">
           {t.alifba.spotGameInstructions}
         </p>
-        <div className="w-40 h-40 rounded-3xl bg-[var(--color-accent)]/8 border border-[var(--color-accent)]/20 flex items-center justify-center shadow-sm">
+        <div className="w-40 h-40 rounded bg-[var(--color-accent)]/8 border border-[var(--color-accent)]/20 flex items-center justify-center shadow-sm">
           <span
             className="block text-[6rem] select-none text-center"
             dir="rtl"
@@ -203,7 +203,7 @@ function FillGamePage() {
           const isSelected = selected === i;
           const isRight = choice.isCorrect;
 
-          let cls = "relative flex flex-col items-center justify-center min-h-[6rem] px-3 py-4 rounded-2xl border-2 transition-all duration-200 ";
+          let cls = "relative flex flex-col items-center justify-center min-h-[6rem] px-3 py-4 rounded border-2 transition-all duration-200 ";
           if (selected === null) {
             cls += "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)]/60 hover:bg-[var(--color-accent)]/5 cursor-pointer active:scale-[0.97]";
           } else if (isRight) {

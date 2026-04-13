@@ -101,7 +101,7 @@ function SpeedGamePage() {
           <h1 className="text-xl font-semibold mt-3 mb-2">{t.alifba.speedGame}</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">{GAME_DURATION} {t.alifba.speedGameDesc2}</p>
         </div>
-        <button onClick={() => setStarted(true)} className="px-8 py-3 rounded-2xl bg-[var(--color-accent)] text-white font-medium">
+        <button onClick={() => setStarted(true)} className="px-8 py-3 rounded bg-[var(--color-accent)] text-white font-medium">
           {t.alifba.start}
         </button>
       </div>
@@ -116,10 +116,10 @@ function SpeedGamePage() {
         <p className="text-2xl font-bold text-[var(--color-accent)]">{score}</p>
         <p className="text-sm text-[var(--color-text-secondary)]">{t.alifba.score}</p>
         <div className="flex gap-3">
-          <Link to="/alifba/games" className="px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
+          <Link to="/alifba/games" className="px-4 py-2.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
             {t.nav.back}
           </Link>
-          <button onClick={restart} className="px-4 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm">
+          <button onClick={restart} className="px-4 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm">
             {t.alifba.tryAgain}
           </button>
         </div>
@@ -142,7 +142,7 @@ function SpeedGamePage() {
         <div className={`h-full ${timerColor} transition-all`} style={{ width: `${timerPct}%` }} />
       </div>
 
-      <div className={`flex items-center justify-center py-10 mb-6 rounded-2xl border transition-colors ${
+      <div className={`flex items-center justify-center py-10 mb-6 rounded border transition-colors ${
         flash === "correct" ? "bg-green-500/15 border-green-500/50" :
         flash === "wrong" ? "bg-red-500/15 border-red-500/50" :
         "bg-[var(--color-surface)] border-[var(--color-border)]"
@@ -157,7 +157,7 @@ function SpeedGamePage() {
           <button
             key={choice.id}
             onClick={() => handleChoice(choice.id)}
-            className="flex items-center justify-center py-3 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] active:scale-95 transition-colors text-sm font-medium"
+            className="flex items-center justify-center py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] active:scale-95 transition-colors text-sm font-medium"
           >
             {choice.name}
           </button>

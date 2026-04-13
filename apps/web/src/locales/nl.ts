@@ -6,10 +6,10 @@ export const nl: PartialMessages = {
     close: "Sluiten",
     theme: "Thema",
     themes: {
-      papyrus: "Papyrus",
       sea: "Zee",
       night: "Nacht",
-      seher: "Dageraad",
+      quran: "Koran",
+      tezhip: "Tezhip",
     },
     readingMode: "Leesmodus",
     mushafPage: "Mushaf Pagina",

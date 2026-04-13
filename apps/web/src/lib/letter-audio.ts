@@ -56,20 +56,21 @@ export function playLetterAudio(
   onEnd: () => void,
 ): LetterAudioHandle {
   const audio = new Audio(`/kids/audio/${id}.mp3`);
-  let spoken = false;
+  let stopped = false;
+  let audioStarted = false;
 
   const speak = () => {
-    if (spoken) return;
-    spoken = true;
+    if (stopped || audioStarted) return;
     speakArabic(arabic, onEnd);
   };
 
-  audio.onended = onEnd;
+  audio.onended = () => { if (!stopped) onEnd(); };
   audio.onerror = speak;
-  audio.play().catch(speak);
+  audio.play().then(() => { audioStarted = true; }).catch(speak);
 
   return {
     stop: () => {
+      stopped = true;
       audio.pause();
       if ("speechSynthesis" in window) speechSynthesis.cancel();
     },

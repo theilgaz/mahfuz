@@ -33,7 +33,7 @@ export function LetterFormsPanel({ arabic, letterId: _letterId }: LetterFormsPan
           </span>
           {/* Card — just the glyph */}
           <div
-            className={`relative w-full aspect-square rounded-2xl flex items-center justify-center border transition-colors ${
+            className={`relative w-full aspect-square rounded flex items-center justify-center border transition-colors ${
               limited
                 ? "bg-[var(--color-surface)] border-[var(--color-border)] opacity-60"
                 : "bg-[var(--color-surface)] border-[var(--color-border)]"

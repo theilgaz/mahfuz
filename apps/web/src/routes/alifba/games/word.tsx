@@ -104,7 +104,7 @@ function WordGamePage() {
     const pct = Math.round((correct / questions.length) * 100);
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-5 mt-10">
-        <div className="w-16 h-16 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center">
+        <div className="w-16 h-16 rounded bg-[var(--color-accent)]/10 flex items-center justify-center">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
           </svg>
@@ -114,12 +114,12 @@ function WordGamePage() {
           <p className="text-sm text-[var(--color-text-secondary)]">{correct}/{questions.length} · {pct}%</p>
         </div>
         <div className="flex gap-3 mt-2">
-          <Link to="/alifba/games" className="px-5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium">
+          <Link to="/alifba/games" className="px-5 py-2.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium">
             {t.nav.back}
           </Link>
           <button
             onClick={() => { setIndex(0); setSelected(null); setCorrect(0); setDone(false); }}
-            className="px-5 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-medium"
+            className="px-5 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-medium"
           >
             {t.alifba.tryAgain}
           </button>
@@ -158,7 +158,7 @@ function WordGamePage() {
         </p>
         <button
           onClick={playAudio}
-          className={`w-24 h-24 rounded-3xl flex items-center justify-center transition-all duration-150 active:scale-95 shadow-sm border ${
+          className={`w-24 h-24 rounded flex items-center justify-center transition-all duration-150 active:scale-95 shadow-sm border ${
             playing
               ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white scale-105"
               : "bg-[var(--color-accent)]/10 border-[var(--color-accent)]/25 text-[var(--color-accent)]"
@@ -184,7 +184,7 @@ function WordGamePage() {
           const isSelected = selected === i;
           const isRight = choice.arabic === q.correct.arabic;
 
-          let cls = "relative flex flex-col items-center justify-center min-h-[6rem] px-3 py-4 rounded-2xl border-2 transition-all duration-200 ";
+          let cls = "relative flex flex-col items-center justify-center min-h-[6rem] px-3 py-4 rounded border-2 transition-all duration-200 ";
           if (selected === null) {
             cls += "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)]/60 hover:bg-[var(--color-accent)]/5 cursor-pointer active:scale-[0.97]";
           } else if (isRight) {

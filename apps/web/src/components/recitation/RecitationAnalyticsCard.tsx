@@ -11,7 +11,7 @@ export function RecitationAnalyticsCard() {
 
   if (totalMatches === 0) {
     return (
-      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
         <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">Kıraet Analitikleri</h3>
         <p className="text-xs text-[var(--color-text-secondary)]">
           Tilavet seansı başlattığında burada istatistiklerin görünür.
@@ -38,16 +38,16 @@ export function RecitationAnalyticsCard() {
     totalMatches;
 
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 space-y-4">
+    <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-4 space-y-4">
       <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Kıraet Analitikleri</h3>
 
       {/* Özet istatistikler */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] px-3 py-2.5 text-center">
+        <div className="rounded bg-[var(--color-bg)] border border-[var(--color-border)] px-3 py-2.5 text-center">
           <p className="text-xl font-bold text-[var(--color-text-primary)]">{totalMatches}</p>
           <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">Tanınan Ayet</p>
         </div>
-        <div className="rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] px-3 py-2.5 text-center">
+        <div className="rounded bg-[var(--color-bg)] border border-[var(--color-border)] px-3 py-2.5 text-center">
           <p className="text-xl font-bold text-[var(--color-text-primary)]">
             {avgScore > 0 ? `${Math.round(avgScore * 100)}%` : "-"}
           </p>

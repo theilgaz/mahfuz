@@ -33,7 +33,7 @@ export function FindVerseSheet() {
     <div className="space-y-4">
       {/* Current result */}
       {lastMatch && (
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-base font-semibold">

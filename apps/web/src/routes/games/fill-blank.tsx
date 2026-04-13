@@ -139,7 +139,7 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
         </p>
 
         {/* ── Ayet kartı ── */}
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] mb-4 overflow-hidden">
+        <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] mb-4 overflow-hidden">
           <div
             className="px-6 py-6 text-right leading-[2.4] text-[1.35rem]"
             dir="rtl"
@@ -209,7 +209,7 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
                 onClick={() => handleSelect(opt)}
                 disabled={isAnswered}
                 style={containerStyle}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-150 ${containerClass}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded border transition-all duration-150 ${containerClass}`}
               >
                 {isAnswered && opt === verse.correctWord ? (
                   <span className="text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ backgroundColor: `${P}25`, color: P }}>
@@ -235,7 +235,7 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
         {/* ── Feedback + Sonraki ── */}
         {isAnswered && (
           <div
-            className="rounded-2xl border px-5 py-4 flex items-center justify-between gap-4"
+            className="rounded border px-5 py-4 flex items-center justify-between gap-4"
             style={
               gameState === "correct"
                 ? { backgroundColor: `${P}12`, borderColor: `${P}40` }
@@ -280,7 +280,7 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
             <button
               ref={nextBtnRef}
               onClick={nextRound}
-              className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+              className="shrink-0 px-5 py-2.5 rounded text-sm font-bold text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: gameState === "correct" ? P : "var(--color-accent)" }}
             >
               {t.fillBlankGame.next}

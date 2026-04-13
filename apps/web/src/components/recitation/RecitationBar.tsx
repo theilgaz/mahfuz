@@ -81,7 +81,7 @@ export function RecitationBar() {
 
   return (
     <div className="fixed bottom-36 left-1/2 -translate-x-1/2 z-30 w-[min(92vw,380px)]">
-      <div className="rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-2xl overflow-hidden">
+      <div className="rounded bg-[var(--color-bg)] border border-[var(--color-border)] shadow-sm overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
           <span className="text-[11px] font-semibold text-[var(--color-accent)] uppercase tracking-wide">

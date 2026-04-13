@@ -65,9 +65,9 @@ function GamesHubPage() {
           <Link
             key={game.id}
             to={game.to}
-            className="flex items-center gap-4 px-4 py-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors active:scale-[0.99]"
+            className="flex items-center gap-4 px-4 py-4 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors active:scale-[0.99]"
           >
-            <span className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)] shrink-0">{game.icon}</span>
+            <span className="w-10 h-10 rounded bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)] shrink-0">{game.icon}</span>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium">{game.label}</p>
               <p className="text-xs text-[var(--color-text-secondary)]">{game.desc}</p>

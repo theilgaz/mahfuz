@@ -6,10 +6,10 @@ export const fr: PartialMessages = {
     close: "Fermer",
     theme: "Thème",
     themes: {
-      papyrus: "Papyrus",
       sea: "Océan",
       night: "Nuit",
-      seher: "Aube",
+      quran: "Coran",
+      tezhip: "Tezhip",
     },
     readingMode: "Mode de Lecture",
     mushafPage: "Page du Mushaf",

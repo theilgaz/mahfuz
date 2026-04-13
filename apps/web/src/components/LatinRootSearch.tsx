@@ -45,7 +45,7 @@ export function LatinRootSearch() {
   return (
     <div className="space-y-3">
       {/* Açıklama */}
-      <div className="text-xs text-[var(--color-text-secondary)] bg-[var(--color-surface)] rounded-xl px-3 py-2 border border-[var(--color-border)]">
+      <div className="text-xs text-[var(--color-text-secondary)] bg-[var(--color-surface)] rounded px-3 py-2 border border-[var(--color-border)]">
         {t.hub.rootSearchHint.split("sbr")[0]}<span className="font-mono text-[var(--color-accent)]">sbr</span>{t.hub.rootSearchHint.split("sbr")[1]}
       </div>
 
@@ -56,7 +56,7 @@ export function LatinRootSearch() {
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder={t.hub.rootSearchPlaceholder}
-          className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-secondary)] text-sm font-mono focus:outline-none focus:border-[var(--color-accent)] transition-colors"
+          className="w-full px-4 py-2.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-secondary)] text-sm font-mono focus:outline-none focus:border-[var(--color-accent)] transition-colors"
         />
         {isPending && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -93,7 +93,7 @@ export function LatinRootSearch() {
           {results.map((root) => (
             <div
               key={root.id}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-colors cursor-pointer"
+              className="flex items-center gap-3 px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-colors cursor-pointer"
             >
               <span
                 className="text-2xl text-[var(--color-text-primary)]"

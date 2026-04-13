@@ -123,9 +123,9 @@ export function GitHubContributors() {
   const totalCommits = contributors.reduce((s, x) => s + x.contributions, 0);
 
   return (
-    <section className="mt-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
-      {/* Header — gradient banner */}
-      <div className="relative px-4 pt-4 pb-3 bg-gradient-to-br from-[var(--color-accent)]/8 to-transparent">
+    <section className="mt-8 rounded border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+      {/* Header */}
+      <div className="relative px-4 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)]/12 flex items-center justify-center">
@@ -210,7 +210,7 @@ export function GitHubContributors() {
               href={user.html_url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[var(--color-accent)]/5 transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded hover:bg-[var(--color-accent)]/5 transition-colors ${
                 i === 0 ? "bg-[var(--color-accent)]/4" : ""
               }`}
             >

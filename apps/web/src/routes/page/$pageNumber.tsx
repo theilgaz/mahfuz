@@ -9,7 +9,6 @@ import { MushafPage } from "~/components/reader/MushafPage";
 
 import { pageDataQueryOptions } from "~/hooks/useQuranQuery";
 import { ScrollToTop } from "~/components/ScrollToTop";
-import { FontSizeControl } from "~/components/reader/FontSizeControl";
 import { useSwipeNav } from "~/hooks/useSwipeNav";
 import { useViewTransition } from "~/hooks/useViewTransition";
 import { RouteErrorFallback } from "~/components/RouteErrorFallback";
@@ -51,22 +50,21 @@ function PageRoute() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "ArrowLeft") goTo(page + 1);
-      if (e.key === "ArrowRight") goTo(page - 1);
+      if (e.key === "ArrowLeft") goTo(page - 1);
+      if (e.key === "ArrowRight") goTo(page + 1);
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [page, goTo]);
 
   useSwipeNav({
-    onSwipeLeft: () => goTo(page + 1),
-    onSwipeRight: () => goTo(page - 1),
+    onSwipeLeft: () => goTo(page - 1),
+    onSwipeRight: () => goTo(page + 1),
   });
 
   return (
-    <div className="min-h-screen relative pb-20">
+    <div className="min-h-screen relative pb-20" style={{ backgroundColor: "var(--color-bg)" }}>
       <MushafPage pageNumber={page} highlightAyah={ayah} />
-      <FontSizeControl mushaf />
       <ScrollToTop />
     </div>
   );

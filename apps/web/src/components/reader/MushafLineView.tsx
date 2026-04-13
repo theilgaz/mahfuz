@@ -64,7 +64,7 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
       minLeft < Infinity ? maxRight - minLeft : inner.scrollWidth;
 
     if (contentWidth > containerWidth + 0.5) {
-      setScale(Math.max(0.5, containerWidth / contentWidth));
+      setScale(Math.max(0.35, containerWidth / contentWidth));
     } else {
       setScale(1);
     }

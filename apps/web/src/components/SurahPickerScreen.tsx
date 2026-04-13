@@ -110,7 +110,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
         {/* Tüm Kuran */}
         <button
           onClick={() => setMode("all")}
-          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all text-left ${
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded border transition-all text-left ${
             mode === "all"
               ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
               : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
@@ -128,7 +128,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
           <>
             <button
               onClick={() => setMode("hifz")}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all text-left ${
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded border transition-all text-left ${
                 mode === "hifz"
                   ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
                   : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
@@ -144,7 +144,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
             </button>
 
             {mode === "hifz" && (
-              <div className="ml-9 rounded-xl border border-[var(--color-border)] overflow-hidden">
+              <div className="ml-9 rounded border border-[var(--color-border)] overflow-hidden">
                 {memorizedEntries.map(({ surahId, verses }, i) => {
                   const surah = surahMap.get(surahId);
                   return (
@@ -167,7 +167,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
         {/* Özel Seçim */}
         <button
           onClick={() => setMode("custom")}
-          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all text-left ${
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded border transition-all text-left ${
             mode === "custom"
               ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
               : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
@@ -231,12 +231,12 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
                 placeholder={t.surahPicker.searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent)]/60"
+                className="w-full pl-9 pr-4 py-2 text-sm rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent)]/60"
               />
             </div>
 
             {/* Sure listesi */}
-            <div className="rounded-xl border border-[var(--color-border)] overflow-hidden overflow-y-auto max-h-[50vh]">
+            <div className="rounded border border-[var(--color-border)] overflow-hidden overflow-y-auto max-h-[50vh]">
               {isLoading ? (
                 <p className="text-center text-xs text-[var(--color-text-secondary)] py-6">{t.surahPicker.loading}</p>
               ) : (
@@ -276,7 +276,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
       <button
         onClick={handleStart}
         disabled={mode === "custom" && selected.size === 0}
-        className="w-full py-3.5 rounded-2xl bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90"
+        className="w-full py-3.5 rounded bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90"
       >
         {mode === "all"
           ? t.surahPicker.startAll

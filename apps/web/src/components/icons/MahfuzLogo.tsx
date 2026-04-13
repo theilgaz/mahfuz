@@ -1,9 +1,7 @@
 /**
- * Organic Meem (م) — Mahfuz lettermark logo.
- * Tema-uyumlu gradient: CSS variables (--logo-g1..g4, --logo-hl) ile.
+ * Organic Meem (م) -- Mahfuz lettermark logo.
+ * Tek renk: CSS variable (--color-accent) ile.
  */
-
-import { useId } from "react";
 
 interface MahfuzLogoProps {
   className?: string;
@@ -17,10 +15,6 @@ const VIEW_BOX = "118 152 93 138";
 const ASPECT = 93 / 138;
 
 export function MahfuzLogo({ className, size }: MahfuzLogoProps) {
-  const uid = useId();
-  const gradId = `mg${uid}`;
-  const hlId = `mh${uid}`;
-
   const h = size ?? 40;
   const sizeProps = { width: Math.round(h * ASPECT), height: h };
 
@@ -32,23 +26,7 @@ export function MahfuzLogo({ className, size }: MahfuzLogoProps) {
       className={className}
       {...sizeProps}
     >
-      <defs>
-        <linearGradient id={gradId} x1="0.15" y1="0" x2="0.85" y2="1">
-          <stop offset="0%" stopColor="var(--logo-g1)" />
-          <stop offset="35%" stopColor="var(--logo-g2)" />
-          <stop offset="70%" stopColor="var(--logo-g3)" />
-          <stop offset="100%" stopColor="var(--logo-g4)" />
-        </linearGradient>
-        <linearGradient id={hlId} x1="0.3" y1="0" x2="0.5" y2="0.6">
-          <stop offset="0%" stopColor="var(--logo-hl)" stopOpacity={0.5} />
-          <stop offset="100%" stopColor="var(--logo-g2)" stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <g transform="translate(2, 2)" opacity={0.08}>
-        <path fill="#000" d={MEEM_PATH} />
-      </g>
-      <path fill={`url(#${gradId})`} d={MEEM_PATH} />
-      <path fill={`url(#${hlId})`} d={MEEM_PATH} />
+      <path fill="var(--color-accent)" d={MEEM_PATH} />
     </svg>
   );
 }

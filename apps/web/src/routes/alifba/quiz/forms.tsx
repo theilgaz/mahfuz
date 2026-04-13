@@ -133,7 +133,7 @@ function FormsQuizPage() {
           {finalCorrect} / {questions.length} {t.alifba.correct}
         </p>
         <div className="flex gap-3">
-          <Link to="/alifba/" className="px-4 py-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
+          <Link to="/alifba/" className="px-4 py-2 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
             {t.nav.back}
           </Link>
           <button
@@ -142,7 +142,7 @@ function FormsQuizPage() {
               setWrongIds([]); setLcCorrectIds([]); setLcQuestions([]);
               setPhase("main");
             }}
-            className="px-4 py-2 rounded-xl bg-[var(--color-accent)] text-white text-sm"
+            className="px-4 py-2 rounded bg-[var(--color-accent)] text-white text-sm"
           >
             {t.alifba.tryAgain}
           </button>
@@ -168,7 +168,7 @@ function FormsQuizPage() {
 
       {/* Son Şans banner */}
       {phase === "lastChance" && (
-        <div className="mb-4 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
+        <div className="mb-4 px-3 py-2 rounded bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-amber-500 shrink-0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <div>
             <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{t.alifba.lastChance}</p>
@@ -205,7 +205,7 @@ function FormsQuizPage() {
         {q.choices.map((choice) => {
           const isSelected = selected === choice.id;
           const isRight = choice.id === q.letter.id;
-          let cls = "flex flex-col items-center justify-center gap-2 h-[5.5rem] overflow-hidden rounded-2xl border transition-colors ";
+          let cls = "flex flex-col items-center justify-center gap-2 h-[5.5rem] overflow-hidden rounded border transition-colors ";
           if (!selected) {
             cls += "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)] cursor-pointer active:scale-95";
           } else if (isRight) {

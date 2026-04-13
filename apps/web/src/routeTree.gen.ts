@@ -13,7 +13,6 @@ import { Route as TajweedRouteImport } from './routes/tajweed'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReciteRouteImport } from './routes/recite'
-import { Route as QaidaRouteImport } from './routes/qaida'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as NotesRouteImport } from './routes/notes'
@@ -24,13 +23,14 @@ import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as HatimIndexRouteImport } from './routes/hatim/index'
+import { Route as QaidaIndexRouteImport } from './routes/qaida/index'
+import { Route as KhatmIndexRouteImport } from './routes/khatm/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as AlifbaIndexRouteImport } from './routes/alifba/index'
 import { Route as SurahSurahSlugRouteImport } from './routes/surah/$surahSlug'
 import { Route as PagePageNumberRouteImport } from './routes/page/$pageNumber'
+import { Route as KhatmGroupIdRouteImport } from './routes/khatm/$groupId'
 import { Route as JuzJuzIdRouteImport } from './routes/juz/$juzId'
-import { Route as HatimGroupIdRouteImport } from './routes/hatim/$groupId'
 import { Route as GamesWordMeaningRouteImport } from './routes/games/word-meaning'
 import { Route as GamesVerseChainRouteImport } from './routes/games/verse-chain'
 import { Route as GamesSurahGuessRouteImport } from './routes/games/surah-guess'
@@ -44,6 +44,7 @@ import { Route as AlifbaExamRouteImport } from './routes/alifba/exam'
 import { Route as AlifbaLetterIdRouteImport } from './routes/alifba/$letterId'
 import { Route as ContextDisabledRouteImport } from './routes/_context.disabled'
 import { Route as AlifbaGamesIndexRouteImport } from './routes/alifba/games/index'
+import { Route as QaidaExamStepIdRouteImport } from './routes/qaida/exam/$stepId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AlifbaQuizVoiceRouteImport } from './routes/alifba/quiz/voice'
 import { Route as AlifbaQuizFormsRouteImport } from './routes/alifba/quiz/forms'
@@ -70,11 +71,6 @@ const SearchRoute = SearchRouteImport.update({
 const ReciteRoute = ReciteRouteImport.update({
   id: '/recite',
   path: '/recite',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QaidaRoute = QaidaRouteImport.update({
-  id: '/qaida',
-  path: '/qaida',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -127,9 +123,14 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HatimIndexRoute = HatimIndexRouteImport.update({
-  id: '/hatim/',
-  path: '/hatim/',
+const QaidaIndexRoute = QaidaIndexRouteImport.update({
+  id: '/qaida/',
+  path: '/qaida/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KhatmIndexRoute = KhatmIndexRouteImport.update({
+  id: '/khatm/',
+  path: '/khatm/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesIndexRoute = GamesIndexRouteImport.update({
@@ -152,14 +153,14 @@ const PagePageNumberRoute = PagePageNumberRouteImport.update({
   path: '/page/$pageNumber',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KhatmGroupIdRoute = KhatmGroupIdRouteImport.update({
+  id: '/khatm/$groupId',
+  path: '/khatm/$groupId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JuzJuzIdRoute = JuzJuzIdRouteImport.update({
   id: '/juz/$juzId',
   path: '/juz/$juzId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HatimGroupIdRoute = HatimGroupIdRouteImport.update({
-  id: '/hatim/$groupId',
-  path: '/hatim/$groupId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesWordMeaningRoute = GamesWordMeaningRouteImport.update({
@@ -227,6 +228,11 @@ const AlifbaGamesIndexRoute = AlifbaGamesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AlifbaGamesRoute,
 } as any)
+const QaidaExamStepIdRoute = QaidaExamStepIdRouteImport.update({
+  id: '/qaida/exam/$stepId',
+  path: '/qaida/exam/$stepId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -274,7 +280,6 @@ export interface FileRoutesByFullPath {
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
-  '/qaida': typeof QaidaRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
@@ -291,13 +296,14 @@ export interface FileRoutesByFullPath {
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
-  '/hatim/$groupId': typeof HatimGroupIdRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
+  '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
-  '/hatim/': typeof HatimIndexRoute
+  '/khatm/': typeof KhatmIndexRoute
+  '/qaida/': typeof QaidaIndexRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
   '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
@@ -305,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
   '/alifba/games/': typeof AlifbaGamesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -317,7 +324,6 @@ export interface FileRoutesByTo {
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
-  '/qaida': typeof QaidaRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
@@ -333,13 +339,14 @@ export interface FileRoutesByTo {
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
-  '/hatim/$groupId': typeof HatimGroupIdRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
+  '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba': typeof AlifbaIndexRoute
   '/games': typeof GamesIndexRoute
-  '/hatim': typeof HatimIndexRoute
+  '/khatm': typeof KhatmIndexRoute
+  '/qaida': typeof QaidaIndexRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
   '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
@@ -347,6 +354,7 @@ export interface FileRoutesByTo {
   '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
   '/alifba/games': typeof AlifbaGamesIndexRoute
 }
 export interface FileRoutesById {
@@ -361,7 +369,6 @@ export interface FileRoutesById {
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
-  '/qaida': typeof QaidaRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
@@ -378,13 +385,14 @@ export interface FileRoutesById {
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
-  '/hatim/$groupId': typeof HatimGroupIdRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
+  '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
-  '/hatim/': typeof HatimIndexRoute
+  '/khatm/': typeof KhatmIndexRoute
+  '/qaida/': typeof QaidaIndexRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
   '/alifba/games/speed': typeof AlifbaGamesSpeedRoute
@@ -392,6 +400,7 @@ export interface FileRoutesById {
   '/alifba/quiz/forms': typeof AlifbaQuizFormsRoute
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
   '/alifba/games/': typeof AlifbaGamesIndexRoute
 }
 export interface FileRouteTypes {
@@ -407,7 +416,6 @@ export interface FileRouteTypes {
     | '/notes'
     | '/premium'
     | '/profile'
-    | '/qaida'
     | '/recite'
     | '/search'
     | '/stats'
@@ -424,13 +432,14 @@ export interface FileRouteTypes {
     | '/games/surah-guess'
     | '/games/verse-chain'
     | '/games/word-meaning'
-    | '/hatim/$groupId'
     | '/juz/$juzId'
+    | '/khatm/$groupId'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
     | '/alifba/'
     | '/games/'
-    | '/hatim/'
+    | '/khatm/'
+    | '/qaida/'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
     | '/alifba/games/speed'
@@ -438,6 +447,7 @@ export interface FileRouteTypes {
     | '/alifba/quiz/forms'
     | '/alifba/quiz/voice'
     | '/api/auth/$'
+    | '/qaida/exam/$stepId'
     | '/alifba/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -450,7 +460,6 @@ export interface FileRouteTypes {
     | '/notes'
     | '/premium'
     | '/profile'
-    | '/qaida'
     | '/recite'
     | '/search'
     | '/stats'
@@ -466,13 +475,14 @@ export interface FileRouteTypes {
     | '/games/surah-guess'
     | '/games/verse-chain'
     | '/games/word-meaning'
-    | '/hatim/$groupId'
     | '/juz/$juzId'
+    | '/khatm/$groupId'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
     | '/alifba'
     | '/games'
-    | '/hatim'
+    | '/khatm'
+    | '/qaida'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
     | '/alifba/games/speed'
@@ -480,6 +490,7 @@ export interface FileRouteTypes {
     | '/alifba/quiz/forms'
     | '/alifba/quiz/voice'
     | '/api/auth/$'
+    | '/qaida/exam/$stepId'
     | '/alifba/games'
   id:
     | '__root__'
@@ -493,7 +504,6 @@ export interface FileRouteTypes {
     | '/notes'
     | '/premium'
     | '/profile'
-    | '/qaida'
     | '/recite'
     | '/search'
     | '/stats'
@@ -510,13 +520,14 @@ export interface FileRouteTypes {
     | '/games/surah-guess'
     | '/games/verse-chain'
     | '/games/word-meaning'
-    | '/hatim/$groupId'
     | '/juz/$juzId'
+    | '/khatm/$groupId'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
     | '/alifba/'
     | '/games/'
-    | '/hatim/'
+    | '/khatm/'
+    | '/qaida/'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
     | '/alifba/games/speed'
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | '/alifba/quiz/forms'
     | '/alifba/quiz/voice'
     | '/api/auth/$'
+    | '/qaida/exam/$stepId'
     | '/alifba/games/'
   fileRoutesById: FileRoutesById
 }
@@ -538,7 +550,6 @@ export interface RootRouteChildren {
   NotesRoute: typeof NotesRoute
   PremiumRoute: typeof PremiumRoute
   ProfileRoute: typeof ProfileRoute
-  QaidaRoute: typeof QaidaRoute
   ReciteRoute: typeof ReciteRoute
   SearchRoute: typeof SearchRoute
   StatsRoute: typeof StatsRoute
@@ -550,15 +561,17 @@ export interface RootRouteChildren {
   AnalyseVerseKeyRoute: typeof AnalyseVerseKeyRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
-  HatimGroupIdRoute: typeof HatimGroupIdRoute
   JuzJuzIdRoute: typeof JuzJuzIdRoute
+  KhatmGroupIdRoute: typeof KhatmGroupIdRoute
   PagePageNumberRoute: typeof PagePageNumberRoute
   SurahSurahSlugRoute: typeof SurahSurahSlugRoute
   AlifbaIndexRoute: typeof AlifbaIndexRoute
-  HatimIndexRoute: typeof HatimIndexRoute
+  KhatmIndexRoute: typeof KhatmIndexRoute
+  QaidaIndexRoute: typeof QaidaIndexRoute
   AlifbaQuizFormsRoute: typeof AlifbaQuizFormsRoute
   AlifbaQuizVoiceRoute: typeof AlifbaQuizVoiceRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  QaidaExamStepIdRoute: typeof QaidaExamStepIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -589,13 +602,6 @@ declare module '@tanstack/react-router' {
       path: '/recite'
       fullPath: '/recite'
       preLoaderRoute: typeof ReciteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/qaida': {
-      id: '/qaida'
-      path: '/qaida'
-      fullPath: '/qaida'
-      preLoaderRoute: typeof QaidaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -668,11 +674,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/hatim/': {
-      id: '/hatim/'
-      path: '/hatim'
-      fullPath: '/hatim/'
-      preLoaderRoute: typeof HatimIndexRouteImport
+    '/qaida/': {
+      id: '/qaida/'
+      path: '/qaida'
+      fullPath: '/qaida/'
+      preLoaderRoute: typeof QaidaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/khatm/': {
+      id: '/khatm/'
+      path: '/khatm'
+      fullPath: '/khatm/'
+      preLoaderRoute: typeof KhatmIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/': {
@@ -703,18 +716,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagePageNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/khatm/$groupId': {
+      id: '/khatm/$groupId'
+      path: '/khatm/$groupId'
+      fullPath: '/khatm/$groupId'
+      preLoaderRoute: typeof KhatmGroupIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/juz/$juzId': {
       id: '/juz/$juzId'
       path: '/juz/$juzId'
       fullPath: '/juz/$juzId'
       preLoaderRoute: typeof JuzJuzIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hatim/$groupId': {
-      id: '/hatim/$groupId'
-      path: '/hatim/$groupId'
-      fullPath: '/hatim/$groupId'
-      preLoaderRoute: typeof HatimGroupIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/word-meaning': {
@@ -807,6 +820,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/alifba/games/'
       preLoaderRoute: typeof AlifbaGamesIndexRouteImport
       parentRoute: typeof AlifbaGamesRoute
+    }
+    '/qaida/exam/$stepId': {
+      id: '/qaida/exam/$stepId'
+      path: '/qaida/exam/$stepId'
+      fullPath: '/qaida/exam/$stepId'
+      preLoaderRoute: typeof QaidaExamStepIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -911,7 +931,6 @@ const rootRouteChildren: RootRouteChildren = {
   NotesRoute: NotesRoute,
   PremiumRoute: PremiumRoute,
   ProfileRoute: ProfileRoute,
-  QaidaRoute: QaidaRoute,
   ReciteRoute: ReciteRoute,
   SearchRoute: SearchRoute,
   StatsRoute: StatsRoute,
@@ -923,15 +942,17 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyseVerseKeyRoute: AnalyseVerseKeyRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,
-  HatimGroupIdRoute: HatimGroupIdRoute,
   JuzJuzIdRoute: JuzJuzIdRoute,
+  KhatmGroupIdRoute: KhatmGroupIdRoute,
   PagePageNumberRoute: PagePageNumberRoute,
   SurahSurahSlugRoute: SurahSurahSlugRoute,
   AlifbaIndexRoute: AlifbaIndexRoute,
-  HatimIndexRoute: HatimIndexRoute,
+  KhatmIndexRoute: KhatmIndexRoute,
+  QaidaIndexRoute: QaidaIndexRoute,
   AlifbaQuizFormsRoute: AlifbaQuizFormsRoute,
   AlifbaQuizVoiceRoute: AlifbaQuizVoiceRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  QaidaExamStepIdRoute: QaidaExamStepIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

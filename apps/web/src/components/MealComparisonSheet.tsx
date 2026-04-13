@@ -162,7 +162,7 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
           {isLoading ? (
             <div className="space-y-3">
               {selectedSlugs.map((slug) => (
-                <div key={slug} className="rounded-xl border border-[var(--color-border)] p-3 animate-pulse">
+                <div key={slug} className="rounded border border-[var(--color-border)] p-3 animate-pulse">
                   <div className="h-3 w-24 rounded bg-[var(--color-border)] mb-2" />
                   <div className="h-4 w-full rounded bg-[var(--color-border)] mb-1" />
                   <div className="h-4 w-3/4 rounded bg-[var(--color-border)]" />
@@ -176,7 +176,7 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
                 return (
                   <div
                     key={t.sourceId}
-                    className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-1"
+                    className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-1"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
@@ -239,7 +239,7 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
           {acikKuranLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-xl border border-[var(--color-border)] p-3 animate-pulse">
+                <div key={i} className="rounded border border-[var(--color-border)] p-3 animate-pulse">
                   <div className="h-3 w-32 rounded bg-[var(--color-border)] mb-2" />
                   <div className="h-4 w-full rounded bg-[var(--color-border)] mb-1" />
                   <div className="h-4 w-2/3 rounded bg-[var(--color-border)]" />
@@ -251,7 +251,7 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
               {filteredAcikKuran.map((t) => (
                 <div
                   key={t.authorId}
-                  className="rounded-xl border border-[var(--color-accent)]/15 bg-[var(--color-accent)]/5 p-3 space-y-1.5"
+                  className="rounded border border-[var(--color-accent)]/15 bg-[var(--color-accent)]/5 p-3 space-y-1.5"
                 >
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-accent)]/15 text-[var(--color-accent)]">

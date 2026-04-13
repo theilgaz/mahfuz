@@ -77,7 +77,7 @@ function LoginPage() {
           </h1>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+        <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           {error && (
             <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-[13px] text-red-400">
               {error}
@@ -88,7 +88,7 @@ function LoginPage() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--color-bg)]"
+            className="flex w-full items-center justify-center gap-2.5 rounded border border-[var(--color-border)] px-4 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--color-bg)]"
           >
             <GoogleIcon />
             {t.auth.continueWithGoogle}
@@ -115,7 +115,7 @@ function LoginPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t.auth.namePlaceholder}
-                  className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
+                  className="w-full rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
                 />
               </div>
             )}
@@ -130,7 +130,7 @@ function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t.auth.emailPlaceholder}
-                className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
+                className="w-full rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
               />
             </div>
             <div>
@@ -145,13 +145,13 @@ function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t.auth.passwordPlaceholder}
-                className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
+                className="w-full rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-[var(--color-accent)] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="w-full rounded bg-[var(--color-accent)] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loading
                 ? "..."

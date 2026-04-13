@@ -70,7 +70,7 @@ function LetterDetailPage() {
       </div>
 
       {/* Harf hero */}
-      <div className="relative mb-5 rounded-3xl overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)]">
+      <div className="relative mb-5 rounded overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)]">
         {/* Subtle radial glow behind the letter */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -127,7 +127,7 @@ function LetterDetailPage() {
             {examples.map((ex, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]"
+                className="flex items-center justify-between gap-3 px-3 py-2.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)]"
               >
                 <div className="flex flex-col gap-0.5">
                   <span className="text-xs text-[var(--color-text-secondary)]">{ex.transliteration}</span>
@@ -154,7 +154,7 @@ function LetterDetailPage() {
         <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
           {t.alifba.tracing}
         </h2>
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <Suspense
             fallback={
               <div className="h-48 flex items-center justify-center text-sm text-[var(--color-text-secondary)]">
@@ -189,7 +189,7 @@ function LetterDetailPage() {
               navigate({ to: "/alifba/" });
             }
           }}
-          className="mb-3 w-full py-3 rounded-xl bg-[var(--color-accent)] text-white font-medium text-sm hover:opacity-90 transition-colors"
+          className="mb-3 w-full py-3 rounded bg-[var(--color-accent)] text-white font-medium text-sm hover:opacity-90 transition-colors"
         >
           {t.alifba.markSeen}
         </button>
@@ -201,7 +201,7 @@ function LetterDetailPage() {
           <Link
             to="/alifba/$letterId"
             params={{ letterId: prevLetter.id }}
-            className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 transition-colors"
+            className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M10 4L6 8l4 4" />
@@ -217,7 +217,7 @@ function LetterDetailPage() {
           <Link
             to="/alifba/$letterId"
             params={{ letterId: nextLetter.id }}
-            className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 hover:bg-[var(--color-accent)]/15 transition-colors"
+            className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 hover:bg-[var(--color-accent)]/15 transition-colors"
           >
             <span className="text-xl" style={{ fontFamily: "var(--font-arabic)" }}>{nextLetter.arabic}</span>
             <span className="text-sm flex-1 text-right">{nextLetter.name}</span>
@@ -228,7 +228,7 @@ function LetterDetailPage() {
         ) : (
           <Link
             to="/alifba/"
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-[var(--color-accent)] text-white transition-colors hover:opacity-90"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded bg-[var(--color-accent)] text-white transition-colors hover:opacity-90"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 8H3" />

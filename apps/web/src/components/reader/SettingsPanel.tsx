@@ -5,8 +5,7 @@
 
 import { useMemo, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
-import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type ReadingMode, type ColorPaletteId, type SeherOverride } from "~/stores/settings.store";
-import { isDaytime, nextTransition } from "~/lib/solar";
+import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type ReadingMode, type ColorPaletteId } from "~/stores/settings.store";
 import { useQuery } from "@tanstack/react-query";
 import { recitersQueryOptions, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -29,19 +28,17 @@ const LANG_LABELS: Record<string, string> = {
 
 interface ThemeDef {
   id: Theme;
-  labelKey: "papyrus" | "sea" | "night" | "seher";
+  labelKey: "sea" | "night" | "quran" | "tezhip";
   bg: string;
   text: string;
   accent: string;
-  split?: { bg2: string; text2: string };
 }
 
 const THEMES: ThemeDef[] = [
-  { id: "papyrus", labelKey: "papyrus", bg: "#f5efe0", text: "#2c2416", accent: "#8b6914" },
-  { id: "sea",     labelKey: "sea",     bg: "#eef3f2", text: "#1a2c28", accent: "#0d7377" },
-  { id: "night",   labelKey: "night",   bg: "#0f0e0c", text: "#f0ece4", accent: "#7aad4a" },
-  { id: "seher",   labelKey: "seher",   bg: "#f5ede8", text: "#2a1a20", accent: "#c47a5a",
-    split: { bg2: "#1a1018", text2: "#f0e6e8" } },
+  { id: "sea",    labelKey: "sea",    bg: "#eef3f2", text: "#1a2c28", accent: "#0d7377" },
+  { id: "night",  labelKey: "night",  bg: "#0f0e0c", text: "#f0ece4", accent: "#7aad4a" },
+  { id: "quran",  labelKey: "quran",  bg: "#f5efe0", text: "#2c2416", accent: "#8b6914" },
+  { id: "tezhip", labelKey: "tezhip", bg: "#0a1628", text: "#f0e8d8", accent: "#c8a24e" },
 ];
 
 // ── Okuma modu ikonları ───────────────────────────────────
@@ -135,8 +132,8 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t.settings.title} className="fixed right-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-xl overflow-y-auto">
-        <div className="flex flex-col min-h-full p-4">
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t.settings.title} className="fixed right-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-sm overflow-y-auto">
+        <div className="flex flex-col min-h-full p-4 pb-24">
           {/* Header + tabs */}
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-medium">{t.settings.title}</h2>
@@ -344,7 +341,7 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
               <button
                 key={value}
                 onClick={() => onModeChange(value)}
-                className={`flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl border text-[10px] font-medium leading-tight transition-colors ${
+                className={`flex flex-col items-center gap-1.5 py-2.5 px-1 rounded border text-[10px] font-medium leading-tight transition-colors ${
                   active
                     ? "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
                     : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/40"
@@ -403,27 +400,18 @@ function GeneralTab({ store, locale, setLocale, t }: {
               <div
                 className="w-full aspect-[3/4] rounded-lg overflow-hidden transition-all relative"
                 style={{
-                  background: item.split
-                    ? `linear-gradient(135deg, ${item.bg} 50%, ${item.split.bg2} 50%)`
-                    : item.bg,
+                  background: item.bg,
                   boxShadow: active ? `0 0 0 2px ${item.accent}` : "0 0 0 1px rgba(128,128,128,0.15)",
                 }}
               >
                 <div className="flex flex-col items-center justify-center h-full gap-1 px-1.5">
-                  <span className="text-[11px] leading-none" style={{ color: item.split ? item.text : item.text, fontFamily: "var(--font-arabic)" }}>
+                  <span className="text-[11px] leading-none" style={{ color: item.text, fontFamily: "var(--font-arabic)" }}>
                     بسم
                   </span>
                   <span className="block rounded-full h-[3px] w-[40%]" style={{ background: item.accent }} />
-                  {item.split && (
-                    <span className="text-[9px] leading-none" style={{ color: item.split.text2, fontFamily: "var(--font-arabic)" }}>
-                      الله
-                    </span>
-                  )}
-                  {!item.split && (
-                    <div className="flex flex-col gap-[3px] w-full items-center">
-                      <span className="block rounded-full h-[2px] w-[70%]" style={{ background: item.text, opacity: 0.15 }} />
-                    </div>
-                  )}
+                  <div className="flex flex-col gap-[3px] w-full items-center">
+                    <span className="block rounded-full h-[2px] w-[70%]" style={{ background: item.text, opacity: 0.15 }} />
+                  </div>
                 </div>
               </div>
               <span className="text-[10px] font-medium" style={{ color: active ? item.accent : "var(--color-text-secondary)" }}>
@@ -433,11 +421,6 @@ function GeneralTab({ store, locale, setLocale, t }: {
           );
         })}
       </div>
-
-      {/* ── Seher geçiş modu (yalnızca Seher teması seçiliyse) ── */}
-      {store.theme === "seher" && (
-        <SeherControls store={store} t={t} />
-      )}
 
       <Divider />
 
@@ -510,24 +493,6 @@ function GeneralTab({ store, locale, setLocale, t }: {
         )}
       </div>
 
-      <Divider />
-
-      {/* ── Keşif Modu ── */}
-      <div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text-secondary)]">
-              <path d="M9 3H15V8L19 14V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V14L9 8V3Z" />
-              <path d="M9 3H15" />
-              <path d="M12 11V15" />
-              <path d="M10 13H14" />
-            </svg>
-            <Label>{t.settings.labs}</Label>
-          </div>
-          <Toggle checked={store.labsEnabled} onChange={() => store.setLabsEnabled(!store.labsEnabled)} />
-        </div>
-        <p className="text-[10px] text-[var(--color-text-secondary)] mt-1 opacity-70">{t.settings.labsDesc}</p>
-      </div>
 
       <Divider />
 
@@ -623,113 +588,4 @@ function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (
   );
 }
 
-// ── Seher Geçiş Kontrolleri ──────────────────────────────
-
-function SeherControls({ store, t }: {
-  store: ReturnType<typeof useSettingsStore>;
-  t: any;
-}) {
-  const { seherOverride, seherLocation, setSeherOverride } = store;
-
-  const nextTime = seherLocation
-    ? nextTransition(seherLocation.lat, seherLocation.lon)
-    : null;
-
-  const formatTime = (d: Date) =>
-    d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-  const currentlyDay = seherLocation
-    ? isDaytime(seherLocation.lat, seherLocation.lon)
-    : null;
-
-  const MODES: { id: SeherOverride; icon: ReactNode; label: string }[] = [
-    { id: "auto", icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
-      </svg>
-    ), label: t.settings.seherAuto },
-    { id: "light", icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="5" strokeWidth={1.5}/><path strokeLinecap="round" strokeWidth={1.5} d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-      </svg>
-    ), label: t.settings.seherLight },
-    { id: "dark", icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-      </svg>
-    ), label: t.settings.seherDark },
-  ];
-
-  return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
-      <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
-        {t.settings.seherMode}
-      </span>
-
-      {/* 3-button toggle */}
-      <div className="flex rounded-xl overflow-hidden border border-[var(--color-border)]">
-        {MODES.map(({ id, icon, label }) => {
-          const active = seherOverride === id;
-          return (
-            <button
-              key={id}
-              onClick={() => setSeherOverride(id)}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors ${
-                active
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
-              }`}
-            >
-              <span className="leading-none flex items-center justify-center">{icon}</span>
-              <span>{label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Durum satırı */}
-      {seherOverride === "auto" && (
-        <div className="text-[11px] text-[var(--color-text-secondary)] space-y-1">
-          {seherLocation ? (
-            <>
-              <div className="flex items-center gap-1.5">
-                <svg className="w-3 h-3 opacity-70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span>
-                  {t.settings.seherLocationUsing}:{" "}
-                  {seherLocation.lat.toFixed(1)}°{seherLocation.lat >= 0 ? "K" : "G"},{" "}
-                  {seherLocation.lon.toFixed(1)}°{seherLocation.lon >= 0 ? "D" : "B"}
-                </span>
-              </div>
-              {nextTime && (
-                <div className="flex items-center gap-1.5">
-                  <svg className="w-3 h-3 opacity-70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {currentlyDay
-                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
-                      : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-                    }
-                  </svg>
-                  <span>
-                    {currentlyDay
-                      ? t.settings.seherNextDark
-                      : t.settings.seherNextLight}{" "}
-                    · {formatTime(nextTime)}
-                  </span>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex items-start gap-1.5">
-              <svg className="w-3 h-3 opacity-70 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-              <span className="leading-snug">{t.settings.seherLocationNeeded}</span>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 

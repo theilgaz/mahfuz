@@ -20,7 +20,7 @@ export function StreakCard({ currentStreak, todayPages, dailyTarget, onSetGoal }
   const progress = Math.min(todayPages / dailyTarget, 1);
 
   return (
-    <div className="rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+    <div className="rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Streak */}
         <div className="flex items-center gap-1.5">

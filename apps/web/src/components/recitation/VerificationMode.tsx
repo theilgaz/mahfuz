@@ -100,7 +100,7 @@ export function VerificationMode({ surahId, startAyah = 1, endAyah }: Verificati
 
       {/* Current verse prompt */}
       {engine.isRecording && !isComplete && (
-        <div className="rounded-xl border-2 border-[var(--color-accent)] bg-[var(--color-accent)]/5 p-4 text-center">
+        <div className="rounded border-2 border-[var(--color-accent)] bg-[var(--color-accent)]/5 p-4 text-center">
           <p className="text-xs text-[var(--color-text-secondary)] mb-1">Ayet {currentAyah}</p>
           <p className="text-lg font-bold text-[var(--color-accent)]">
             {currentAyah}. ayeti okuyun
@@ -137,7 +137,7 @@ export function VerificationMode({ surahId, startAyah = 1, endAyah }: Verificati
 
       {/* Summary */}
       {isComplete && (
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-center">
+        <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-center">
           <p className="text-2xl font-bold text-[var(--color-accent)]">
             {correctCount} / {totalAttempted}
           </p>

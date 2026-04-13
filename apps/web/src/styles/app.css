@@ -28,53 +28,31 @@
 
 @font-face {
   font-family: "Readex Pro";
+  src: url("/fonts/readex-pro-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Readex Pro";
   src: url("/fonts/readex-pro-bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
-/* ── Tema: Papirüs (varsayılan) ─────────────────────── */
-
-:root,
-[data-theme="papyrus"] {
-  --color-bg: #f5efe0;
-  --color-surface: #ece4d0;
-  --color-text-primary: #2c2416;
-  --color-text-secondary: #7a6e5a;
-  --color-text-translation: #5c5040;
-  --color-border: #d9d0bc;
-  --color-accent: #8b6914;
-  --color-word-hover: rgba(139, 105, 20, 0.12);
-  --color-word-hover-text: #6b4c00;
-
-  /* Logo — altın amber gradient */
-  --logo-g1: #d4a24e;
-  --logo-g2: #b8860b;
-  --logo-g3: #8b6914;
-  --logo-g4: #6b4c00;
-  --logo-hl: #f0d590;
-
-  /* Ayet sonu madalyonu */
-  --marker-g1: #d4a24e;
-  --marker-g2: #b8860b;
-  --marker-g3: #7a5800;
-  --marker-text: #fdf3d8;
-
-  /* Üst bant — altın yaldız tezhip şeridi */
-  --header-band: linear-gradient(90deg, transparent, #6b4c00, #b8860b, #d4a24e, #f0d590, #d4a24e, #b8860b, #6b4c00, transparent);
-
-  /* Tipografi */
-  --font-arabic: "Scheherazade New", serif;
-  --font-ui: system-ui, -apple-system, sans-serif;
-  --font-size-arabic: clamp(1.5rem, 3vw, 2.2rem);
-  --line-height-arabic: 2.8;
-  --font-size-translation: 0.95rem;
-  --line-height-translation: 1.7;
+@font-face {
+  font-family: "Noto Kufi Arabic";
+  src: url("/fonts/noto-kufi-arabic-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
-/* ── Tema: Deniz ─────────────────────────────────────── */
+/* ── Tema: Deniz (varsayılan) ──────────────────────── */
 
+:root,
 [data-theme="sea"] {
   --color-bg: #eef3f2;
   --color-surface: #e0eae6;
@@ -86,21 +64,61 @@
   --color-word-hover: rgba(13, 115, 119, 0.12);
   --color-word-hover-text: #065a5e;
 
-  /* Logo — teal gradient */
-  --logo-g1: #2dd4bf;
-  --logo-g2: #14b8a6;
-  --logo-g3: #0d9488;
-  --logo-g4: #0d7377;
-  --logo-hl: #99f6e4;
-
-  /* Ayet sonu madalyonu — teal */
+  /* Ayet sonu madalyonu */
   --marker-g1: #2ab8c0;
   --marker-g2: #0d9098;
   --marker-g3: #075f64;
   --marker-text: #e4f8f8;
 
-  /* Üst bant — okyanus yüzeyi, dalgalanan teal */
-  --header-band: linear-gradient(90deg, #065a5e, #0d9488, #14b8a6, #2dd4bf, #99f6e4, #2dd4bf, #0d9488, #065a5e);
+  /* Sayfa cercevesi */
+  --frame-color: #0d7377;
+  --frame-opacity: 0.15;
+  --frame-corner-opacity: 0.2;
+
+  /* Mushaf kagit */
+  --mushaf-bg: #f8f4ec;
+  --mushaf-border: rgba(13, 115, 119, 0.12);
+  --mushaf-shadow: rgba(0, 0, 0, 0.06);
+  --mushaf-inner-shadow: rgba(0, 0, 0, 0.03);
+
+  /* Tipografi */
+  --font-arabic: "Scheherazade New", serif;
+  --font-ui: system-ui, -apple-system, sans-serif;
+  --font-size-arabic: clamp(1.5rem, 3vw, 2.2rem);
+  --line-height-arabic: 2.8;
+  --font-size-translation: 0.95rem;
+  --line-height-translation: 1.7;
+}
+
+/* ── Tema: Kur'an (sicak okuma temasi) ────────────── */
+
+[data-theme="quran"] {
+  --color-bg: #f5efe0;
+  --color-surface: #ece4d0;
+  --color-text-primary: #2c2416;
+  --color-text-secondary: #7a6e5a;
+  --color-text-translation: #5c5040;
+  --color-border: #d9d0bc;
+  --color-accent: #8b6914;
+  --color-word-hover: rgba(139, 105, 20, 0.12);
+  --color-word-hover-text: #6b4c00;
+
+  /* Ayet sonu madalyonu */
+  --marker-g1: #d4a24e;
+  --marker-g2: #b8860b;
+  --marker-g3: #7a5800;
+  --marker-text: #fdf3d8;
+
+  /* Sayfa cercevesi */
+  --frame-color: #8b6914;
+  --frame-opacity: 0.15;
+  --frame-corner-opacity: 0.2;
+
+  /* Mushaf kagit */
+  --mushaf-bg: #f7f0de;
+  --mushaf-border: rgba(139, 105, 20, 0.18);
+  --mushaf-shadow: rgba(80, 60, 20, 0.1);
+  --mushaf-inner-shadow: rgba(80, 60, 20, 0.04);
 }
 
 /* ── Tema: Gece ──────────────────────────────────────── */
@@ -116,85 +134,56 @@
   --color-word-hover: rgba(122, 173, 74, 0.15);
   --color-word-hover-text: #a4d470;
 
-  /* Logo — yeşil ışıltı gradient */
-  --logo-g1: #a4d470;
-  --logo-g2: #7aad4a;
-  --logo-g3: #5a8c2a;
-  --logo-g4: #3d6b14;
-  --logo-hl: #d4f0a8;
-
-  /* Üst bant — kuzey ışıkları, karanlıkta yeşil fısıltı */
-  --header-band: linear-gradient(90deg, #0f0e0c, #1a2010, #2a3818, #3d6b14, #5a8c2a, #3d6b14, #2a3818, #1a2010, #0f0e0c);
-
-  /* Ayet sonu madalyonu — yeşil accent ile uyumlu */
+  /* Ayet sonu madalyonu */
   --marker-g1: #a4d470;
   --marker-g2: #7aad4a;
   --marker-g3: #3d6b14;
   --marker-text: #f0f8e8;
+
+  /* Sayfa cercevesi */
+  --frame-color: #7aad4a;
+  --frame-opacity: 0.3;
+  --frame-corner-opacity: 0.4;
+
+  /* Mushaf kagit */
+  --mushaf-bg: #1a1814;
+  --mushaf-border: rgba(122, 173, 74, 0.15);
+  --mushaf-shadow: rgba(0, 0, 0, 0.3);
+  --mushaf-inner-shadow: rgba(0, 0, 0, 0.15);
 }
 
-/* ── Tema: Seher (سحر — şafak öncesi) ────────────────── */
-/* Gündüz: sıcak gül kremi  ·  Gece: derin mürdüm       */
+/* ── Tema: Tezhip (تذهيب - lacivert & altin) ─────────── */
 
-[data-theme="seher"] {
-  /* Light (gündüz — sabah aydınlığı) */
-  --color-bg: #f5ede8;
-  --color-surface: #ebe0d8;
-  --color-text-primary: #2a1a20;
-  --color-text-secondary: #8a7078;
-  --color-text-translation: #5c4850;
-  --color-border: #d8c8c0;
-  --color-accent: #c47a5a;
-  --color-word-hover: rgba(196, 122, 90, 0.12);
-  --color-word-hover-text: #a05830;
+[data-theme="tezhip"] {
+  --color-bg: #0a1628;
+  --color-surface: #111e38;
+  --color-text-primary: #f0e8d8;
+  --color-text-secondary: #8a9ab0;
+  --color-text-translation: #c0ccda;
+  --color-border: #1e2e4a;
+  --color-accent: #c8a24e;
+  --color-word-hover: rgba(200, 162, 78, 0.15);
+  --color-word-hover-text: #e0c070;
 
-  /* Logo — gül altını gradient */
-  --logo-g1: #e0a080;
-  --logo-g2: #c47a5a;
-  --logo-g3: #a45a3a;
-  --logo-g4: #843a1a;
-  --logo-hl: #f0c8b0;
+  /* Ayet sonu madalyonu */
+  --marker-g1: #e0c070;
+  --marker-g2: #c8a24e;
+  --marker-g3: #7a5a10;
+  --marker-text: #fdf3d8;
 
-  /* Ayet sonu madalyonu — şafak terrakota */
-  --marker-g1: #e09878;
-  --marker-g2: #c47a5a;
-  --marker-g3: #8c4e2c;
-  --marker-text: #fdf0e8;
+  /* Sayfa cercevesi */
+  --frame-color: #c8a24e;
+  --frame-opacity: 0.7;
+  --frame-corner-opacity: 0.9;
 
-  /* Üst bant — şafak ufku, geceden aydınlığa */
-  --header-band: linear-gradient(90deg, #3a1520, #843a1a, #c47a5a, #f0c8b0, #c47a5a, #843a1a, #3a1520);
+  /* Mushaf kagit */
+  --mushaf-bg: #141e34;
+  --mushaf-border: rgba(200, 162, 78, 0.25);
+  --mushaf-shadow: rgba(0, 0, 0, 0.4);
+  --mushaf-inner-shadow: rgba(0, 0, 0, 0.2);
 }
 
-[data-theme="seher"][data-seher="dark"] {
-  /* Gece — şafak öncesi karanlık mürdüm */
-  --color-bg: #1a1018;
-  --color-surface: #241c22;
-  --color-text-primary: #f0e6e8;
-  --color-text-secondary: #9a8890;
-  --color-text-translation: #c4b8be;
-  --color-border: #362a32;
-  --color-word-hover: rgba(196, 122, 90, 0.15);
-  --color-word-hover-text: #e0a080;
-
-  --logo-hl: #f0c8b0;
-}
-
-/* Konum/hesap yok — OS dark-mode fallback (data-seher henüz atanmadıysa) */
-@media (prefers-color-scheme: dark) {
-  [data-theme="seher"]:not([data-seher]) {
-    --color-bg: #1a1018;
-    --color-surface: #241c22;
-    --color-text-primary: #f0e6e8;
-    --color-text-secondary: #9a8890;
-    --color-text-translation: #c4b8be;
-    --color-border: #362a32;
-    --color-word-hover: rgba(196, 122, 90, 0.15);
-    --color-word-hover-text: #e0a080;
-    --logo-hl: #f0c8b0;
-  }
-}
-
-/* Sistem karanlık modu → tema seçilmediyse gece teması */
+/* Sistem karanlık modu -> tema secilmediyse gece temasi */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --color-bg: #0f0e0c;
@@ -206,15 +195,14 @@
     --color-accent: #7aad4a;
     --color-word-hover: rgba(122, 173, 74, 0.15);
     --color-word-hover-text: #a4d470;
-    --logo-g1: #a4d470;
-    --logo-g2: #7aad4a;
-    --logo-g3: #5a8c2a;
-    --logo-g4: #3d6b14;
-    --logo-hl: #d4f0a8;
     --marker-g1: #a4d470;
     --marker-g2: #7aad4a;
     --marker-g3: #3d6b14;
     --marker-text: #f0f8e8;
+    --mushaf-bg: #1a1814;
+    --mushaf-border: rgba(122, 173, 74, 0.15);
+    --mushaf-shadow: rgba(0, 0, 0, 0.3);
+    --mushaf-inner-shadow: rgba(0, 0, 0, 0.15);
   }
 }
 
@@ -255,7 +243,7 @@
 /* ── Tecvid karanlık tema ────────────────────────────── */
 
 /* Night + sistem karanlık → her zaman dark tecvid */
-:is([data-theme="night"], :root:not([data-theme])) {
+:is([data-theme="night"], [data-theme="tezhip"], :root:not([data-theme])) {
   & .tajweed-madda_normal { color: #5ab0e0; }
   & .tajweed-madda_permissible { color: #7ac4e8; }
   & .tajweed-madda_necessary { color: #3a8fc0; }
@@ -274,27 +262,6 @@
   & .tajweed-slnt { color: #aaaaaa; opacity: 0.5; }
 }
 
-/* Seher → sadece sistem karanlıkken dark tecvid */
-@media (prefers-color-scheme: dark) {
-  [data-theme="seher"] {
-    & .tajweed-madda_normal { color: #5ab0e0; }
-    & .tajweed-madda_permissible { color: #7ac4e8; }
-    & .tajweed-madda_necessary { color: #3a8fc0; }
-    & .tajweed-madda_obligatory { color: #4a90d0; }
-    & .tajweed-qalaqah { color: #e0aa30; }
-    & .tajweed-ikhafa { color: #4ebd6a; }
-    & .tajweed-ikhafa_shafawi { color: #60c880; }
-    & .tajweed-idgham_ghunnah { color: #3a9c5a; }
-    & .tajweed-idgham_wo_ghunnah { color: #b07a50; }
-    & .tajweed-idgham_shafawi { color: #50b870; }
-    & .tajweed-idgham_mutajanisayn { color: #90a050; }
-    & .tajweed-iqlab { color: #b04aa0; }
-    & .tajweed-ghunnah { color: #e04040; }
-    & .tajweed-ham_wasl { color: #aaaaaa; }
-    & .tajweed-laam_shamsiyah { color: #aaaaaa; }
-    & .tajweed-slnt { color: #aaaaaa; opacity: 0.5; }
-  }
-}
 
 /* ── Accessibility ────────────────────────────────────── */
 
@@ -426,20 +393,6 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
   background: var(--color-accent);
   border: 2px solid var(--color-bg);
   box-shadow: 0 1px 3px rgba(0,0,0,.25);
-}
-
-/* ── Meem Menu Stagger Animation ─────────────────────── */
-
-@keyframes meem-item-in {
-  from { opacity: 0; transform: translateY(12px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  @keyframes meem-item-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
 }
 
 /* ── View Transitions ────────────────────────────────── */

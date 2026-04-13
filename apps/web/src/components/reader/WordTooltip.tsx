@@ -50,7 +50,7 @@ export function WordTooltip({ word, anchorRect, onClose }: WordTooltipProps) {
   const content = (
     <div
       ref={tooltipRef}
-      className="fixed z-[9999] bg-[var(--color-surface)] border border-[var(--color-accent)]/40 rounded-xl shadow-2xl px-3 py-2 text-center pointer-events-auto"
+      className="fixed z-[9999] bg-[var(--color-surface)] border border-[var(--color-accent)]/40 rounded shadow-2xl px-3 py-2 text-center pointer-events-auto"
       style={{ left, top, width: tipW }}
       onClick={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}

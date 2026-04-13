@@ -228,7 +228,7 @@ function NextSurahCard({ currentSurahId }: { currentSurahId: number }) {
             search: { ayah: undefined },
           })
         }
-        className="w-full flex items-center justify-between gap-3 px-4 py-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] active:bg-[var(--color-accent)]/10 transition-colors group"
+        className="w-full flex items-center justify-between gap-3 px-4 py-4 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] active:bg-[var(--color-accent)]/10 transition-colors group"
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="flex flex-col items-start min-w-0">

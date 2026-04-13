@@ -75,7 +75,6 @@ function makeGames(t: T): Game[] {
   const games: Game[] = [
     { id: "kelime-doldurma", img: GAME_IMGS["kelime-doldurma"], title: t.gamesHub.fillBlankTitle, description: t.gamesHub.fillBlankDesc, category: t.gamesHub.catHifz, link: "/games/fill-blank", surahScoped: true },
     { id: "ayet-zinciri", img: GAME_IMGS["ayet-zinciri"], title: t.gamesHub.verseChainTitle, description: t.gamesHub.verseChainDesc, category: t.gamesHub.catHifz, link: "/games/verse-chain", surahScoped: true },
-    { id: "kiraet-karaoke", img: GAME_IMGS["kiraet-karaoke"], title: t.gamesHub.reciteKaraokeTitle, description: t.gamesHub.reciteKaraokeDesc, category: t.gamesHub.catHifz, link: "/recite" },
     { id: "sure-tanima", img: GAME_IMGS["sure-tanima"], title: t.gamesHub.surahGuessTitle, description: t.gamesHub.surahGuessDesc, category: t.gamesHub.catListening, link: "/games/surah-guess", surahScoped: true },
     { id: "kelime-anlami", img: GAME_IMGS["kelime-anlami"], title: t.gamesHub.wordMeaningTitle, description: t.gamesHub.wordMeaningDesc, category: t.gamesHub.catWord, link: "/games/word-meaning" },
     { id: "hexagon-harf", img: GAME_IMGS["hexagon-harf"], title: t.gamesHub.hexagonTitle, description: t.gamesHub.hexagonDesc, category: t.gamesHub.catWord, link: "/games/hexagon" },
@@ -85,11 +84,11 @@ function makeGames(t: T): Game[] {
 
 function makeElifbaGames(t: T): Game[] {
   const games: Game[] = [
+    { id: "elifba-karisik-sinav", img: GAME_IMGS["elifba-karisik-sinav"], title: t.gamesHub.mixedExamTitle, description: t.gamesHub.mixedExamDesc, category: t.gamesHub.catElifba, link: "/alifba/exam" },
+    { id: "elifba-hiz", img: GAME_IMGS["elifba-hiz"], title: t.gamesHub.speedGameTitle, description: t.gamesHub.speedGameDesc, category: t.gamesHub.catElifba, link: "/alifba/games/speed" },
     { id: "elifba-sesli-quiz", img: GAME_IMGS["elifba-sesli-quiz"], title: t.gamesHub.voiceQuizTitle, description: t.gamesHub.voiceQuizDesc, category: t.gamesHub.catElifba, link: "/alifba/quiz/voice" },
     { id: "elifba-form-quiz", img: GAME_IMGS["elifba-form-quiz"], title: t.gamesHub.formQuizTitle, description: t.gamesHub.formQuizDesc, category: t.gamesHub.catElifba, link: "/alifba/quiz/forms" },
-    { id: "elifba-karisik-sinav", img: GAME_IMGS["elifba-karisik-sinav"], title: t.gamesHub.mixedExamTitle, description: t.gamesHub.mixedExamDesc, category: t.gamesHub.catElifba, link: "/alifba/exam" },
     { id: "elifba-hafiza", img: GAME_IMGS["elifba-hafiza"], title: t.gamesHub.memoryGameTitle, description: t.gamesHub.memoryGameDesc, category: t.gamesHub.catElifba, link: "/alifba/games/memory" },
-    { id: "elifba-hiz", img: GAME_IMGS["elifba-hiz"], title: t.gamesHub.speedGameTitle, description: t.gamesHub.speedGameDesc, category: t.gamesHub.catElifba, link: "/alifba/games/speed" },
     { id: "elifba-harf-bul", img: GAME_IMGS["elifba-harf-bul"], title: t.gamesHub.letterFindTitle, description: t.gamesHub.letterFindDesc, category: t.gamesHub.catElifba, link: "/alifba/games/fill" },
     { id: "elifba-kelime-bul", img: GAME_IMGS["elifba-kelime-bul"], title: t.gamesHub.wordFindTitle, description: t.gamesHub.wordFindDesc, category: t.gamesHub.catElifba, link: "/alifba/games/word" },
   ];
@@ -103,6 +102,7 @@ function makeComingSoon(t: T): Omit<Game, "link">[] {
     { id: "musretek-kok", title: t.gamesHub.commonRootTitle, description: t.gamesHub.commonRootDesc, category: t.gamesHub.catWord },
     { id: "kissadan-hisse", title: t.gamesHub.moralTitle, description: t.gamesHub.moralDesc, category: t.gamesHub.catLogic },
     { id: "rakip-mod", title: t.gamesHub.rivalTitle, description: t.gamesHub.rivalDesc, category: t.gamesHub.catHifz },
+    { id: "kiraet-karaoke", img: GAME_IMGS["kiraet-karaoke"], title: t.gamesHub.reciteKaraokeTitle, description: t.gamesHub.reciteKaraokeDesc, category: t.gamesHub.catHifz, colors: GAME_COLORS["kiraet-karaoke"] },
   ];
 }
 
@@ -198,22 +198,16 @@ function EditorChoiceCard({ game, t }: { game: Game; t: T }) {
     <Link
       to={game.link as "/recite"}
       className="relative shrink-0 active:opacity-80 transition-opacity snap-start"
-      style={{ width: "min(calc(100vw - 2.5rem), 22rem)" }}
+      style={{ width: "min(calc(100vw - 2rem), 22rem)" }}
     >
       {/* Card */}
       <div
-        className="relative w-full rounded-2xl overflow-hidden"
+        className="relative w-full rounded overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${bg}dd 0%, ${bg}ff 40%, ${bg}bb 100%)`,
-          boxShadow: `0 8px 32px ${glow}50`,
+          backgroundColor: bg,
+          boxShadow: `0 1px 3px ${glow}30`,
         }}
       >
-        {/* Highlight sheen */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: `radial-gradient(ellipse at 80% 10%, ${isDark ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.55)"} 0%, transparent 60%)` }}
-        />
-
         {/* Content row */}
         <div className="relative flex items-center gap-4 p-4">
           {/* App icon */}
@@ -223,7 +217,7 @@ function EditorChoiceCard({ game, t }: { game: Game; t: T }) {
                 src={game.img} alt={game.title} loading="eager" decoding="async"
                 className="w-full h-full object-cover rounded-[22%]"
                 draggable={false}
-                style={{ boxShadow: `0 4px 16px ${glow}60` }}
+                style={{ boxShadow: `0 1px 3px ${glow}30` }}
               />
             )}
             {game.surahScoped && selectedSurahIds.length > 0 && (
@@ -279,7 +273,7 @@ function CategoryFilter({
 }) {
   const pills = [{ key: null, label: allLabel }, ...categories.map((c) => ({ key: c, label: c }))];
   return (
-    <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-0.5 [&::-webkit-scrollbar]:hidden">
+    <div className="flex gap-2 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden">
       {pills.map(({ key, label }) => {
         const active = key === selected;
         return (
@@ -338,7 +332,7 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
           </span>
         </div>
       )}
-      <div className="flex rounded-xl border border-[var(--color-border)] overflow-hidden">
+      <div className="flex rounded border border-[var(--color-border)] overflow-hidden">
         {([["mine", t.gamesHub.tabMine], ["global", t.gamesHub.tabGlobal], ["game", t.gamesHub.tabByGame]] as const).map(([key, label]) => (
           <button
             key={key}
@@ -445,7 +439,7 @@ function GamesPage() {
   const elifbaGames = ELIFBA_GAMES.filter((g) => !favoriteIds.includes(g.id));
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 pb-24 space-y-6">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-24 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold text-[var(--color-text-primary)]">{t.gamesHub.title}</h1>
@@ -475,7 +469,7 @@ function GamesPage() {
               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               {t.gamesHub.editorChoice}
             </p>
-            <div className="flex gap-3 overflow-x-auto -mx-4 px-4 pb-1 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
               {editorsChoice.map((g) => (
                 <EditorChoiceCard key={g.id} game={g} t={t} />
               ))}

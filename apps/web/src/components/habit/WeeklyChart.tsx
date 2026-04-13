@@ -14,7 +14,7 @@ export function WeeklyChart({ days, dailyTarget }: WeeklyChartProps) {
   const maxPages = Math.max(dailyTarget, ...days.map((d) => d.pagesRead));
 
   return (
-    <div className="px-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+    <div className="px-4 py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
       <p className="text-xs text-[var(--color-text-secondary)] mb-3">Son 7 gün</p>
 
       <div className="flex items-end gap-1.5 h-16">

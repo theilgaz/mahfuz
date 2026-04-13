@@ -6,10 +6,10 @@ export const ar: PartialMessages = {
     close: "إغلاق",
     theme: "المظهر",
     themes: {
-      papyrus: "بردية",
       sea: "بحر",
       night: "ليل",
-      seher: "سحر",
+      quran: "قرآن",
+      tezhip: "تذهيب",
     },
     readingMode: "وضع القراءة",
     mushafPage: "صفحة المصحف",

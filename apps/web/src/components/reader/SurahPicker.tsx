@@ -91,9 +91,8 @@ export function SurahPicker({
     );
   });
 
-  // Sure adı — her zaman transliterasyon (nameSimple) kullan
   const currentSurah = surahs.find((s) => s.id === currentSurahId);
-  const surahName = currentSurah?.nameSimple || "";
+  const surahName = getSurahName(currentSurahId, locale) || currentSurah?.nameSimple || "";
 
   // Trigger label
   const triggerLabel =
@@ -120,7 +119,7 @@ export function SurahPicker({
 
       {/* Dropdown */}
       {open && (
-        <div ref={dropdownRef} role="listbox" aria-label={t.surahList.searchPlaceholder} className={`absolute left-1/2 -translate-x-1/2 w-72 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 flex flex-col overflow-hidden ${dropUp ? "bottom-full mb-2 max-h-[40vh]" : "top-full mt-2 max-h-[60vh]"}`}>
+        <div ref={dropdownRef} role="listbox" aria-label={t.surahList.searchPlaceholder} className={`absolute left-1/2 -translate-x-1/2 w-72 rounded bg-[var(--color-bg)] border border-[var(--color-border)] shadow-sm z-50 flex flex-col overflow-hidden ${dropUp ? "bottom-full mb-2 max-h-[40vh]" : "top-full mt-2 max-h-[60vh]"}`}>
           {/* Tab bar: Sure / Cüz */}
           <div role="tablist" className="flex border-b border-[var(--color-border)]">
             <button

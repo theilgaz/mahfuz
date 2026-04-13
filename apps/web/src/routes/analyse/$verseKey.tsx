@@ -43,7 +43,7 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-28 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse" />
+          <div key={i} className="h-28 rounded bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse" />
         ))}
       </div>
     );
@@ -51,7 +51,7 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="px-4 py-8 rounded-2xl border border-dashed border-[var(--color-border)] text-center">
+      <div className="px-4 py-8 rounded border border-dashed border-[var(--color-border)] text-center">
         <div className="flex items-center justify-center mb-3">
           <svg className="w-8 h-8 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -81,7 +81,7 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
           key={v.verseKey}
           to="/analyse/$verseKey"
           params={{ verseKey: v.verseKey }}
-          className="block px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-all"
+          className="block px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-all"
         >
           <div className="flex items-start justify-between gap-2 mb-2">
             <span className="text-xs font-medium text-[var(--color-accent)]">
@@ -118,7 +118,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
 
   if (!ctx) {
     return (
-      <div className="px-4 py-8 rounded-2xl border border-dashed border-[var(--color-border)] text-center">
+      <div className="px-4 py-8 rounded border border-dashed border-[var(--color-border)] text-center">
         <div className="flex items-center justify-center mb-3">
           <svg className="w-8 h-8 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -135,14 +135,14 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
   return (
     <div className="space-y-4">
       {/* Konu */}
-      <div className="px-4 py-3 rounded-xl bg-[var(--color-accent)]/8 border border-[var(--color-accent)]/20">
+      <div className="px-4 py-3 rounded bg-[var(--color-accent)]/8 border border-[var(--color-accent)]/20">
         <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-accent)] mb-0.5">Konu</p>
         <p className="text-sm font-medium text-[var(--color-text-primary)]">{ctx.topic}</p>
       </div>
 
       {/* Nüzul Sebebi */}
       {ctx.revelationContext && (
-        <div className="px-4 py-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="px-4 py-4 rounded border border-[var(--color-border)] bg-[var(--color-surface)]">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2">
             Nüzul Sebebi
           </p>
@@ -151,7 +151,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
       )}
 
       {/* Tarihsel Bağlam */}
-      <div className="px-4 py-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="px-4 py-4 rounded border border-[var(--color-border)] bg-[var(--color-surface)]">
         <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2">
           Tarihsel Bağlam
         </p>
@@ -167,7 +167,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
           {ctx.misconceptions.map((m, i) => (
             <div
               key={i}
-              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden"
+              className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden"
             >
               <button
                 className="w-full flex items-start gap-3 px-4 py-3 text-left"
@@ -202,7 +202,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
 
       {/* Fıkhi Not */}
       {ctx.legalNote && (
-        <div className="px-4 py-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
+        <div className="px-4 py-4 rounded border border-amber-500/20 bg-amber-500/5">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400 mb-2">
             Fıkhi Tartışma
           </p>
@@ -216,7 +216,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
           <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2 px-1">
             Karşılaştırmalı Hukuk
           </p>
-          <div className="rounded-xl border border-[var(--color-border)] overflow-hidden">
+          <div className="rounded border border-[var(--color-border)] overflow-hidden">
             <div className="grid grid-cols-3 bg-[var(--color-surface)] px-3 py-2 border-b border-[var(--color-border)]">
               <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Sistem</span>
               <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Hüküm</span>
@@ -256,7 +256,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
                 key={rv.verseKey}
                 to="/analyse/$verseKey"
                 params={{ verseKey: rv.verseKey }}
-                className="flex items-start gap-3 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 transition-all"
+                className="flex items-start gap-3 px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 transition-all"
               >
                 <span className="shrink-0 text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-2 py-0.5 rounded-full whitespace-nowrap">
                   {rv.surahName} {rv.ayahNumber}
@@ -270,7 +270,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
 
       {/* Kaynaklar */}
       {ctx.sources && ctx.sources.length > 0 && (
-        <div className="px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-surface)]">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2">
             Kaynaklar
           </p>
@@ -295,7 +295,7 @@ function ThemesTab({ surahId, translation }: { surahId: number; translation: str
 
   if (themes.length === 0) {
     return (
-      <div className="px-4 py-6 rounded-2xl border border-dashed border-[var(--color-border)] text-center">
+      <div className="px-4 py-6 rounded border border-dashed border-[var(--color-border)] text-center">
         <p className="text-sm text-[var(--color-text-secondary)]">Bu sure için tema verisi yükleniyor...</p>
       </div>
     );
@@ -309,7 +309,7 @@ function ThemesTab({ surahId, translation }: { surahId: number; translation: str
       {themes.map((theme, i) => (
         <div
           key={theme.id}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
+          className={`flex items-center gap-3 px-4 py-3 rounded border transition-all ${
             i === 0
               ? "border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5"
               : "border-[var(--color-border)] bg-[var(--color-surface)]"
@@ -374,9 +374,9 @@ function AnalysePage() {
 
       {/* Arapça metin */}
       {isLoading ? (
-        <div className="h-20 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse mb-5" />
+        <div className="h-20 rounded bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse mb-5" />
       ) : (
-        <div className="px-5 py-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] mb-5">
+        <div className="px-5 py-5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] mb-5">
           <p
             className="text-2xl text-right leading-loose text-[var(--color-text-primary)]"
             dir="rtl"
@@ -392,7 +392,7 @@ function AnalysePage() {
       )}
 
       {/* Tab bar */}
-      <div className="flex gap-1 bg-[var(--color-surface)] rounded-xl p-1 border border-[var(--color-border)] mb-5 overflow-x-auto">
+      <div className="flex gap-1 bg-[var(--color-surface)] rounded p-1 border border-[var(--color-border)] mb-5 overflow-x-auto">
         {TABS.map((t) => (
           <button
             key={t}
@@ -414,7 +414,7 @@ function AnalysePage() {
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse" />
+                <div key={i} className="h-24 rounded bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse" />
               ))}
             </div>
           ) : data ? (
@@ -431,7 +431,7 @@ function AnalysePage() {
 
       {/* Morfoloji */}
       {tab === "morfoloji" && (
-        <div className="px-4 py-6 rounded-2xl border border-dashed border-[var(--color-border)] text-center">
+        <div className="px-4 py-6 rounded border border-dashed border-[var(--color-border)] text-center">
           <div className="flex items-center justify-center mb-3">
             <svg className="w-8 h-8 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -444,7 +444,7 @@ function AnalysePage() {
             Her kelimenin kök, vezin ve gramer rolü. Yakında Mürşid ile.
           </p>
           <div
-            className="mt-4 text-right text-lg leading-loose px-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]"
+            className="mt-4 text-right text-lg leading-loose px-4 py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)]"
             dir="rtl"
             lang="ar"
             style={{ fontFamily: "var(--font-arabic)" }}

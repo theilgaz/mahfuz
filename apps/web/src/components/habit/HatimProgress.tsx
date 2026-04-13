@@ -26,7 +26,7 @@ export function HatimProgress({ lastPage, startedAt, onStart }: HatimProgressPro
   const estimatedDays = pagesPerDay > 0 ? Math.ceil(remainingPages / pagesPerDay) : null;
 
   return (
-    <div className="px-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+    <div className="px-4 py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
       <div className="flex items-center justify-between mb-2">
         <p className="text-sm font-medium">Hatim</p>
         <span className="text-xs text-[var(--color-text-secondary)]">
@@ -59,7 +59,7 @@ export function HatimStartCard({ onStart }: { onStart: () => void }) {
   return (
     <button
       onClick={onStart}
-      className="w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors text-left"
+      className="w-full px-4 py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors text-left"
     >
       <p className="text-sm font-medium">Hatim Başlat</p>
       <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">

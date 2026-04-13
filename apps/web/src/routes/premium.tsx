@@ -119,11 +119,11 @@ function SupportCard({ title, desc }: { title: string; desc: string }) {
   const [recurring, setRecurring] = useState(false);
 
   return (
-    <div className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]/60 p-5">
+    <div className="py-3 px-1 border-b border-[var(--color-border)]">
       <p className="font-semibold text-[var(--color-text-primary)] mb-1">{title}</p>
       <p className="text-sm text-[var(--color-text-secondary)] mb-4 leading-relaxed">{desc}</p>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-0.5 bg-[var(--color-border)]/40 rounded-xl p-1">
+        <div className="flex items-center gap-0.5 bg-[var(--color-border)]/40 rounded p-1">
           <button
             onClick={() => setRecurring(false)}
             className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all ${
@@ -161,10 +161,10 @@ function Label({ children }: { children: string }) {
 
 function PremiumPage() {
   return (
-    <div className="max-w-md mx-auto pb-28">
+    <div className="max-w-3xl mx-auto pb-28">
 
       {/* Hero */}
-      <div className="mx-4 mt-6 rounded-3xl bg-[var(--color-accent)] px-6 pt-10 pb-8 text-white text-center">
+      <div className="mx-4 mt-6 rounded bg-[var(--color-accent)] px-6 pt-10 pb-8 text-white text-center">
         <p className="text-xs font-semibold tracking-widest opacity-70 mb-3">Mahfuz Mürşid</p>
         <h1 className="text-4xl font-bold leading-tight tracking-tight mb-3">
           Öğrenmek<br />herkese açık.
@@ -181,7 +181,7 @@ function PremiumPage() {
           {FREE_FEATURES.map((f) => (
             <div
               key={f.label}
-              className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]/60 flex flex-col items-center justify-center gap-2 py-4 px-1"
+              className="rounded bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col items-center justify-center gap-2 py-4 px-1"
             >
               <span className="text-[var(--color-accent)]">{f.icon}</span>
               <span className="text-[10px] font-medium text-[var(--color-text-secondary)] text-center leading-tight">{f.label}</span>
@@ -202,9 +202,9 @@ function PremiumPage() {
           {MODULES.map((m) => (
             <div
               key={m.title}
-              className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]/60 p-4"
+              className="rounded bg-[var(--color-surface)] border border-[var(--color-border)] p-4"
             >
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-accent)]/10 text-[var(--color-accent)] mb-3">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded bg-[var(--color-accent)]/10 text-[var(--color-accent)] mb-3">
                 {m.icon}
               </span>
               <p className="text-sm font-semibold text-[var(--color-text-primary)] leading-snug mb-1">{m.title}</p>

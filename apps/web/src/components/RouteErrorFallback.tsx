@@ -54,13 +54,13 @@ export function RouteErrorFallback({ error, reset }: RouteErrorFallbackProps) {
       <div className="flex items-center gap-3">
         <button
           onClick={reset}
-          className="px-4 py-2 rounded-xl bg-[var(--color-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          className="px-4 py-2 rounded bg-[var(--color-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
         >
           {t.error.retry}
         </button>
         <Link
           to="/"
-          className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+          className="px-4 py-2 rounded border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
         >
           {t.error.goHome}
         </Link>

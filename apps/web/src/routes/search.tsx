@@ -12,6 +12,7 @@ import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { SettingsButton } from "~/components/SettingsButton";
 import { surahSlug } from "~/lib/surah-slugs";
+import { LatinRootSearch } from "~/components/LatinRootSearch";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
@@ -61,7 +62,7 @@ const APP_PAGES: AppPage[] = [
   {
     id: "hatim", label: "Hatim",
     keywords: ["hatim", "grup", "cuz", "okuma", "group"],
-    route: "/hatim", desc: "Hatim gruplari",
+    route: "/khatm", desc: "Hatim gruplari",
     iconColor: "bg-[var(--color-accent)] text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
   },
@@ -156,7 +157,7 @@ function SearchPage() {
           onChange={(e) => handleInput(e.target.value)}
           placeholder={t.search.placeholder}
           autoFocus
-          className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-[var(--color-surface)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 transition-all"
+          className="w-full pl-11 pr-4 py-3.5 rounded bg-[var(--color-surface)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 transition-all"
         />
       </div>
 
@@ -169,12 +170,12 @@ function SearchPage() {
           <h3 className="text-sm font-bold text-[var(--color-text-primary)] mb-3">
             {locale === "tr" ? "Ozellikler" : "Features"}
           </h3>
-          <div className="space-y-1.5">
+          <div>
             {appResults.map((page) => (
               <Link
                 key={page.id}
                 to={page.route as "/"}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[var(--color-surface)] hover:bg-[var(--color-surface)]/80 active:scale-[0.98] transition-all"
+                className="flex items-center gap-3 py-3 px-1 border-b border-[var(--color-border)] hover:bg-[var(--color-surface)] active:scale-[0.98] transition-all"
               >
                 <span className={`flex items-center justify-center w-10 h-10 rounded-[12px] shrink-0 ${page.iconColor}`}>
                   {page.icon}
@@ -224,8 +225,8 @@ function SearchPage() {
 
 const GROUP_LABELS: Record<string, { tr: string; en: string }> = {
   surah: { tr: "Sureler", en: "Surahs" },
-  translation: { tr: "Meal Sonuclari", en: "Translation Results" },
-  arabic: { tr: "Arapca Metin", en: "Arabic Text" },
+  translation: { tr: "Meal Sonuçları", en: "Translation Results" },
+  arabic: { tr: "Arapça Metin", en: "Arabic Text" },
 };
 
 function GroupedResults({ results, readingMode, locale, t, navigate }: {
@@ -255,7 +256,7 @@ function GroupedResults({ results, readingMode, locale, t, navigate }: {
           <h3 className="text-sm font-bold text-[var(--color-text-primary)] mb-3">
             {GROUP_LABELS[group.type]?.[locale as "tr" | "en"] ?? GROUP_LABELS[group.type]?.tr ?? group.type}
           </h3>
-          <ul className="space-y-2.5 list-none p-0">
+          <ul className="list-none p-0">
             {group.items.map((r) => (
               <li key={`${r.surahId}:${r.ayahNumber}`}>
                 <ResultCard r={r} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />
@@ -280,10 +281,10 @@ function ResultCard({ r, readingMode, locale, t, navigate }: {
           navigate({ to: "/page/$pageNumber", params: { pageNumber: String(r.pageNumber) }, search: { ayah: `${r.surahId}:${r.ayahNumber}` } });
         }
       }}
-      className="block w-full text-left p-4 rounded-2xl bg-[var(--color-surface)] hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] active:scale-[0.99] transition-all"
+      className="block w-full text-left py-3 px-1 border-b border-[var(--color-border)] hover:bg-[var(--color-surface)] active:scale-[0.99] transition-all"
     >
       <div className="flex items-center gap-2 mb-2.5">
-        <span className="text-sm font-semibold text-[var(--color-text-primary)]">{r.surahNameSimple}</span>
+        <span className="text-sm font-semibold text-[var(--color-text-primary)]">{getSurahName(r.surahId, locale) || r.surahNameSimple}</span>
         <span className="text-xs px-1.5 py-0.5 rounded-md bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium">
           {r.ayahNumber}
         </span>
@@ -338,7 +339,7 @@ function SearchSuggestions({ onSelect, locale, t }: { onSelect: (q: string) => v
             <button
               key={s.id}
               onClick={() => onSelect(getSurahName(s.id, locale) || s.nameAr)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-surface)] hover:bg-[var(--color-accent)]/8 active:scale-[0.97] text-xs transition-all"
+              className="flex items-center gap-2 px-3 py-2 rounded bg-[var(--color-surface)] hover:bg-[var(--color-accent)]/8 active:scale-[0.97] text-xs transition-all"
             >
               <span dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "0.85rem" }}>{s.nameAr}</span>
               <span className="text-[var(--color-text-secondary)]">{getSurahName(s.id, locale)}</span>
@@ -363,6 +364,14 @@ function SearchSuggestions({ onSelect, locale, t }: { onSelect: (q: string) => v
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Kök arama */}
+      <div>
+        <h3 className="text-[15px] font-bold text-[var(--color-text-primary)] mb-3">
+          {t.hub.rootSearch}
+        </h3>
+        <LatinRootSearch />
       </div>
     </div>
   );

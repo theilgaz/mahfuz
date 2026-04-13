@@ -44,7 +44,7 @@ export function PageJumpDialog({ open, onClose, currentPage }: PageJumpDialogPro
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div className="fixed top-1/3 left-1/2 -translate-x-1/2 z-50 w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl shadow-xl p-5">
+      <div className="fixed top-1/3 left-1/2 -translate-x-1/2 z-50 w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded shadow-sm p-5">
         <h3 className="text-sm font-medium mb-3">{t.reader.pageJumpTitle}</h3>
 
         <div className="flex gap-2 mb-4">

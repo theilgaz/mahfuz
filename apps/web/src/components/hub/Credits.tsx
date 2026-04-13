@@ -84,7 +84,7 @@ export function Credits() {
   const c = t.hub.credits;
 
   return (
-    <section className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+    <section className="mt-6 rounded border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
       {/* Header */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center gap-2.5">

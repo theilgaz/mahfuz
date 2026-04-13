@@ -41,7 +41,7 @@ export function LetterTrace({ letter, onComplete }: LetterTraceProps) {
         </p>
         <button
           onClick={onComplete}
-          className="rounded-xl bg-[var(--color-accent)] px-8 py-3 text-[14px] font-bold text-white shadow-md active:scale-95"
+          className="rounded bg-[var(--color-accent)] px-8 py-3 text-[14px] font-bold text-white shadow-md active:scale-95"
         >
           {t.alifba.tracingNext}
         </button>
@@ -286,7 +286,7 @@ function LetterTraceInner({ letter, onComplete }: LetterTraceProps) {
       </p>
 
       <div
-        className="rounded-2xl bg-[var(--color-surface)] shadow-sm w-full"
+        className="rounded bg-[var(--color-surface)] shadow-sm w-full"
       >
         <svg
           ref={svgRef}
@@ -585,14 +585,14 @@ function LetterTraceInner({ letter, onComplete }: LetterTraceProps) {
       <div className="flex gap-3">
         <button
           onClick={handleReset}
-          className="rounded-xl border border-[var(--color-border)] px-6 py-3 text-[14px] font-semibold text-[var(--color-text-secondary)] active:scale-95"
+          className="rounded border border-[var(--color-border)] px-6 py-3 text-[14px] font-semibold text-[var(--color-text-secondary)] active:scale-95"
         >
           {t.alifba.tracingRetry}
         </button>
         {done && (
           <button
             onClick={onComplete}
-            className="rounded-xl bg-[var(--color-accent)] px-8 py-3 text-[14px] font-bold text-white shadow-md active:scale-95"
+            className="rounded bg-[var(--color-accent)] px-8 py-3 text-[14px] font-bold text-white shadow-md active:scale-95"
           >
             {t.alifba.tracingNext}
           </button>

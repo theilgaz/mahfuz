@@ -149,7 +149,7 @@ function PagePlayButton({ pageNumber }: { pageNumber: number }) {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
             ref={popoverRef}
-            className="absolute right-0 top-full mt-1.5 w-52 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 py-1.5 overflow-hidden"
+            className="absolute right-0 top-full mt-1.5 w-52 rounded bg-[var(--color-bg)] border border-[var(--color-border)] shadow-sm z-50 py-1.5 overflow-hidden"
             style={{ fontFamily: "var(--font-ui)" }}
           >
             <p className="px-3 py-1 text-[10px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">

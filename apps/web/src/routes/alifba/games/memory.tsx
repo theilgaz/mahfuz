@@ -98,10 +98,10 @@ function MemoryGamePage() {
         <h2 className="text-lg font-semibold">{t.alifba.quizComplete}</h2>
         <p className="text-sm text-[var(--color-text-secondary)]">{moves} {t.alifba.moves} · {t.alifba.score}: {score}</p>
         <div className="flex gap-3">
-          <Link to="/alifba/games" className="px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
+          <Link to="/alifba/games" className="px-4 py-2.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
             {t.nav.back}
           </Link>
-          <button onClick={restart} className="px-4 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm">
+          <button onClick={restart} className="px-4 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm">
             {t.alifba.tryAgain}
           </button>
         </div>
@@ -131,7 +131,7 @@ function MemoryGamePage() {
             <button
               key={card.uid}
               onClick={() => handleFlip(card.uid)}
-              className={`aspect-square rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
+              className={`aspect-square rounded border flex flex-col items-center justify-center gap-1 transition-all ${
                 isMatched
                   ? "bg-[var(--color-accent)]/10 border-[var(--color-accent)]/40"
                   : isFlipped

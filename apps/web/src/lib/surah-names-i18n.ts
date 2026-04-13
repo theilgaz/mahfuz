@@ -3,7 +3,7 @@
  * TR zaten surah-names-tr.ts'de var, burası diğer diller için.
  */
 
-import { SURAH_NAMES_TR } from "./surah-names-tr";
+import { SURAH_NAMES_TR, SURAH_MEANINGS_TR } from "./surah-names-tr";
 
 const EN: Record<number, string> = {
   1: "The Opening", 2: "The Cow", 3: "The Family of Imran", 4: "The Women", 5: "The Table Spread",
@@ -177,5 +177,23 @@ const SURAH_NAMES: Record<string, Record<number, string>> = {
  */
 export function getSurahName(surahId: number, locale: string): string {
   return SURAH_NAMES[locale]?.[surahId] ?? EN[surahId] ?? "";
+}
+
+const SURAH_MEANINGS: Record<string, Record<number, string>> = {
+  tr: SURAH_MEANINGS_TR,
+  en: EN,
+  fr: FR,
+  es: ES,
+  ar: AR,
+  de: DE,
+  nl: NL,
+};
+
+/**
+ * Dile gore sure anlamini dondurur.
+ * TR: "Gruplar", EN: "The Combined Forces", vb.
+ */
+export function getSurahMeaning(surahId: number, locale: string): string {
+  return SURAH_MEANINGS[locale]?.[surahId] ?? EN[surahId] ?? "";
 }
 

@@ -190,7 +190,7 @@ export const AyahBlock = memo(function AyahBlock({
       data-longpress={longPressActive || menuOpen ? "true" : undefined}
       className={`group py-3 border-b border-[var(--color-border)] last:border-b-0 relative transition-all duration-300 rounded-lg ${
         longPressActive || menuOpen
-          ? "bg-[var(--color-accent)]/10 scale-[0.98] shadow-lg ring-1 ring-[var(--color-accent)]/20"
+          ? "bg-[var(--color-accent)]/10 scale-[0.98] shadow-sm ring-1 ring-[var(--color-accent)]/20"
           : flash ? "bg-[var(--color-accent)]/10" : isPlaying ? "bg-[var(--color-accent)]/6" : ""
       }`}
       tabIndex={surahId ? 0 : undefined}

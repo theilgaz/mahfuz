@@ -7,12 +7,13 @@
  *   A- → "standard" modu (varsayılan mushaf oranları)
  */
 
+import { useEffect, useRef, useState } from "react";
 import { useSettingsStore } from "~/stores/settings.store";
 
 const STEP = 0.15;
 
 const BTN =
-  "w-9 h-9 rounded-full bg-[var(--color-surface)] border shadow-lg flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors active:scale-95";
+  "w-9 h-9 rounded-full bg-[var(--color-surface)] border shadow-sm flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors active:scale-95";
 const BTN_ACTIVE =
   "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)]";
 const BTN_IDLE = "border-[var(--color-border)]";
@@ -23,9 +24,25 @@ export function FontSizeControl({ mushaf = false }: { mushaf?: boolean }) {
   const mushafSizeMode = useSettingsStore((s) => s.mushafSizeMode);
   const setMushafSizeMode = useSettingsStore((s) => s.setMushafSizeMode);
 
+  const [visible, setVisible] = useState(true);
+  const lastY = useRef(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setVisible(y < lastY.current);
+      lastY.current = y;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const wrapperClass = `fixed left-4 bottom-20 z-20 flex flex-col gap-1 transition-opacity duration-300 ${visible ? "opacity-60" : "opacity-0 pointer-events-none"}`;
+
   if (mushaf) {
     return (
-      <div className="fixed left-4 bottom-20 z-20 flex flex-col gap-1">
+      <div className={wrapperClass}>
         {/* A+ → cihaza uygun (fill) */}
         <button
           onClick={() => setMushafSizeMode("fill")}
@@ -53,7 +70,7 @@ export function FontSizeControl({ mushaf = false }: { mushaf?: boolean }) {
   }
 
   return (
-    <div className="fixed left-4 bottom-20 z-20 flex flex-col gap-1">
+    <div className={wrapperClass}>
       <button
         onClick={() => setArabicFontSize(arabicFontSize + STEP)}
         className={`${BTN} ${BTN_IDLE}`}

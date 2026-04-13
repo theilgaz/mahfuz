@@ -263,10 +263,10 @@ function RuleCard({ rule, onSelect }: { rule: TajweedRule; onSelect: () => void 
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left flex items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-sm active:scale-[0.99] transition-all duration-150 overflow-hidden"
+      className="w-full text-left flex items-center py-3 px-1 border-b border-[var(--color-border)] hover:bg-[var(--color-surface)] active:scale-[0.99] transition-all duration-150"
     >
       <div
-        className="w-14 self-stretch flex items-center justify-center shrink-0"
+        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mr-3"
         style={{ backgroundColor: alpha(rule.accent, 0.08) }}
       >
         <span
@@ -279,9 +279,7 @@ function RuleCard({ rule, onSelect }: { rule: TajweedRule; onSelect: () => void 
         </span>
       </div>
 
-      <div className="w-px self-stretch" style={{ backgroundColor: "var(--color-border)" }} />
-
-      <div className="flex-1 min-w-0 px-4 py-3.5">
+      <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5 flex-wrap">
           <p className="text-sm font-semibold text-[var(--color-text-primary)]">{rule.name}</p>
           {rule.duration && (
@@ -332,9 +330,9 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
       </button>
 
       <div
-        className="rounded-2xl px-5 pt-5 pb-4 border"
+        className="rounded px-5 pt-5 pb-4 border"
         style={{
-          background: `linear-gradient(135deg, ${alpha(rule.accent, 0.08)} 0%, ${alpha(rule.accent, 0.03)} 100%)`,
+          backgroundColor: alpha(rule.accent, 0.05),
           borderColor: alpha(rule.accent, 0.25),
         }}
       >
@@ -354,7 +352,7 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
             )}
           </div>
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+            className="w-12 h-12 rounded flex items-center justify-center shrink-0"
             style={{ backgroundColor: alpha(rule.accent, 0.12) }}
           >
             <span
@@ -380,15 +378,15 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
         </p>
       </div>
 
-      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+      <div>
         <SectionHeader
           icon={<><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></>}
           label={t.tajweedPage.sectionConditions}
           accent={rule.accent}
         />
-        <ul className="divide-y divide-[var(--color-border)]">
+        <ul>
           {rule.conditions.map((c, i) => (
-            <li key={i} className="flex items-start gap-3 px-4 py-3">
+            <li key={i} className="flex items-start gap-3 py-3 px-1 border-b border-[var(--color-border)]">
               <span
                 className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
                 style={{ backgroundColor: alpha(rule.accent, 0.12), color: rule.accent }}
@@ -401,15 +399,15 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
         </ul>
       </div>
 
-      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+      <div>
         <SectionHeader
           icon={<><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></>}
           label={t.tajweedPage.sectionExamples}
           accent={rule.accent}
         />
-        <div className="divide-y divide-[var(--color-border)]">
+        <div>
           {rule.examples.map((ex, i) => (
-            <div key={i} className="flex items-center gap-4 px-4 py-4">
+            <div key={i} className="flex items-center gap-4 py-3 px-1 border-b border-[var(--color-border)]">
               <div className="flex-1 min-w-0">
                 <p
                   className="text-2xl text-[var(--color-text-primary)] leading-loose"
@@ -425,7 +423,7 @@ function RuleDetail({ rule, onBack, t }: { rule: TajweedRule; onBack: () => void
               <div className="shrink-0 text-center">
                 <p className="text-[10px] text-[var(--color-text-secondary)] mb-1">{t.tajweedPage.ruleApplied}</p>
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  className="w-12 h-12 rounded flex items-center justify-center"
                   style={{ backgroundColor: alpha(rule.accent, 0.1) }}
                 >
                   <span
@@ -454,13 +452,13 @@ function TajweedPage() {
   const CATEGORY_GROUPS = useMemo(() => makeCategories(t), [t]);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
       {selectedRule ? (
         <RuleDetail rule={selectedRule} onBack={() => setSelectedRule(null)} t={t} />
       ) : (
         <>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
               <svg className="w-5 h-5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
               </svg>
@@ -485,7 +483,7 @@ function TajweedPage() {
                     {rules.length}
                   </span>
                 </div>
-                <div className="space-y-2">
+                <div>
                   {rules.map((rule) => (
                     <RuleCard key={rule.id} rule={rule} onSelect={() => setSelectedRule(rule)} />
                   ))}
@@ -494,8 +492,8 @@ function TajweedPage() {
             );
           })}
 
-          <div className="px-5 py-4 rounded-2xl border border-dashed border-[var(--color-border)] flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
+          <div className="px-5 py-4 rounded border border-dashed border-[var(--color-border)] flex items-center gap-3">
+            <div className="w-9 h-9 rounded bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
               <svg className="w-4 h-4 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1"/><circle cx="18" cy="13" r="1"/>
               </svg>

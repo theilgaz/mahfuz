@@ -30,10 +30,10 @@ function NotesPage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
       {/* Başlık */}
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
           <svg className="w-5 h-5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
@@ -50,7 +50,7 @@ function NotesPage() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse" />
+            <div key={i} className="h-24 rounded bg-[var(--color-surface)] border border-[var(--color-border)] animate-pulse" />
           ))}
         </div>
       ) : notes.length === 0 ? (
@@ -68,13 +68,13 @@ function NotesPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div>
           {notes.map((note) => {
             const [surahId, verseNum] = note.verseKey.split(":").map(Number);
             return (
               <div
                 key={note.id}
-                className="px-4 py-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]"
+                className="py-3 px-1 border-b border-[var(--color-border)]"
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <Link

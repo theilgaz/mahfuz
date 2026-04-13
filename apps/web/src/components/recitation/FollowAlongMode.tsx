@@ -28,7 +28,7 @@ export function FollowAlongMode({ surahId, onVerseRecognized }: FollowAlongModeP
   }, [lastMatch, surahId, onVerseRecognized]);
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div className="flex items-center gap-3 px-3 py-2 rounded border border-[var(--color-border)] bg-[var(--color-surface)]">
       {/* Mic toggle */}
       <button
         onClick={() => engine.isRecording ? engine.stopListening() : engine.startListening()}

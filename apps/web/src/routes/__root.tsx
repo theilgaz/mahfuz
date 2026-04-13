@@ -25,7 +25,6 @@ import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { getSession } from "~/lib/auth-session";
 import { useSyncEngine } from "~/hooks/useSyncEngine";
-import { useSeherTheme } from "~/hooks/useSeherTheme";
 import { surahSlug, surahIdFromSlug } from "~/lib/surah-slugs";
 import type { Session } from "~/lib/auth";
 import appCss from "~/styles/app.css?url";
@@ -99,7 +98,7 @@ function NotFound() {
       </p>
       <Link
         to="/"
-        className="px-5 py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+        className="px-5 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
       >
         {t.error.goHome}
       </Link>
@@ -116,18 +115,12 @@ function RootComponent() {
 }
 
 function AppHeader() {
-  const labsEnabled = useSettingsStore((s) => s.labsEnabled);
   const { t } = useTranslation();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [labsMenuOpen, setLabsMenuOpen] = useState(false);
   const [verseJumpOpen, setVerseJumpOpen] = useState(false);
   const { session } = useRouteContext({ from: "__root__" });
-  const labsMenuRef = useRef<HTMLDivElement>(null);
-  const labsDropdownRef = useRef<HTMLDivElement>(null);
-  const closeLabsMenu = useCallback(() => setLabsMenuOpen(false), []);
-  useFocusTrap(labsDropdownRef, labsMenuOpen, closeLabsMenu);
 
   const isHome = path === "/";
   const isAuth = path.startsWith("/auth");
@@ -178,7 +171,7 @@ function AppHeader() {
     <>
       <div className="sticky top-0 z-40">
         {/* Main header */}
-        <header className="flex items-center h-11 bg-[var(--color-bg)]/95 backdrop-blur-sm border-b border-[var(--color-border)]">
+        <header className="flex items-center h-11 bg-[var(--color-bg)] border-b border-[var(--color-border)]">
         <div className="flex items-center gap-1.5 w-full max-w-3xl mx-auto px-4">
           {/* Left: logo or back */}
           {isHome ? (
@@ -189,8 +182,7 @@ function AppHeader() {
           ) : (
             <button
               onClick={() => {
-                if (isAlifbaGame) navigate({ to: "/alifba/games" });
-                else if (isAlifbaSubRoute) navigate({ to: "/alifba/" });
+                if (window.history.length > 1) window.history.back();
                 else navigate({ to: "/" });
               }}
               className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
@@ -233,58 +225,6 @@ function AppHeader() {
             </Link>
           )}
 
-          {/* Labs menu — sadece keşif modunda */}
-          {labsEnabled && (
-            <div className="relative" ref={labsMenuRef}>
-              <button
-                onClick={() => setLabsMenuOpen((v) => !v)}
-                className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
-                aria-label="Labs"
-                aria-haspopup="true"
-                aria-expanded={labsMenuOpen}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 3H15V8L19 14V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V14L9 8V3Z" />
-                  <path d="M9 3H15" />
-                  <path d="M12 11V15" />
-                  <path d="M10 13H14" />
-                </svg>
-              </button>
-              {labsMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setLabsMenuOpen(false)} />
-                  <div ref={labsDropdownRef} role="menu" className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl z-50 py-1 overflow-hidden">
-                    {([
-                      { to: "/recite", label: "Tilavet", icon: (
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-                      )},
-                      { to: "/discover", label: t.hub.listenMemorize, icon: (
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 22V12h6v10"/></svg>
-                      )},
-                      { to: "/discover", label: t.hub.apps, icon: (
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" strokeWidth={1.5}/><rect x="14" y="3" width="7" height="7" rx="1" strokeWidth={1.5}/><rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={1.5}/><rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={1.5}/></svg>
-                      )},
-                      { to: "/alifba/", label: t.hub.alifba, icon: (
-                        <span className="text-[10px] font-bold" style={{ fontFamily: "var(--font-arabic)" }}>ا ب</span>
-                      )},
-                    ] as { to: string; label: string; icon: ReactNode }[]).map((item) => (
-                      <Link
-                        key={item.label}
-                        to={item.to}
-                        role="menuitem"
-                        onClick={() => setLabsMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors"
-                      >
-                        <span className="w-5 flex items-center justify-center text-[var(--color-text-secondary)]">{item.icon}</span>
-                        <span>{item.label}</span>
-                        <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium">Keşif</span>
-                      </Link>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
 
           {/* Ayete git — sadece sure rotasında */}
           {surahSlugMatch && (
@@ -310,17 +250,38 @@ function AppHeader() {
             <SmartPlayButton mode="page" pageNumber={currentPage} />
           )}
 
-          {/* Settings */}
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
-            aria-label={t.settings.title}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
+          {/* User avatar / login */}
+          {session?.user ? (
+            <Link
+              to="/profile"
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:ring-2 hover:ring-[var(--color-accent)]/30 transition-all shrink-0 overflow-hidden"
+              aria-label={session.user.name || t.hub.profile}
+            >
+              {session.user.image ? (
+                <img
+                  src={session.user.image}
+                  alt={session.user.name || ""}
+                  className="w-8 h-8 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className="w-8 h-8 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-xs font-semibold text-white">
+                  {session.user.name?.[0]?.toUpperCase() || "?"}
+                </span>
+              )}
+            </Link>
+          ) : (
+            <Link
+              to="/auth/login"
+              className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
+              aria-label={t.auth?.login || "Login"}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </Link>
+          )}
 
         </div>
         </header>
@@ -427,9 +388,6 @@ function RootDocument({ children }: { children: ReactNode }) {
     // Sync browser chrome color
     document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => { m.content = bg; });
   }, [theme]);
-
-  // Seher teması: gün doğumu/batımı bazlı otomatik geçiş
-  useSeherTheme();
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
