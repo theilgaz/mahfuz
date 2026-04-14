@@ -3,6 +3,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
 import { surahSlug } from "~/lib/surah-slugs";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -44,16 +45,20 @@ export function VerseJumpDialog({ open, onClose, surahId, ayahCount }: VerseJump
     onClose();
   }
 
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div className="fixed top-1/3 left-1/2 -translate-x-1/2 z-50 w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded shadow-sm p-5">
+      <div className="fixed inset-0 z-[100] bg-black/30" onClick={onClose} />
+      <div
+        className="fixed top-1/3 left-1/2 -translate-x-1/2 z-[101] w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded shadow-sm p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3 className="text-sm font-medium mb-3">{t.reader.verseJumpTitle}</h3>
 
         <div className="flex gap-2 mb-4">
           <input
             ref={inputRef}
             type="number"
+            inputMode="numeric"
             min={1}
             max={ayahCount}
             value={value}
@@ -95,6 +100,7 @@ export function VerseJumpDialog({ open, onClose, surahId, ayahCount }: VerseJump
             ))}
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }
