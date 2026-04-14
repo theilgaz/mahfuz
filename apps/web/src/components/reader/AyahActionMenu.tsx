@@ -94,16 +94,17 @@ export function AyahActionMenu({
 
   if (!open) return null;
 
-  const reference = `${surahId}:${ayahNumber}`;
+  const surahName = SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`;
+  const shareFooter = `${surahName} ${ayahNumber} · Mahfuz\nmahfuz.ilg.az`;
 
   async function copyText(text: string, label: string) {
-    await navigator.clipboard.writeText(`${text}\n\n${reference}`);
+    await navigator.clipboard.writeText(`${text}\n\n${shareFooter}`);
     setCopied(label);
     setTimeout(() => onClose(), 600);
   }
 
   async function share() {
-    const text = [textUthmani, translation, `${reference}`].filter(Boolean).join("\n\n");
+    const text = [textUthmani, translation, shareFooter].filter(Boolean).join("\n\n");
     if (navigator.share) {
       try { await navigator.share({ text }); } catch { /* cancelled */ }
     } else {
