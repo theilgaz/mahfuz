@@ -262,7 +262,7 @@ export const en: Messages = {
   home: {
     continueReading: "Continue reading",
     dailyVerse: "Verse of the Day",
-    readInSurah: "Read in surah →",
+    readInSurah: "Read in surah",
     analyse: "Analyse",
     share: "Share",
   },
@@ -593,6 +593,8 @@ export const en: Messages = {
     modeHifzVerses: "verses",
     modeCustom: "Custom",
     modeCustomHint: "Tap to select surahs",
+    showDetails: "Details",
+    hideDetails: "Hide",
   },
   gamesHub: {
     title: "Games",
@@ -631,7 +633,7 @@ export const en: Messages = {
     surahGuessTitle: "Surah Recognition",
     surahGuessDesc: "Guess the surah when you hear the recitation",
     wordMeaningTitle: "Word Meaning",
-    wordMeaningDesc: "Arabic word → {locale} meaning",
+    wordMeaningDesc: "Arabic word → English meaning",
     hexagonTitle: "Hexagon Letters",
     hexagonDesc: "Form words from letters in the honeycomb",
     voiceQuizTitle: "Audio Quiz",

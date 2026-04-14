@@ -260,7 +260,7 @@ export const tr = {
   home: {
     continueReading: "Okumaya devam et",
     dailyVerse: "Günün Ayeti",
-    readInSurah: "Surede oku →",
+    readInSurah: "Surede oku",
     analyse: "Tahlil",
     share: "Paylaş",
   },
@@ -545,9 +545,11 @@ export const tr = {
     diffEasy: "Kolay",
     diffMedium: "Orta",
     diffHard: "Zor",
+    diffHafiz: "Hafiz",
     diffEasyHint: "1x puan",
     diffMediumHint: "1.5x puan",
     diffHardHint: "2x puan",
+    diffHafizHint: "3x puan",
     newHighScore: "Yeni rekor!",
   },
   hexagonGame: {
@@ -616,6 +618,8 @@ export const tr = {
     modeHifzVerses: "ayet",
     modeCustom: "Özel Seçim",
     modeCustomHint: "Sure seçmek için tıkla",
+    showDetails: "Detay",
+    hideDetails: "Gizle",
   },
   gamesHub: {
     title: "Oyunlar",
@@ -655,7 +659,7 @@ export const tr = {
     surahGuessTitle: "Sure Tanıma",
     surahGuessDesc: "Tilaveti duyunca sureyi tahmin et",
     wordMeaningTitle: "Kelime Anlamı",
-    wordMeaningDesc: "Arapça kelime → {locale} anlam",
+    wordMeaningDesc: "Arapca kelime → Turkce anlam",
     hexagonTitle: "Hexagon Harf",
     hexagonDesc: "Bal peteğinde harflerden kelime oluştur",
     // Elifba game titles & descriptions
