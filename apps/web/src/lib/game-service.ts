@@ -9,7 +9,7 @@ import { sql, eq, inArray, and, or } from "drizzle-orm";
 
 export type VerseFilter = { surahId: number; verseNums: number[] }[];
 
-export const getRandomVerseForGame = createServerFn({ method: "GET" })
+export const getRandomVerseForGame = createServerFn({ method: "POST" })
   .inputValidator(
     (input: {
       surahIds?: number[];
@@ -95,7 +95,7 @@ export const getRandomVerseForGame = createServerFn({ method: "GET" })
     return null;
   });
 
-export const getVerseGuessQuestion = createServerFn({ method: "GET" })
+export const getVerseGuessQuestion = createServerFn({ method: "POST" })
   .inputValidator(
     (input: { surahIds?: number[]; excludeAyahIds?: number[]; optionCount?: number }) => input,
   )
