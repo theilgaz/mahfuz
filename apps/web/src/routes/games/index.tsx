@@ -251,7 +251,7 @@ function EditorChoiceCard({ game, t }: { game: Game; t: T }) {
 
 function GamesGrid({ games, t, showStar = true }: { games: Game[]; t: T; showStar?: boolean }) {
   return (
-    <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+    <div className="grid grid-cols-5 gap-x-2 gap-y-3">
       {games.map((g) => (
         <GameCard key={g.id} game={g} t={t} showStar={showStar} />
       ))}
@@ -411,8 +411,16 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
           ))}
         </div>
 
-        {/* Right: my scores + global */}
+        {/* Right: global + my scores */}
         <div className="flex flex-col gap-5">
+          <SectionCard icon={<GlobeSvg />} title={t.gamesHub.tabGlobal}>
+            {!globalBoard?.length ? (
+              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noScores}</p>
+            ) : (
+              <LeaderboardRows entries={globalBoard} userId={userId} />
+            )}
+          </SectionCard>
+
           <SectionCard icon={<StarSvg />} title={t.gamesHub.tabMine}>
             {!userId ? (
               <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">
@@ -434,14 +442,6 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
                   </div>
                 ))}
               </div>
-            )}
-          </SectionCard>
-
-          <SectionCard icon={<GlobeSvg />} title={t.gamesHub.tabGlobal}>
-            {!globalBoard?.length ? (
-              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noScores}</p>
-            ) : (
-              <LeaderboardRows entries={globalBoard} userId={userId} />
             )}
           </SectionCard>
         </div>

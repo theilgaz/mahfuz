@@ -135,7 +135,7 @@ function AppHeader() {
   const currentSurahId = surahSlugMatch ? (surahIdFromSlug(surahSlugMatch[1]) ?? 1) : 1;
   const currentAyahCount = surahsForJump.find((s) => s.id === currentSurahId)?.ayahCount ?? 286;
 
-  const lastPosition = useReadingStore.getState().lastPosition;
+  const lastPosition = useReadingStore((s) => s.lastPosition);
   const currentPage = pageNumMatch ? parseInt(pageNumMatch[1], 10) : undefined;
 
   // Alifba sub-route tespiti
@@ -153,6 +153,9 @@ function AppHeader() {
     : path.startsWith("/changelog") ? t.changelog.banner
     : isAlifbaGame ? t.alifba.games
     : isAlifbaSubRoute ? t.hub.alifba
+    : path === "/qaida" || path === "/qaida/" ? t.hub.qaida
+    : path.startsWith("/qaida/lesson/") ? t.hub.qaida
+    : path.startsWith("/qaida/exam/") ? t.hub.qaidaExamTitle
     : path === "/games/fill-blank" ? t.gamesHub.fillBlankTitle
     : path === "/games/surah-guess" ? t.gamesHub.surahGuessTitle
     : path === "/games/verse-chain" ? t.gamesHub.verseChainTitle
@@ -172,7 +175,7 @@ function AppHeader() {
     if (!ctx.surahId && lastPosition) ctx.surahId = lastPosition.surahId;
     if (!ctx.pageNumber && lastPosition) ctx.pageNumber = lastPosition.pageNumber;
     return ctx;
-  }, [surahSlugMatch, pageNumMatch]);
+  }, [surahSlugMatch, pageNumMatch, lastPosition]);
 
   return (
     <>

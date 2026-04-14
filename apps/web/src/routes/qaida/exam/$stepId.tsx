@@ -242,14 +242,8 @@ function HarekeExam() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <Link to="/qaida" className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <h1 className="text-sm font-semibold text-[var(--color-text-primary)]">{t.hub.qaidaExamTitle}</h1>
+      {/* Progress */}
+      <div className="flex items-center justify-end mb-4">
         <span className="text-xs font-medium text-[var(--color-text-secondary)] tabular-nums">
           {current + 1} / {TOTAL}
         </span>
