@@ -2,18 +2,32 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { LOCALE_CODES, DEFAULT_LOCALE, type Locale } from "~/locales/registry";
 
+/** Detect best matching locale from browser languages. */
+function detectBrowserLocale(): Locale {
+  if (typeof navigator === "undefined") return DEFAULT_LOCALE;
+  const langs = navigator.languages ?? [navigator.language];
+  for (const lang of langs) {
+    const code = lang.split("-")[0].toLowerCase();
+    if (LOCALE_CODES.includes(code as Locale)) return code as Locale;
+  }
+  return DEFAULT_LOCALE;
+}
+
 interface LocaleState {
   locale: Locale;
+  /** Whether the user has explicitly chosen a locale (first-visit gate). */
+  hasChosenLocale: boolean;
   setLocale: (locale: Locale) => void;
+  confirmLocale: () => void;
 }
 
 export const useLocaleStore = create<LocaleState>()(
   persist(
     (set) => ({
-      // Always start with DEFAULT_LOCALE to match SSR.
-      // Browser detection happens in onRehydrateStorage (client-only).
       locale: DEFAULT_LOCALE,
-      setLocale: (locale) => set({ locale }),
+      hasChosenLocale: false,
+      setLocale: (locale) => set({ locale, hasChosenLocale: true }),
+      confirmLocale: () => set({ hasChosenLocale: true }),
     }),
     {
       name: "mahfuz-core-locale",
@@ -25,13 +39,11 @@ export const useLocaleStore = create<LocaleState>()(
           state.locale = DEFAULT_LOCALE;
         }
 
-        // If still default and no persisted value was stored,
-        // detect from browser (first visit only).
-        // persist middleware sets state before this callback,
-        // so if locale was never saved it stays DEFAULT_LOCALE.
+        // First visit: detect browser language
+        if (!state.hasChosenLocale) {
+          state.locale = detectBrowserLocale();
+        }
       },
-      // skipHydration is not needed — persist will overwrite
-      // DEFAULT_LOCALE with the stored value on client.
     },
   ),
 );

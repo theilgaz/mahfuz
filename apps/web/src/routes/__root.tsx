@@ -22,6 +22,7 @@ import { SurahPicker } from "~/components/reader/SurahPicker";
 import { VerseJumpDialog } from "~/components/reader/VerseJumpDialog";
 import { SmartPlayButton } from "~/components/reader/SmartPlayButton";
 import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
+import { LanguageSelector } from "~/components/LanguageSelector";
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { getSession } from "~/lib/auth-session";
 import { useSyncEngine } from "~/hooks/useSyncEngine";
@@ -426,6 +427,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <AudioBar />
         <RecitationBar />
         <BottomNav />
+        <LanguageSelector />
         <Scripts />
       </body>
     </html>
