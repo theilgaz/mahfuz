@@ -539,6 +539,7 @@ export const en: Messages = {
     clear: "Clear",
     backToList: "Back to List",
     next: "Next →",
+    wrongAttempts: "wrong attempts",
   },
   fillBlankGame: {
     loadingVerse: "Loading verse…",
@@ -567,6 +568,18 @@ export const en: Messages = {
     restart: "Start Again",
     backToGames: "Back to Games",
   },
+  verseChainGame: {
+    startChain: "Start the chain",
+    chainCount: "{count} links",
+    lastWord: "Last word:",
+    whichVerseContinues: "which verse continues?",
+    correctAnswer: "Correct answer",
+    hintQuestion: "Which verse comes after the highlighted last word?",
+    showSurahName: "Show surah name",
+  },
+  surahGuessGame: {
+    questionPrompt: "Which surah does this verse belong to?",
+  },
   surahPicker: {
     subtitle: "Select surah",
     allQuranHint: "Questions will come from the entire Quran",
@@ -579,7 +592,7 @@ export const en: Messages = {
     presetNamaz: "Prayer Surahs",
     presetDuhaToNas: "Duha → Nas",
     presetAmme: "Amma Juz",
-    presetTabaraka: "Tabaraka",
+    presetTabaraka: "Tabaraka Juz",
     searchPlaceholder: "Search surah...",
     loading: "Loading...",
     startAll: "Start from All Quran",

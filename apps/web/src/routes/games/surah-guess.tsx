@@ -152,13 +152,6 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     timer.reset();
   };
 
-  // Auto-advance on correct after 2s
-  useEffect(() => {
-    if (gameState !== "correct") return;
-    const t = setTimeout(nextRound, 2000);
-    return () => clearTimeout(t);
-  }, [gameState]); // eslint-disable-line react-hooks/exhaustive-deps
-
   if (showGameOver) {
     return (
       <GameOverCard
@@ -207,8 +200,8 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
           className="px-5 py-5 rounded-2xl border bg-[var(--color-surface)] mb-5 game-slide-up"
           style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
         >
-          <p className="text-xs text-[var(--color-text-secondary)] mb-3 text-center">Bu ayet hangi sureye ait?</p>
-          <p className="text-xl text-right leading-loose text-[var(--color-text-primary)]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
+          <p className="text-xs text-[var(--color-text-secondary)] mb-3 text-center">{t.surahGuessGame.questionPrompt}</p>
+          <p className="text-[2.5rem] text-right leading-[2.6] text-[var(--color-text-primary)]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
             {question.verseText}
           </p>
         </div>
@@ -250,22 +243,31 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
                 style={{ backgroundColor: bgColor, borderColor, color: textColor }}
               >
                 <p className="text-sm font-medium">{getSurahName(opt.id, locale) || opt.name}</p>
-                <p className="text-base mt-0.5" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{opt.arabic}</p>
+                <p className="text-xl mt-0.5" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{opt.arabic}</p>
               </button>
             );
           })}
         </div>
 
         {gameState === "correct" && (
-          <div
-            className="px-4 py-3 rounded-xl text-center border game-slide-up"
-            style={{ backgroundColor: `${P}10`, borderColor: `${P}30`, boxShadow: `0 2px 12px ${THEME.glow}` }}
-          >
-            <p className="text-sm font-semibold flex items-center justify-center gap-2" style={{ color: P }}>
-              <span className="game-star-spin">{"\u2713"}</span>
-              {t.fillBlankGame.correct} {lastDelta !== null && formatDelta(lastDelta)}
-            </p>
-          </div>
+          <>
+            <div
+              className="px-4 py-3 rounded-xl text-center border mb-3 game-slide-up"
+              style={{ backgroundColor: `${P}10`, borderColor: `${P}30`, boxShadow: `0 2px 12px ${THEME.glow}` }}
+            >
+              <p className="text-sm font-semibold flex items-center justify-center gap-2" style={{ color: P }}>
+                <span className="game-star-spin">{"\u2713"}</span>
+                {t.fillBlankGame.correct} {lastDelta !== null && formatDelta(lastDelta)}
+              </p>
+            </div>
+            <button
+              onClick={nextRound}
+              className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
+            >
+              {t.fillBlankGame.next}
+            </button>
+          </>
         )}
 
         {gameState === "wrong" && (

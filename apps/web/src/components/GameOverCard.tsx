@@ -49,9 +49,9 @@ export function GameOverCard({
 
       {/* Stats row */}
       <div className="flex justify-center gap-3 mb-6">
-        <StatBox label={t.gameScoring.correctCount.replace("{count}", "")} value={String(correctCount)} color="#22c55e" />
-        <StatBox label={t.gameScoring.wrongCount.replace("{count}", "")} value={String(wrongCount)} color="#ef4444" />
-        <StatBox label={t.gameScoring.streakBest.replace("{count}", "")} value={String(bestStreak)} color={P} />
+        <StatBox label={t.gameScoring.correctCount.replace("{count}", "")} value={String(correctCount)} />
+        <StatBox label={t.gameScoring.wrongCount.replace("{count}", "")} value={String(wrongCount)} />
+        <StatBox label={t.gameScoring.streakBest.replace("{count}", "")} value={String(bestStreak)} />
       </div>
 
       {/* Accuracy bar */}
@@ -90,13 +90,10 @@ export function GameOverCard({
   );
 }
 
-function StatBox({ label, value, color }: { label: string; value: string; color: string }) {
+function StatBox({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      className="flex flex-col items-center px-4 py-2.5 rounded-xl min-w-[72px]"
-      style={{ backgroundColor: `${color}12`, border: `1px solid ${color}25` }}
-    >
-      <span className="text-xl font-extrabold tabular-nums" style={{ color }}>{value}</span>
+    <div className="flex-1 flex flex-col items-center py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <span className="text-xl font-extrabold tabular-nums text-[var(--color-text-primary)]">{value}</span>
       <span className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">{label.trim()}</span>
     </div>
   );

@@ -238,7 +238,7 @@ function GameScreen({
           className="rounded-2xl border bg-[var(--color-surface)] mb-5 overflow-hidden game-slide-up"
           style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
         >
-          <div className="px-6 py-6 text-right leading-[2.4] text-[1.35rem]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
+          <div className="px-6 py-8 text-right leading-[2.6] text-[2.5rem]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
             {verse.words.map((w, i) => {
               if (i === verse.blankIndex) {
                 const blankStyle =
@@ -303,17 +303,17 @@ function GameScreen({
                 key={opt}
                 onClick={() => handleSelect(opt)}
                 disabled={isAnswered}
-                className={`game-option-card flex items-center gap-3 ${extraClass}`}
+                className={`game-option-card flex items-center gap-3 py-4 ${extraClass}`}
                 style={{ backgroundColor: bgColor, borderColor, color: textColor }}
               >
                 <span
-                  className="text-[11px] font-bold w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+                  className="text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                   style={{ backgroundColor: labelBg, color: labelColor }}
                 >
                   {OPTION_LABELS[idx]}
                 </span>
                 <span
-                  className="flex-1 text-right text-lg leading-snug"
+                  className="flex-1 text-right text-[2.5rem] leading-relaxed"
                   style={{ fontFamily: "var(--font-arabic)", direction: "rtl" }}
                 >
                   {opt}

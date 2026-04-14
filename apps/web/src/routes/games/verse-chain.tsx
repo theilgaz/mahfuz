@@ -153,14 +153,14 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
           <span className="game-score-badge" style={{ backgroundColor: `${P}25`, color: P }}>
             {score}
           </span>
-          <div className="flex gap-1 items-center">
+          <div className="flex gap-1.5 items-center">
             {Array.from({ length: 3 }, (_, i) => (
               <span
                 key={i}
-                className={`text-sm ${i < lives ? "game-heart-beat" : "opacity-20 grayscale"}`}
-                style={i < lives ? { animationDelay: `${i * 0.15}s` } : {}}
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${i < lives ? "game-heart-beat" : "opacity-20"}`}
+                style={i < lives ? { backgroundColor: `${P}20`, color: P, animationDelay: `${i * 0.15}s` } : { backgroundColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
               >
-                {"\u2764\uFE0F"}
+                {i < lives ? "\u2713" : "\u2717"}
               </span>
             ))}
           </div>
@@ -180,7 +180,7 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
             )}
           </div>
           <span className="text-xs text-[var(--color-text-secondary)] font-medium">
-            {chainLength === 0 ? "Zinciri baslat" : `${chainLength} halka`}
+            {chainLength === 0 ? t.verseChainGame.startChain : t.verseChainGame.chainCount.replace("{count}", String(chainLength))}
           </span>
           {streak >= 2 && (
             <span className="game-streak-fire ml-auto" style={{ color: P, backgroundColor: `${P}20`, ["--glow-color" as string]: THEME.glow }}>
@@ -197,7 +197,7 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
           <p className="text-xs text-[var(--color-text-secondary)] mb-2">
             {currentVerse.surahName} &middot; {currentVerse.verseKey.split(":")[1]}. Ayet
           </p>
-          <p className="text-xl text-right leading-loose text-[var(--color-text-primary)] mb-3" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
+          <p className="text-[2.5rem] text-right leading-[2.6] text-[var(--color-text-primary)] mb-3" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
             {restWords}{" "}
             <span
               className="font-medium px-2 py-0.5 rounded-lg game-pulse-glow"
@@ -207,9 +207,9 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
             </span>
           </p>
           <div className="flex items-center gap-2 pt-2 border-t border-[var(--color-border)]">
-            <span className="text-xs text-[var(--color-text-secondary)]">Son kelime:</span>
-            <span className="text-base font-medium" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)", color: P }}>{currentVerse.lastWordArabic}</span>
-            <span className="text-xs text-[var(--color-text-secondary)] ml-auto">devam eden ayet hangisi?</span>
+            <span className="text-xs text-[var(--color-text-secondary)]">{t.verseChainGame.lastWord}</span>
+            <span className="text-xl font-medium" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)", color: P }}>{currentVerse.lastWordArabic}</span>
+            <span className="text-xs text-[var(--color-text-secondary)] ml-auto">{t.verseChainGame.whichVerseContinues}</span>
           </div>
         </div>
 
@@ -252,7 +252,7 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
                     <button
                       onClick={(e) => { e.stopPropagation(); setRevealedSurahs((prev) => new Set(prev).add(idx)); }}
                       className="text-xs px-2 py-0.5 rounded bg-[var(--color-border)] text-transparent select-none hover:opacity-70 transition-opacity"
-                      aria-label="Sure adini goster"
+                      aria-label={t.verseChainGame.showSurahName}
                       style={{ filter: "blur(3px)" }}
                     >
                       {opt.surahName}
@@ -270,11 +270,11 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
                   )}
                   {state !== "playing" && opt.isCorrect && selected !== idx && (
                     <span className="inline-flex items-center gap-1 text-xs font-medium" style={{ color: P }}>
-                      &#10003; Dogru cevap
+                      &#10003; {t.verseChainGame.correctAnswer}
                     </span>
                   )}
                 </div>
-                <p className="text-base text-right leading-loose text-[var(--color-text-primary)]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
+                <p className="text-[2.5rem] text-right leading-[2.6] text-[var(--color-text-primary)]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
                   {opt.firstWords}
                 </p>
               </button>
@@ -284,7 +284,7 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
 
         {state === "playing" && (
           <p className="text-center text-xs text-[var(--color-text-secondary)]">
-            Vurgulanan son kelimeden sonra hangi ayet gelir?
+            {t.verseChainGame.hintQuestion}
           </p>
         )}
       </div>

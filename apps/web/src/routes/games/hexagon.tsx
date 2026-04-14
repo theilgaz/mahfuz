@@ -157,7 +157,7 @@ function WordGame({
         style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
       >
         {puzzle.ayahBefore && (
-          <span className="text-xl text-[var(--color-text-primary)]" style={{ fontFamily: "var(--font-arabic)" }}>{puzzle.ayahBefore}{" "}</span>
+          <span className="text-[2rem] text-[var(--color-text-primary)]" style={{ fontFamily: "var(--font-arabic)" }}>{puzzle.ayahBefore}{" "}</span>
         )}
         <span className="inline-flex flex-row-reverse gap-1.5 items-center align-middle mx-1">
           {letters.map((_, i) => (
@@ -169,7 +169,7 @@ function WordGame({
           ))}
         </span>
         {puzzle.ayahAfter && (
-          <span className="text-xl text-[var(--color-text-primary)]" style={{ fontFamily: "var(--font-arabic)" }}>{" "}{puzzle.ayahAfter}</span>
+          <span className="text-[2rem] text-[var(--color-text-primary)]" style={{ fontFamily: "var(--font-arabic)" }}>{" "}{puzzle.ayahAfter}</span>
         )}
       </div>
 
@@ -183,7 +183,7 @@ function WordGame({
               key={i}
               onClick={() => letter && handleSlotClick(i)}
               disabled={!letter || isSuccess}
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-medium transition-all duration-200"
+              className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl font-medium transition-all duration-200"
               dir="rtl" lang="ar"
               style={{
                 fontFamily: "var(--font-arabic)",
@@ -213,7 +213,7 @@ function WordGame({
           <p className="text-3xl my-2 leading-loose" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)", color: P }}>{puzzle.targetWord}</p>
           <p className="text-xs" style={{ color: `${P}cc` }}>{puzzle.meaning}</p>
           {wrongAttempts > 0 && (
-            <p className="text-xs text-[var(--color-text-secondary)] mt-1">{wrongAttempts} yanlis deneme</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-1">{wrongAttempts} {t.hexagonGame.wrongAttempts}</p>
           )}
         </div>
       )}

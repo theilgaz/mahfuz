@@ -11,6 +11,7 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { GameOverCard } from "~/components/GameOverCard";
+
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { GAME_THEMES } from "~/lib/game-themes";
 import {
@@ -250,15 +251,10 @@ function WordMeaningPage() {
     }
   }, [timer.isExpired]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (gameState !== "correct") return;
-    const t = setTimeout(nextRound, 2000);
-    return () => clearTimeout(t);
-  }, [gameState]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const handleSelect = useCallback(
     (opt: string) => {
       if (gameState !== "playing" || timer.isExpired) return;
+      timer.pause();
       setSelected(opt);
       const answerTime = Date.now() - questionStart.current;
 
@@ -297,6 +293,7 @@ function WordMeaningPage() {
 
   const nextRound = () => {
     if (timer.isExpired) { endGame(); return; }
+    timer.start();
     const nextUsed = gameState === "correct" ? new Set([...usedIndices, question.idx]) : usedIndices;
     setQuestion(getRandomQuestion(nextUsed, optionCount));
     setGameState("playing");
@@ -343,20 +340,6 @@ function WordMeaningPage() {
 
   return (
     <div className="max-w-lg mx-auto pb-24 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
-      <GameHeader
-        img={THEME.img} bg={THEME.bg} isDark={THEME.isDark}
-        title={t.wordMeaningGame.title}
-        onBack={() => endGame()}
-        right={
-          <div className="flex items-center gap-2">
-            {streak >= 2 && (
-              <span className="game-streak-fire" style={{ color: P, backgroundColor: `${P}20`, ["--glow-color" as string]: THEME.glow }}>
-                {streak}x
-              </span>
-            )}
-          </div>
-        }
-      />
       <div className="px-4 pt-2">
         <GameScoreBar
           theme={THEME}
@@ -424,22 +407,31 @@ function WordMeaningPage() {
         </div>
 
         {gameState === "correct" && (
-          <div
-            className="px-4 py-3 rounded-xl text-center border game-slide-up"
-            style={{ backgroundColor: `${P}10`, borderColor: `${P}30`, boxShadow: `0 2px 12px ${THEME.glow}` }}
-          >
-            <p className="text-sm font-semibold flex items-center justify-center gap-2" style={{ color: P }}>
-              <span className="game-star-spin">{"\u{2B50}"}</span>
-              {t.fillBlankGame.correct} {lastDelta !== null && formatDelta(lastDelta)}
-            </p>
-          </div>
+          <>
+            <div
+              className="px-4 py-3 rounded-xl text-center border mb-3 game-slide-up"
+              style={{ backgroundColor: `${P}10`, borderColor: `${P}30`, boxShadow: `0 2px 12px ${THEME.glow}` }}
+            >
+              <p className="text-sm font-semibold flex items-center justify-center gap-2" style={{ color: P }}>
+                <span className="game-star-spin">{"\u2713"}</span>
+                {t.fillBlankGame.correct} {lastDelta !== null && formatDelta(lastDelta)}
+              </p>
+            </div>
+            <button
+              onClick={nextRound}
+              className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
+            >
+              {t.wordMeaningGame.nextQuestion}
+            </button>
+          </>
         )}
 
         {gameState === "wrong" && (
           <>
             <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3 game-slide-up">
               <p className="text-sm font-semibold text-red-600 flex items-center justify-center gap-2">
-                <span>{"\u{1F614}"}</span>
+                <span>{"\u2717"}</span>
                 {t.wordMeaningGame.wrong.replace("{word}", question.meaning)} {lastDelta !== null && formatDelta(lastDelta)}
               </p>
             </div>

@@ -564,6 +564,7 @@ export const tr = {
     clear: "Temizle",
     backToList: "Listeye Dön",
     next: "Sonraki →",
+    wrongAttempts: "yanlış deneme",
   },
   fillBlankGame: {
     loadingVerse: "Ayet yükleniyor…",
@@ -592,6 +593,18 @@ export const tr = {
     restart: "Yeniden Başla",
     backToGames: "Oyunlara dön",
   },
+  verseChainGame: {
+    startChain: "Zinciri başlat",
+    chainCount: "{count} halka",
+    lastWord: "Son kelime:",
+    whichVerseContinues: "devam eden ayet hangisi?",
+    correctAnswer: "Doğru cevap",
+    hintQuestion: "Vurgulanan son kelimeden sonra hangi ayet gelir?",
+    showSurahName: "Sure adını göster",
+  },
+  surahGuessGame: {
+    questionPrompt: "Bu ayet hangi sureye ait?",
+  },
   surahPicker: {
     subtitle: "Sure seç",
     allQuranHint: "Tüm Kuran'dan sorular gelir",
@@ -604,7 +617,7 @@ export const tr = {
     presetNamaz: "Namaz Sureleri",
     presetDuhaToNas: "Duha → Nas",
     presetAmme: "Amme Cüzü",
-    presetTabaraka: "Tebareke",
+    presetTabaraka: "Tebareke Cüzü",
     searchPlaceholder: "Sure ara...",
     loading: "Yükleniyor...",
     startAll: "Tüm Kuran'dan Başla",
