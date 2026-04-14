@@ -8,6 +8,7 @@ import { useAlifbaStore, computeAlifbaStats } from "~/stores/alifba.store";
 import { useQaidaStore } from "~/stores/qaida.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useEffect } from "react";
+import { getFirstIncompleteLessonForStep, getStageForStep } from "~/lib/qaida-helpers";
 
 export const Route = createFileRoute("/qaida/")({
   component: QaidaPage,
@@ -36,6 +37,23 @@ const STEPS: StepDef[] = [
   { id: 10, titleKey: "qaidaStep10", subtitleKey: "qaidaStep10Desc", icon: "\u062A\u064E\u062C\u0652\u0648\u0650\u064A\u062F", link: "/tajweed", examLink: null },
 ];
 
+/** Adim icin dinamik ders linki hesapla */
+function getLessonLinkForStep(stepId: number, completedLessons: Set<string>): string | null {
+  // Step 1 -> /alifba, Step 10 -> /tajweed (sabit linkler)
+  if (stepId === 1 || stepId === 10) return null;
+  const lessonId = getFirstIncompleteLessonForStep(stepId, completedLessons);
+  return lessonId ? `/qaida/lesson/${lessonId}` : null;
+}
+
+/** Adim icin ders ilerleme sayisi */
+function getStepLessonProgress(stepId: number, completedLessons: Set<string>): { done: number; total: number } | null {
+  if (stepId === 1 || stepId === 10) return null;
+  const stage = getStageForStep(stepId);
+  if (!stage) return null;
+  const done = stage.lessons.filter((l) => completedLessons.has(l.id)).length;
+  return { done, total: stage.lessons.length };
+}
+
 type StepStatus = "completed" | "available" | "locked";
 
 function useStepStatuses(): StepStatus[] {
@@ -63,7 +81,9 @@ function useStepStatuses(): StepStatus[] {
   });
 }
 
-function StepCard({ step, status, t }: { step: StepDef; status: StepStatus; t: ReturnType<typeof useTranslation>["t"] }) {
+function StepCard({ step, status, completedLessons, t }: { step: StepDef; status: StepStatus; completedLessons: Set<string>; t: ReturnType<typeof useTranslation>["t"] }) {
+  const lessonLink = getLessonLinkForStep(step.id, completedLessons);
+  const progress = getStepLessonProgress(step.id, completedLessons);
   const rowClass =
     status === "completed"
       ? "border-b-[var(--color-accent)]"
@@ -101,7 +121,7 @@ function StepCard({ step, status, t }: { step: StepDef; status: StepStatus; t: R
               ? "text-[var(--color-text-primary)]"
               : "text-[var(--color-text-secondary)]/60"
         }`}>
-          {(t.hub as Record<string, string>)[step.titleKey]}
+          {(t.hub as unknown as Record<string, string>)[step.titleKey]}
           {step.isMilestone && (
             <span className="ml-2 inline-flex items-center gap-0.5 text-[10px] text-[var(--color-accent)] font-bold">
               <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21l1.9-5.7a8.5 8.5 0 113.8 3.8L3 21z"/></svg>
@@ -113,7 +133,14 @@ function StepCard({ step, status, t }: { step: StepDef; status: StepStatus; t: R
           status === "completed"
             ? "text-[var(--color-accent)]/70"
             : "text-[var(--color-text-secondary)]"
-        }`}>{(t.hub as Record<string, string>)[step.subtitleKey]}</p>
+        }`}>
+          {(t.hub as unknown as Record<string, string>)[step.subtitleKey]}
+          {progress && progress.total > 0 && (
+            <span className="ml-1.5 text-[var(--color-accent)] font-medium">
+              ({progress.done}/{progress.total})
+            </span>
+          )}
+        </p>
       </div>
 
       {/* Arapca ornek */}
@@ -140,8 +167,11 @@ function StepCard({ step, status, t }: { step: StepDef; status: StepStatus; t: R
     </div>
   );
 
-  // Completed veya available: link varsa ders sayfasina, yoksa sinava yonlendir
+  // Completed veya available: dinamik ders linki -> sabit link -> sinav linki
   if (status === "completed" || status === "available") {
+    if (lessonLink) {
+      return <Link to={lessonLink as string}>{content}</Link>;
+    }
     if (step.link) {
       return <Link to={step.link as "/alifba"}>{content}</Link>;
     }
@@ -157,6 +187,8 @@ function QaidaPage() {
   const { t } = useTranslation();
   const statuses = useStepStatuses();
   const completedCount = statuses.filter((s) => s === "completed").length;
+  const lessonProgress = useQaidaStore((s) => s.lessonProgress);
+  const completedLessons = new Set(Object.keys(lessonProgress));
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
@@ -184,7 +216,7 @@ function QaidaPage() {
       {/* Adimlar */}
       <div className="flex flex-col">
         {STEPS.map((step, i) => (
-          <StepCard key={step.id} step={step} status={statuses[i]} t={t} />
+          <StepCard key={step.id} step={step} status={statuses[i]} completedLessons={completedLessons} t={t} />
         ))}
       </div>
 

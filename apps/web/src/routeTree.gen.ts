@@ -44,6 +44,7 @@ import { Route as AlifbaExamRouteImport } from './routes/alifba/exam'
 import { Route as AlifbaLetterIdRouteImport } from './routes/alifba/$letterId'
 import { Route as ContextDisabledRouteImport } from './routes/_context.disabled'
 import { Route as AlifbaGamesIndexRouteImport } from './routes/alifba/games/index'
+import { Route as QaidaLessonLessonIdRouteImport } from './routes/qaida/lesson/$lessonId'
 import { Route as QaidaExamStepIdRouteImport } from './routes/qaida/exam/$stepId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AlifbaQuizVoiceRouteImport } from './routes/alifba/quiz/voice'
@@ -228,6 +229,11 @@ const AlifbaGamesIndexRoute = AlifbaGamesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AlifbaGamesRoute,
 } as any)
+const QaidaLessonLessonIdRoute = QaidaLessonLessonIdRouteImport.update({
+  id: '/qaida/lesson/$lessonId',
+  path: '/qaida/lesson/$lessonId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QaidaExamStepIdRoute = QaidaExamStepIdRouteImport.update({
   id: '/qaida/exam/$stepId',
   path: '/qaida/exam/$stepId',
@@ -312,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
+  '/qaida/lesson/$lessonId': typeof QaidaLessonLessonIdRoute
   '/alifba/games/': typeof AlifbaGamesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -355,6 +362,7 @@ export interface FileRoutesByTo {
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
+  '/qaida/lesson/$lessonId': typeof QaidaLessonLessonIdRoute
   '/alifba/games': typeof AlifbaGamesIndexRoute
 }
 export interface FileRoutesById {
@@ -401,6 +409,7 @@ export interface FileRoutesById {
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
+  '/qaida/lesson/$lessonId': typeof QaidaLessonLessonIdRoute
   '/alifba/games/': typeof AlifbaGamesIndexRoute
 }
 export interface FileRouteTypes {
@@ -448,6 +457,7 @@ export interface FileRouteTypes {
     | '/alifba/quiz/voice'
     | '/api/auth/$'
     | '/qaida/exam/$stepId'
+    | '/qaida/lesson/$lessonId'
     | '/alifba/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -491,6 +501,7 @@ export interface FileRouteTypes {
     | '/alifba/quiz/voice'
     | '/api/auth/$'
     | '/qaida/exam/$stepId'
+    | '/qaida/lesson/$lessonId'
     | '/alifba/games'
   id:
     | '__root__'
@@ -536,6 +547,7 @@ export interface FileRouteTypes {
     | '/alifba/quiz/voice'
     | '/api/auth/$'
     | '/qaida/exam/$stepId'
+    | '/qaida/lesson/$lessonId'
     | '/alifba/games/'
   fileRoutesById: FileRoutesById
 }
@@ -572,6 +584,7 @@ export interface RootRouteChildren {
   AlifbaQuizVoiceRoute: typeof AlifbaQuizVoiceRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   QaidaExamStepIdRoute: typeof QaidaExamStepIdRoute
+  QaidaLessonLessonIdRoute: typeof QaidaLessonLessonIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -821,6 +834,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlifbaGamesIndexRouteImport
       parentRoute: typeof AlifbaGamesRoute
     }
+    '/qaida/lesson/$lessonId': {
+      id: '/qaida/lesson/$lessonId'
+      path: '/qaida/lesson/$lessonId'
+      fullPath: '/qaida/lesson/$lessonId'
+      preLoaderRoute: typeof QaidaLessonLessonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/qaida/exam/$stepId': {
       id: '/qaida/exam/$stepId'
       path: '/qaida/exam/$stepId'
@@ -953,6 +973,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlifbaQuizVoiceRoute: AlifbaQuizVoiceRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   QaidaExamStepIdRoute: QaidaExamStepIdRoute,
+  QaidaLessonLessonIdRoute: QaidaLessonLessonIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
