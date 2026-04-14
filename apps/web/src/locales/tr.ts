@@ -659,9 +659,9 @@ export const tr = {
     surahGuessTitle: "Sure Tanıma",
     surahGuessDesc: "Tilaveti duyunca sureyi tahmin et",
     wordMeaningTitle: "Kelime Anlamı",
-    wordMeaningDesc: "Arapca kelime → Turkce anlam",
-    hexagonTitle: "Hexagon Harf",
-    hexagonDesc: "Bal peteğinde harflerden kelime oluştur",
+    wordMeaningDesc: "Arapça kelime → Türkçe anlam",
+    hexagonTitle: "Kelime Dizme",
+    hexagonDesc: "Karisik harflerden kelimeyi dogru siraya diz",
     // Elifba game titles & descriptions
     voiceQuizTitle: "Sesli Tanıma",
     voiceQuizDesc: "Sesi dinle, doğru harfi seç",
