@@ -1,7 +1,7 @@
 /**
  * Sure Tanima -- ayet metni gorunce sureyi tahmin et.
- * 10 round, zorluk secimi, zaman bonusu, yanlis cezasi.
- * Themed: sage green, ear/sound waves motif.
+ * 2 dakika sayac (zorluk carpanina gore erime hizi degisir).
+ * Sik sayisi zorluga gore: Kolay 3, Orta 4, Zor 5, Hafiz 6.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -11,12 +11,14 @@ import { getVerseGuessQuestion } from "~/lib/game-service";
 import { submitScore } from "~/lib/score-service";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { useTranslation } from "~/hooks/useTranslation";
-import { GameHeader } from "~/components/GameHeader";
+import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { GameOverCard } from "~/components/GameOverCard";
 import { GAME_THEMES } from "~/lib/game-themes";
+import { getSurahName } from "~/lib/surah-names-i18n";
+import { useLocaleStore } from "~/stores/locale.store";
 import {
-  TOTAL_ROUNDS,
+  OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,
   formatDelta,
@@ -35,6 +37,8 @@ type Screen = "setup" | "game";
 
 function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; difficulty: Difficulty; onSetup: () => void }) {
   const { t } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
+  const timer = useGameTimer(difficulty);
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
   const [streak, setStreak] = useState(0);
@@ -51,6 +55,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
   const [gameState, setGameState] = useState<GameState>("playing");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const usedAyahIdsRef = useRef<number[]>([]);
+  const optionCount = OPTION_COUNT[difficulty];
 
   const {
     data: question,
@@ -60,11 +65,19 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     queryKey: ["surah-guess", refreshKey, surahIds],
     queryFn: () =>
       getVerseGuessQuestion({
-        data: { surahIds, excludeAyahIds: usedAyahIdsRef.current },
+        data: { surahIds, excludeAyahIds: usedAyahIdsRef.current, optionCount },
       }),
-    staleTime: Infinity,
+    staleTime: 0,
+    gcTime: 0,
     retry: 1,
   });
+
+  // Start timer when first question loads
+  useEffect(() => {
+    if (!isLoading && question && round === 1 && !timer.isExpired) {
+      timer.start();
+    }
+  }, [isLoading, question]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isLoading && question) {
@@ -73,9 +86,16 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     }
   }, [isLoading, question]);
 
+  // Timer expired -> end game
+  useEffect(() => {
+    if (timer.isExpired && !showGameOver) {
+      endGame();
+    }
+  }, [timer.isExpired]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSelect = useCallback(
     (surahId: number) => {
-      if (gameState !== "playing" || !question) return;
+      if (gameState !== "playing" || !question || timer.isExpired) return;
       setSelectedId(surahId);
       const answerTime = Date.now() - questionStart.current;
 
@@ -97,10 +117,11 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
         setGameState("wrong");
       }
     },
-    [gameState, question, streak, difficulty],
+    [gameState, question, streak, difficulty, timer.isExpired],
   );
 
   const endGame = useCallback(() => {
+    timer.pause();
     if (!submittedRef.current && score > 0) {
       submittedRef.current = true;
       submitScore({ data: { gameId: "surah-guess", score, durationMs: Date.now() - sessionStart.current, difficulty } })
@@ -108,10 +129,10 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
         .catch(() => {});
     }
     setShowGameOver(true);
-  }, [score, difficulty]);
+  }, [score, difficulty, timer]);
 
   const nextRound = () => {
-    if (round >= TOTAL_ROUNDS) { endGame(); return; }
+    if (timer.isExpired) { endGame(); return; }
     setGameState("playing");
     setSelectedId(null);
     setLastDelta(null);
@@ -126,13 +147,14 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     usedAyahIdsRef.current = [];
     sessionStart.current = Date.now(); setGameState("playing");
     setSelectedId(null); setRefreshKey((k) => k + 1); setShowGameOver(false);
+    timer.reset();
   };
 
   // Auto-advance on correct after 2s
   useEffect(() => {
     if (gameState !== "correct") return;
-    const timer = setTimeout(nextRound, 2000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(nextRound, 2000);
+    return () => clearTimeout(t);
   }, [gameState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (showGameOver) {
@@ -167,22 +189,16 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
 
   return (
     <div className="max-w-lg mx-auto pb-24 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
-      <GameHeader
-        img={THEME.img} bg={THEME.bg} isDark={THEME.isDark}
-        title={t.gamesHub.surahGuessTitle}
-        onBack={() => endGame()}
-        right={
-          <div className="flex items-center gap-2">
-            {streak >= 2 && (
-              <span className="game-streak-fire" style={{ color: P, backgroundColor: `${P}20`, ["--glow-color" as string]: THEME.glow }}>
-                {streak}x
-              </span>
-            )}
-          </div>
-        }
-      />
       <div className="px-4 pt-2">
-        <GameScoreBar theme={THEME} round={round} score={score} streak={streak} lastDelta={lastDelta} />
+        <GameScoreBar
+          theme={THEME}
+          timerDisplay={timer.display}
+          timerProgress={timer.progress}
+          score={score}
+          streak={streak}
+          lastDelta={lastDelta}
+          round={round}
+        />
 
         {/* Verse card */}
         <div
@@ -231,7 +247,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
                 className={`game-option-card text-left ${extraClass}`}
                 style={{ backgroundColor: bgColor, borderColor, color: textColor }}
               >
-                <p className="text-sm font-medium">{opt.name}</p>
+                <p className="text-sm font-medium">{getSurahName(opt.id, locale) || opt.name}</p>
                 <p className="text-base mt-0.5" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{opt.arabic}</p>
               </button>
             );
@@ -255,7 +271,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
             <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3 game-slide-up">
               <p className="text-sm font-semibold text-red-600 flex items-center justify-center gap-2">
                 <span>{"\u2717"}</span>
-                {t.fillBlankGame.wrong} {lastDelta !== null && formatDelta(lastDelta)} &middot; {question.correctSurahName}
+                {t.fillBlankGame.wrong} {lastDelta !== null && formatDelta(lastDelta)} &middot; {getSurahName(question.correctSurahId, locale) || question.correctSurahName}
               </p>
             </div>
             <button
@@ -263,7 +279,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
               className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
-              {round >= TOTAL_ROUNDS ? t.gameScoring.gameOver : t.fillBlankGame.next}
+              {t.fillBlankGame.next}
             </button>
           </>
         )}
@@ -281,7 +297,7 @@ function SurahGuessGame() {
   if (screen === "setup") {
     return (
       <SurahPickerScreen
-        gameTitle={t.gamesHub.surahGuessTitle}
+        gameImg={THEME.img}
         onStart={(ids, _vf, diff) => {
           setSurahIds(ids);
           setDifficulty(diff ?? "medium");

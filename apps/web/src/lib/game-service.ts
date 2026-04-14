@@ -15,9 +15,11 @@ export const getRandomVerseForGame = createServerFn({ method: "GET" })
       surahIds?: number[];
       verseFilter?: VerseFilter;
       excludeAyahIds?: number[];
+      optionCount?: number;
     }) => input,
   )
   .handler(async ({ data }) => {
+    const numOptions = data.optionCount ?? 4;
     // Ayet bazında filtre (ezber modu) varsa öncelikli olarak kullan
     const conditions: ReturnType<typeof sql>[] = [];
 
@@ -69,11 +71,11 @@ export const getRandomVerseForGame = createServerFn({ method: "GET" })
       const blankIndex = Math.floor(Math.random() * (words.length - 2)) + 1;
       const correctWord = words[blankIndex];
 
-      // Seçenekler: doğru kelime + aynı ayetten 3 farklı kelime
+      // Seçenekler: doğru kelime + ayetten (numOptions-1) farklı kelime
       const distractors = words
         .filter((_, i) => i !== blankIndex)
         .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
+        .slice(0, numOptions - 1);
 
       const options = [...distractors, correctWord].sort(
         () => Math.random() - 0.5,
@@ -95,9 +97,10 @@ export const getRandomVerseForGame = createServerFn({ method: "GET" })
 
 export const getVerseGuessQuestion = createServerFn({ method: "GET" })
   .inputValidator(
-    (input: { surahIds?: number[]; excludeAyahIds?: number[] }) => input,
+    (input: { surahIds?: number[]; excludeAyahIds?: number[]; optionCount?: number }) => input,
   )
   .handler(async ({ data }) => {
+    const numOptions = data.optionCount ?? 4;
     const conditions: ReturnType<typeof sql>[] = [
       sql`length(${ayahs.textUthmani}) BETWEEN 30 AND 100`,
     ];
@@ -128,12 +131,18 @@ export const getVerseGuessQuestion = createServerFn({ method: "GET" })
       .from(surahs)
       .where(eq(surahs.id, ayah.surahId));
 
+    const wrongConditions = [sql`${surahs.id} != ${ayah.surahId}`];
+    if (data.surahIds && data.surahIds.length > 0) {
+      wrongConditions.push(
+        inArray(surahs.id, data.surahIds) as ReturnType<typeof sql>,
+      );
+    }
     const wrongSurahs = await db
       .select()
       .from(surahs)
-      .where(sql`${surahs.id} != ${ayah.surahId}`)
+      .where(and(...wrongConditions))
       .orderBy(sql`RANDOM()`)
-      .limit(3);
+      .limit(numOptions - 1);
 
     const options = [...wrongSurahs, correctSurah].sort(() => Math.random() - 0.5);
 

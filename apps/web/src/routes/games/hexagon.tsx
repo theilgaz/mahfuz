@@ -1,14 +1,12 @@
 /**
  * Kelime Dizme -- Ayetteki bos kelimeyi karisik harflerden siraya tiklayarak tamamla.
  * Bulmaca bazli zorluk, zaman bonusu, yanlis cezasi.
- * Themed: dark green hexagonal grid, golden path.
  */
 
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
 import { useTranslation } from "~/hooks/useTranslation";
-import { GameHeader } from "~/components/GameHeader";
 import { GAME_THEMES } from "~/lib/game-themes";
 import {
   calcCorrectPoints,
@@ -144,19 +142,13 @@ function WordGame({
       className={`max-w-md mx-auto pb-24 flex flex-col items-center game-bg${shake ? " game-shake" : ""}`}
       style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}
     >
-      <GameHeader
-        img={THEME.img} bg={THEME.bg} isDark={THEME.isDark}
-        title={t.hexagonGame.title}
-        onBack={onBack}
-        right={
-          <div className="flex items-center gap-2">
-            <span className="game-score-badge" style={{ backgroundColor: `${P}25`, color: P }}>
-              {totalScore}
-            </span>
-            <span className="text-xs opacity-80" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{puzzle.label}</span>
-          </div>
-        }
-      />
+      {/* Score and puzzle label */}
+      <div className="flex items-center justify-between px-5 pt-3 mb-3">
+        <span className="game-score-badge" style={{ backgroundColor: `${P}25`, color: P }}>
+          {totalScore}
+        </span>
+        <span className="text-xs opacity-80" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{puzzle.label}</span>
+      </div>
 
       {/* Verse context */}
       <div
@@ -215,7 +207,7 @@ function WordGame({
           style={{ backgroundColor: `${P}12`, borderColor: `${P}40`, boxShadow: `0 4px 20px ${THEME.glow}` }}
         >
           <p className="font-bold text-sm flex items-center justify-center gap-2" style={{ color: P }}>
-            <span className="game-star-spin">{"\u{2B50}"}</span>
+            <span className="game-star-spin">{"\u2713"}</span>
             {t.hexagonGame.correct} {lastDelta !== null && formatDelta(lastDelta)}
           </p>
           <p className="text-3xl my-2 leading-loose" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)", color: P }}>{puzzle.targetWord}</p>
@@ -297,11 +289,6 @@ function PuzzleSelect({ onSelect }: { onSelect: (p: WordPuzzle, idx: number) => 
   const { t } = useTranslation();
   return (
     <div className="max-w-md mx-auto pb-24 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
-      <GameHeader
-        img={THEME.img} bg={THEME.bg} isDark={THEME.isDark}
-        title={t.hexagonGame.title}
-        onBack={() => window.history.back()}
-      />
       <div className="px-4 pt-2 mb-4">
         <p className="text-sm text-[var(--color-text-secondary)]">{t.hexagonGame.listSubtitle}</p>
       </div>
@@ -362,6 +349,7 @@ function HexagonPage() {
 
   return (
     <WordGame
+      key={active.idx}
       puzzle={active.puzzle}
       onBack={() => setActive(null)}
       onNext={nextPuzzle ? () => setActive({ puzzle: nextPuzzle, idx: active.idx + 1 }) : undefined}

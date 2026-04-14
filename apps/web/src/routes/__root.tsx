@@ -153,6 +153,12 @@ function AppHeader() {
     : path.startsWith("/changelog") ? t.changelog.banner
     : isAlifbaGame ? t.alifba.games
     : isAlifbaSubRoute ? t.hub.alifba
+    : path === "/games/fill-blank" ? t.gamesHub.fillBlankTitle
+    : path === "/games/surah-guess" ? t.gamesHub.surahGuessTitle
+    : path === "/games/verse-chain" ? t.gamesHub.verseChainTitle
+    : path === "/games/word-meaning" ? t.wordMeaningGame.title
+    : path === "/games/hexagon" ? t.hexagonGame.title
+    : path === "/games" || path === "/games/" ? t.gamesHub.title
     : null;
 
   const settingsContext = useMemo(() => {
@@ -181,18 +187,21 @@ function AppHeader() {
               <span className="text-sm font-semibold">Mahfuz</span>
             </div>
           ) : (
-            <button
-              onClick={() => {
-                if (window.history.length > 1) window.history.back();
-                else navigate({ to: "/" });
-              }}
-              className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
-              aria-label={t.nav.back}
-            >
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M13 4L7 10L13 16" />
-              </svg>
-            </button>
+            <div className="flex items-center shrink-0">
+              <button
+                onClick={() => {
+                  if (window.history.length > 1) window.history.back();
+                  else navigate({ to: "/" });
+                }}
+                className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
+                aria-label={t.nav.back}
+              >
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M13 4L7 10L13 16" />
+                </svg>
+              </button>
+              <MahfuzLogo size={20} />
+            </div>
           )}
 
           {/* Center: title or reading nav */}
