@@ -63,15 +63,29 @@ function GameScreen({
   const [refreshKey, setRefreshKey] = useState(0);
   const [screen, setScreen] = useState<"game" | "gameover">("game");
   const nextBtnRef = useRef<HTMLButtonElement>(null);
+  const usedAyahIdsRef = useRef<number[]>([]);
 
-  const { data: verse, isLoading } = useQuery({
+  const {
+    data: verse,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["fill-blank-verse", refreshKey, surahIds, verseFilter],
-    queryFn: () => getRandomVerseForGame({ data: { surahIds, verseFilter } }),
-    staleTime: 0,
+    queryFn: () =>
+      getRandomVerseForGame({
+        data: {
+          surahIds,
+          verseFilter,
+          excludeAyahIds: usedAyahIdsRef.current,
+        },
+      }),
+    staleTime: Infinity,
+    retry: 1,
   });
 
   useEffect(() => {
     if (!isLoading && verse) {
+      usedAyahIdsRef.current.push(verse.ayahId);
       setGameState("playing");
       questionStart.current = Date.now();
     }
@@ -131,6 +145,7 @@ function GameScreen({
     setScore(0); setRound(1); setStreak(0); setBestStreak(0);
     setCorrectCount(0); setWrongCount(0); setLastDelta(null);
     setIsNewHighScore(false); submittedRef.current = false;
+    usedAyahIdsRef.current = [];
     sessionStart.current = Date.now(); setSelectedOption(null);
     setGameState("loading"); setRefreshKey((k) => k + 1); setScreen("game");
   };
@@ -155,6 +170,17 @@ function GameScreen({
         bestStreak={bestStreak} isNewHighScore={isNewHighScore} t={t}
         onRestart={handleRestart} onSetup={onSetup}
       />
+    );
+  }
+
+  if (isError || (!isLoading && !verse)) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-10 text-center">
+        <p className="text-[var(--color-text-secondary)] text-sm mb-4">Ayet bulunamadi</p>
+        <button onClick={() => setRefreshKey((k) => k + 1)} className="px-5 py-2 rounded-xl text-sm font-bold text-white" style={{ backgroundColor: P }}>
+          {t.fillBlankGame.next}
+        </button>
+      </div>
     );
   }
 
@@ -296,9 +322,10 @@ function GameScreen({
           >
             <div className="flex items-center gap-3">
               <span
-                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-lg ${gameState === "correct" ? "game-star-spin" : ""}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-base font-bold ${gameState === "correct" ? "game-star-spin" : ""}`}
+                style={gameState === "correct" ? { backgroundColor: `${P}20`, color: P } : { backgroundColor: "#fecaca", color: "#dc2626" }}
               >
-                {gameState === "correct" ? "\u{2B50}" : "\u{1F614}"}
+                {gameState === "correct" ? "\u2713" : "\u2717"}
               </span>
               <div>
                 <p className="text-sm font-bold" style={gameState === "correct" ? { color: P } : { color: "#dc2626" }}>

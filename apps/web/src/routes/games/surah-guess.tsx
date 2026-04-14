@@ -50,15 +50,27 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
   const [refreshKey, setRefreshKey] = useState(0);
   const [gameState, setGameState] = useState<GameState>("playing");
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const usedAyahIdsRef = useRef<number[]>([]);
 
-  const { data: question, isLoading } = useQuery({
+  const {
+    data: question,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["surah-guess", refreshKey, surahIds],
-    queryFn: () => getVerseGuessQuestion({ data: { surahIds } }),
-    staleTime: 0,
+    queryFn: () =>
+      getVerseGuessQuestion({
+        data: { surahIds, excludeAyahIds: usedAyahIdsRef.current },
+      }),
+    staleTime: Infinity,
+    retry: 1,
   });
 
   useEffect(() => {
-    if (!isLoading && question) questionStart.current = Date.now();
+    if (!isLoading && question) {
+      usedAyahIdsRef.current.push(question.ayahId);
+      questionStart.current = Date.now();
+    }
   }, [isLoading, question]);
 
   const handleSelect = useCallback(
@@ -111,6 +123,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     setScore(0); setRound(1); setStreak(0); setBestStreak(0);
     setCorrectCount(0); setWrongCount(0); setLastDelta(null);
     setIsNewHighScore(false); submittedRef.current = false;
+    usedAyahIdsRef.current = [];
     sessionStart.current = Date.now(); setGameState("playing");
     setSelectedId(null); setRefreshKey((k) => k + 1); setShowGameOver(false);
   };
@@ -129,6 +142,17 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
         bestStreak={bestStreak} isNewHighScore={isNewHighScore} t={t}
         onRestart={handleRestart} onSetup={onSetup}
       />
+    );
+  }
+
+  if (isError || (!isLoading && !question)) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-10 text-center">
+        <p className="text-[var(--color-text-secondary)] text-sm mb-4">Ayet bulunamadi</p>
+        <button onClick={() => setRefreshKey((k) => k + 1)} className="px-5 py-2 rounded-xl text-sm font-bold text-white" style={{ backgroundColor: P }}>
+          {t.fillBlankGame.next}
+        </button>
+      </div>
     );
   }
 
@@ -220,7 +244,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
             style={{ backgroundColor: `${P}10`, borderColor: `${P}30`, boxShadow: `0 2px 12px ${THEME.glow}` }}
           >
             <p className="text-sm font-semibold flex items-center justify-center gap-2" style={{ color: P }}>
-              <span className="game-star-spin">{"\u{2B50}"}</span>
+              <span className="game-star-spin">{"\u2713"}</span>
               {t.fillBlankGame.correct} {lastDelta !== null && formatDelta(lastDelta)}
             </p>
           </div>
@@ -230,7 +254,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
           <>
             <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3 game-slide-up">
               <p className="text-sm font-semibold text-red-600 flex items-center justify-center gap-2">
-                <span>{"\u{1F614}"}</span>
+                <span>{"\u2717"}</span>
                 {t.fillBlankGame.wrong} {lastDelta !== null && formatDelta(lastDelta)} &middot; {question.correctSurahName}
               </p>
             </div>
