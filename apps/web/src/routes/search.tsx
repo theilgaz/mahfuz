@@ -54,7 +54,7 @@ const APP_PAGES: AppPage[] = [
   },
   {
     id: "games", label: "Oyunlar",
-    keywords: ["oyun", "quiz", "game", "kelime", "hexagon", "sure", "bilmece", "yarismak"],
+    keywords: ["oyun", "quiz", "game", "kelime", "dizme", "sure", "bilmece", "yarismak"],
     route: "/games", desc: "Kuran oyunlari",
     iconColor: "bg-orange-600 text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" /><path d="M7 10v4M5 12h4" /><path d="M17 10h.01M19 12h.01" /></svg>,

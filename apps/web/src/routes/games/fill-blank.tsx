@@ -1,7 +1,7 @@
 /**
- * Kelime Doldurma -- ayetteki eksik kelimeyi bul (4 secenek).
- * 10 round, zorluk secimi, zaman bonusu, yanlis cezasi.
- * Themed: warm golden/parchment, puzzle-piece motif.
+ * Kelime Doldurma -- ayetteki eksik kelimeyi bul.
+ * 2 dakika sayac (zorluk carpanina gore erime hizi degisir).
+ * Sik sayisi zorluga gore: Kolay 3, Orta 4, Zor 5, Hafiz 6.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -11,12 +11,12 @@ import { getRandomVerseForGame, type VerseFilter } from "~/lib/game-service";
 import { submitScore } from "~/lib/score-service";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { useTranslation } from "~/hooks/useTranslation";
-import { GameHeader } from "~/components/GameHeader";
+import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { GameOverCard } from "~/components/GameOverCard";
 import { GAME_THEMES } from "~/lib/game-themes";
 import {
-  TOTAL_ROUNDS,
+  OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,
   formatDelta,
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/games/fill-blank")({
 const THEME = GAME_THEMES["fill-blank"];
 const P = THEME.primary;
 
-const OPTION_LABELS = ["A", "B", "C", "D"];
+const OPTION_LABELS = ["A", "B", "C", "D", "E", "F"];
 
 type GameState = "playing" | "correct" | "wrong" | "loading";
 type Screen = "setup" | "game" | "gameover";
@@ -47,6 +47,7 @@ function GameScreen({
   onSetup: () => void;
 }) {
   const { t } = useTranslation();
+  const timer = useGameTimer(difficulty);
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
   const [streak, setStreak] = useState(0);
@@ -64,6 +65,7 @@ function GameScreen({
   const [screen, setScreen] = useState<"game" | "gameover">("game");
   const nextBtnRef = useRef<HTMLButtonElement>(null);
   const usedAyahIdsRef = useRef<number[]>([]);
+  const optionCount = OPTION_COUNT[difficulty];
 
   const {
     data: verse,
@@ -77,11 +79,19 @@ function GameScreen({
           surahIds,
           verseFilter,
           excludeAyahIds: usedAyahIdsRef.current,
+          optionCount,
         },
       }),
     staleTime: Infinity,
     retry: 1,
   });
+
+  // Start timer when first question loads
+  useEffect(() => {
+    if (!isLoading && verse && round === 1 && !timer.isExpired) {
+      timer.start();
+    }
+  }, [isLoading, verse]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isLoading && verse) {
@@ -91,16 +101,24 @@ function GameScreen({
     }
   }, [isLoading, verse]);
 
+  // Timer expired -> end game
+  useEffect(() => {
+    if (timer.isExpired && screen === "game") {
+      endGame();
+    }
+  }, [timer.isExpired]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (gameState !== "playing") nextBtnRef.current?.focus();
   }, [gameState]);
 
   const handleSelect = useCallback(
     (option: string) => {
-      if (gameState !== "playing" || !verse) return;
+      if (gameState !== "playing" || !verse || timer.isExpired) return;
       setSelectedOption(option);
       const answerTime = Date.now() - questionStart.current;
 
+      timer.pause();
       if (option === verse.correctWord) {
         const newStreak = streak + 1;
         const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
@@ -119,10 +137,11 @@ function GameScreen({
         setGameState("wrong");
       }
     },
-    [gameState, verse, streak, difficulty],
+    [gameState, verse, streak, difficulty, timer.isExpired],
   );
 
   const endGame = useCallback(() => {
+    timer.pause();
     if (!submittedRef.current && score > 0) {
       submittedRef.current = true;
       submitScore({ data: { gameId: "fill-blank", score, durationMs: Date.now() - sessionStart.current, difficulty } })
@@ -130,10 +149,11 @@ function GameScreen({
         .catch(() => {});
     }
     setScreen("gameover");
-  }, [score, difficulty]);
+  }, [score, difficulty, timer]);
 
   const nextRound = () => {
-    if (round >= TOTAL_ROUNDS) { endGame(); return; }
+    if (timer.isExpired) { endGame(); return; }
+    timer.start();
     setRound((r) => r + 1);
     setSelectedOption(null);
     setLastDelta(null);
@@ -148,6 +168,7 @@ function GameScreen({
     usedAyahIdsRef.current = [];
     sessionStart.current = Date.now(); setSelectedOption(null);
     setGameState("loading"); setRefreshKey((k) => k + 1); setScreen("game");
+    timer.reset();
   };
 
   useEffect(() => {
@@ -155,7 +176,7 @@ function GameScreen({
       if (!verse) return;
       const key = e.key.toLowerCase();
       if (gameState === "playing") {
-        const idx = ["a", "b", "c", "d"].indexOf(key);
+        const idx = ["a", "b", "c", "d", "e", "f"].indexOf(key);
         if (idx !== -1 && verse.options[idx] !== undefined) { e.preventDefault(); handleSelect(verse.options[idx]); }
       } else if (key === "enter" || key === " ") { e.preventDefault(); nextRound(); }
     };
@@ -197,23 +218,16 @@ function GameScreen({
 
   return (
     <div className="max-w-lg mx-auto pb-32 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
-      <GameHeader
-        img={THEME.img} bg={THEME.bg} isDark={THEME.isDark}
-        title={t.gamesHub.fillBlankTitle}
-        onBack={() => endGame()}
-        right={
-          <div className="flex items-center gap-2">
-            {streak >= 2 && (
-              <span className="game-streak-fire" style={{ color: P, backgroundColor: `${P}20`, ["--glow-color" as string]: THEME.glow }}>
-                {streak}x
-              </span>
-            )}
-          </div>
-        }
-      />
-
       <div className="px-4 pt-2">
-        <GameScoreBar theme={THEME} round={round} score={score} streak={streak} lastDelta={lastDelta} />
+        <GameScoreBar
+          theme={THEME}
+          timerDisplay={timer.display}
+          timerProgress={timer.progress}
+          score={score}
+          streak={streak}
+          lastDelta={lastDelta}
+          round={round}
+        />
 
         <p className="text-xs font-medium text-[var(--color-text-secondary)] text-center mb-3">
           {t.fillBlankGame.verseLabel.replace("{surahName}", verse.surahName).replace("{verseNum}", String(verse.verseNum))}
@@ -350,7 +364,7 @@ function GameScreen({
               className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
-              {round >= TOTAL_ROUNDS ? t.gameScoring.gameOver : t.fillBlankGame.next}
+              {t.fillBlankGame.next}
             </button>
           </div>
         )}
@@ -369,7 +383,7 @@ function FillBlankGame() {
   if (screen === "setup") {
     return (
       <SurahPickerScreen
-        gameTitle={t.gamesHub.fillBlankTitle}
+        gameImg={THEME.img}
         onStart={(ids, vf, diff) => {
           setSurahIds(ids);
           setVerseFilter(vf);

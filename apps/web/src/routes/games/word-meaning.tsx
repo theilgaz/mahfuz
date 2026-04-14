@@ -1,20 +1,20 @@
 /**
- * Kelime Anlami -- Arapca kelime -> Turkce anlam (4 secenek).
- * 10 round, zorluk secimi, zaman bonusu, yanlis cezasi.
- * Themed: warm golden/tan, open book motif.
+ * Kelime Anlami -- Arapca kelime -> Turkce anlam.
+ * 2 dakika sayac (zorluk carpanina gore erime hizi degisir).
+ * Sik sayisi zorluga gore: Kolay 3, Orta 4, Zor 5, Hafiz 6.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
 import { useTranslation } from "~/hooks/useTranslation";
-import { GameHeader } from "~/components/GameHeader";
+import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { GameOverCard } from "~/components/GameOverCard";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { GAME_THEMES } from "~/lib/game-themes";
 import {
-  TOTAL_ROUNDS,
+  OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,
   formatDelta,
@@ -189,12 +189,22 @@ function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
-function getRandomQuestion(usedIndices: Set<number>) {
+function getRandomQuestion(usedIndices: Set<number>, optionCount = 4) {
   const available = WORD_PAIRS.map((_, i) => i).filter((i) => !usedIndices.has(i));
   const pool = available.length > 0 ? available : Array.from({ length: WORD_PAIRS.length }, (_, i) => i);
   const idx = pool[Math.floor(Math.random() * pool.length)];
   const pair = WORD_PAIRS[idx];
-  const options = shuffle([pair.meaning, ...pair.wrong]);
+  // Base 3 wrong answers + extra distractors from other pairs for harder difficulties
+  const wrongs = [...pair.wrong];
+  if (optionCount > 4) {
+    const extras = WORD_PAIRS
+      .filter((_, i) => i !== idx)
+      .map((p) => p.meaning)
+      .filter((m) => m !== pair.meaning && !wrongs.includes(m));
+    const shuffledExtras = shuffle(extras);
+    wrongs.push(...shuffledExtras.slice(0, optionCount - 4));
+  }
+  const options = shuffle([pair.meaning, ...wrongs.slice(0, optionCount - 1)]);
   return { ...pair, options, idx };
 }
 
@@ -204,6 +214,8 @@ function WordMeaningPage() {
   const { t } = useTranslation();
   const [screen, setScreen] = useState<"setup" | "game" | "gameover">("setup");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const timer = useGameTimer(difficulty);
+  const optionCount = OPTION_COUNT[difficulty];
 
   // Game state
   const [usedIndices, setUsedIndices] = useState<Set<number>>(new Set());
@@ -215,22 +227,38 @@ function WordMeaningPage() {
   const [wrongCount, setWrongCount] = useState(0);
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
-  const [question, setQuestion] = useState(() => getRandomQuestion(new Set()));
+  const [question, setQuestion] = useState(() => getRandomQuestion(new Set(), optionCount));
   const [gameState, setGameState] = useState<GameState>("playing");
   const [selected, setSelected] = useState<string | null>(null);
   const submittedRef = useRef(false);
   const sessionStart = useRef(Date.now());
   const questionStart = useRef(Date.now());
+  const timerStartedRef = useRef(false);
+
+  // Start timer when game screen is shown
+  useEffect(() => {
+    if (screen === "game" && !timerStartedRef.current && !timer.isExpired) {
+      timer.start();
+      timerStartedRef.current = true;
+    }
+  }, [screen]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Timer expired -> end game
+  useEffect(() => {
+    if (timer.isExpired && screen === "game") {
+      endGame();
+    }
+  }, [timer.isExpired]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (gameState !== "correct") return;
-    const timer = setTimeout(nextRound, 2000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(nextRound, 2000);
+    return () => clearTimeout(t);
   }, [gameState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelect = useCallback(
     (opt: string) => {
-      if (gameState !== "playing") return;
+      if (gameState !== "playing" || timer.isExpired) return;
       setSelected(opt);
       const answerTime = Date.now() - questionStart.current;
 
@@ -253,10 +281,11 @@ function WordMeaningPage() {
         setGameState("wrong");
       }
     },
-    [gameState, question, streak, difficulty],
+    [gameState, question, streak, difficulty, timer.isExpired],
   );
 
   const endGame = useCallback(() => {
+    timer.pause();
     if (!submittedRef.current && score > 0) {
       submittedRef.current = true;
       submitScore({ data: { gameId: "word-meaning", score, durationMs: Date.now() - sessionStart.current, difficulty } })
@@ -264,12 +293,12 @@ function WordMeaningPage() {
         .catch(() => {});
     }
     setScreen("gameover");
-  }, [score, difficulty]);
+  }, [score, difficulty, timer]);
 
   const nextRound = () => {
-    if (round >= TOTAL_ROUNDS) { endGame(); return; }
+    if (timer.isExpired) { endGame(); return; }
     const nextUsed = gameState === "correct" ? new Set([...usedIndices, question.idx]) : usedIndices;
-    setQuestion(getRandomQuestion(nextUsed));
+    setQuestion(getRandomQuestion(nextUsed, optionCount));
     setGameState("playing");
     setSelected(null);
     setLastDelta(null);
@@ -283,15 +312,16 @@ function WordMeaningPage() {
     setBestStreak(0); setCorrectCount(0); setWrongCount(0);
     setLastDelta(null); setIsNewHighScore(false);
     submittedRef.current = false; sessionStart.current = Date.now();
-    questionStart.current = Date.now();
-    setQuestion(getRandomQuestion(fresh));
+    questionStart.current = Date.now(); timerStartedRef.current = false;
+    setQuestion(getRandomQuestion(fresh, optionCount));
     setGameState("playing"); setSelected(null); setScreen("game");
+    timer.reset();
   };
 
   if (screen === "setup") {
     return (
       <SurahPickerScreen
-        gameTitle={t.wordMeaningGame.title}
+        gameImg={THEME.img}
         difficultyOnly
         onStart={(_ids, _vf, diff) => {
           setDifficulty(diff ?? "medium");
@@ -328,7 +358,15 @@ function WordMeaningPage() {
         }
       />
       <div className="px-4 pt-2">
-        <GameScoreBar theme={THEME} round={round} score={score} streak={streak} lastDelta={lastDelta} />
+        <GameScoreBar
+          theme={THEME}
+          timerDisplay={timer.display}
+          timerProgress={timer.progress}
+          score={score}
+          streak={streak}
+          lastDelta={lastDelta}
+          round={round}
+        />
 
         {/* Arabic word card */}
         <div
@@ -410,7 +448,7 @@ function WordMeaningPage() {
               className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
-              {round >= TOTAL_ROUNDS ? t.gameScoring.gameOver : t.wordMeaningGame.nextQuestion}
+              {t.wordMeaningGame.nextQuestion}
             </button>
           </>
         )}

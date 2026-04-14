@@ -1,39 +1,46 @@
 /**
- * In-game score bar with round dots, score badge, streak indicator.
+ * In-game score bar with countdown timer, score badge, streak indicator.
  */
 import type { GameTheme } from "~/lib/game-themes";
-import { TOTAL_ROUNDS } from "~/lib/game-scoring";
 
 interface GameScoreBarProps {
   theme: GameTheme;
-  round: number;
+  timerDisplay: string;
+  timerProgress: number;
   score: number;
   streak: number;
   lastDelta: number | null;
+  round: number;
 }
 
-export function GameScoreBar({ theme, round, score, streak, lastDelta }: GameScoreBarProps) {
+export function GameScoreBar({ theme, timerDisplay, timerProgress, score, streak, lastDelta, round }: GameScoreBarProps) {
   const P = theme.primary;
+  const urgent = timerProgress < 0.25;
 
   return (
-    <div className="flex items-center justify-between gap-3 px-1 mb-4">
-      {/* Round dots */}
-      <div className="game-round-dots flex-wrap">
-        {Array.from({ length: TOTAL_ROUNDS }, (_, i) => (
+    <div className="mb-4">
+      {/* Timer bar */}
+      <div className="flex items-center gap-3 mb-2">
+        <span
+          className={`text-xs font-bold tabular-nums ${urgent ? "text-red-500" : ""}`}
+          style={urgent ? undefined : { color: P }}
+        >
+          {timerDisplay}
+        </span>
+        <div className="flex-1 h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
           <div
-            key={i}
-            className="game-round-dot"
+            className="h-full rounded-full transition-[width] duration-200"
             style={{
-              backgroundColor: i < round - 1 ? P : i === round - 1 ? `${P}cc` : `${P}25`,
-              width: i === round - 1 ? 10 : 8,
-              height: i === round - 1 ? 10 : 8,
+              width: `${Math.max(0, timerProgress * 100)}%`,
+              backgroundColor: urgent ? "#ef4444" : P,
             }}
           />
-        ))}
+        </div>
+        <span className="text-[10px] text-[var(--color-text-secondary)] tabular-nums">#{round}</span>
       </div>
 
       {/* Score + streak */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-2">
         {streak >= 2 && (
           <span
             className="game-streak-fire"

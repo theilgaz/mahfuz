@@ -601,7 +601,7 @@ export const tr = {
     myMemorized: "Ezberim",
     noMemorized: "Henüz ezberlediğin sure yok",
     memorizedCount: "{count} ezberlenen sure",
-    presetLast10: "Son 10",
+    presetNamaz: "Namaz Sureleri",
     presetDuhaToNas: "Duha → Nas",
     presetAmme: "Amme Cüzü",
     presetTabaraka: "Tebareke",

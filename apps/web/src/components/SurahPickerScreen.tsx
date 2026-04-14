@@ -4,7 +4,7 @@
  */
 
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+
 import { useQuery } from "@tanstack/react-query";
 import { getSurahs } from "~/lib/quran-service";
 import { useSurahSelectionStore } from "~/stores/surahSelection.store";
@@ -16,21 +16,21 @@ import type { Difficulty } from "~/lib/game-scoring";
 type Mode = "all" | "hifz" | "custom";
 
 const PRESETS = [
-  { key: "last10",    labelKey: "presetLast10",    range: [105, 114] as const },
+  { key: "namaz",     labelKey: "presetNamaz",     ids: [1, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114] },
   { key: "duhaToNas", labelKey: "presetDuhaToNas", range: [93,  114] as const },
   { key: "amme",      labelKey: "presetAmme",      range: [78,  114] as const },
   { key: "tabaraka",  labelKey: "presetTabaraka",  range: [67,   77] as const },
 ] as const;
 
 interface Props {
-  gameTitle: string;
-  backTo?: string;
+  /** Game illustration URL (from GameTheme.img). */
+  gameImg?: string;
   /** When true, hides surah selection and only shows difficulty. */
   difficultyOnly?: boolean;
   onStart: (surahIds: number[], verseFilter?: VerseFilter, difficulty?: Difficulty) => void;
 }
 
-export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly, onStart }: Props) {
+export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
   const { t } = useTranslation();
   const savedIds = useSurahSelectionStore((s) => s.selectedSurahIds);
   const saveIds = useSurahSelectionStore((s) => s.setSelectedSurahIds);
@@ -50,6 +50,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly
   });
   const [selected, setSelected] = useState<Set<number>>(new Set(savedIds));
   const [search, setSearch] = useState("");
+  const [hifzExpanded, setHifzExpanded] = useState(false);
 
   const { data: surahs = [], isLoading } = useQuery({
     queryKey: ["quran", "surahs"],
@@ -97,24 +98,67 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly
 
   const hifzTotalVerses = memorizedEntries.reduce((s, e) => s + e.verses.length, 0);
 
+  const startButtonLabel = difficultyOnly
+    ? t.surahPicker.startAll
+    : mode === "all"
+    ? t.surahPicker.startAll
+    : mode === "hifz"
+    ? t.surahPicker.testMyHifz.replace("{count}", String(hifzTotalVerses))
+    : selected.size > 0
+    ? t.surahPicker.startWithSurahs.replace("{count}", String(selected.size))
+    : t.surahPicker.modeCustomHint;
+
+  const startDisabled = !difficultyOnly && mode === "custom" && selected.size === 0;
+
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-28">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <Link to={backTo as "/games"} className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <div className="text-center">
-          <p className="text-sm font-semibold text-[var(--color-text-primary)]">{gameTitle}</p>
-          <p className="text-xs text-[var(--color-text-secondary)]">{t.surahPicker.subtitle}</p>
+      {/* Oyun görseli */}
+      {gameImg && (
+        <div className="flex justify-center mb-4">
+          <img
+            src={gameImg}
+            alt=""
+            className="w-32 h-32 object-contain rounded-2xl"
+          />
         </div>
-        <div className="w-5" />
+      )}
+
+      {/* Başlat butonu */}
+      <button
+        onClick={handleStart}
+        disabled={startDisabled}
+        className="w-full py-3.5 rounded-xl bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90 mb-5"
+      >
+        {startButtonLabel}
+      </button>
+
+      {/* Zorluk seçimi */}
+      <div className="mb-5">
+        <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden">
+          {(["easy", "medium", "hard", "hafiz"] as const).map((d) => {
+            const active = difficulty === d;
+            const label = t.gameScoring[d === "easy" ? "diffEasy" : d === "medium" ? "diffMedium" : d === "hard" ? "diffHard" : "diffHafiz"];
+            const dotColor = d === "easy" ? "bg-emerald-500" : d === "medium" ? "bg-amber-500" : d === "hard" ? "bg-red-500" : "bg-purple-500";
+            return (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${
+                  active
+                    ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
+                    : "text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)]/5"
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${dotColor}`} />
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Mod seçimi */}
-      {!difficultyOnly && <div className="space-y-2 mb-6">
+      {!difficultyOnly && <div className="space-y-2">
         {/* Tüm Kuran */}
         <button
           onClick={() => setMode("all")}
@@ -133,14 +177,20 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly
 
         {/* Ezberim */}
         {hasHifz && (
-          <>
+          <div className={`rounded border transition-all overflow-hidden ${
+            mode === "hifz"
+              ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
+              : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
+          }`}>
             <button
-              onClick={() => setMode("hifz")}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded border transition-all text-left ${
-                mode === "hifz"
-                  ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
-                  : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
-              }`}
+              onClick={() => {
+                if (mode === "hifz") {
+                  setHifzExpanded((v) => !v);
+                } else {
+                  setMode("hifz");
+                }
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
             >
               <RadioDot active={mode === "hifz"} />
               <div className="flex-1 min-w-0">
@@ -149,16 +199,21 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly
                   {memorizedEntries.length} {t.surahPicker.modeHifzSurahs} · {hifzTotalVerses} {t.surahPicker.modeHifzVerses}
                 </p>
               </div>
+              {mode === "hifz" && (
+                <svg className={`w-4 h-4 text-[var(--color-text-secondary)] transition-transform ${hifzExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
             </button>
 
-            {mode === "hifz" && (
-              <div className="ml-9 rounded border border-[var(--color-border)] overflow-hidden">
+            {mode === "hifz" && hifzExpanded && (
+              <div className="border-t border-[var(--color-border)]">
                 {memorizedEntries.map(({ surahId, verses }, i) => {
                   const surah = surahMap.get(surahId);
                   return (
                     <div
                       key={surahId}
-                      className={`flex items-center gap-2 px-3 py-1.5 bg-[var(--color-surface)] ${i > 0 ? "border-t border-[var(--color-border)]" : ""}`}
+                      className={`flex items-center gap-2 px-4 py-1.5 ${i > 0 ? "border-t border-[var(--color-border)]/50" : ""}`}
                     >
                       <span className="text-[10px] text-[var(--color-text-secondary)] w-6 shrink-0 tabular-nums">{surahId}</span>
                       <span className="text-xs text-[var(--color-text-primary)] flex-1 truncate">{surah?.nameSimple ?? `Sure ${surahId}`}</span>
@@ -169,7 +224,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly
                 })}
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* Özel Seçim */}
@@ -192,10 +247,12 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly
           </div>
         </button>
 
-        {/* Ön tanımlı gruplar — her zaman görünür, tıklayınca custom moda geçer */}
+        {/* Ön tanımlı gruplar */}
         <div className="flex flex-wrap gap-1.5 px-1">
           {PRESETS.map((preset) => {
-            const ids = surahs.filter((s) => s.id >= preset.range[0] && s.id <= preset.range[1]).map((s) => s.id);
+            const ids = "ids" in preset
+              ? preset.ids.filter((id) => surahs.some((s) => s.id === id))
+              : surahs.filter((s) => s.id >= preset.range[0] && s.id <= preset.range[1]).map((s) => s.id);
             const isActive = mode === "custom" && ids.length > 0 && ids.every((id) => selected.has(id)) && selected.size === ids.length;
             return (
               <button
@@ -279,49 +336,6 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly
           </div>
         )}
       </div>}
-
-      {/* Zorluk seçimi */}
-      <div className="mb-4">
-        <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-2">{t.gameScoring.difficulty}</p>
-        <div className="grid grid-cols-3 gap-2">
-          {(["easy", "medium", "hard"] as const).map((d) => {
-            const active = difficulty === d;
-            const label = t.gameScoring[d === "easy" ? "diffEasy" : d === "medium" ? "diffMedium" : "diffHard"];
-            const hint = t.gameScoring[d === "easy" ? "diffEasyHint" : d === "medium" ? "diffMediumHint" : "diffHardHint"];
-            return (
-              <button
-                key={d}
-                onClick={() => setDifficulty(d)}
-                className={`flex flex-col items-center gap-0.5 px-3 py-2.5 rounded border transition-all ${
-                  active
-                    ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/8"
-                    : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
-                }`}
-              >
-                <span className={`text-sm font-medium ${active ? "text-[var(--color-accent)]" : "text-[var(--color-text-primary)]"}`}>{label}</span>
-                <span className="text-[10px] text-[var(--color-text-secondary)]">{hint}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Başlat butonu */}
-      <button
-        onClick={handleStart}
-        disabled={!difficultyOnly && mode === "custom" && selected.size === 0}
-        className="w-full py-3.5 rounded bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90"
-      >
-        {difficultyOnly
-          ? t.surahPicker.startAll
-          : mode === "all"
-          ? t.surahPicker.startAll
-          : mode === "hifz"
-          ? t.surahPicker.testMyHifz.replace("{count}", String(hifzTotalVerses))
-          : selected.size > 0
-          ? t.surahPicker.startWithSurahs.replace("{count}", String(selected.size))
-          : t.surahPicker.modeCustomHint}
-      </button>
     </div>
   );
 }

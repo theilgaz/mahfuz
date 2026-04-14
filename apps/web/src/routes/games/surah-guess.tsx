@@ -96,6 +96,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
   const handleSelect = useCallback(
     (surahId: number) => {
       if (gameState !== "playing" || !question || timer.isExpired) return;
+      timer.pause();
       setSelectedId(surahId);
       const answerTime = Date.now() - questionStart.current;
 
@@ -133,6 +134,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
 
   const nextRound = () => {
     if (timer.isExpired) { endGame(); return; }
+    timer.start();
     setGameState("playing");
     setSelectedId(null);
     setLastDelta(null);

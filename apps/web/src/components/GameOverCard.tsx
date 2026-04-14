@@ -35,7 +35,7 @@ export function GameOverCard({
         className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 game-star-spin"
         style={{ background: `linear-gradient(135deg, ${P}30, ${P}10)`, boxShadow: `0 0 24px ${theme.glow}` }}
       >
-        <span className="text-3xl">{pct >= 80 ? "\u{1F3C6}" : pct >= 50 ? "\u{2B50}" : "\u{1F4AA}"}</span>
+        <span className="text-2xl font-bold" style={{ color: P }}>{pct >= 80 ? "A+" : pct >= 50 ? "B" : "C"}</span>
       </div>
 
       {/* Score */}

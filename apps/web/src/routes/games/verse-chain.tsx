@@ -11,7 +11,6 @@ import type { ChainQuestion } from "~/lib/verse-chain-data";
 import { submitScore } from "~/lib/score-service";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { useTranslation } from "~/hooks/useTranslation";
-import { GameHeader } from "~/components/GameHeader";
 import { GameOverCard } from "~/components/GameOverCard";
 import { GAME_THEMES } from "~/lib/game-themes";
 import {
@@ -148,32 +147,24 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
 
   return (
     <div className="max-w-lg mx-auto pb-24 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
-      <GameHeader
-        img={THEME.img} bg={THEME.bg} isDark={THEME.isDark}
-        title={t.gamesHub.verseChainTitle}
-        onBack={onSetup}
-        right={
-          <div className="flex items-center gap-3">
-            <span className="game-score-badge" style={{ backgroundColor: `${P}25`, color: P }}>
-              {score}
-            </span>
-            {/* Lives as hearts */}
-            <div className="flex gap-1 items-center">
-              {Array.from({ length: 3 }, (_, i) => (
-                <span
-                  key={i}
-                  className={`text-sm ${i < lives ? "game-heart-beat" : "opacity-20 grayscale"}`}
-                  style={i < lives ? { animationDelay: `${i * 0.15}s` } : {}}
-                >
-                  {"\u2764\uFE0F"}
-                </span>
-              ))}
-            </div>
-          </div>
-        }
-      />
-
       <div className="px-4 pt-2">
+        {/* Score and lives */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="game-score-badge" style={{ backgroundColor: `${P}25`, color: P }}>
+            {score}
+          </span>
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: 3 }, (_, i) => (
+              <span
+                key={i}
+                className={`text-sm ${i < lives ? "game-heart-beat" : "opacity-20 grayscale"}`}
+                style={i < lives ? { animationDelay: `${i * 0.15}s` } : {}}
+              >
+                {"\u2764\uFE0F"}
+              </span>
+            ))}
+          </div>
+        </div>
         {/* Chain counter */}
         <div className="flex items-center gap-2 mb-4">
           <div className="flex gap-1.5">
@@ -269,12 +260,12 @@ function VerseChainGame({ surahIds, difficulty, onSetup }: { surahIds: number[];
                   )}
                   {selected === idx && state === "correct" && (
                     <span className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: P }}>
-                      {"\u{2B50}"} {lastDelta !== null && formatDelta(lastDelta)}
+                      {"\u2713"} {lastDelta !== null && formatDelta(lastDelta)}
                     </span>
                   )}
                   {selected === idx && state === "wrong" && !opt.isCorrect && (
                     <span className="inline-flex items-center gap-1 text-red-500 text-xs font-bold">
-                      {"\u{1F614}"} {lastDelta !== null && formatDelta(lastDelta)}
+                      {"\u2717"} {lastDelta !== null && formatDelta(lastDelta)}
                     </span>
                   )}
                   {state !== "playing" && opt.isCorrect && selected !== idx && (
@@ -310,7 +301,7 @@ function VerseChainPage() {
   if (screen === "setup") {
     return (
       <SurahPickerScreen
-        gameTitle={t.gamesHub.verseChainTitle}
+        gameImg={THEME.img}
         onStart={(ids, _vf, diff) => {
           setSurahIds(ids);
           setDifficulty(diff ?? "medium");

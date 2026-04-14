@@ -5,18 +5,41 @@
  * - Base points per correct answer: 100
  * - Time bonus: up to +50 (decays linearly over 10 seconds)
  * - Streak bonus: +10 per consecutive correct (max +50 at 5+ streak)
- * - Difficulty multiplier: Easy 1x, Medium 1.5x, Hard 2x
+ * - Difficulty multiplier: Easy 1x, Medium 1.5x, Hard 2x, Hafiz 3x
  * - Wrong answer penalty: -50 (also scaled by difficulty)
+ *
+ * Timer mode: 2 minute base, drains at multiplier speed.
+ * Effective play time: Easy 120s, Medium 80s, Hard 60s, Hafiz 40s.
+ *
+ * Question difficulty: option count scales with difficulty.
+ * Easy 3, Medium 4, Hard 5, Hafiz 6.
  */
 
 export const TOTAL_ROUNDS = 10;
 
-export type Difficulty = "easy" | "medium" | "hard";
+export type Difficulty = "easy" | "medium" | "hard" | "hafiz";
 
-const DIFFICULTY_MULTIPLIER: Record<Difficulty, number> = {
+export const DIFFICULTY_MULTIPLIER: Record<Difficulty, number> = {
   easy: 1,
   medium: 1.5,
   hard: 2,
+  hafiz: 3,
+};
+
+/** Base game duration in ms (2 minutes). */
+export const GAME_DURATION_MS = 120_000;
+
+/** Effective play time in ms, adjusted by difficulty drain speed. */
+export function getEffectiveDuration(difficulty: Difficulty): number {
+  return Math.round(GAME_DURATION_MS / DIFFICULTY_MULTIPLIER[difficulty]);
+}
+
+/** Number of answer options per difficulty. */
+export const OPTION_COUNT: Record<Difficulty, number> = {
+  easy: 3,
+  medium: 4,
+  hard: 5,
+  hafiz: 6,
 };
 
 const BASE_POINTS = 100;
@@ -53,4 +76,5 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   easy: "Kolay",
   medium: "Orta",
   hard: "Zor",
+  hafiz: "Hafiz",
 };

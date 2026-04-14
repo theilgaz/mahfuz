@@ -23,16 +23,11 @@ export function StreakCard({ currentStreak, todayPages, dailyTarget, onSetGoal }
     <div className="rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Streak */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-lg">
-            {currentStreak > 0 ? "\u{1F525}" : "\u{1F4D6}"}
-          </span>
-          <span className="text-sm font-medium">
-            {currentStreak > 0
-              ? `${currentStreak} günlük seri`
-              : "Bugün başla"}
-          </span>
-        </div>
+        <span className="text-sm font-medium">
+          {currentStreak > 0
+            ? `${currentStreak} günlük seri`
+            : "Bugün başla"}
+        </span>
 
         <span className="text-[var(--color-border)]">&middot;</span>
 
