@@ -358,9 +358,25 @@ function LeaderboardRows({ entries, userId }: { entries: LeaderboardEntry[]; use
   );
 }
 
-function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
-  const [selectedGame, setSelectedGame] = useState<string | null>(null);
+function GameLeaderboard({ gameId, userId, t }: { gameId: string; userId?: string; t: T }) {
+  const { data: board } = useQuery<LeaderboardEntry[]>({
+    queryKey: ["game-leaderboard", gameId],
+    queryFn: () => getGameLeaderboard({ data: { gameId } }),
+    staleTime: 60_000,
+  });
 
+  return (
+    <SectionCard icon={<TrophySvg />} title={GAME_TITLES[gameId] ?? gameId}>
+      {!board?.length ? (
+        <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noScoresForGame}</p>
+      ) : (
+        <LeaderboardRows entries={board} userId={userId} />
+      )}
+    </SectionCard>
+  );
+}
+
+function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
   const { data: myStats } = useQuery<MyGameStat[]>({
     queryKey: ["my-score-stats"],
     queryFn: () => getMyScoreStats(),
@@ -371,18 +387,9 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
     queryKey: ["global-leaderboard"],
     queryFn: () => getGlobalLeaderboard(),
     staleTime: 60_000,
-    enabled: selectedGame === null,
-  });
-  const { data: gameBoard } = useQuery<LeaderboardEntry[]>({
-    queryKey: ["game-leaderboard", selectedGame],
-    queryFn: () => getGameLeaderboard({ data: { gameId: selectedGame! } }),
-    staleTime: 60_000,
-    enabled: selectedGame !== null,
   });
 
   const myTotal = myStats?.reduce((s, r) => s + r.bestScore, 0) ?? 0;
-  const board = selectedGame === null ? globalBoard : gameBoard;
-  const noData = selectedGame === null ? t.gamesHub.noScores : t.gamesHub.noScoresForGame;
 
   return (
     <div className="space-y-5">
@@ -395,67 +402,49 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
         </div>
       )}
 
-      {/* My scores + Leaderboard side by side */}
+      {/* Two-column layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* My scores */}
-        <SectionCard icon={<StarSvg />} title={t.gamesHub.tabMine}>
-          {!userId ? (
-            <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">
-              {t.gamesHub.loginPrompt}{" "}
-              <Link to="/auth/login" search={{ redirect: "/games" }} className="text-[var(--color-accent)] underline">{t.gamesHub.loginLink}</Link>
-            </p>
-          ) : !myStats?.length ? (
-            <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noGamesPlayed}</p>
-          ) : (
-            <div className="space-y-2">
-              {myStats.map((s) => (
-                <div key={s.gameId} className="flex items-center justify-between">
-                  <span className="text-sm text-[var(--color-text-primary)]">{GAME_TITLES[s.gameId] ?? s.gameId}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-[var(--color-text-secondary)] tabular-nums">{s.totalPlays}x</span>
-                    <span className="text-sm font-bold text-[var(--color-accent)] tabular-nums">{s.bestScore}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
+        {/* Left: per-game leaderboards */}
+        <div className="flex flex-col gap-5">
+          {GAME_IDS.map((id) => (
+            <GameLeaderboard key={id} gameId={id} userId={userId} t={t} />
+          ))}
+        </div>
 
-        {/* Leaderboard */}
-        <SectionCard icon={<GlobeSvg />} title={t.gamesHub.tabGlobal}>
-          <div className="space-y-3">
-            <div className="flex gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
-              <button
-                onClick={() => setSelectedGame(null)}
-                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                  selectedGame === null
-                    ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white"
-                    : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/40"
-                }`}
-              >
-                {t.gamesHub.catAll}
-              </button>
-              {GAME_IDS.map((id) => (
-                <button
-                  key={id}
-                  onClick={() => setSelectedGame(id)}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                    selectedGame === id
-                      ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white"
-                      : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/40"
-                  }`}
-                >
-                  {GAME_TITLES[id]}
-                </button>
-              ))}
-            </div>
-            {!board?.length ? (
-              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{noData}</p>
+        {/* Right: my scores + global */}
+        <div className="flex flex-col gap-5">
+          <SectionCard icon={<StarSvg />} title={t.gamesHub.tabMine}>
+            {!userId ? (
+              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">
+                {t.gamesHub.loginPrompt}{" "}
+                <Link to="/auth/login" search={{ redirect: "/games" }} className="text-[var(--color-accent)] underline">{t.gamesHub.loginLink}</Link>
+              </p>
+            ) : !myStats?.length ? (
+              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noGamesPlayed}</p>
             ) : (
-              <LeaderboardRows entries={board} userId={userId} />
+              <div className="flex flex-wrap gap-2">
+                {myStats.map((s) => (
+                  <div
+                    key={s.gameId}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]"
+                  >
+                    <span className="text-xs text-[var(--color-text-primary)]">{GAME_TITLES[s.gameId] ?? s.gameId}</span>
+                    <span className="text-[10px] text-[var(--color-text-secondary)] tabular-nums">{s.totalPlays}x</span>
+                    <span className="text-xs font-bold text-[var(--color-accent)] tabular-nums">{s.bestScore}</span>
+                  </div>
+                ))}
+              </div>
             )}
-          </div>
-        </SectionCard>
+          </SectionCard>
+
+          <SectionCard icon={<GlobeSvg />} title={t.gamesHub.tabGlobal}>
+            {!globalBoard?.length ? (
+              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noScores}</p>
+            ) : (
+              <LeaderboardRows entries={globalBoard} userId={userId} />
+            )}
+          </SectionCard>
+        </div>
       </div>
     </div>
   );
