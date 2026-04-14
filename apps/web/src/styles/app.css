@@ -395,6 +395,140 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
   box-shadow: 0 1px 3px rgba(0,0,0,.25);
 }
 
+/* ── Game Animations ─────────────────────────────────── */
+
+@keyframes game-bounce-in {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes game-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes game-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@keyframes game-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--glow-color, rgba(74,155,106,0.4)); }
+  50% { box-shadow: 0 0 16px 4px var(--glow-color, rgba(74,155,106,0.2)); }
+}
+
+@keyframes game-score-fly {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-28px) scale(1.2); opacity: 0; }
+}
+
+@keyframes game-star-spin {
+  0% { transform: rotate(0deg) scale(0); opacity: 0; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 1; }
+  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+
+@keyframes game-confetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-60px) rotate(360deg); opacity: 0; }
+}
+
+@keyframes game-heart-beat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.25); }
+  30% { transform: scale(1); }
+}
+
+@keyframes game-chain-link {
+  0% { transform: scale(0) rotate(-180deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes game-slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.game-bounce-in { animation: game-bounce-in 0.4s ease-out; }
+.game-pop { animation: game-pop 0.3s ease-out; }
+.game-shake { animation: game-shake 0.4s ease; }
+.game-pulse-glow { animation: game-pulse-glow 2s ease-in-out infinite; }
+.game-score-fly { animation: game-score-fly 0.8s ease-out forwards; }
+.game-star-spin { animation: game-star-spin 0.5s ease-out; }
+.game-heart-beat { animation: game-heart-beat 0.6s ease; }
+.game-chain-link { animation: game-chain-link 0.4s ease-out; }
+.game-slide-up { animation: game-slide-up 0.3s ease-out; }
+
+/* Themed game body background */
+.game-bg {
+  min-height: 100dvh;
+  position: relative;
+}
+.game-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--game-bg-gradient);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* Score badge */
+.game-score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Streak fire */
+.game-streak-fire {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  animation: game-pulse-glow 1.5s ease-in-out infinite;
+  border-radius: 12px;
+  padding: 2px 8px;
+}
+
+/* Round progress dots */
+.game-round-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.game-round-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+/* Game card with glow hover */
+.game-option-card {
+  position: relative;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  padding: 14px 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.game-option-card:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
 /* ── View Transitions ────────────────────────────────── */
 
 @keyframes vt-fade-in {

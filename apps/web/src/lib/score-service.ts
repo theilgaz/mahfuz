@@ -25,7 +25,7 @@ export const GAME_IDS = Object.keys(GAME_TITLES);
 // ── Skor Kaydet ────────────────────────────────────────────
 
 export const submitScore = createServerFn({ method: "POST" })
-  .inputValidator((input: { gameId: string; score: number; durationMs?: number }) => input)
+  .inputValidator((input: { gameId: string; score: number; durationMs?: number; difficulty?: string }) => input)
   .handler(async ({ data }) => {
     if (data.score <= 0) return { saved: false, isNewHighScore: false };
 
@@ -48,6 +48,7 @@ export const submitScore = createServerFn({ method: "POST" })
       userId,
       gameId: data.gameId,
       score: data.score,
+      mode: data.difficulty ?? null,
       durationMs: data.durationMs ?? null,
       metadata: "{}",
       createdAt: Date.now(),

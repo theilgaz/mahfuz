@@ -1,5 +1,7 @@
 /**
- * Kelime Doldurma — ayetteki eksik kelimeyi bul (4 seçenek).
+ * Kelime Doldurma -- ayetteki eksik kelimeyi bul (4 secenek).
+ * 10 round, zorluk secimi, zaman bonusu, yanlis cezasi.
+ * Themed: warm golden/parchment, puzzle-piece motif.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -10,30 +12,56 @@ import { submitScore } from "~/lib/score-service";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { useTranslation } from "~/hooks/useTranslation";
 import { GameHeader } from "~/components/GameHeader";
+import { GameScoreBar } from "~/components/GameScoreBar";
+import { GameOverCard } from "~/components/GameOverCard";
 import { GAME_THEMES } from "~/lib/game-themes";
+import {
+  TOTAL_ROUNDS,
+  calcCorrectPoints,
+  calcWrongPenalty,
+  formatDelta,
+  type Difficulty,
+} from "~/lib/game-scoring";
 
 export const Route = createFileRoute("/games/fill-blank")({
   component: FillBlankGame,
 });
 
 const THEME = GAME_THEMES["fill-blank"];
-const P = THEME.primary; // e.g. "#8B6914"
-
-type GameState = "playing" | "correct" | "wrong" | "loading";
-type Screen = "setup" | "game";
+const P = THEME.primary;
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
 
-function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; verseFilter?: VerseFilter; onSetup: () => void }) {
+type GameState = "playing" | "correct" | "wrong" | "loading";
+type Screen = "setup" | "game" | "gameover";
+
+function GameScreen({
+  surahIds,
+  verseFilter,
+  difficulty,
+  onSetup,
+}: {
+  surahIds: number[];
+  verseFilter?: VerseFilter;
+  difficulty: Difficulty;
+  onSetup: () => void;
+}) {
   const { t } = useTranslation();
   const [score, setScore] = useState(0);
-  const [round, setRound] = useState(0);
+  const [round, setRound] = useState(1);
   const [streak, setStreak] = useState(0);
-  const submittedScore = useRef(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
+  const [lastDelta, setLastDelta] = useState<number | null>(null);
+  const [isNewHighScore, setIsNewHighScore] = useState(false);
   const sessionStart = useRef(Date.now());
+  const questionStart = useRef(Date.now());
+  const submittedRef = useRef(false);
   const [gameState, setGameState] = useState<GameState>("loading");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [screen, setScreen] = useState<"game" | "gameover">("game");
   const nextBtnRef = useRef<HTMLButtonElement>(null);
 
   const { data: verse, isLoading } = useQuery({
@@ -43,31 +71,68 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
   });
 
   useEffect(() => {
-    if (!isLoading && verse) setGameState("playing");
+    if (!isLoading && verse) {
+      setGameState("playing");
+      questionStart.current = Date.now();
+    }
   }, [isLoading, verse]);
 
   useEffect(() => {
     if (gameState !== "playing") nextBtnRef.current?.focus();
   }, [gameState]);
 
-  const handleSelect = useCallback((option: string) => {
-    if (gameState !== "playing" || !verse) return;
-    setSelectedOption(option);
-    if (option === verse.correctWord) {
-      setScore((s) => s + 10);
-      setStreak((s) => s + 1);
-      setGameState("correct");
-    } else {
-      setStreak(0);
-      setGameState("wrong");
+  const handleSelect = useCallback(
+    (option: string) => {
+      if (gameState !== "playing" || !verse) return;
+      setSelectedOption(option);
+      const answerTime = Date.now() - questionStart.current;
+
+      if (option === verse.correctWord) {
+        const newStreak = streak + 1;
+        const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
+        setScore((s) => s + pts);
+        setStreak(newStreak);
+        setBestStreak((b) => Math.max(b, newStreak));
+        setCorrectCount((c) => c + 1);
+        setLastDelta(pts);
+        setGameState("correct");
+      } else {
+        const penalty = calcWrongPenalty(difficulty);
+        setScore((s) => Math.max(0, s - penalty));
+        setStreak(0);
+        setWrongCount((c) => c + 1);
+        setLastDelta(-penalty);
+        setGameState("wrong");
+      }
+    },
+    [gameState, verse, streak, difficulty],
+  );
+
+  const endGame = useCallback(() => {
+    if (!submittedRef.current && score > 0) {
+      submittedRef.current = true;
+      submitScore({ data: { gameId: "fill-blank", score, durationMs: Date.now() - sessionStart.current, difficulty } })
+        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); })
+        .catch(() => {});
     }
-  }, [gameState, verse]);
+    setScreen("gameover");
+  }, [score, difficulty]);
 
   const nextRound = () => {
+    if (round >= TOTAL_ROUNDS) { endGame(); return; }
     setRound((r) => r + 1);
     setSelectedOption(null);
+    setLastDelta(null);
     setGameState("loading");
     setRefreshKey((k) => k + 1);
+  };
+
+  const handleRestart = () => {
+    setScore(0); setRound(1); setStreak(0); setBestStreak(0);
+    setCorrectCount(0); setWrongCount(0); setLastDelta(null);
+    setIsNewHighScore(false); submittedRef.current = false;
+    sessionStart.current = Date.now(); setSelectedOption(null);
+    setGameState("loading"); setRefreshKey((k) => k + 1); setScreen("game");
   };
 
   useEffect(() => {
@@ -76,31 +141,27 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
       const key = e.key.toLowerCase();
       if (gameState === "playing") {
         const idx = ["a", "b", "c", "d"].indexOf(key);
-        if (idx !== -1 && verse.options[idx] !== undefined) {
-          e.preventDefault();
-          handleSelect(verse.options[idx]);
-        }
-      } else if (key === "enter" || key === " ") {
-        e.preventDefault();
-        nextRound();
-      }
+        if (idx !== -1 && verse.options[idx] !== undefined) { e.preventDefault(); handleSelect(verse.options[idx]); }
+      } else if (key === "enter" || key === " ") { e.preventDefault(); nextRound(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [gameState, verse, handleSelect]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onBack = () => {
-    if (score > submittedScore.current) {
-      submittedScore.current = score;
-      submitScore({ data: { gameId: "fill-blank", score, durationMs: Date.now() - sessionStart.current } }).catch(() => {});
-    }
-    onSetup();
-  };
+  if (screen === "gameover") {
+    return (
+      <GameOverCard
+        theme={THEME} score={score} correctCount={correctCount} wrongCount={wrongCount}
+        bestStreak={bestStreak} isNewHighScore={isNewHighScore} t={t}
+        onRestart={handleRestart} onSetup={onSetup}
+      />
+    );
+  }
 
   if (isLoading || !verse) {
     return (
       <div className="max-w-lg mx-auto px-4 py-10 text-center">
-        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: `${P}80`, borderTopColor: "transparent" }} />
+        <div className="w-10 h-10 border-3 rounded-full animate-spin mx-auto mb-3" style={{ borderColor: `${P}30`, borderTopColor: P }} />
         <p className="text-[var(--color-text-secondary)] text-sm">{t.fillBlankGame.loadingVerse}</p>
       </div>
     );
@@ -109,58 +170,50 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
   const isAnswered = gameState !== "playing";
 
   return (
-    <div className="max-w-lg mx-auto pb-32">
-      {/* ── Colored header ── */}
+    <div className="max-w-lg mx-auto pb-32 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
       <GameHeader
-        img={THEME.img}
-        bg={THEME.bg}
-        isDark={THEME.isDark}
+        img={THEME.img} bg={THEME.bg} isDark={THEME.isDark}
         title={t.gamesHub.fillBlankTitle}
-        onBack={onBack}
+        onBack={() => endGame()}
         right={
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {streak >= 2 && (
-              <span className="flex items-center gap-0.5 text-xs font-semibold" style={{ color: P }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C10 5.5 6.5 7 6.5 12a5.5 5.5 0 0011 0C17.5 7 14 5.5 12 2zm0 14a3 3 0 01-3-3c0-2 3-5.5 3-5.5s3 3.5 3 5.5a3 3 0 01-3 3z"/>
-                </svg>
-                {streak}
+              <span className="game-streak-fire" style={{ color: P, backgroundColor: `${P}20`, ["--glow-color" as string]: THEME.glow }}>
+                {streak}x
               </span>
             )}
-            <span className="text-sm font-bold tabular-nums">{score}</span>
           </div>
         }
       />
 
       <div className="px-4 pt-2">
-        {/* Sure etiketi */}
-        <p className="text-xs font-medium text-[var(--color-text-secondary)] text-center mb-4">
+        <GameScoreBar theme={THEME} round={round} score={score} streak={streak} lastDelta={lastDelta} />
+
+        <p className="text-xs font-medium text-[var(--color-text-secondary)] text-center mb-3">
           {t.fillBlankGame.verseLabel.replace("{surahName}", verse.surahName).replace("{verseNum}", String(verse.verseNum))}
         </p>
 
-        {/* ── Ayet kartı ── */}
-        <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] mb-4 overflow-hidden">
-          <div
-            className="px-6 py-6 text-right leading-[2.4] text-[1.35rem]"
-            dir="rtl"
-            lang="ar"
-            style={{ fontFamily: "var(--font-arabic)" }}
-          >
+        {/* Verse card */}
+        <div
+          className="rounded-2xl border bg-[var(--color-surface)] mb-5 overflow-hidden game-slide-up"
+          style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
+        >
+          <div className="px-6 py-6 text-right leading-[2.4] text-[1.35rem]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
             {verse.words.map((w, i) => {
               if (i === verse.blankIndex) {
                 const blankStyle =
                   gameState === "correct"
                     ? { borderColor: `${P}80`, backgroundColor: `${P}18`, color: P }
                     : gameState === "wrong"
-                    ? { borderColor: "#ef444480", backgroundColor: "#fef2f2", color: "#dc2626" }
-                    : { borderColor: `${P}40`, backgroundColor: `${P}0a`, color: "transparent" };
+                      ? { borderColor: "#ef444480", backgroundColor: "#fef2f2", color: "#dc2626" }
+                      : { borderColor: `${P}40`, backgroundColor: `${P}0a`, color: "transparent" };
                 return (
                   <span
                     key={i}
-                    className="inline-block mx-1 px-3 py-0.5 rounded-lg border min-w-[72px] text-center align-middle font-semibold transition-all"
-                    style={blankStyle}
+                    className={`inline-block mx-1 px-3 py-0.5 rounded-xl border-2 min-w-[72px] text-center align-middle font-semibold transition-all ${isAnswered ? "game-pop" : "game-pulse-glow"}`}
+                    style={{ ...blankStyle, ["--glow-color" as string]: THEME.glow }}
                   >
-                    {isAnswered ? verse.correctWord : "‌"}
+                    {isAnswered ? verse.correctWord : "\u200C"}
                   </span>
                 );
               }
@@ -169,37 +222,39 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
           </div>
         </div>
 
-        {/* ── Seçenekler ── */}
-        <div className="flex flex-col gap-2 mb-4">
+        {/* Options */}
+        <div className="flex flex-col gap-2.5 mb-4">
           {verse.options.map((opt, idx) => {
-            let containerStyle: React.CSSProperties = {};
-            let containerClass = "border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-accent)]/5 active:scale-[0.99]";
-            let labelClass = "text-[var(--color-text-secondary)] bg-[var(--color-border)]/60";
-            let wordClass = "text-[var(--color-text-primary)]";
+            let bgColor = "var(--color-surface)";
+            let borderColor = `${P}20`;
+            let textColor = "var(--color-text-primary)";
+            let labelBg = `${P}12`;
+            let labelColor = `${P}cc`;
             let icon: React.ReactNode = null;
+            let extraClass = "";
 
             if (isAnswered) {
               if (opt === verse.correctWord) {
-                containerClass = "border-2";
-                containerStyle = { borderColor: `${P}80`, backgroundColor: `${P}12`, color: P };
-                labelClass = "";
-                wordClass = "";
-                icon = (
-                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: P }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                );
+                bgColor = `${P}12`;
+                borderColor = `${P}60`;
+                textColor = P;
+                labelBg = `${P}30`;
+                labelColor = P;
+                extraClass = "game-bounce-in";
+                icon = <span className="text-base">&#10003;</span>;
               } else if (opt === selectedOption) {
-                containerClass = "border-red-300 bg-red-50";
-                labelClass = "text-red-500 bg-red-100";
-                wordClass = "text-red-600";
-                icon = (
-                  <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                );
+                bgColor = "#fef2f2";
+                borderColor = "#fca5a5";
+                textColor = "#dc2626";
+                labelBg = "#fee2e2";
+                labelColor = "#ef4444";
+                extraClass = "game-shake";
+                icon = <span className="text-base">&#10007;</span>;
               } else {
-                containerClass = "border-[var(--color-border)]/40 bg-transparent opacity-35";
+                bgColor = "transparent";
+                borderColor = `${P}10`;
+                textColor = "var(--color-text-secondary)";
+                extraClass = "opacity-35";
               }
             }
 
@@ -208,21 +263,18 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
                 key={opt}
                 onClick={() => handleSelect(opt)}
                 disabled={isAnswered}
-                style={containerStyle}
-                className={`flex items-center gap-3 px-4 py-3 rounded border transition-all duration-150 ${containerClass}`}
+                className={`game-option-card flex items-center gap-3 ${extraClass}`}
+                style={{ backgroundColor: bgColor, borderColor, color: textColor }}
               >
-                {isAnswered && opt === verse.correctWord ? (
-                  <span className="text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ backgroundColor: `${P}25`, color: P }}>
-                    {OPTION_LABELS[idx]}
-                  </span>
-                ) : (
-                  <span className={`text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center shrink-0 ${labelClass}`}>
-                    {OPTION_LABELS[idx]}
-                  </span>
-                )}
                 <span
-                  className={`flex-1 text-right text-lg leading-snug ${wordClass}`}
-                  style={{ fontFamily: "var(--font-arabic)", direction: "rtl", color: isAnswered && opt === verse.correctWord ? P : undefined }}
+                  className="text-[11px] font-bold w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: labelBg, color: labelColor }}
+                >
+                  {OPTION_LABELS[idx]}
+                </span>
+                <span
+                  className="flex-1 text-right text-lg leading-snug"
+                  style={{ fontFamily: "var(--font-arabic)", direction: "rtl" }}
                 >
                   {opt}
                 </span>
@@ -232,47 +284,35 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
           })}
         </div>
 
-        {/* ── Feedback + Sonraki ── */}
+        {/* Feedback + Next */}
         {isAnswered && (
           <div
-            className="rounded border px-5 py-4 flex items-center justify-between gap-4"
+            className="rounded-xl border px-5 py-4 flex items-center justify-between gap-4 game-slide-up"
             style={
               gameState === "correct"
-                ? { backgroundColor: `${P}12`, borderColor: `${P}40` }
+                ? { backgroundColor: `${P}10`, borderColor: `${P}30`, boxShadow: `0 2px 12px ${THEME.glow}` }
                 : { backgroundColor: "#fef2f2", borderColor: "#fecaca" }
             }
           >
             <div className="flex items-center gap-3">
               <span
-                className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                style={gameState === "correct" ? { backgroundColor: P } : { backgroundColor: "#f87171" }}
+                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-lg ${gameState === "correct" ? "game-star-spin" : ""}`}
               >
-                {gameState === "correct" ? (
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                )}
+                {gameState === "correct" ? "\u{2B50}" : "\u{1F614}"}
               </span>
               <div>
                 <p className="text-sm font-bold" style={gameState === "correct" ? { color: P } : { color: "#dc2626" }}>
-                  {gameState === "correct" ? t.fillBlankGame.correct : t.fillBlankGame.wrong}
+                  {gameState === "correct" ? t.fillBlankGame.correct : t.fillBlankGame.wrong}{" "}
+                  {lastDelta !== null && <span className="font-semibold">{formatDelta(lastDelta)}</span>}
                 </p>
                 {gameState === "wrong" && (
                   <p className="text-xs text-red-500 mt-0.5">
-                    {t.fillBlankGame.correctAnswer}{" "}
-                    <span style={{ fontFamily: "var(--font-arabic)" }}>{verse.correctWord}</span>
+                    {t.fillBlankGame.correctAnswer} <span style={{ fontFamily: "var(--font-arabic)" }}>{verse.correctWord}</span>
                   </p>
                 )}
                 {gameState === "correct" && streak >= 2 && (
                   <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: P }}>
                     {t.fillBlankGame.streak.replace("{count}", String(streak))}
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C10 5.5 6.5 7 6.5 12a5.5 5.5 0 0011 0C17.5 7 14 5.5 12 2zm0 14a3 3 0 01-3-3c0-2 3-5.5 3-5.5s3 3.5 3 5.5a3 3 0 01-3 3z"/>
-                    </svg>
                   </p>
                 )}
               </div>
@@ -280,10 +320,10 @@ function GameScreen({ surahIds, verseFilter, onSetup }: { surahIds: number[]; ve
             <button
               ref={nextBtnRef}
               onClick={nextRound}
-              className="shrink-0 px-5 py-2.5 rounded text-sm font-bold text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: gameState === "correct" ? P : "var(--color-accent)" }}
+              className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
+              style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
-              {t.fillBlankGame.next}
+              {round >= TOTAL_ROUNDS ? t.gameScoring.gameOver : t.fillBlankGame.next}
             </button>
           </div>
         )}
@@ -297,14 +337,20 @@ function FillBlankGame() {
   const [screen, setScreen] = useState<Screen>("setup");
   const [surahIds, setSurahIds] = useState<number[]>([]);
   const [verseFilter, setVerseFilter] = useState<VerseFilter | undefined>();
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
 
   if (screen === "setup") {
     return (
       <SurahPickerScreen
         gameTitle={t.gamesHub.fillBlankTitle}
-        onStart={(ids, vf) => { setSurahIds(ids); setVerseFilter(vf); setScreen("game"); }}
+        onStart={(ids, vf, diff) => {
+          setSurahIds(ids);
+          setVerseFilter(vf);
+          setDifficulty(diff ?? "medium");
+          setScreen("game");
+        }}
       />
     );
   }
-  return <GameScreen surahIds={surahIds} verseFilter={verseFilter} onSetup={() => setScreen("setup")} />;
+  return <GameScreen surahIds={surahIds} verseFilter={verseFilter} difficulty={difficulty} onSetup={() => setScreen("setup")} />;
 }

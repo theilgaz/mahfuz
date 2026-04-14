@@ -1,20 +1,31 @@
 /**
- * Kelime Anlamı — Arapça kelime → Türkçe anlam (4 seçenek).
- * Doğru cevaplanmış kelimeler oturum boyunca tekrar gelmez.
+ * Kelime Anlami -- Arapca kelime -> Turkce anlam (4 secenek).
+ * 10 round, zorluk secimi, zaman bonusu, yanlis cezasi.
+ * Themed: warm golden/tan, open book motif.
  */
 
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
 import { useTranslation } from "~/hooks/useTranslation";
 import { GameHeader } from "~/components/GameHeader";
+import { GameScoreBar } from "~/components/GameScoreBar";
+import { GameOverCard } from "~/components/GameOverCard";
+import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { GAME_THEMES } from "~/lib/game-themes";
+import {
+  TOTAL_ROUNDS,
+  calcCorrectPoints,
+  calcWrongPenalty,
+  formatDelta,
+  type Difficulty,
+} from "~/lib/game-scoring";
 
 const THEME = GAME_THEMES["word-meaning"];
-const P = THEME.primary; // "#8B5E1A"
+const P = THEME.primary;
 
 export const Route = createFileRoute("/games/word-meaning")({
-  component: WordMeaningGame,
+  component: WordMeaningPage,
 });
 
 interface WordPair {
@@ -25,175 +36,161 @@ interface WordPair {
 
 // ~150 temel Kuran kelimesi
 const WORD_PAIRS: WordPair[] = [
-  // Esmaül Hüsna & Allah'ın sıfatları
-  { arabic: "اللَّهُ",       meaning: "Allah",                        wrong: ["Melek", "Peygamber", "Cennet"] },
-  { arabic: "الرَّحْمَٰنِ", meaning: "Rahman (çok merhamet eden)",    wrong: ["Şiddetli", "Kızgın", "Güçlü"] },
-  { arabic: "الرَّحِيمِ",   meaning: "Rahim (merhamet edici)",        wrong: ["Bilen", "Duyan", "Yaratan"] },
-  { arabic: "الْمَلِكِ",    meaning: "Hükümdar / Melik",              wrong: ["Kul", "Elçi", "Yolcu"] },
-  { arabic: "الْقُدُّوسُ",  meaning: "Kutsal / Münezzeh",             wrong: ["Adil", "Güçlü", "Yaratan"] },
-  { arabic: "السَّلَامُ",   meaning: "Esenlik / Selamet",             wrong: ["Savaş", "Azap", "Fitne"] },
-  { arabic: "الْعَزِيزُ",   meaning: "Güçlü / Aziz",                 wrong: ["Zayıf", "Yoksul", "Kibar"] },
-  { arabic: "الْحَكِيمُ",   meaning: "Hakim / Hikmet sahibi",         wrong: ["Cahil", "Acemi", "Zalim"] },
-  { arabic: "الْغَفُورُ",   meaning: "Çok bağışlayan",               wrong: ["Cezalandıran", "Unutan", "Sınayan"] },
-  { arabic: "الشَّكُورُ",   meaning: "Şükrü kabul eden",             wrong: ["Nankör", "Veren", "Alan"] },
-  { arabic: "الْحَلِيمُ",   meaning: "Yumuşak huylu / Halim",        wrong: ["Sert", "Kızgın", "Hızlı"] },
-  { arabic: "الْعَلِيمُ",   meaning: "Her şeyi bilen",               wrong: ["Gören", "Duyan", "Güçlü"] },
-  { arabic: "الْقَدِيرُ",   meaning: "Her şeye gücü yeten",          wrong: ["Bilen", "İşiten", "Gören"] },
-  { arabic: "السَّمِيعُ",   meaning: "Her şeyi işiten",              wrong: ["Gören", "Bilen", "Güçlü"] },
-  { arabic: "الْبَصِيرُ",   meaning: "Her şeyi gören",               wrong: ["İşiten", "Bilen", "Güçlü"] },
-  { arabic: "الْوَاحِدُ",   meaning: "Bir / Tek",                    wrong: ["İki", "Çok", "Sonsuz"] },
-  { arabic: "الصَّمَدُ",    meaning: "Herkesin muhtaç olduğu",       wrong: ["Yaratan", "Yıkıcı", "Gönderen"] },
-  { arabic: "الْكَرِيمُ",   meaning: "Çok cömert / Kerim",           wrong: ["Cimri", "Zalim", "Güçlü"] },
-  { arabic: "الرَّزَّاقُ",  meaning: "Rızık veren",                  wrong: ["Alan", "Yaratan", "Öldüren"] },
-  { arabic: "الْوَدُودُ",   meaning: "Seven / Sevilen",              wrong: ["Kızan", "Unutan", "Cezalandıran"] },
-
+  // Esmaul Husna & Allah'in sifatlari
+  { arabic: "\u0627\u0644\u0644\u0651\u064E\u0647\u064F",       meaning: "Allah",                        wrong: ["Melek", "Peygamber", "Cennet"] },
+  { arabic: "\u0627\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650", meaning: "Rahman (\u00e7ok merhamet eden)",    wrong: ["\u015Eiddetli", "K\u0131zg\u0131n", "G\u00fc\u00e7l\u00fc"] },
+  { arabic: "\u0627\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650",   meaning: "Rahim (merhamet edici)",        wrong: ["Bilen", "Duyan", "Yaratan"] },
+  { arabic: "\u0627\u0644\u0652\u0645\u064E\u0644\u0650\u0643\u0650",    meaning: "H\u00fck\u00fcmdar / Melik",              wrong: ["Kul", "El\u00e7i", "Yolcu"] },
+  { arabic: "\u0627\u0644\u0652\u0642\u064F\u062F\u0651\u064F\u0648\u0633\u064F",  meaning: "Kutsal / M\u00fcnezzeh",             wrong: ["Adil", "G\u00fc\u00e7l\u00fc", "Yaratan"] },
+  { arabic: "\u0627\u0644\u0633\u0651\u064E\u0644\u064E\u0627\u0645\u064F",   meaning: "Esenlik / Selamet",             wrong: ["Sava\u015f", "Azap", "Fitne"] },
+  { arabic: "\u0627\u0644\u0652\u0639\u064E\u0632\u0650\u064A\u0632\u064F",   meaning: "G\u00fc\u00e7l\u00fc / Aziz",                 wrong: ["Zay\u0131f", "Yoksul", "Kibar"] },
+  { arabic: "\u0627\u0644\u0652\u062D\u064E\u0643\u0650\u064A\u0645\u064F",   meaning: "Hakim / Hikmet sahibi",         wrong: ["Cahil", "Acemi", "Zalim"] },
+  { arabic: "\u0627\u0644\u0652\u063A\u064E\u0641\u064F\u0648\u0631\u064F",   meaning: "\u00c7ok ba\u011f\u0131\u015flayan",               wrong: ["Cezaland\u0131ran", "Unutan", "S\u0131nayan"] },
+  { arabic: "\u0627\u0644\u0634\u0651\u064E\u0643\u064F\u0648\u0631\u064F",   meaning: "\u015e\u00fckr\u00fc kabul eden",             wrong: ["Nank\u00f6r", "Veren", "Alan"] },
+  { arabic: "\u0627\u0644\u0652\u062D\u064E\u0644\u0650\u064A\u0645\u064F",   meaning: "Yumu\u015fak huylu / Halim",        wrong: ["Sert", "K\u0131zg\u0131n", "H\u0131zl\u0131"] },
+  { arabic: "\u0627\u0644\u0652\u0639\u064E\u0644\u0650\u064A\u0645\u064F",   meaning: "Her \u015feyi bilen",               wrong: ["G\u00f6ren", "Duyan", "G\u00fc\u00e7l\u00fc"] },
+  { arabic: "\u0627\u0644\u0652\u0642\u064E\u062F\u0650\u064A\u0631\u064F",   meaning: "Her \u015feye g\u00fcc\u00fc yeten",          wrong: ["Bilen", "\u0130\u015fiten", "G\u00f6ren"] },
+  { arabic: "\u0627\u0644\u0633\u0651\u064E\u0645\u0650\u064A\u0639\u064F",   meaning: "Her \u015feyi i\u015fiten",              wrong: ["G\u00f6ren", "Bilen", "G\u00fc\u00e7l\u00fc"] },
+  { arabic: "\u0627\u0644\u0652\u0628\u064E\u0635\u0650\u064A\u0631\u064F",   meaning: "Her \u015feyi g\u00f6ren",               wrong: ["\u0130\u015fiten", "Bilen", "G\u00fc\u00e7l\u00fc"] },
+  { arabic: "\u0627\u0644\u0652\u0648\u064E\u0627\u062D\u0650\u062F\u064F",   meaning: "Bir / Tek",                    wrong: ["\u0130ki", "\u00c7ok", "Sonsuz"] },
+  { arabic: "\u0627\u0644\u0635\u0651\u064E\u0645\u064E\u062F\u064F",    meaning: "Herkesin muhta\u00e7 oldu\u011fu",       wrong: ["Yaratan", "Y\u0131k\u0131c\u0131", "G\u00f6nderen"] },
+  { arabic: "\u0627\u0644\u0652\u0643\u064E\u0631\u0650\u064A\u0645\u064F",   meaning: "\u00c7ok c\u00f6mert / Kerim",           wrong: ["Cimri", "Zalim", "G\u00fc\u00e7l\u00fc"] },
+  { arabic: "\u0627\u0644\u0631\u0651\u064E\u0632\u0651\u064E\u0627\u0642\u064F",  meaning: "R\u0131z\u0131k veren",                  wrong: ["Alan", "Yaratan", "\u00d6ld\u00fcren"] },
+  { arabic: "\u0627\u0644\u0652\u0648\u064E\u062F\u064F\u0648\u062F\u064F",   meaning: "Seven / Sevilen",              wrong: ["K\u0131zan", "Unutan", "Cezaland\u0131ran"] },
   // Temel kavramlar
-  { arabic: "الْحَمْدُ",    meaning: "Hamd / Övgü",                  wrong: ["Şikâyet", "Dua", "İstek"] },
-  { arabic: "كِتَابٌ",      meaning: "Kitap",                        wrong: ["Ev", "Su", "Taş"] },
-  { arabic: "نُورٌ",        meaning: "Nur / Işık",                   wrong: ["Karanlık", "Ateş", "Su"] },
-  { arabic: "صَلَاةٌ",      meaning: "Namaz / Dua",                  wrong: ["Oruç", "Zekat", "Hac"] },
-  { arabic: "رَحْمَةٌ",     meaning: "Rahmet / Merhamet",            wrong: ["Azap", "Hüzün", "Felaket"] },
-  { arabic: "جَنَّةٌ",      meaning: "Cennet",                       wrong: ["Cehennem", "Dünya", "Kabir"] },
-  { arabic: "نَارٌ",        meaning: "Ateş / Cehennem ateşi",        wrong: ["Su", "Hava", "Toprak"] },
-  { arabic: "قَلْبٌ",       meaning: "Kalp / Gönül",                 wrong: ["El", "Göz", "Kulak"] },
-  { arabic: "عِلْمٌ",       meaning: "İlim / Bilgi",                 wrong: ["Cehalet", "Güç", "Mal"] },
-  { arabic: "صَبْرٌ",       meaning: "Sabır",                        wrong: ["Acele", "Korku", "Hırs"] },
-  { arabic: "إِيمَانٌ",     meaning: "İman",                         wrong: ["Küfür", "Şüphe", "Kibir"] },
-  { arabic: "تَقْوَى",      meaning: "Takva / Allah'tan korkma",     wrong: ["Cimrilik", "Kibir", "Gaflet"] },
-  { arabic: "آيَةٌ",        meaning: "Ayet / İşaret",                wrong: ["Sure", "Cüz", "Hizb"] },
-  { arabic: "سُورَةٌ",      meaning: "Sure",                         wrong: ["Ayet", "Kelime", "Harf"] },
-  { arabic: "قُرْآنٌ",      meaning: "Kuran",                        wrong: ["Tevrat", "İncil", "Zebur"] },
-  { arabic: "رَبِّ",        meaning: "Rab / Efendi",                 wrong: ["Kul", "Şeytan", "Dünya"] },
-
-  // İnsanlar & toplum
-  { arabic: "نَبِيٌّ",      meaning: "Nebi / Peygamber",             wrong: ["Melek", "Veli", "Şehit"] },
-  { arabic: "رَسُولٌ",      meaning: "Resul / Elçi",                 wrong: ["Kral", "Kâtip", "Şair"] },
-  { arabic: "مُؤْمِنٌ",     meaning: "Mümin / İnanan",               wrong: ["Kâfir", "Münafık", "Fasık"] },
-  { arabic: "كَافِرٌ",      meaning: "Kâfir / İnkârcı",              wrong: ["Mümin", "Fasık", "Zalim"] },
-  { arabic: "مُنَافِقٌ",    meaning: "Münafık / İkiyüzlü",           wrong: ["Mümin", "Kâfir", "Zalim"] },
-  { arabic: "إِنْسَانٌ",    meaning: "İnsan",                        wrong: ["Cin", "Melek", "Hayvan"] },
-  { arabic: "مَلَكٌ",       meaning: "Melek",                        wrong: ["Cin", "İnsan", "Şeytan"] },
-  { arabic: "شَيْطَانٌ",    meaning: "Şeytan",                       wrong: ["Melek", "Cin", "İnsan"] },
-  { arabic: "عَبْدٌ",       meaning: "Kul / Köle",                   wrong: ["Efendi", "Kral", "Peygamber"] },
-  { arabic: "قَوْمٌ",       meaning: "Kavim / Halk",                 wrong: ["Ordu", "Aile", "Yolcu"] },
-  { arabic: "أُمَّةٌ",      meaning: "Ümmet / Topluluk",             wrong: ["Aile", "Ordu", "Devlet"] },
-  { arabic: "وَلِيٌّ",      meaning: "Veli / Dost",                  wrong: ["Düşman", "Yabancı", "Köle"] },
-
-  // Doğa & evren
-  { arabic: "سَمَاءٌ",      meaning: "Gök / Sema",                   wrong: ["Yer", "Deniz", "Dağ"] },
-  { arabic: "أَرْضٌ",       meaning: "Yer / Toprak",                 wrong: ["Gök", "Su", "Hava"] },
-  { arabic: "مَاءٌ",        meaning: "Su",                           wrong: ["Ateş", "Hava", "Toprak"] },
-  { arabic: "نَهَارٌ",      meaning: "Gündüz",                       wrong: ["Gece", "Sabah", "Akşam"] },
-  { arabic: "لَيْلٌ",       meaning: "Gece",                         wrong: ["Gündüz", "Sabah", "Öğle"] },
-  { arabic: "شَمْسٌ",       meaning: "Güneş",                        wrong: ["Ay", "Yıldız", "Bulut"] },
-  { arabic: "قَمَرٌ",       meaning: "Ay",                           wrong: ["Güneş", "Yıldız", "Bulut"] },
-  { arabic: "نَجْمٌ",       meaning: "Yıldız",                       wrong: ["Ay", "Güneş", "Işık"] },
-  { arabic: "جَبَلٌ",       meaning: "Dağ",                          wrong: ["Deniz", "Nehir", "Çöl"] },
-  { arabic: "بَحْرٌ",       meaning: "Deniz",                        wrong: ["Nehir", "Göl", "Dağ"] },
-  { arabic: "رِيحٌ",        meaning: "Rüzgar",                       wrong: ["Yağmur", "Kar", "Fırtına"] },
-  { arabic: "مَطَرٌ",       meaning: "Yağmur",                       wrong: ["Kar", "Rüzgar", "Bulut"] },
-  { arabic: "شَجَرَةٌ",     meaning: "Ağaç",                         wrong: ["Çiçek", "Taş", "Toprak"] },
-  { arabic: "نَارٌ",        meaning: "Ateş",                         wrong: ["Su", "Hava", "Toprak"] },
-
+  { arabic: "\u0627\u0644\u0652\u062D\u064E\u0645\u0652\u062F\u064F",    meaning: "Hamd / \u00d6vg\u00fc",                  wrong: ["\u015eik\u00e2yet", "Dua", "\u0130stek"] },
+  { arabic: "\u0643\u0650\u062A\u064E\u0627\u0628\u064C",      meaning: "Kitap",                        wrong: ["Ev", "Su", "Ta\u015f"] },
+  { arabic: "\u0646\u064F\u0648\u0631\u064C",        meaning: "Nur / I\u015f\u0131k",                   wrong: ["Karanl\u0131k", "Ate\u015f", "Su"] },
+  { arabic: "\u0635\u064E\u0644\u064E\u0627\u0629\u064C",      meaning: "Namaz / Dua",                  wrong: ["Oru\u00e7", "Zekat", "Hac"] },
+  { arabic: "\u0631\u064E\u062D\u0652\u0645\u064E\u0629\u064C",     meaning: "Rahmet / Merhamet",            wrong: ["Azap", "H\u00fcz\u00fcn", "Felaket"] },
+  { arabic: "\u062C\u064E\u0646\u0651\u064E\u0629\u064C",      meaning: "Cennet",                       wrong: ["Cehennem", "D\u00fcnya", "Kabir"] },
+  { arabic: "\u0646\u064E\u0627\u0631\u064C",        meaning: "Ate\u015f / Cehennem ate\u015fi",        wrong: ["Su", "Hava", "Toprak"] },
+  { arabic: "\u0642\u064E\u0644\u0652\u0628\u064C",       meaning: "Kalp / G\u00f6n\u00fcl",                 wrong: ["El", "G\u00f6z", "Kulak"] },
+  { arabic: "\u0639\u0650\u0644\u0652\u0645\u064C",       meaning: "\u0130lim / Bilgi",                    wrong: ["Cehalet", "G\u00fc\u00e7", "Mal"] },
+  { arabic: "\u0635\u064E\u0628\u0652\u0631\u064C",       meaning: "Sab\u0131r",                        wrong: ["Acele", "Korku", "H\u0131rs"] },
+  { arabic: "\u0625\u0650\u064A\u0645\u064E\u0627\u0646\u064C",     meaning: "\u0130man",                         wrong: ["K\u00fcf\u00fcr", "\u015e\u00fcphe", "Kibir"] },
+  { arabic: "\u062A\u064E\u0642\u0652\u0648\u064E\u0649",      meaning: "Takva / Allah'tan korkma",     wrong: ["Cimrilik", "Kibir", "Gaflet"] },
+  { arabic: "\u0622\u064A\u064E\u0629\u064C",        meaning: "Ayet / \u0130\u015faret",                wrong: ["Sure", "C\u00fcz", "Hizb"] },
+  { arabic: "\u0633\u064F\u0648\u0631\u064E\u0629\u064C",      meaning: "Sure",                         wrong: ["Ayet", "Kelime", "Harf"] },
+  { arabic: "\u0642\u064F\u0631\u0652\u0622\u0646\u064C",      meaning: "Kuran",                        wrong: ["Tevrat", "\u0130ncil", "Zebur"] },
+  { arabic: "\u0631\u064E\u0628\u0651\u0650",        meaning: "Rab / Efendi",                 wrong: ["Kul", "\u015eeytan", "D\u00fcnya"] },
+  // Insanlar & toplum
+  { arabic: "\u0646\u064E\u0628\u0650\u064A\u0651\u064C",      meaning: "Nebi / Peygamber",             wrong: ["Melek", "Veli", "\u015eehit"] },
+  { arabic: "\u0631\u064E\u0633\u064F\u0648\u0644\u064C",      meaning: "Resul / El\u00e7i",                 wrong: ["Kral", "K\u00e2tip", "\u015eair"] },
+  { arabic: "\u0645\u064F\u0624\u0652\u0645\u0650\u0646\u064C",     meaning: "M\u00fcmin / \u0130nanan",               wrong: ["K\u00e2fir", "M\u00fcnaf\u0131k", "Fas\u0131k"] },
+  { arabic: "\u0643\u064E\u0627\u0641\u0650\u0631\u064C",      meaning: "K\u00e2fir / \u0130nk\u00e2rc\u0131",              wrong: ["M\u00fcmin", "Fas\u0131k", "Zalim"] },
+  { arabic: "\u0645\u064F\u0646\u064E\u0627\u0641\u0650\u0642\u064C",    meaning: "M\u00fcnaf\u0131k / \u0130kiy\u00fczl\u00fc",           wrong: ["M\u00fcmin", "K\u00e2fir", "Zalim"] },
+  { arabic: "\u0625\u0650\u0646\u0652\u0633\u064E\u0627\u0646\u064C",    meaning: "\u0130nsan",                        wrong: ["Cin", "Melek", "Hayvan"] },
+  { arabic: "\u0645\u064E\u0644\u064E\u0643\u064C",       meaning: "Melek",                        wrong: ["Cin", "\u0130nsan", "\u015eeytan"] },
+  { arabic: "\u0634\u064E\u064A\u0652\u0637\u064E\u0627\u0646\u064C",    meaning: "\u015eeytan",                       wrong: ["Melek", "Cin", "\u0130nsan"] },
+  { arabic: "\u0639\u064E\u0628\u0652\u062F\u064C",       meaning: "Kul / K\u00f6le",                   wrong: ["Efendi", "Kral", "Peygamber"] },
+  { arabic: "\u0642\u064E\u0648\u0652\u0645\u064C",       meaning: "Kavim / Halk",                 wrong: ["Ordu", "Aile", "Yolcu"] },
+  { arabic: "\u0623\u064F\u0645\u0651\u064E\u0629\u064C",      meaning: "\u00dcmmet / Topluluk",             wrong: ["Aile", "Ordu", "Devlet"] },
+  { arabic: "\u0648\u064E\u0644\u0650\u064A\u0651\u064C",      meaning: "Veli / Dost",                  wrong: ["D\u00fc\u015fman", "Yabanc\u0131", "K\u00f6le"] },
+  // Doga & evren
+  { arabic: "\u0633\u064E\u0645\u064E\u0627\u0621\u064C",      meaning: "G\u00f6k / Sema",                   wrong: ["Yer", "Deniz", "Da\u011f"] },
+  { arabic: "\u0623\u064E\u0631\u0652\u0636\u064C",       meaning: "Yer / Toprak",                 wrong: ["G\u00f6k", "Su", "Hava"] },
+  { arabic: "\u0645\u064E\u0627\u0621\u064C",        meaning: "Su",                           wrong: ["Ate\u015f", "Hava", "Toprak"] },
+  { arabic: "\u0646\u064E\u0647\u064E\u0627\u0631\u064C",      meaning: "G\u00fcnd\u00fcz",                       wrong: ["Gece", "Sabah", "Ak\u015fam"] },
+  { arabic: "\u0644\u064E\u064A\u0652\u0644\u064C",       meaning: "Gece",                         wrong: ["G\u00fcnd\u00fcz", "Sabah", "\u00d6\u011fle"] },
+  { arabic: "\u0634\u064E\u0645\u0652\u0633\u064C",       meaning: "G\u00fcne\u015f",                        wrong: ["Ay", "Y\u0131ld\u0131z", "Bulut"] },
+  { arabic: "\u0642\u064E\u0645\u064E\u0631\u064C",       meaning: "Ay",                           wrong: ["G\u00fcne\u015f", "Y\u0131ld\u0131z", "Bulut"] },
+  { arabic: "\u0646\u064E\u062C\u0652\u0645\u064C",       meaning: "Y\u0131ld\u0131z",                       wrong: ["Ay", "G\u00fcne\u015f", "I\u015f\u0131k"] },
+  { arabic: "\u062C\u064E\u0628\u064E\u0644\u064C",       meaning: "Da\u011f",                          wrong: ["Deniz", "Nehir", "\u00c7\u00f6l"] },
+  { arabic: "\u0628\u064E\u062D\u0652\u0631\u064C",       meaning: "Deniz",                        wrong: ["Nehir", "G\u00f6l", "Da\u011f"] },
+  { arabic: "\u0631\u0650\u064A\u062D\u064C",        meaning: "R\u00fczgar",                       wrong: ["Ya\u011fmur", "Kar", "F\u0131rt\u0131na"] },
+  { arabic: "\u0645\u064E\u0637\u064E\u0631\u064C",       meaning: "Ya\u011fmur",                       wrong: ["Kar", "R\u00fczgar", "Bulut"] },
+  { arabic: "\u0634\u064E\u062C\u064E\u0631\u064E\u0629\u064C",     meaning: "A\u011fa\u00e7",                         wrong: ["\u00c7i\u00e7ek", "Ta\u015f", "Toprak"] },
   // Ahiret & din
-  { arabic: "يَوْمٌ",       meaning: "Gün",                          wrong: ["Gece", "Yıl", "Ay"] },
-  { arabic: "آخِرَةٌ",      meaning: "Ahiret",                       wrong: ["Dünya", "Cennet", "Kabir"] },
-  { arabic: "دُنْيَا",      meaning: "Dünya",                        wrong: ["Ahiret", "Cennet", "Cehennem"] },
-  { arabic: "قِيَامَةٌ",    meaning: "Kıyamet",                      wrong: ["Ölüm", "Hesap", "Cennet"] },
-  { arabic: "حِسَابٌ",      meaning: "Hesap / Yargılama",            wrong: ["Ödül", "Azap", "Cennet"] },
-  { arabic: "جَهَنَّمُ",    meaning: "Cehennem",                     wrong: ["Cennet", "Dünya", "Kabir"] },
-  { arabic: "مَوْتٌ",       meaning: "Ölüm",                         wrong: ["Hayat", "Diriliş", "Uyku"] },
-  { arabic: "حَيَاةٌ",      meaning: "Hayat / Yaşam",                wrong: ["Ölüm", "Uyku", "Rüya"] },
-  { arabic: "صِرَاطٌ",      meaning: "Yol / Sırat",                  wrong: ["Kapı", "Köprü", "Dağ"] },
-  { arabic: "مِيزَانٌ",     meaning: "Terazi / Ölçü",                wrong: ["Hesap", "Kitap", "Kalem"] },
-  { arabic: "عَذَابٌ",      meaning: "Azap / Ceza",                  wrong: ["Nimet", "Rahmet", "Cennet"] },
-  { arabic: "ثَوَابٌ",      meaning: "Sevap / Ödül",                 wrong: ["Ceza", "Azap", "Günah"] },
-  { arabic: "ذَنْبٌ",       meaning: "Günah / Suç",                  wrong: ["Sevap", "İbadet", "Tövbe"] },
-  { arabic: "تَوْبَةٌ",     meaning: "Tövbe / Pişmanlık",            wrong: ["Günah", "Kibir", "Gaflet"] },
-  { arabic: "نِعْمَةٌ",     meaning: "Nimet",                        wrong: ["Azap", "Ceza", "Yoksulluk"] },
-
-  // İbadet & ahlak
-  { arabic: "زَكَاةٌ",      meaning: "Zekat",                        wrong: ["Oruç", "Hac", "Namaz"] },
-  { arabic: "صَوْمٌ",       meaning: "Oruç",                         wrong: ["Namaz", "Zekat", "Hac"] },
-  { arabic: "حَجٌّ",        meaning: "Hac",                          wrong: ["Umre", "Zekat", "Oruç"] },
-  { arabic: "جِهَادٌ",      meaning: "Cihad / Mücadele",             wrong: ["Namaz", "Oruç", "Hac"] },
-  { arabic: "دُعَاءٌ",      meaning: "Dua",                          wrong: ["Namaz", "Zikir", "Tilâvet"] },
-  { arabic: "ذِكْرٌ",       meaning: "Zikir / Anmak",                wrong: ["Dua", "Namaz", "Oruç"] },
-  { arabic: "تَوَكُّلٌ",    meaning: "Tevekkül / Allah'a güvenmek",  wrong: ["Korku", "Ümit", "Sabır"] },
-  { arabic: "إِخْلَاصٌ",    meaning: "İhlâs / Samimilik",            wrong: ["Riya", "Kibir", "Cimrilik"] },
-  { arabic: "شُكْرٌ",       meaning: "Şükür / Teşekkür",             wrong: ["Nankörlük", "Şikayet", "Kibir"] },
-  { arabic: "عَدْلٌ",       meaning: "Adalet",                       wrong: ["Zulüm", "Kibir", "Yalan"] },
-  { arabic: "أَمَانَةٌ",    meaning: "Emanet / Güven",               wrong: ["Hıyanet", "Yalan", "Kibir"] },
-  { arabic: "رِبَا",        meaning: "Faiz",                         wrong: ["Zekat", "Sadaka", "Ticaraet"] },
-  { arabic: "صَدَقَةٌ",     meaning: "Sadaka",                       wrong: ["Zekat", "Hac", "Oruç"] },
-  { arabic: "كِبْرٌ",       meaning: "Kibir / Büyüklük taslama",     wrong: ["Tevazu", "Sabır", "Şükür"] },
-  { arabic: "حَسَدٌ",       meaning: "Haset / Kıskançlık",           wrong: ["Sevgi", "Merhamet", "Sabır"] },
-
+  { arabic: "\u064A\u064E\u0648\u0652\u0645\u064C",       meaning: "G\u00fcn",                          wrong: ["Gece", "Y\u0131l", "Ay"] },
+  { arabic: "\u0622\u062E\u0650\u0631\u064E\u0629\u064C",      meaning: "Ahiret",                       wrong: ["D\u00fcnya", "Cennet", "Kabir"] },
+  { arabic: "\u062F\u064F\u0646\u0652\u064A\u064E\u0627",      meaning: "D\u00fcnya",                        wrong: ["Ahiret", "Cennet", "Cehennem"] },
+  { arabic: "\u0642\u0650\u064A\u064E\u0627\u0645\u064E\u0629\u064C",    meaning: "K\u0131yamet",                      wrong: ["\u00d6l\u00fcm", "Hesap", "Cennet"] },
+  { arabic: "\u062D\u0650\u0633\u064E\u0627\u0628\u064C",      meaning: "Hesap / Yarg\u0131lama",            wrong: ["\u00d6d\u00fcl", "Azap", "Cennet"] },
+  { arabic: "\u062C\u064E\u0647\u064E\u0646\u0651\u064E\u0645\u064F",    meaning: "Cehennem",                     wrong: ["Cennet", "D\u00fcnya", "Kabir"] },
+  { arabic: "\u0645\u064E\u0648\u0652\u062A\u064C",       meaning: "\u00d6l\u00fcm",                         wrong: ["Hayat", "Dirili\u015f", "Uyku"] },
+  { arabic: "\u062D\u064E\u064A\u064E\u0627\u0629\u064C",      meaning: "Hayat / Ya\u015fam",                wrong: ["\u00d6l\u00fcm", "Uyku", "R\u00fcya"] },
+  { arabic: "\u0635\u0650\u0631\u064E\u0627\u0637\u064C",      meaning: "Yol / S\u0131rat",                  wrong: ["Kap\u0131", "K\u00f6pr\u00fc", "Da\u011f"] },
+  { arabic: "\u0645\u0650\u064A\u0632\u064E\u0627\u0646\u064C",     meaning: "Terazi / \u00d6l\u00e7\u00fc",                wrong: ["Hesap", "Kitap", "Kalem"] },
+  { arabic: "\u0639\u064E\u0630\u064E\u0627\u0628\u064C",      meaning: "Azap / Ceza",                  wrong: ["Nimet", "Rahmet", "Cennet"] },
+  { arabic: "\u062B\u064E\u0648\u064E\u0627\u0628\u064C",      meaning: "Sevap / \u00d6d\u00fcl",                wrong: ["Ceza", "Azap", "G\u00fcnah"] },
+  { arabic: "\u0630\u064E\u0646\u0652\u0628\u064C",       meaning: "G\u00fcnah / Su\u00e7",                  wrong: ["Sevap", "\u0130badet", "T\u00f6vbe"] },
+  { arabic: "\u062A\u064E\u0648\u0652\u0628\u064E\u0629\u064C",     meaning: "T\u00f6vbe / Pi\u015fmanl\u0131k",            wrong: ["G\u00fcnah", "Kibir", "Gaflet"] },
+  { arabic: "\u0646\u0650\u0639\u0652\u0645\u064E\u0629\u064C",     meaning: "Nimet",                        wrong: ["Azap", "Ceza", "Yoksulluk"] },
+  // Ibadet & ahlak
+  { arabic: "\u0632\u064E\u0643\u064E\u0627\u0629\u064C",      meaning: "Zekat",                        wrong: ["Oru\u00e7", "Hac", "Namaz"] },
+  { arabic: "\u0635\u064E\u0648\u0652\u0645\u064C",       meaning: "Oru\u00e7",                         wrong: ["Namaz", "Zekat", "Hac"] },
+  { arabic: "\u062D\u064E\u062C\u0651\u064C",        meaning: "Hac",                          wrong: ["Umre", "Zekat", "Oru\u00e7"] },
+  { arabic: "\u062C\u0650\u0647\u064E\u0627\u062F\u064C",      meaning: "Cihad / M\u00fccadele",             wrong: ["Namaz", "Oru\u00e7", "Hac"] },
+  { arabic: "\u062F\u064F\u0639\u064E\u0627\u0621\u064C",      meaning: "Dua",                          wrong: ["Namaz", "Zikir", "Til\u00e2vet"] },
+  { arabic: "\u0630\u0650\u0643\u0652\u0631\u064C",       meaning: "Zikir / Anmak",                wrong: ["Dua", "Namaz", "Oru\u00e7"] },
+  { arabic: "\u062A\u064E\u0648\u064E\u0643\u0651\u064F\u0644\u064C",    meaning: "Tevekk\u00fcl / Allah'a g\u00fcvenmek",  wrong: ["Korku", "\u00dcmit", "Sab\u0131r"] },
+  { arabic: "\u0625\u0650\u062E\u0652\u0644\u064E\u0627\u0635\u064C",    meaning: "\u0130hl\u00e2s / Samimilik",            wrong: ["Riya", "Kibir", "Cimrilik"] },
+  { arabic: "\u0634\u064F\u0643\u0652\u0631\u064C",       meaning: "\u015e\u00fck\u00fcr / Te\u015fekk\u00fcr",             wrong: ["Nank\u00f6rl\u00fck", "\u015eikayet", "Kibir"] },
+  { arabic: "\u0639\u064E\u062F\u0652\u0644\u064C",       meaning: "Adalet",                       wrong: ["Zul\u00fcm", "Kibir", "Yalan"] },
+  { arabic: "\u0623\u064E\u0645\u064E\u0627\u0646\u064E\u0629\u064C",    meaning: "Emanet / G\u00fcven",               wrong: ["H\u0131yanet", "Yalan", "Kibir"] },
+  { arabic: "\u0631\u0650\u0628\u064E\u0627",        meaning: "Faiz",                         wrong: ["Zekat", "Sadaka", "Ticaraet"] },
+  { arabic: "\u0635\u064E\u062F\u064E\u0642\u064E\u0629\u064C",     meaning: "Sadaka",                       wrong: ["Zekat", "Hac", "Oru\u00e7"] },
+  { arabic: "\u0643\u0650\u0628\u0652\u0631\u064C",       meaning: "Kibir / B\u00fcy\u00fckl\u00fck taslama",     wrong: ["Tevazu", "Sab\u0131r", "\u015e\u00fck\u00fcr"] },
+  { arabic: "\u062D\u064E\u0633\u064E\u062F\u064C",       meaning: "Haset / K\u0131skan\u00e7l\u0131k",           wrong: ["Sevgi", "Merhamet", "Sab\u0131r"] },
   // Fiiller & eylem isimleri
-  { arabic: "هُدًى",        meaning: "Hidayet / Rehberlik",          wrong: ["Sapıklık", "Karanlık", "Şüphe"] },
-  { arabic: "ضَلَالٌ",      meaning: "Sapıklık / Yoldan çıkma",      wrong: ["Hidayet", "İman", "Tövbe"] },
-  { arabic: "فَتْحٌ",       meaning: "Fetih / Açılış",               wrong: ["Yenilgi", "Kapanma", "Hüzün"] },
-  { arabic: "نَصْرٌ",       meaning: "Zafer / Yardım",               wrong: ["Yenilgi", "Hüzün", "Azap"] },
-  { arabic: "هِجْرَةٌ",     meaning: "Hicret / Göç",                 wrong: ["Dönüş", "Savaş", "Barış"] },
-  { arabic: "عَهْدٌ",       meaning: "Ahit / Sözleşme",              wrong: ["Yalan", "Hıyanet", "Savaş"] },
-  { arabic: "قَوْلٌ",       meaning: "Söz / Kelam",                  wrong: ["Sessizlik", "İş", "Bakış"] },
-  { arabic: "فِعْلٌ",       meaning: "Fiil / Eylem",                 wrong: ["Söz", "Düşünce", "Niyet"] },
-  { arabic: "نِيَّةٌ",      meaning: "Niyet",                        wrong: ["Eylem", "Söz", "Sonuç"] },
-  { arabic: "حِكْمَةٌ",     meaning: "Hikmet / Bilgelik",            wrong: ["Cehalet", "Kibir", "Gaflet"] },
-
-  // Varlık & yaratılış
-  { arabic: "خَلْقٌ",       meaning: "Yaratılış / Yaratık",          wrong: ["Ölüm", "Yıkım", "Değişim"] },
-  { arabic: "رُوحٌ",        meaning: "Ruh",                          wrong: ["Beden", "Kan", "Nefes"] },
-  { arabic: "نَفْسٌ",       meaning: "Nefs / Can",                   wrong: ["Ruh", "Beden", "Akıl"] },
-  { arabic: "عَقْلٌ",       meaning: "Akıl",                         wrong: ["Kalp", "Nefs", "Ruh"] },
-  { arabic: "لِسَانٌ",      meaning: "Dil / Lisan",                  wrong: ["Göz", "Kulak", "El"] },
-  { arabic: "يَدٌ",         meaning: "El",                           wrong: ["Göz", "Ayak", "Baş"] },
-  { arabic: "عَيْنٌ",       meaning: "Göz / Pınar",                  wrong: ["Kulak", "El", "Dil"] },
-  { arabic: "أُذُنٌ",       meaning: "Kulak",                        wrong: ["Göz", "Dil", "El"] },
-  { arabic: "وَجْهٌ",       meaning: "Yüz",                          wrong: ["El", "Ayak", "Gönül"] },
-
+  { arabic: "\u0647\u064F\u062F\u064B\u0649",        meaning: "Hidayet / Rehberlik",          wrong: ["Sap\u0131kl\u0131k", "Karanl\u0131k", "\u015e\u00fcphe"] },
+  { arabic: "\u0636\u064E\u0644\u064E\u0627\u0644\u064C",      meaning: "Sap\u0131kl\u0131k / Yoldan \u00e7\u0131kma",      wrong: ["Hidayet", "\u0130man", "T\u00f6vbe"] },
+  { arabic: "\u0641\u064E\u062A\u0652\u062D\u064C",       meaning: "Fetih / A\u00e7\u0131l\u0131\u015f",               wrong: ["Yenilgi", "Kapanma", "H\u00fcz\u00fcn"] },
+  { arabic: "\u0646\u064E\u0635\u0652\u0631\u064C",       meaning: "Zafer / Yard\u0131m",               wrong: ["Yenilgi", "H\u00fcz\u00fcn", "Azap"] },
+  { arabic: "\u0647\u0650\u062C\u0652\u0631\u064E\u0629\u064C",     meaning: "Hicret / G\u00f6\u00e7",                wrong: ["D\u00f6n\u00fc\u015f", "Sava\u015f", "Bar\u0131\u015f"] },
+  { arabic: "\u0639\u064E\u0647\u0652\u062F\u064C",       meaning: "Ahit / S\u00f6zle\u015fme",              wrong: ["Yalan", "H\u0131yanet", "Sava\u015f"] },
+  { arabic: "\u0642\u064E\u0648\u0652\u0644\u064C",       meaning: "S\u00f6z / Kelam",                  wrong: ["Sessizlik", "\u0130\u015f", "Bak\u0131\u015f"] },
+  { arabic: "\u0641\u0650\u0639\u0652\u0644\u064C",       meaning: "Fiil / Eylem",                 wrong: ["S\u00f6z", "D\u00fc\u015f\u00fcnce", "Niyet"] },
+  { arabic: "\u0646\u0650\u064A\u0651\u064E\u0629\u064C",      meaning: "Niyet",                        wrong: ["Eylem", "S\u00f6z", "Sonu\u00e7"] },
+  { arabic: "\u062D\u0650\u0643\u0652\u0645\u064E\u0629\u064C",     meaning: "Hikmet / Bilgelik",            wrong: ["Cehalet", "Kibir", "Gaflet"] },
+  // Varlik & yaratilis
+  { arabic: "\u062E\u064E\u0644\u0652\u0642\u064C",       meaning: "Yarat\u0131l\u0131\u015f / Yarat\u0131k",          wrong: ["\u00d6l\u00fcm", "Y\u0131k\u0131m", "De\u011fi\u015fim"] },
+  { arabic: "\u0631\u064F\u0648\u062D\u064C",        meaning: "Ruh",                          wrong: ["Beden", "Kan", "Nefes"] },
+  { arabic: "\u0646\u064E\u0641\u0652\u0633\u064C",       meaning: "Nefs / Can",                   wrong: ["Ruh", "Beden", "Ak\u0131l"] },
+  { arabic: "\u0639\u064E\u0642\u0652\u0644\u064C",       meaning: "Ak\u0131l",                         wrong: ["Kalp", "Nefs", "Ruh"] },
+  { arabic: "\u0644\u0650\u0633\u064E\u0627\u0646\u064C",      meaning: "Dil / Lisan",                  wrong: ["G\u00f6z", "Kulak", "El"] },
+  { arabic: "\u064A\u064E\u062F\u064C",         meaning: "El",                           wrong: ["G\u00f6z", "Ayak", "Ba\u015f"] },
+  { arabic: "\u0639\u064E\u064A\u0652\u0646\u064C",       meaning: "G\u00f6z / P\u0131nar",                  wrong: ["Kulak", "El", "Dil"] },
+  { arabic: "\u0623\u064F\u0630\u064F\u0646\u064C",       meaning: "Kulak",                        wrong: ["G\u00f6z", "Dil", "El"] },
+  { arabic: "\u0648\u064E\u062C\u0652\u0647\u064C",       meaning: "Y\u00fcz",                          wrong: ["El", "Ayak", "G\u00f6n\u00fcl"] },
   // Zaman & mekan
-  { arabic: "وَقْتٌ",       meaning: "Vakit / Zaman",                wrong: ["Mekan", "Yol", "Kapı"] },
-  { arabic: "مَسْجِدٌ",     meaning: "Mescit / Cami",                wrong: ["Ev", "Pazar", "Saray"] },
-  { arabic: "بَيْتٌ",       meaning: "Ev",                           wrong: ["Mescit", "Kapı", "Yol"] },
-  { arabic: "مَدِينَةٌ",    meaning: "Şehir / Medine",               wrong: ["Köy", "Çöl", "Dağ"] },
-  { arabic: "طَرِيقٌ",      meaning: "Yol",                          wrong: ["Kapı", "Ev", "Nehir"] },
-  { arabic: "أَوَّلٌ",      meaning: "İlk / Evvel",                  wrong: ["Son", "Orta", "Bir"] },
-  { arabic: "آخِرٌ",        meaning: "Son / Ahir",                   wrong: ["İlk", "Orta", "Yeni"] },
-
-  // Sıfatlar & nitelikler
-  { arabic: "كَبِيرٌ",      meaning: "Büyük",                        wrong: ["Küçük", "Uzak", "Eski"] },
-  { arabic: "صَغِيرٌ",      meaning: "Küçük",                        wrong: ["Büyük", "Uzun", "Yeni"] },
-  { arabic: "عَظِيمٌ",      meaning: "Yüce / Azim",                  wrong: ["Küçük", "Zayıf", "Adi"] },
-  { arabic: "حَقٌّ",        meaning: "Hak / Gerçek",                 wrong: ["Batıl", "Yalan", "Şüphe"] },
-  { arabic: "بَاطِلٌ",      meaning: "Batıl / Geçersiz",             wrong: ["Hak", "Gerçek", "Doğru"] },
-  { arabic: "حَسَنٌ",       meaning: "Güzel / İyi",                  wrong: ["Kötü", "Çirkin", "Yanlış"] },
-  { arabic: "قَرِيبٌ",      meaning: "Yakın",                        wrong: ["Uzak", "Yabancı", "Gizli"] },
-  { arabic: "بَعِيدٌ",      meaning: "Uzak",                         wrong: ["Yakın", "Burada", "Gizli"] },
-
-  // Diğer önemli kelimeler
-  { arabic: "أَمْرٌ",       meaning: "Emir / İş",                    wrong: ["Yasak", "Niyet", "Söz"] },
-  { arabic: "نَهْيٌ",       meaning: "Yasak / Nehiy",                wrong: ["Emir", "İzin", "Teşvik"] },
-  { arabic: "مَلَكُوتٌ",    meaning: "Hükümranlık / İktidar",        wrong: ["Zayıflık", "Yoksulluk", "Kölelik"] },
-  { arabic: "غَيْبٌ",       meaning: "Gayb / Görünmez",              wrong: ["Görünen", "Bilinen", "Açık"] },
-  { arabic: "وَحْيٌ",       meaning: "Vahiy",                        wrong: ["Rüya", "Görüş", "Düşünce"] },
-  { arabic: "فِرْعَوْنُ",   meaning: "Firavun",                      wrong: ["Karun", "Haman", "Nemrut"] },
-  { arabic: "إِبْرَاهِيمُ", meaning: "İbrahim (a.s.)",               wrong: ["Musa", "İsa", "Yusuf"] },
-  { arabic: "مُوسَى",       meaning: "Musa (a.s.)",                  wrong: ["İsa", "İbrahim", "Davud"] },
-  { arabic: "عِيسَى",       meaning: "İsa (a.s.)",                   wrong: ["Musa", "İbrahim", "Yahya"] },
-  { arabic: "مُحَمَّدٌ",    meaning: "Muhammed (s.a.v.)",             wrong: ["İbrahim", "Musa", "İsa"] },
-  { arabic: "إِسْرَائِيلُ", meaning: "İsrail / Yakup (a.s.)",        wrong: ["İbrahim", "Musa", "İsmail"] },
+  { arabic: "\u0648\u064E\u0642\u0652\u062A\u064C",       meaning: "Vakit / Zaman",                wrong: ["Mekan", "Yol", "Kap\u0131"] },
+  { arabic: "\u0645\u064E\u0633\u0652\u062C\u0650\u062F\u064C",     meaning: "Mescit / Cami",                wrong: ["Ev", "Pazar", "Saray"] },
+  { arabic: "\u0628\u064E\u064A\u0652\u062A\u064C",       meaning: "Ev",                           wrong: ["Mescit", "Kap\u0131", "Yol"] },
+  { arabic: "\u0645\u064E\u062F\u0650\u064A\u0646\u064E\u0629\u064C",    meaning: "\u015eehir / Medine",               wrong: ["K\u00f6y", "\u00c7\u00f6l", "Da\u011f"] },
+  { arabic: "\u0637\u064E\u0631\u0650\u064A\u0642\u064C",      meaning: "Yol",                          wrong: ["Kap\u0131", "Ev", "Nehir"] },
+  { arabic: "\u0623\u064E\u0648\u0651\u064E\u0644\u064C",      meaning: "\u0130lk / Evvel",                  wrong: ["Son", "Orta", "Bir"] },
+  { arabic: "\u0622\u062E\u0650\u0631\u064C",        meaning: "Son / Ahir",                   wrong: ["\u0130lk", "Orta", "Yeni"] },
+  // Sifatlar & nitelikler
+  { arabic: "\u0643\u064E\u0628\u0650\u064A\u0631\u064C",      meaning: "B\u00fcy\u00fck",                        wrong: ["K\u00fc\u00e7\u00fck", "Uzak", "Eski"] },
+  { arabic: "\u0635\u064E\u063A\u0650\u064A\u0631\u064C",      meaning: "K\u00fc\u00e7\u00fck",                        wrong: ["B\u00fcy\u00fck", "Uzun", "Yeni"] },
+  { arabic: "\u0639\u064E\u0638\u0650\u064A\u0645\u064C",      meaning: "Y\u00fcce / Azim",                  wrong: ["K\u00fc\u00e7\u00fck", "Zay\u0131f", "Adi"] },
+  { arabic: "\u062D\u064E\u0642\u0651\u064C",        meaning: "Hak / Ger\u00e7ek",                 wrong: ["Bat\u0131l", "Yalan", "\u015e\u00fcphe"] },
+  { arabic: "\u0628\u064E\u0627\u0637\u0650\u0644\u064C",      meaning: "Bat\u0131l / Ge\u00e7ersiz",             wrong: ["Hak", "Ger\u00e7ek", "Do\u011fru"] },
+  { arabic: "\u062D\u064E\u0633\u064E\u0646\u064C",       meaning: "G\u00fczel / \u0130yi",                  wrong: ["K\u00f6t\u00fc", "\u00c7irkin", "Yanl\u0131\u015f"] },
+  { arabic: "\u0642\u064E\u0631\u0650\u064A\u0628\u064C",      meaning: "Yak\u0131n",                        wrong: ["Uzak", "Yabanc\u0131", "Gizli"] },
+  { arabic: "\u0628\u064E\u0639\u0650\u064A\u062F\u064C",      meaning: "Uzak",                         wrong: ["Yak\u0131n", "Burada", "Gizli"] },
+  // Diger onemli kelimeler
+  { arabic: "\u0623\u064E\u0645\u0652\u0631\u064C",       meaning: "Emir / \u0130\u015f",                    wrong: ["Yasak", "Niyet", "S\u00f6z"] },
+  { arabic: "\u0646\u064E\u0647\u0652\u064A\u064C",       meaning: "Yasak / Nehiy",                wrong: ["Emir", "\u0130zin", "Te\u015fvik"] },
+  { arabic: "\u0645\u064E\u0644\u064E\u0643\u064F\u0648\u062A\u064C",    meaning: "H\u00fck\u00fcmranl\u0131k / \u0130ktidar",        wrong: ["Zay\u0131fl\u0131k", "Yoksulluk", "K\u00f6lelik"] },
+  { arabic: "\u063A\u064E\u064A\u0652\u0628\u064C",       meaning: "Gayb / G\u00f6r\u00fcnmez",              wrong: ["G\u00f6r\u00fcnen", "Bilinen", "A\u00e7\u0131k"] },
+  { arabic: "\u0648\u064E\u062D\u0652\u064A\u064C",       meaning: "Vahiy",                        wrong: ["R\u00fcya", "G\u00f6r\u00fc\u015f", "D\u00fc\u015f\u00fcnce"] },
+  { arabic: "\u0641\u0650\u0631\u0652\u0639\u064E\u0648\u0652\u0646\u064F",   meaning: "Firavun",                      wrong: ["Karun", "Haman", "Nemrut"] },
+  { arabic: "\u0625\u0650\u0628\u0652\u0631\u064E\u0627\u0647\u0650\u064A\u0645\u064F", meaning: "\u0130brahim (a.s.)",               wrong: ["Musa", "\u0130sa", "Yusuf"] },
+  { arabic: "\u0645\u064F\u0648\u0633\u064E\u0649",       meaning: "Musa (a.s.)",                  wrong: ["\u0130sa", "\u0130brahim", "Davud"] },
+  { arabic: "\u0639\u0650\u064A\u0633\u064E\u0649",       meaning: "\u0130sa (a.s.)",                   wrong: ["Musa", "\u0130brahim", "Yahya"] },
+  { arabic: "\u0645\u064F\u062D\u064E\u0645\u0651\u064E\u062F\u064C",    meaning: "Muhammed (s.a.v.)",             wrong: ["\u0130brahim", "Musa", "\u0130sa"] },
+  { arabic: "\u0625\u0650\u0633\u0652\u0631\u064E\u0627\u0626\u0650\u064A\u0644\u064F", meaning: "\u0130srail / Yakup (a.s.)",        wrong: ["\u0130brahim", "Musa", "\u0130smail"] },
 ];
 
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
-function getRandomQuestion(seenIndices: Set<number>) {
-  const available = WORD_PAIRS
-    .map((p, i) => i)
-    .filter((i) => !seenIndices.has(i));
-
+function getRandomQuestion(usedIndices: Set<number>) {
+  const available = WORD_PAIRS.map((_, i) => i).filter((i) => !usedIndices.has(i));
   const pool = available.length > 0 ? available : Array.from({ length: WORD_PAIRS.length }, (_, i) => i);
   const idx = pool[Math.floor(Math.random() * pool.length)];
   const pair = WORD_PAIRS[idx];
@@ -203,182 +200,220 @@ function getRandomQuestion(seenIndices: Set<number>) {
 
 type GameState = "playing" | "correct" | "wrong";
 
-function WordMeaningGame() {
+function WordMeaningPage() {
   const { t } = useTranslation();
-  const [seenIndices, setSeenIndices] = useState<Set<number>>(new Set());
+  const [screen, setScreen] = useState<"setup" | "game" | "gameover">("setup");
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+
+  // Game state
+  const [usedIndices, setUsedIndices] = useState<Set<number>>(new Set());
   const [score, setScore] = useState(0);
-  const submittedRef = useRef(false);
-  const sessionStart = useRef(Date.now());
   const [round, setRound] = useState(1);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
+  const [lastDelta, setLastDelta] = useState<number | null>(null);
+  const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [question, setQuestion] = useState(() => getRandomQuestion(new Set()));
   const [gameState, setGameState] = useState<GameState>("playing");
   const [selected, setSelected] = useState<string | null>(null);
+  const submittedRef = useRef(false);
+  const sessionStart = useRef(Date.now());
+  const questionStart = useRef(Date.now());
 
-  const allDone = seenIndices.size >= WORD_PAIRS.length;
-
-  // Doğru cevapta 3s sonra otomatik ilerle
   useEffect(() => {
     if (gameState !== "correct") return;
-    const t = setTimeout(nextRound, 3000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(nextRound, 2000);
+    return () => clearTimeout(timer);
   }, [gameState]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSelect = useCallback((opt: string) => {
-    if (gameState !== "playing") return;
-    setSelected(opt);
-    if (opt === question.meaning) {
-      setScore((s) => s + 10);
-      setGameState("correct");
-      setSeenIndices((prev) => new Set(prev).add(question.idx));
-    } else {
-      setGameState("wrong");
+  const handleSelect = useCallback(
+    (opt: string) => {
+      if (gameState !== "playing") return;
+      setSelected(opt);
+      const answerTime = Date.now() - questionStart.current;
+
+      if (opt === question.meaning) {
+        const newStreak = streak + 1;
+        const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
+        setScore((s) => s + pts);
+        setStreak(newStreak);
+        setBestStreak((b) => Math.max(b, newStreak));
+        setCorrectCount((c) => c + 1);
+        setLastDelta(pts);
+        setGameState("correct");
+        setUsedIndices((prev) => new Set(prev).add(question.idx));
+      } else {
+        const penalty = calcWrongPenalty(difficulty);
+        setScore((s) => Math.max(0, s - penalty));
+        setStreak(0);
+        setWrongCount((c) => c + 1);
+        setLastDelta(-penalty);
+        setGameState("wrong");
+      }
+    },
+    [gameState, question, streak, difficulty],
+  );
+
+  const endGame = useCallback(() => {
+    if (!submittedRef.current && score > 0) {
+      submittedRef.current = true;
+      submitScore({ data: { gameId: "word-meaning", score, durationMs: Date.now() - sessionStart.current, difficulty } })
+        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); })
+        .catch(() => {});
     }
-  }, [gameState, question]);
+    setScreen("gameover");
+  }, [score, difficulty]);
 
   const nextRound = () => {
-    const nextQ = getRandomQuestion(
-      gameState === "correct" ? new Set([...seenIndices, question.idx]) : seenIndices
-    );
-    setQuestion(nextQ);
+    if (round >= TOTAL_ROUNDS) { endGame(); return; }
+    const nextUsed = gameState === "correct" ? new Set([...usedIndices, question.idx]) : usedIndices;
+    setQuestion(getRandomQuestion(nextUsed));
     setGameState("playing");
     setSelected(null);
+    setLastDelta(null);
     setRound((r) => r + 1);
+    questionStart.current = Date.now();
   };
 
-  const resetSession = () => {
+  const handleRestart = () => {
     const fresh = new Set<number>();
-    setSeenIndices(fresh);
-    setScore(0);
-    setRound(1);
+    setUsedIndices(fresh); setScore(0); setRound(1); setStreak(0);
+    setBestStreak(0); setCorrectCount(0); setWrongCount(0);
+    setLastDelta(null); setIsNewHighScore(false);
+    submittedRef.current = false; sessionStart.current = Date.now();
+    questionStart.current = Date.now();
     setQuestion(getRandomQuestion(fresh));
-    setGameState("playing");
-    setSelected(null);
+    setGameState("playing"); setSelected(null); setScreen("game");
   };
 
-  // Tüm kelimeler tamamlandığında skoru kaydet
-  useEffect(() => {
-    if (allDone && score > 0 && !submittedRef.current) {
-      submittedRef.current = true;
-      submitScore({ data: { gameId: "word-meaning", score, durationMs: Date.now() - sessionStart.current } }).catch(() => {});
-    }
-  }, [allDone, score]);
-
-  // Tüm kelimeler tamamlandı
-  if (allDone) {
+  if (screen === "setup") {
     return (
-      <div className="max-w-lg mx-auto px-4 py-12 text-center">
-        <div className="w-16 h-16 rounded flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${P}18`, color: P }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M8 21h8M12 17v4M7 4h10l1 7H6L7 4z"/><path d="M6 11s-1 2 0 4 6 2 6 2 5 0 6-2 0-4 0-4"/>
-          </svg>
-        </div>
-        <h2 className="text-xl font-bold text-[var(--color-text-primary)] mb-2">{t.wordMeaningGame.allDoneTitle}</h2>
-        <p className="text-sm text-[var(--color-text-secondary)] mb-1">
-          <strong>{t.wordMeaningGame.allDoneDesc.replace("{count}", String(WORD_PAIRS.length))}</strong>
-        </p>
-        <p className="text-2xl font-bold text-[var(--color-accent)] mb-6">{t.wordMeaningGame.points.replace("{score}", String(score))}</p>
-        <button
-          onClick={resetSession}
-          className="px-8 py-3 rounded bg-[var(--color-accent)] text-white font-semibold text-sm hover:opacity-90 transition-all"
-        >
-          {t.wordMeaningGame.restart}
-        </button>
-        <div className="mt-4">
-          <Link to="/games" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]">
-            {t.wordMeaningGame.backToGames}
-          </Link>
-        </div>
-      </div>
+      <SurahPickerScreen
+        gameTitle={t.wordMeaningGame.title}
+        difficultyOnly
+        onStart={(_ids, _vf, diff) => {
+          setDifficulty(diff ?? "medium");
+          handleRestart();
+        }}
+      />
     );
   }
 
-  const remaining = WORD_PAIRS.length - seenIndices.size;
+  if (screen === "gameover") {
+    return (
+      <GameOverCard
+        theme={THEME} score={score} correctCount={correctCount} wrongCount={wrongCount}
+        bestStreak={bestStreak} isNewHighScore={isNewHighScore} t={t}
+        onRestart={handleRestart} onSetup={() => setScreen("setup")}
+      />
+    );
+  }
 
   return (
-    <div className="max-w-lg mx-auto pb-24">
-      {/* Colored header */}
+    <div className="max-w-lg mx-auto pb-24 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
       <GameHeader
-        img={THEME.img}
-        bg={THEME.bg}
-        isDark={THEME.isDark}
+        img={THEME.img} bg={THEME.bg} isDark={THEME.isDark}
         title={t.wordMeaningGame.title}
-        onBack={() => { window.history.back(); }}
+        onBack={() => endGame()}
         right={
-          <div className="text-right">
-            <p className="text-xs opacity-70">{t.wordMeaningGame.roundLabel.replace("{round}", String(round))}</p>
-            <p className="text-sm font-bold tabular-nums">{score}</p>
+          <div className="flex items-center gap-2">
+            {streak >= 2 && (
+              <span className="game-streak-fire" style={{ color: P, backgroundColor: `${P}20`, ["--glow-color" as string]: THEME.glow }}>
+                {streak}x
+              </span>
+            )}
           </div>
         }
       />
       <div className="px-4 pt-2">
+        <GameScoreBar theme={THEME} round={round} score={score} streak={streak} lastDelta={lastDelta} />
 
-      {/* Soru */}
-      <div className="px-5 py-8 rounded border border-[var(--color-border)] bg-[var(--color-surface)] mb-6 text-center">
-        <p className="text-xs text-[var(--color-text-secondary)] mb-8">{t.wordMeaningGame.questionPrompt}</p>
-        <p
-          className="text-5xl font-bold text-[var(--color-text-primary)] leading-[1.6]"
-          dir="rtl"
-          lang="ar"
-          style={{ fontFamily: "var(--font-arabic)" }}
+        {/* Arabic word card */}
+        <div
+          className="px-5 py-8 rounded-2xl border bg-[var(--color-surface)] mb-5 text-center game-slide-up"
+          style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
         >
-          {question.arabic}
-        </p>
-        <p className="text-[10px] text-[var(--color-text-secondary)] mt-4">
-          {t.wordMeaningGame.remainingWords.replace("{count}", String(remaining))}
-        </p>
-      </div>
-
-      {/* Seçenekler */}
-      <div className="grid grid-cols-2 gap-2 mb-6">
-        {question.options.map((opt) => {
-          let cls = "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)]";
-          let style: React.CSSProperties = {};
-          if (gameState !== "playing") {
-            if (opt === question.meaning) {
-              cls = "border-2";
-              style = { borderColor: `${P}80`, backgroundColor: `${P}15`, color: P };
-            } else if (opt === selected) {
-              cls = "border-red-400 bg-red-50 text-red-600";
-            } else {
-              cls = "border-[var(--color-border)]/50 opacity-40 text-[var(--color-text-secondary)]";
-            }
-          }
-          return (
-            <button
-              key={opt}
-              onClick={() => handleSelect(opt)}
-              disabled={gameState !== "playing"}
-              style={style}
-              className={`px-4 py-3.5 rounded border text-sm font-medium transition-all ${cls}`}
-            >
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-
-      {gameState === "correct" && (
-        <div className="px-4 py-3 rounded text-center border" style={{ backgroundColor: `${P}12`, borderColor: `${P}40` }}>
-          <p className="text-sm font-semibold" style={{ color: P }}>{t.wordMeaningGame.correct}</p>
-          <p className="text-xs mt-1" style={{ color: `${P}cc` }}>{t.wordMeaningGame.correctNext}</p>
-        </div>
-      )}
-
-      {gameState === "wrong" && (
-        <>
-          <div className="px-4 py-3 rounded text-center bg-red-50 border border-red-100 mb-3">
-            <p className="text-sm font-semibold text-red-600">{t.wordMeaningGame.wrong.replace("{word}", question.meaning)}</p>
-            <p className="text-xs text-red-500 mt-1">{t.wordMeaningGame.wrongNote}</p>
-          </div>
-          <button
-            onClick={nextRound}
-            className="w-full py-3 rounded text-white font-semibold text-sm"
-            style={{ backgroundColor: P }}
+          <p className="text-xs text-[var(--color-text-secondary)] mb-6">{t.wordMeaningGame.questionPrompt}</p>
+          <p
+            className="text-5xl font-bold text-[var(--color-text-primary)] leading-[1.6] game-bounce-in"
+            dir="rtl" lang="ar"
+            style={{ fontFamily: "var(--font-arabic)" }}
           >
-            {t.wordMeaningGame.nextQuestion}
-          </button>
-        </>
-      )}
+            {question.arabic}
+          </p>
+        </div>
+
+        {/* Options - 2x2 grid */}
+        <div className="grid grid-cols-2 gap-2.5 mb-5">
+          {question.options.map((opt) => {
+            let bgColor = "var(--color-surface)";
+            let borderColor = `${P}20`;
+            let textColor = "var(--color-text-primary)";
+            let extraClass = "";
+
+            if (gameState !== "playing") {
+              if (opt === question.meaning) {
+                bgColor = `${P}12`;
+                borderColor = `${P}60`;
+                textColor = P;
+                extraClass = "game-bounce-in";
+              } else if (opt === selected) {
+                bgColor = "#fef2f2";
+                borderColor = "#fca5a5";
+                textColor = "#dc2626";
+                extraClass = "game-shake";
+              } else {
+                bgColor = "transparent";
+                borderColor = `${P}10`;
+                extraClass = "opacity-30";
+              }
+            }
+
+            return (
+              <button
+                key={opt}
+                onClick={() => handleSelect(opt)}
+                disabled={gameState !== "playing"}
+                className={`game-option-card text-center ${extraClass}`}
+                style={{ backgroundColor: bgColor, borderColor, color: textColor }}
+              >
+                <span className="text-sm font-medium">{opt}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {gameState === "correct" && (
+          <div
+            className="px-4 py-3 rounded-xl text-center border game-slide-up"
+            style={{ backgroundColor: `${P}10`, borderColor: `${P}30`, boxShadow: `0 2px 12px ${THEME.glow}` }}
+          >
+            <p className="text-sm font-semibold flex items-center justify-center gap-2" style={{ color: P }}>
+              <span className="game-star-spin">{"\u{2B50}"}</span>
+              {t.fillBlankGame.correct} {lastDelta !== null && formatDelta(lastDelta)}
+            </p>
+          </div>
+        )}
+
+        {gameState === "wrong" && (
+          <>
+            <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3 game-slide-up">
+              <p className="text-sm font-semibold text-red-600 flex items-center justify-center gap-2">
+                <span>{"\u{1F614}"}</span>
+                {t.wordMeaningGame.wrong.replace("{word}", question.meaning)} {lastDelta !== null && formatDelta(lastDelta)}
+              </p>
+            </div>
+            <button
+              onClick={nextRound}
+              className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
+            >
+              {round >= TOTAL_ROUNDS ? t.gameScoring.gameOver : t.wordMeaningGame.nextQuestion}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

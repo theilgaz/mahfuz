@@ -11,6 +11,7 @@ import { useSurahSelectionStore } from "~/stores/surahSelection.store";
 import { useHifzStore } from "~/stores/hifz.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import type { VerseFilter } from "~/lib/game-service";
+import type { Difficulty } from "~/lib/game-scoring";
 
 type Mode = "all" | "hifz" | "custom";
 
@@ -24,14 +25,17 @@ const PRESETS = [
 interface Props {
   gameTitle: string;
   backTo?: string;
-  onStart: (surahIds: number[], verseFilter?: VerseFilter) => void;
+  /** When true, hides surah selection and only shows difficulty. */
+  difficultyOnly?: boolean;
+  onStart: (surahIds: number[], verseFilter?: VerseFilter, difficulty?: Difficulty) => void;
 }
 
-export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Props) {
+export function SurahPickerScreen({ gameTitle, backTo = "/games", difficultyOnly, onStart }: Props) {
   const { t } = useTranslation();
   const savedIds = useSurahSelectionStore((s) => s.selectedSurahIds);
   const saveIds = useSurahSelectionStore((s) => s.setSelectedSurahIds);
   const memorized = useHifzStore((s) => s.memorized);
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
 
   const memorizedEntries = Object.entries(memorized)
     .filter(([, verses]) => verses.length > 0)
@@ -71,19 +75,23 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
     });
 
   const handleStart = () => {
+    if (difficultyOnly) {
+      onStart([], undefined, difficulty);
+      return;
+    }
     if (mode === "all") {
-      onStart([]);
+      onStart([], undefined, difficulty);
     } else if (mode === "hifz") {
       const surahIds = memorizedEntries.map((e) => e.surahId);
       const verseFilter: VerseFilter = memorizedEntries.map((e) => ({
         surahId: e.surahId,
         verseNums: e.verses,
       }));
-      onStart(surahIds, verseFilter);
+      onStart(surahIds, verseFilter, difficulty);
     } else {
       const ids = [...selected];
       saveIds(ids);
-      onStart(ids);
+      onStart(ids, undefined, difficulty);
     }
   };
 
@@ -106,7 +114,7 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
       </div>
 
       {/* Mod seçimi */}
-      <div className="space-y-2 mb-6">
+      {!difficultyOnly && <div className="space-y-2 mb-6">
         {/* Tüm Kuran */}
         <button
           onClick={() => setMode("all")}
@@ -270,15 +278,43 @@ export function SurahPickerScreen({ gameTitle, backTo = "/games", onStart }: Pro
             </div>
           </div>
         )}
+      </div>}
+
+      {/* Zorluk seçimi */}
+      <div className="mb-4">
+        <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-2">{t.gameScoring.difficulty}</p>
+        <div className="grid grid-cols-3 gap-2">
+          {(["easy", "medium", "hard"] as const).map((d) => {
+            const active = difficulty === d;
+            const label = t.gameScoring[d === "easy" ? "diffEasy" : d === "medium" ? "diffMedium" : "diffHard"];
+            const hint = t.gameScoring[d === "easy" ? "diffEasyHint" : d === "medium" ? "diffMediumHint" : "diffHardHint"];
+            return (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={`flex flex-col items-center gap-0.5 px-3 py-2.5 rounded border transition-all ${
+                  active
+                    ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/8"
+                    : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
+                }`}
+              >
+                <span className={`text-sm font-medium ${active ? "text-[var(--color-accent)]" : "text-[var(--color-text-primary)]"}`}>{label}</span>
+                <span className="text-[10px] text-[var(--color-text-secondary)]">{hint}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Başlat butonu — inline, fixed değil */}
+      {/* Başlat butonu */}
       <button
         onClick={handleStart}
-        disabled={mode === "custom" && selected.size === 0}
+        disabled={!difficultyOnly && mode === "custom" && selected.size === 0}
         className="w-full py-3.5 rounded bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90"
       >
-        {mode === "all"
+        {difficultyOnly
+          ? t.surahPicker.startAll
+          : mode === "all"
           ? t.surahPicker.startAll
           : mode === "hifz"
           ? t.surahPicker.testMyHifz.replace("{count}", String(hifzTotalVerses))
