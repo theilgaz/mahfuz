@@ -106,7 +106,7 @@ export const getGlobalLeaderboard = createServerFn({ method: "GET" })
       JOIN user u ON sub.user_id = u.id
       GROUP BY sub.user_id
       ORDER BY bestScore DESC
-      LIMIT 10
+      LIMIT 50
     `) as { userId: string; userName: string; userImage: string | null; bestScore: number }[];
 
     return rows.map((r, i) => ({ ...r, rank: i + 1, userImage: r.userImage ?? null }));

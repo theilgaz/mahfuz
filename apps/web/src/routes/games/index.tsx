@@ -296,10 +296,8 @@ function CategoryFilter({
 
 // ── Scoreboard ─────────────────────────────────────────────
 
-const RANK_COLORS = ["text-amber-500", "text-slate-400", "text-amber-700"] as const;
-
-const TrophySvg = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+const TrophySvg = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M6 9H4.5a2.5 2.5 0 010-5H6" /><path d="M18 9h1.5a2.5 2.5 0 000-5H18" />
     <path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22h10c0-2-.85-3.25-2.03-3.79A1.07 1.07 0 0114 17v-2.34" />
     <path d="M18 2H6v7a6 6 0 0012 0V2z" />
@@ -312,16 +310,16 @@ const StarSvg = () => (
   </svg>
 );
 
-const GlobeSvg = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+const MedalSvg = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
+    <circle cx="12" cy="15" r="7" /><path d="M8 2l-2 6h4L8 2z" opacity="0.6" /><path d="M16 2l2 6h-4l2-6z" opacity="0.6" />
   </svg>
 );
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-100 text-amber-600 text-xs font-bold">1</span>;
-  if (rank === 2) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 text-xs font-bold">2</span>;
-  if (rank === 3) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-50 text-amber-700 text-xs font-bold">3</span>;
+  if (rank === 1) return <span className="w-6 h-6 flex items-center justify-center text-amber-400"><MedalSvg className="w-6 h-6" /></span>;
+  if (rank === 2) return <span className="w-6 h-6 flex items-center justify-center text-slate-400"><MedalSvg className="w-6 h-6" /></span>;
+  if (rank === 3) return <span className="w-6 h-6 flex items-center justify-center text-amber-700"><MedalSvg className="w-6 h-6" /></span>;
   return <span className="w-6 text-center text-xs font-medium text-[var(--color-text-secondary)] tabular-nums">{rank}</span>;
 }
 
@@ -358,22 +356,151 @@ function LeaderboardRows({ entries, userId }: { entries: LeaderboardEntry[]; use
   );
 }
 
-function GameLeaderboard({ gameId, userId, t }: { gameId: string; userId?: string; t: T }) {
+/** Avatar helper for podium */
+function PodiumAvatar({ entry, size }: { entry: LeaderboardEntry; size: "lg" | "sm" }) {
+  const px = size === "lg" ? "w-14 h-14" : "w-10 h-10";
+  const textSize = size === "lg" ? "text-lg" : "text-sm";
+  if (entry.userImage) {
+    return <img src={entry.userImage} alt="" className={`${px} rounded-full object-cover ring-2 ring-white/20`} referrerPolicy="no-referrer" />;
+  }
+  return (
+    <span className={`${px} rounded-full bg-[var(--color-border)] flex items-center justify-center ${textSize} font-bold text-[var(--color-text-secondary)]`}>
+      {entry.userName?.charAt(0)?.toUpperCase() ?? "?"}
+    </span>
+  );
+}
+
+/** Podium slot for a single player */
+function PodiumSlot({ entry, place, userId }: { entry: LeaderboardEntry; place: 1 | 2 | 3; userId?: string }) {
+  const isMe = entry.userId === userId;
+  const colors = {
+    1: { medal: "text-amber-400", bar: "bg-amber-400/20", barH: "h-20" },
+    2: { medal: "text-slate-300", bar: "bg-slate-300/15", barH: "h-14" },
+    3: { medal: "text-amber-600", bar: "bg-amber-600/15", barH: "h-10" },
+  }[place];
+
+  return (
+    <div className={`flex flex-col items-center gap-1.5 flex-1 ${place === 1 ? "-mt-4" : "mt-2"}`}>
+      {/* Avatar */}
+      <div className="relative">
+        <PodiumAvatar entry={entry} size={place === 1 ? "lg" : "sm"} />
+        {/* Trophy badge */}
+        <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--color-surface)] flex items-center justify-center ${colors.medal}`}>
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6 9H4.5a2.5 2.5 0 010-5H6m12 5h1.5a2.5 2.5 0 000-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22h10c0-2-.85-3.25-2.03-3.79A1.07 1.07 0 0114 17v-2.34M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+        </span>
+      </div>
+      {/* Name */}
+      <p className={`text-xs font-medium text-center truncate max-w-[5rem] ${isMe ? "text-[var(--color-accent)]" : "text-[var(--color-text-primary)]"}`}>
+        {entry.userName?.split(" ")[0]}
+      </p>
+      {/* Score */}
+      <span className="text-xs font-bold tabular-nums text-[var(--color-text-primary)]">{entry.bestScore}</span>
+      {/* Bar */}
+      <div className={`w-full rounded-t-lg ${colors.bar} ${colors.barH}`} />
+    </div>
+  );
+}
+
+/** Top-3 podium display */
+function Podium({ entries, userId }: { entries: LeaderboardEntry[]; userId?: string }) {
+  const first = entries[0];
+  const second = entries[1];
+  const third = entries[2];
+  if (!first) return null;
+
+  return (
+    <div className="flex items-end justify-center gap-2 px-4 pt-2 pb-0">
+      {second ? <PodiumSlot entry={second} place={2} userId={userId} /> : <div className="flex-1" />}
+      <PodiumSlot entry={first} place={1} userId={userId} />
+      {third ? <PodiumSlot entry={third} place={3} userId={userId} /> : <div className="flex-1" />}
+    </div>
+  );
+}
+
+/** Hero card showing user's total score + rank */
+function HeroCard({ myStats, globalBoard, userId, t }: { myStats: MyGameStat[]; globalBoard: LeaderboardEntry[]; userId: string; t: T }) {
+  const myTotal = myStats.reduce((s, r) => s + r.bestScore, 0);
+  if (myTotal <= 0) return null;
+
+  const myRank = globalBoard.find((e) => e.userId === userId)?.rank;
+  const totalPlayers = globalBoard.length;
+  const totalPlays = myStats.reduce((s, r) => s + r.totalPlays, 0);
+  const bestGame = myStats.reduce((best, s) => (s.bestScore > best.bestScore ? s : best), myStats[0]);
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent)]/70 p-5 text-white">
+      {/* Background decoration */}
+      <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
+      <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-white/5" />
+
+      <div className="relative flex items-start gap-4">
+        {/* Score */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <TrophySvg className="w-5 h-5 text-white/80" />
+            <span className="text-xs font-medium text-white/70 uppercase tracking-wider">{t.gamesHub.points.replace("{total}", String(myTotal)).replace(String(myTotal), "").trim()}</span>
+          </div>
+          <p className="text-3xl font-extrabold tabular-nums">{myTotal}</p>
+          {myRank && (
+            <p className="text-sm text-white/70 mt-1">#{myRank} / {totalPlayers}</p>
+          )}
+        </div>
+
+        {/* Stats */}
+        <div className="flex flex-col gap-2 text-right">
+          <div>
+            <p className="text-[10px] text-white/50 uppercase tracking-wider">{t.gamesHub.tabMine}</p>
+            <p className="text-sm font-bold tabular-nums">{totalPlays}x</p>
+          </div>
+          {bestGame && (
+            <div>
+              <p className="text-[10px] text-white/50 uppercase tracking-wider">Top</p>
+              <p className="text-xs font-semibold truncate max-w-[7rem]">{GAME_TITLES[bestGame.gameId] ?? bestGame.gameId}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Horizontal tab bar for game selection */
+function GameTabBar({ selectedId, onSelect }: { selectedId: string; onSelect: (id: string) => void }) {
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden">
+      {GAME_IDS.map((id) => {
+        const active = id === selectedId;
+        return (
+          <button
+            key={id}
+            onClick={() => onSelect(id)}
+            className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+              active
+                ? "bg-[var(--color-text-primary)] text-[var(--color-bg)]"
+                : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
+            }`}
+          >
+            {GAME_TITLES[id]}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Single game leaderboard loaded by selected tab */
+function TabbedGameLeaderboard({ gameId, userId, t }: { gameId: string; userId?: string; t: T }) {
   const { data: board } = useQuery<LeaderboardEntry[]>({
     queryKey: ["game-leaderboard", gameId],
     queryFn: () => getGameLeaderboard({ data: { gameId } }),
     staleTime: 60_000,
   });
 
-  return (
-    <SectionCard icon={<TrophySvg />} title={GAME_TITLES[gameId] ?? gameId}>
-      {!board?.length ? (
-        <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noScoresForGame}</p>
-      ) : (
-        <LeaderboardRows entries={board} userId={userId} />
-      )}
-    </SectionCard>
-  );
+  if (!board?.length) {
+    return <p className="text-xs text-[var(--color-text-secondary)] text-center py-4">{t.gamesHub.noScoresForGame}</p>;
+  }
+
+  return <LeaderboardRows entries={board} userId={userId} />;
 }
 
 function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
@@ -389,63 +516,80 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
     staleTime: 60_000,
   });
 
-  const myTotal = myStats?.reduce((s, r) => s + r.bestScore, 0) ?? 0;
+  // Default tab: user's best game, or first game
+  const bestGameId = myStats?.length
+    ? myStats.reduce((best, s) => (s.bestScore > best.bestScore ? s : best), myStats[0]).gameId
+    : GAME_IDS[0];
+  const [selectedGameId, setSelectedGameId] = useState<string>(bestGameId);
+
+  // Remaining global entries (rank 4+)
+  const remainingGlobal = globalBoard?.slice(3) ?? [];
 
   return (
     <div className="space-y-5">
-      {/* Total score hero */}
-      {myTotal > 0 && (
-        <div className="flex flex-col items-center gap-1 py-4 rounded-xl bg-[var(--color-accent)]/5 border border-[var(--color-accent)]/20">
-          <span className="text-[var(--color-accent)]"><TrophySvg /></span>
-          <span className="text-2xl font-extrabold text-[var(--color-accent)] tabular-nums">{myTotal}</span>
-          <span className="text-xs text-[var(--color-text-secondary)]">{t.gamesHub.points.replace("{total}", String(myTotal)).replace(String(myTotal), "").trim()}</span>
+      {/* 1. Hero Card */}
+      {userId && myStats?.length ? (
+        <HeroCard myStats={myStats} globalBoard={globalBoard ?? []} userId={userId} t={t} />
+      ) : null}
+
+      {/* 2. Global Podium */}
+      <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)]">
+          <span className="text-[var(--color-accent)]">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+            </svg>
+          </span>
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">{t.gamesHub.tabGlobal}</h3>
         </div>
-      )}
-
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Left: per-game leaderboards */}
-        <div className="flex flex-col gap-5">
-          {GAME_IDS.map((id) => (
-            <GameLeaderboard key={id} gameId={id} userId={userId} t={t} />
-          ))}
-        </div>
-
-        {/* Right: global + my scores */}
-        <div className="flex flex-col gap-5">
-          <SectionCard icon={<GlobeSvg />} title={t.gamesHub.tabGlobal}>
-            {!globalBoard?.length ? (
-              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noScores}</p>
-            ) : (
-              <LeaderboardRows entries={globalBoard} userId={userId} />
-            )}
-          </SectionCard>
-
-          <SectionCard icon={<StarSvg />} title={t.gamesHub.tabMine}>
-            {!userId ? (
-              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">
-                {t.gamesHub.loginPrompt}{" "}
-                <Link to="/auth/login" search={{ redirect: "/games" }} className="text-[var(--color-accent)] underline">{t.gamesHub.loginLink}</Link>
-              </p>
-            ) : !myStats?.length ? (
-              <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noGamesPlayed}</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {myStats.map((s) => (
-                  <div
-                    key={s.gameId}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]"
-                  >
-                    <span className="text-xs text-[var(--color-text-primary)]">{GAME_TITLES[s.gameId] ?? s.gameId}</span>
-                    <span className="text-[10px] text-[var(--color-text-secondary)] tabular-nums">{s.totalPlays}x</span>
-                    <span className="text-xs font-bold text-[var(--color-accent)] tabular-nums">{s.bestScore}</span>
-                  </div>
-                ))}
+        {!globalBoard?.length ? (
+          <p className="text-xs text-[var(--color-text-secondary)] text-center py-6">{t.gamesHub.noScores}</p>
+        ) : (
+          <>
+            <Podium entries={globalBoard} userId={userId} />
+            {remainingGlobal.length > 0 && (
+              <div className="px-4 py-3 border-t border-[var(--color-border)]">
+                <LeaderboardRows entries={remainingGlobal} userId={userId} />
               </div>
             )}
-          </SectionCard>
+          </>
+        )}
+      </section>
+
+      {/* 3. Per-Game Leaderboards (Tabbed) */}
+      <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+        <div className="px-4 pt-3 pb-2">
+          <GameTabBar selectedId={selectedGameId} onSelect={setSelectedGameId} />
         </div>
-      </div>
+        <div className="px-4 py-3">
+          <TabbedGameLeaderboard key={selectedGameId} gameId={selectedGameId} userId={userId} t={t} />
+        </div>
+      </section>
+
+      {/* 4. My Scores */}
+      <SectionCard icon={<StarSvg />} title={t.gamesHub.tabMine}>
+        {!userId ? (
+          <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">
+            {t.gamesHub.loginPrompt}{" "}
+            <Link to="/auth/login" search={{ redirect: "/games" }} className="text-[var(--color-accent)] underline">{t.gamesHub.loginLink}</Link>
+          </p>
+        ) : !myStats?.length ? (
+          <p className="text-xs text-[var(--color-text-secondary)] text-center py-2">{t.gamesHub.noGamesPlayed}</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {myStats.map((s) => (
+              <div
+                key={s.gameId}
+                className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]"
+              >
+                <span className="text-xs font-medium text-[var(--color-text-primary)]">{GAME_TITLES[s.gameId] ?? s.gameId}</span>
+                <span className="text-[10px] text-[var(--color-text-secondary)] tabular-nums">{s.totalPlays}x</span>
+                <span className="text-sm font-bold text-[var(--color-accent)] tabular-nums">{s.bestScore}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
     </div>
   );
 }
