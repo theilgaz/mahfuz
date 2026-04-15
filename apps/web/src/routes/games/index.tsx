@@ -37,7 +37,7 @@ type T = ReturnType<typeof useTranslation>["t"];
 
 // ── Game data ──────────────────────────────────────────────
 
-const EDITORS_CHOICE_IDS = ["kelime-doldurma", "kelime-anlami", "hexagon-harf"];
+const EDITORS_CHOICE_IDS = ["kelime-doldurma", "kelime-anlami", "kelime-tahmini"];
 
 const GAME_IMGS: Record<string, string> = {
   "kelime-doldurma":      "/images/games/mahfuz-fill-in-the-blank.webp",
@@ -62,6 +62,7 @@ const GAME_COLORS: Record<string, { bg: string; glow: string }> = {
   "hexagon-harf":         { bg: "#1A3D2B", glow: "#2D6B4A" },
   "kiraet-karaoke":       { bg: "#7B4A2D", glow: "#C4814A" },
   "sure-tanima":          { bg: "#B8C9B0", glow: "#5C7A55" },
+  "kelime-tahmini":       { bg: "#1A3D2B", glow: "#4A9B6A" },
   "elifba-sesli-quiz":    { bg: "#1B2B4A", glow: "#4A7BB5" },
   "elifba-form-quiz":     { bg: "#C49B6B", glow: "#8B6B3A" },
   "elifba-karisik-sinav": { bg: "#2D6B5A", glow: "#4A9B7B" },
@@ -78,6 +79,7 @@ function makeGames(t: T): Game[] {
     { id: "sure-tanima", img: GAME_IMGS["sure-tanima"], title: t.gamesHub.surahGuessTitle, description: t.gamesHub.surahGuessDesc, category: t.gamesHub.catListening, link: "/games/surah-guess", surahScoped: true },
     { id: "kelime-anlami", img: GAME_IMGS["kelime-anlami"], title: t.gamesHub.wordMeaningTitle, description: t.gamesHub.wordMeaningDesc, category: t.gamesHub.catWord, link: "/games/word-meaning" },
     { id: "hexagon-harf", img: GAME_IMGS["hexagon-harf"], title: t.gamesHub.hexagonTitle, description: t.gamesHub.hexagonDesc, category: t.gamesHub.catWord, link: "/games/hexagon" },
+    { id: "kelime-tahmini", title: t.gamesHub.kelimeTahminiTitle, description: t.gamesHub.kelimeTahminiDesc, category: t.gamesHub.catPuzzle, link: "/games/kelime-tahmini" },
   ];
   return games.map((g) => ({ ...g, colors: GAME_COLORS[g.id] }));
 }
@@ -317,9 +319,9 @@ const MedalSvg = ({ className }: { className?: string }) => (
 );
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <span className="w-6 h-6 flex items-center justify-center text-amber-400"><MedalSvg className="w-6 h-6" /></span>;
-  if (rank === 2) return <span className="w-6 h-6 flex items-center justify-center text-slate-400"><MedalSvg className="w-6 h-6" /></span>;
-  if (rank === 3) return <span className="w-6 h-6 flex items-center justify-center text-amber-700"><MedalSvg className="w-6 h-6" /></span>;
+  if (rank === 1) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-100 text-amber-600 text-xs font-bold">1</span>;
+  if (rank === 2) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 text-xs font-bold">2</span>;
+  if (rank === 3) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-50 text-amber-700 text-xs font-bold">3</span>;
   return <span className="w-6 text-center text-xs font-medium text-[var(--color-text-secondary)] tabular-nums">{rank}</span>;
 }
 
