@@ -313,15 +313,17 @@ const StarSvg = () => (
 );
 
 const MedalSvg = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
-    <circle cx="12" cy="15" r="7" /><path d="M8 2l-2 6h4L8 2z" opacity="0.6" /><path d="M16 2l2 6h-4l2-6z" opacity="0.6" />
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15" />
+    <path d="M11 12 5.12 2.2" /><path d="m13 12 5.88-9.8" /><path d="M8 7h8" />
+    <circle cx="12" cy="17" r="5" /><path d="M12 18v-2h-.5" />
   </svg>
 );
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-100 text-amber-600 text-xs font-bold">1</span>;
-  if (rank === 2) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 text-xs font-bold">2</span>;
-  if (rank === 3) return <span className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-50 text-amber-700 text-xs font-bold">3</span>;
+  if (rank === 1) return <span className="w-6 h-6 flex items-center justify-center text-amber-400"><MedalSvg className="w-5 h-5" /></span>;
+  if (rank === 2) return <span className="w-6 h-6 flex items-center justify-center text-slate-400"><MedalSvg className="w-5 h-5" /></span>;
+  if (rank === 3) return <span className="w-6 h-6 flex items-center justify-center text-amber-700"><MedalSvg className="w-5 h-5" /></span>;
   return <span className="w-6 text-center text-xs font-medium text-[var(--color-text-secondary)] tabular-nums">{rank}</span>;
 }
 
