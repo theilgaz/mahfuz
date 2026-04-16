@@ -162,7 +162,7 @@ function MenuScreen({ t, onSelectMode }: { t: any; onSelectMode: (m: "daily" | "
   const stats = loadStats();
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8 pb-28 game-bg" style={gameBgStyle(THEME, "kelime-tahmini")}>
+    <div className="max-w-lg mx-auto px-4 py-8 pb-24 game-bg" style={gameBgStyle(THEME, "kelime-tahmini")}>
       {/* Title */}
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-1">
@@ -435,25 +435,21 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
   }, []);
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-4 pb-28 game-bg" style={gameBgStyle(THEME, "kelime-tahmini")}>
-      {/* Day indicator */}
-      {mode === "daily" && (
-        <div className="flex justify-end mb-2">
-          <span className="text-xs font-medium" style={{ color: P }}>
+    <div className="max-w-lg mx-auto px-2 flex flex-col overflow-hidden game-bg" style={{ ...gameBgStyle(THEME, "kelime-tahmini"), height: "calc(100dvh - 44px - 56px)" }}>
+      {/* Day indicator + Hint */}
+      <div className="text-center py-3">
+        {mode === "daily" && (
+          <span className="text-xs font-medium mr-2" style={{ color: P }}>
             {t.kelimeTahmini.dayNumber.replace("{day}", String(day))}
           </span>
-        </div>
-      )}
-
-      {/* Hint */}
-      <div className="text-center mb-5">
+        )}
         <span className="text-xs text-[var(--color-text-secondary)]">{t.kelimeTahmini.hint} </span>
         <span className="text-sm font-bold text-[var(--color-text-primary)]">{pair.meaning}</span>
         <span className="text-xs text-[var(--color-text-secondary)] ml-2">({letterCount} harf)</span>
       </div>
 
       {/* Grid */}
-      <div className="flex flex-col items-center gap-1.5 mb-5" dir="rtl">
+      <div className="flex flex-col items-center gap-1 flex-1 justify-center" dir="rtl">
         {Array.from({ length: MAX_GUESSES }).map((_, rowIdx) => {
           const isGuessed = rowIdx < guesses.length;
           const isCurrent = rowIdx === guesses.length && !finished;
@@ -465,7 +461,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
           return (
             <div
               key={rowIdx}
-              className={`flex gap-1.5 ${isShaking ? "animate-[game-shake_0.4s_ease]" : ""}`}
+              className={`flex gap-1 ${isShaking ? "animate-[game-shake_0.4s_ease]" : ""}`}
             >
               {Array.from({ length: letterCount }).map((_, colIdx) => {
                 const letter = letters[colIdx] ?? "";
@@ -500,7 +496,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
                 return (
                   <div
                     key={colIdx}
-                    className="w-12 h-12 flex items-center justify-center rounded-lg border-2 text-xl font-bold transition-all"
+                    className="w-11 h-11 flex items-center justify-center rounded-lg border-2 text-lg font-bold transition-all"
                     style={{
                       backgroundColor: bg,
                       borderColor: border,
@@ -521,15 +517,15 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
 
       {/* Win/Lose message */}
       {finished && (
-        <div className="text-center mb-4 game-slide-up">
+        <div className="text-center py-3 game-slide-up">
           {won ? (
-            <div className="px-4 py-3 rounded-xl border mb-3" style={{ backgroundColor: `${P}10`, borderColor: `${P}30` }}>
+            <div className="px-4 py-2.5 rounded-xl border mb-2" style={{ backgroundColor: `${P}10`, borderColor: `${P}30` }}>
               <p className="text-sm font-bold" style={{ color: P }}>
                 {t.kelimeTahmini.win} {t.kelimeTahmini.guessCount.replace("{count}", String(guesses.length))}
               </p>
             </div>
           ) : (
-            <div className="px-4 py-3 rounded-xl border mb-3" style={{ backgroundColor: "rgba(220,38,38,0.10)", borderColor: "rgba(239,68,68,0.3)" }}>
+            <div className="px-4 py-2.5 rounded-xl border mb-2" style={{ backgroundColor: "rgba(220,38,38,0.10)", borderColor: "rgba(239,68,68,0.3)" }}>
               <p className="text-sm font-semibold mb-1" style={{ color: "#f87171" }}>{t.kelimeTahmini.lose}</p>
               <p className="text-2xl font-bold text-[var(--color-text-primary)]" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
                 {pair.arabic}
@@ -537,12 +533,10 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
             </div>
           )}
 
-          {/* Meaning & transliteration */}
-          <p className="text-xs text-[var(--color-text-secondary)] mb-4">
+          <p className="text-xs text-[var(--color-text-secondary)] mb-3">
             {pair.meaning}
           </p>
 
-          {/* Actions */}
           <div className="flex gap-2 justify-center">
             <button
               onClick={handleShare}
@@ -563,15 +557,15 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
         </div>
       )}
 
-      {/* Arabic Keyboard */}
+      {/* Arabic Keyboard - pinned to bottom */}
       {!finished && (
-        <div className="flex flex-col items-center gap-1.5">
+        <div className="flex flex-col items-center gap-1 pb-3 pt-2 shrink-0">
           {KB_ROWS.map((row, rowIdx) => (
-            <div key={rowIdx} className="flex gap-1">
+            <div key={rowIdx} className="flex gap-[3px] w-full justify-center">
               {rowIdx === 2 && (
                 <button
                   onClick={handleSubmit}
-                  className="h-11 px-2.5 rounded-lg text-xs font-bold text-white active:scale-95 transition-all"
+                  className="h-10 px-2 rounded-md text-[11px] font-bold text-white active:scale-95 transition-all shrink-0"
                   style={{ backgroundColor: P }}
                 >
                   {t.kelimeTahmini.submit}
@@ -596,12 +590,13 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
                   <button
                     key={letter}
                     onClick={() => handleKey(letter)}
-                    className="w-8 h-11 rounded-lg border text-base font-semibold active:scale-90 transition-all flex items-center justify-center"
+                    className="flex-1 min-w-0 h-10 rounded-md border text-[15px] font-semibold active:scale-90 transition-all flex items-center justify-center"
                     style={{
                       backgroundColor: kbBg,
                       color: kbText,
                       borderColor: kbBorder,
                       fontFamily: "var(--font-arabic)",
+                      maxWidth: "32px",
                     }}
                     dir="rtl"
                   >
@@ -612,7 +607,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
               {rowIdx === 2 && (
                 <button
                   onClick={handleBackspace}
-                  className="h-11 px-2.5 rounded-lg text-xs font-bold border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] active:scale-95 transition-all"
+                  className="h-10 px-2 rounded-md text-[11px] font-bold border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] active:scale-95 transition-all shrink-0"
                 >
                   {t.kelimeTahmini.backspace}
                 </button>

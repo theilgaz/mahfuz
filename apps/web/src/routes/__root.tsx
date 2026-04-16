@@ -116,6 +116,32 @@ function RootComponent() {
   );
 }
 
+const BreadcrumbChevron = () => (
+  <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
+    <path d="M7 4L13 10L7 16" />
+  </svg>
+);
+
+function BreadcrumbNav({ items }: { items: { label: string; to?: string }[] }) {
+  return (
+    <div className="flex items-center gap-1 min-w-0 flex-1">
+      {items.map((item, i) => (
+        <span key={i} className="flex items-center gap-1 min-w-0">
+          {i > 0 && <BreadcrumbChevron />}
+          {item.to ? (
+            <Link to={item.to} className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] shrink-0">
+              {item.label}
+            </Link>
+          ) : (
+            <span className="text-sm font-medium truncate">{item.label}</span>
+          )}
+        </span>
+      ))}
+      <div className="flex-1" />
+    </div>
+  );
+}
+
 function AppHeader() {
   const { t } = useTranslation();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -193,29 +219,16 @@ function AppHeader() {
         {/* Main header */}
         <header className="flex items-center h-11 bg-[var(--color-bg)] border-b border-[var(--color-border)]">
         <div className="flex items-center gap-1.5 w-full max-w-3xl mx-auto px-4">
-          {/* Left: logo or back */}
+          {/* Left: logo (always links home) */}
           {isHome ? (
             <div className="flex items-center gap-1.5 shrink-0">
               <MahfuzLogo size={22} />
               <span className="text-sm font-semibold">Mahfuz</span>
             </div>
           ) : (
-            <div className="flex items-center shrink-0">
-              <button
-                onClick={() => {
-                  if (isGameSubRoute) navigate({ to: "/games" });
-                  else if (window.history.length > 1) window.history.back();
-                  else navigate({ to: "/" });
-                }}
-                className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
-                aria-label={t.nav.back}
-              >
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M13 4L7 10L13 16" />
-                </svg>
-              </button>
+            <Link to="/" className="flex items-center shrink-0 hover:opacity-70 transition-opacity">
               <MahfuzLogo size={20} />
-            </div>
+            </Link>
           )}
 
           {/* Center: title or reading nav */}
@@ -228,16 +241,19 @@ function AppHeader() {
               ) : null}
             </div>
           ) : isGameSubRoute && gameTitle ? (
-            <div className="flex items-center gap-1 min-w-0 flex-1">
-              <Link to="/games" className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] shrink-0">
-                {t.gamesHub.title}
-              </Link>
-              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
-                <path d="M7 4L13 10L7 16" />
-              </svg>
-              <span className="text-sm font-medium truncate">{gameTitle}</span>
-              <div className="flex-1" />
-            </div>
+            <BreadcrumbNav items={[{ label: t.gamesHub.title, to: "/games" }, { label: gameTitle }]} />
+          ) : isAlifbaGame ? (
+            <BreadcrumbNav items={[{ label: t.hub.alifba, to: "/alifba" }, { label: t.alifba.games }]} />
+          ) : isAlifbaSubRoute ? (
+            <BreadcrumbNav items={[{ label: t.hub.alifba, to: "/alifba" }, { label: title ?? "" }]} />
+          ) : path.startsWith("/qaida/lesson/") ? (
+            <BreadcrumbNav items={[{ label: t.hub.qaida, to: "/qaida" }, { label: title ?? "" }]} />
+          ) : path.startsWith("/qaida/exam/") ? (
+            <BreadcrumbNav items={[{ label: t.hub.qaida, to: "/qaida" }, { label: title ?? "" }]} />
+          ) : path.startsWith("/khatm/") && path !== "/khatm" && path !== "/khatm/" ? (
+            <BreadcrumbNav items={[{ label: "Hatim", to: "/khatm" }, { label: title ?? "" }]} />
+          ) : path.startsWith("/analyse/") ? (
+            <BreadcrumbNav items={[{ label: title ?? "" }]} />
           ) : title ? (
             <>
               <span className="text-sm font-medium truncate">{title}</span>

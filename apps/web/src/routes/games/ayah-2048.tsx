@@ -99,6 +99,16 @@ function saveDiscovered(modeId: string, ids: Set<number>) {
 
 function useSwipe(onSwipe: (dir: Direction) => void) {
   const startRef = useRef<{ x: number; y: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Attach non-passive touchmove to prevent scroll during swipe
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handler = (e: TouchEvent) => { e.preventDefault(); };
+    el.addEventListener("touchmove", handler, { passive: false });
+    return () => el.removeEventListener("touchmove", handler);
+  }, []);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -125,7 +135,7 @@ function useSwipe(onSwipe: (dir: Direction) => void) {
     [onSwipe],
   );
 
-  return { onTouchStart, onTouchEnd };
+  return { ref: containerRef, onTouchStart, onTouchEnd };
 }
 
 // ── Main page ──────────────────────────────────────────────
@@ -181,18 +191,8 @@ function MenuScreen({
   return (
     <div className="game-bg" style={gameBgStyle(THEME, "ayet-2048")}>
       <div className="mx-auto max-w-md px-4 py-6 flex flex-col gap-6 min-h-dvh">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Link to="/games" className="p-2 rounded-lg" style={{ background: THEME.surface }}>
-            <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M15 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-white">{tx.title}</h1>
-            <p className="text-sm text-white/60">{tx.subtitle}</p>
-          </div>
-        </div>
+        {/* Subtitle */}
+        <p className="text-sm text-white/60">{tx.subtitle}</p>
 
         {/* Discovered counter */}
         <button
@@ -366,16 +366,19 @@ function GameScreen({
     setNewlyDiscovered(null);
   };
 
-  const cellSize = Math.min(
-    (Math.min(typeof window !== "undefined" ? window.innerWidth : 400, 400) - 32 - (gridSize + 1) * 6) / gridSize,
-    80,
-  );
+  // Fit grid to both width and height so the page never scrolls
+  // Account for app header (44px) + bottom nav (56px) + score bar + discovered + instructions (~120px)
+  const vw = typeof window !== "undefined" ? window.innerWidth : 400;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 700;
+  const maxW = Math.min(vw, 448) - 32 - (gridSize + 1) * 6; // horizontal limit
+  const usableH = vh - 220 - (gridSize + 1) * 6; // 220 = header(44) + nav(56) + UI chrome(~120)
+  const cellSize = Math.min(maxW / gridSize, usableH / gridSize, 80);
 
   const winSurah = getSurahForLevel(sequence, winTarget);
 
   return (
-    <div className="game-bg" style={gameBgStyle(THEME, "ayet-2048")} {...swipeHandlers}>
-      <div className="mx-auto max-w-md px-4 py-4 flex flex-col gap-3 min-h-dvh">
+    <div className="game-bg" style={{ ...gameBgStyle(THEME, "ayet-2048"), minHeight: 0, height: "calc(100dvh - 44px - 56px)", overflow: "hidden" }} {...swipeHandlers}>
+      <div className="mx-auto max-w-md px-4 py-2 flex flex-col gap-2 h-full overflow-hidden">
         {/* Score bar */}
         <div className="flex items-center justify-end gap-3">
           <div className="text-right">
@@ -392,47 +395,47 @@ function GameScreen({
           </button>
         </div>
 
-        {/* Grid */}
-        <div
-          className="mx-auto rounded-2xl p-1.5 select-none"
-          style={{ background: THEME.surface }}
-        >
+        {/* Grid wrapper (relative for overlays) */}
+        <div className="relative mx-auto flex-1 flex flex-col items-center justify-center">
           <div
-            className="grid relative"
-            style={{
-              gridTemplateColumns: `repeat(${gridSize}, ${cellSize}px)`,
-              gridTemplateRows: `repeat(${gridSize}, ${cellSize}px)`,
-              gap: "6px",
-            }}
+            className="rounded-2xl p-1.5 select-none"
+            style={{ background: THEME.surface }}
           >
-            {/* Empty cells */}
-            {Array.from({ length: gridSize * gridSize }).map((_, i) => (
-              <div
-                key={`empty-${i}`}
-                className="rounded-lg"
-                style={{ background: "rgba(255,255,255,0.05)", width: cellSize, height: cellSize }}
-              />
-            ))}
+            <div
+              className="grid relative"
+              style={{
+                gridTemplateColumns: `repeat(${gridSize}, ${cellSize}px)`,
+                gridTemplateRows: `repeat(${gridSize}, ${cellSize}px)`,
+                gap: "6px",
+              }}
+            >
+              {/* Empty cells */}
+              {Array.from({ length: gridSize * gridSize }).map((_, i) => (
+                <div
+                  key={`empty-${i}`}
+                  className="rounded-lg"
+                  style={{ background: "rgba(255,255,255,0.05)", width: cellSize, height: cellSize }}
+                />
+              ))}
 
-            {/* Tiles */}
-            {gameState.tiles.map((tile) => (
-              <TileView
-                key={tile.id}
-                tile={tile}
-                cellSize={cellSize}
-                gap={6}
-                sequence={sequence}
-                locale={locale}
-              />
-            ))}
+              {/* Tiles */}
+              {gameState.tiles.map((tile) => (
+                <TileView
+                  key={tile.id}
+                  tile={tile}
+                  cellSize={cellSize}
+                  gap={6}
+                  sequence={sequence}
+                  locale={locale}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Discovery banner (fixed height to prevent layout shift) */}
-        <div className="h-14">
+          {/* Discovery banner */}
           {newlyDiscovered && (
             <div
-              className="p-2.5 rounded-xl text-center game-bounce-in"
+              className="absolute left-0 right-0 -bottom-1 p-2 rounded-xl text-center game-bounce-in mx-2"
               style={{ background: THEME.primary }}
             >
               <div className="text-white/80 text-[10px] leading-none">{tx.surahDiscovered}</div>
@@ -441,58 +444,62 @@ function GameScreen({
               </div>
             </div>
           )}
+
+          {/* Win overlay */}
+          {gameState.won && !keepPlaying && !gameState.over && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl">
+              <div className="p-4 rounded-2xl text-center mx-4" style={{ background: THEME.surface }}>
+                <div className="text-2xl font-bold text-white mb-2">{tx.win}</div>
+                <div className="text-white/60 text-sm mb-4">
+                  {winSurah
+                    ? tx.reachedTarget.replace("{target}", getSurahName(winSurah.id, locale))
+                    : ""}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setKeepPlaying(true)}
+                    className="flex-1 py-3 rounded-xl text-white font-semibold"
+                    style={{ background: THEME.primary }}
+                  >
+                    {tx.keepPlaying}
+                  </button>
+                  <button
+                    onClick={restart}
+                    className="flex-1 py-3 rounded-xl text-white/70 font-semibold"
+                    style={{ background: "rgba(255,255,255,0.1)" }}
+                  >
+                    {tx.newGame}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Game over */}
+          {gameState.over && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl">
+              <div className="p-4 rounded-2xl text-center mx-4" style={{ background: THEME.surface }}>
+                <div className="text-2xl font-bold text-white mb-1">{tx.gameOver}</div>
+                <div className="text-white/60 text-sm mb-1">
+                  {tx.finalScore}: {gameState.score}
+                </div>
+                <div className="text-white/40 text-xs mb-4">
+                  {tx.discoveredSurahs}: {discovered.size}/{sequence.length}
+                </div>
+                <button
+                  onClick={restart}
+                  className="w-full py-3 rounded-xl text-white font-semibold"
+                  style={{ background: THEME.primary }}
+                >
+                  {tx.tryAgain}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Win overlay */}
-        {gameState.won && !keepPlaying && !gameState.over && (
-          <div className="p-4 rounded-2xl text-center" style={{ background: THEME.surface }}>
-            <div className="text-2xl font-bold text-white mb-2">{tx.win}</div>
-            <div className="text-white/60 text-sm mb-4">
-              {winSurah
-                ? tx.reachedTarget.replace("{target}", getSurahName(winSurah.id, locale))
-                : ""}
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setKeepPlaying(true)}
-                className="flex-1 py-3 rounded-xl text-white font-semibold"
-                style={{ background: THEME.primary }}
-              >
-                {tx.keepPlaying}
-              </button>
-              <button
-                onClick={restart}
-                className="flex-1 py-3 rounded-xl text-white/70 font-semibold"
-                style={{ background: "rgba(255,255,255,0.1)" }}
-              >
-                {tx.newGame}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Game over */}
-        {gameState.over && (
-          <div className="p-4 rounded-2xl text-center" style={{ background: THEME.surface }}>
-            <div className="text-2xl font-bold text-white mb-1">{tx.gameOver}</div>
-            <div className="text-white/60 text-sm mb-1">
-              {tx.finalScore}: {gameState.score}
-            </div>
-            <div className="text-white/40 text-xs mb-4">
-              {tx.discoveredSurahs}: {discovered.size}/{sequence.length}
-            </div>
-            <button
-              onClick={restart}
-              className="w-full py-3 rounded-xl text-white font-semibold"
-              style={{ background: THEME.primary }}
-            >
-              {tx.tryAgain}
-            </button>
-          </div>
-        )}
-
         {/* Instructions */}
-        <div className="text-white/30 text-xs text-center mt-auto pb-4">
+        <div className="text-white/30 text-[10px] text-center mt-auto">
           {tx.instructions}
         </div>
       </div>
