@@ -246,12 +246,6 @@ function MenuScreen({ t, onSelectMode }: { t: any; onSelectMode: (m: "daily" | "
         </div>
       )}
 
-      {/* Back to games */}
-      <div className="mt-6 text-center">
-        <Link to="/games" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]">
-          {t.gameScoring?.backToGames ?? "Oyunlara don"}
-        </Link>
-      </div>
     </div>
   );
 }
@@ -283,19 +277,28 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
 
   const [guesses, setGuesses] = useState<string[][]>(savedDaily?.guesses ?? []);
 
-  // Build locked (green) letters array from guesses so far
-  const buildFromLocked = useCallback((currentGuesses: string[][]) => {
-    const locked: (string | null)[] = Array(letterCount).fill(null);
-    for (const guess of currentGuesses) {
+  // Locked (green) positions - memoized from guesses
+  const locked = useMemo(() => {
+    const arr: (string | null)[] = Array(letterCount).fill(null);
+    for (const guess of guesses) {
       const result = evaluateGuess(guess, targetLetters);
       result.forEach(({ letter, status }, i) => {
-        if (status === "correct") locked[i] = letter;
+        if (status === "correct") arr[i] = letter;
       });
     }
-    return locked;
-  }, [letterCount, targetLetters]);
+    return arr;
+  }, [guesses, letterCount, targetLetters]);
 
-  const [currentInput, setCurrentInput] = useState<(string | null)[]>(() => buildFromLocked(savedDaily?.guesses ?? []));
+  const [currentInput, setCurrentInput] = useState<(string | null)[]>(() => {
+    const arr: (string | null)[] = Array(letterCount).fill(null);
+    for (const guess of (savedDaily?.guesses ?? [])) {
+      const result = evaluateGuess(guess, targetLetters);
+      result.forEach(({ letter, status }, i) => {
+        if (status === "correct") arr[i] = letter;
+      });
+    }
+    return arr;
+  });
   const [finished, setFinished] = useState(savedDaily?.finished ?? false);
   const [won, setWon] = useState(savedDaily?.won ?? false);
   const [shakeRow, setShakeRow] = useState(false);
@@ -320,34 +323,29 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
 
   const handleKey = useCallback((letter: string) => {
     if (finished) return;
-    const locked = buildFromLocked(guesses);
     setCurrentInput((prev) => {
-      // Ensure array is full-length
       const next = Array.from({ length: letterCount }, (_, i) => prev[i] ?? null);
-      // Find the first empty (unlocked) slot
-      const emptyIdx = next.findIndex((l, i) => locked[i] === null && (l === null));
-      if (emptyIdx === -1) return prev; // all filled
+      const emptyIdx = next.findIndex((l, i) => locked[i] === null && l === null);
+      if (emptyIdx === -1) return prev;
       next[emptyIdx] = letter;
       return next;
     });
-  }, [finished, guesses, buildFromLocked, letterCount]);
+  }, [finished, locked, letterCount]);
 
   const handleBackspace = useCallback(() => {
     if (finished) return;
     setCurrentInput((prev) => {
       const next = [...prev];
-      const locked = buildFromLocked(guesses);
-      // Find the last filled non-locked slot
       for (let i = next.length - 1; i >= 0; i--) {
-        if (locked[i] !== null) continue; // skip locked
-        if (next[i] !== null && next[i] !== undefined) {
+        if (locked[i] !== null) continue;
+        if (next[i] !== null) {
           next[i] = null;
           return next;
         }
       }
       return prev;
     });
-  }, [finished, guesses, buildFromLocked]);
+  }, [finished, locked]);
 
   const handleSubmit = useCallback(() => {
     // Check all slots are filled
@@ -365,8 +363,14 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
     setGuesses(newGuesses);
     setRevealRow(newGuesses.length - 1);
 
-    // Pre-fill next row with locked (correct) letters
-    setCurrentInput(buildFromLocked(newGuesses));
+    // Pre-fill next row with newly locked (correct) letters
+    const nextLocked: (string | null)[] = Array(letterCount).fill(null);
+    for (const g of newGuesses) {
+      evaluateGuess(g, targetLetters).forEach(({ letter, status }, i) => {
+        if (status === "correct") nextLocked[i] = letter;
+      });
+    }
+    setCurrentInput(nextLocked);
 
     const isCorrect = guessLetters.every((l, i) =>
       normalizeAlef(l) === normalizeAlef(targetLetters[i])
@@ -398,7 +402,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
 
         // Submit score for leaderboard (free play only)
         if (mode === "free" && isCorrect) {
-          const score = (MAX_GUESSES - newGuesses.length + 1) * 100;
+          const score = (MAX_GUESSES - newGuesses.length + 1) * 10;
           submitScore({ data: { gameId: "kelime-tahmini", score, correctCount: 1, wrongCount: newGuesses.length - 1, bestStreak: 1 } }).catch(() => {});
         }
       }, letterCount * 300 + 400); // wait for flip animation
@@ -432,17 +436,14 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
 
   return (
     <div className="max-w-lg mx-auto px-4 py-4 pb-28 game-bg" style={gameBgStyle(THEME, "kelime-tahmini")}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={onBack} className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]">
-          {"<"} {t.gameScoring?.backToGames ?? "Geri"}
-        </button>
-        {mode === "daily" && (
+      {/* Day indicator */}
+      {mode === "daily" && (
+        <div className="flex justify-end mb-2">
           <span className="text-xs font-medium" style={{ color: P }}>
             {t.kelimeTahmini.dayNumber.replace("{day}", String(day))}
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Hint */}
       <div className="text-center mb-5">
@@ -470,7 +471,6 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
                 const letter = letters[colIdx] ?? "";
                 const status = result?.[colIdx]?.status;
                 const delay = isRevealing ? colIdx * 300 : 0;
-                const locked = buildFromLocked(guesses);
                 const isLocked = isCurrent && locked[colIdx] !== null;
 
                 let bg = "var(--color-surface)";

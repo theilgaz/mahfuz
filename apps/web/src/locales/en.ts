@@ -573,11 +573,12 @@ export const en: Messages = {
     startChain: "Start the chain",
     chainCount: "{count} links",
     lastWord: "Last word:",
-    whichVerseContinues: "which verse continues?",
+    whichVerseContinues: "Which verse continues?",
     correctAnswer: "Correct answer",
     hintQuestion: "Which verse comes after the highlighted last word?",
     showSurahName: "Show surah name",
     loading: "Preparing questions...",
+    ayah: "Ayah",
   },
   surahGuessGame: {
     questionPrompt: "Which surah does this verse belong to?",

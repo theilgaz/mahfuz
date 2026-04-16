@@ -33,7 +33,7 @@ export const Route = createFileRoute("/games/ayah-2048")({
 
 // ── Merge function: level + 1 (instead of classic value * 2) ──
 const surahMerge = (v: number) => v + 1;
-const surahScore = (level: number) => (level + 1) * 10;
+const surahScore = (level: number) => level + 1;
 
 // ── Color tiers for tile levels ───────────────────────────
 
@@ -376,16 +376,8 @@ function GameScreen({
   return (
     <div className="game-bg" style={gameBgStyle(THEME, "ayet-2048")} {...swipeHandlers}>
       <div className="mx-auto max-w-md px-4 py-4 flex flex-col gap-3 min-h-dvh">
-        {/* Top bar */}
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 rounded-lg" style={{ background: THEME.surface }}>
-            <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-bold text-white">{tx.title}</h1>
-          </div>
+        {/* Score bar */}
+        <div className="flex items-center justify-end gap-3">
           <div className="text-right">
             <div className="text-white/50 text-xs">{tx.score}</div>
             <div className="text-white font-bold text-lg">{gameState.score}</div>
@@ -553,21 +545,13 @@ function TileView({
       >
         {surah && (
           <>
-            <div className={`flex items-baseline gap-0.5 leading-none ${numFontSize}`}>
-              <span className="font-bold" style={{ fontFamily: "var(--font-arabic)" }}>
-                {toArabicNum(surah.id)}
-              </span>
-              <span className="opacity-40">
-                {surah.id}
-              </span>
-            </div>
             <span
-              className={`leading-none mt-0.5 font-semibold ${arabicNameSize}`}
+              className={`leading-none font-semibold ${arabicNameSize}`}
               style={{ fontFamily: "var(--font-arabic)" }}
             >
               {surah.nameArabic}
             </span>
-            <span className={`leading-none mt-0.5 opacity-60 ${nameFontSize}`}>
+            <span className={`leading-none mt-1 opacity-60 ${nameFontSize}`}>
               {getSurahName(surah.id, locale)}
             </span>
           </>

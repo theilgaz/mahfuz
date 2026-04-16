@@ -39,7 +39,7 @@ type T = ReturnType<typeof useTranslation>["t"];
 
 // ── Game data ──────────────────────────────────────────────
 
-const EDITORS_CHOICE_IDS = ["kelime-doldurma", "kelime-anlami", "kelime-tahmini"];
+const EDITORS_CHOICE_IDS = ["kelime-doldurma", "kelime-anlami", "hexagon-harf"];
 
 const GAME_IMGS: Record<string, string> = {
   "kelime-doldurma":      "/images/games/mahfuz-fill-in-the-blank.webp",
@@ -576,7 +576,7 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
 
 // ── Achievements ──────────────────────────────────────────
 
-const SCORE_THRESHOLDS = [100, 500, 1000];
+const SCORE_THRESHOLDS = [250, 1000, 2500];
 const PLAY_THRESHOLDS = [1, 10, 50];
 const CATEGORY_ORDER = ["cross-game", "streak", "flawless", "special", "game-score", "game-plays"] as const;
 
@@ -592,24 +592,22 @@ function tierToMedal(tier: number): keyof typeof MEDAL_COLORS {
   return "bronze";
 }
 
-function MedalIcon({ tier, unlocked, size = "md" }: { tier: number; unlocked: boolean; size?: "sm" | "md" }) {
+function MedalIcon({ tier, unlocked }: { tier: number; unlocked: boolean }) {
   const medal = tierToMedal(tier);
   const colors = MEDAL_COLORS[medal];
-  const dim = size === "sm" ? "w-8 h-8" : "w-10 h-10";
-  const iconSize = size === "sm" ? "text-sm" : "text-base";
 
   if (!unlocked) {
     return (
-      <div className={`${dim} rounded-full bg-[var(--color-border)] flex items-center justify-center ${iconSize} text-[var(--color-text-secondary)] opacity-40`}>
+      <div className="w-7 h-7 rounded-full bg-[var(--color-border)] flex items-center justify-center text-xs text-[var(--color-text-secondary)] opacity-40 shrink-0">
         ?
       </div>
     );
   }
 
-  const icons = { bronze: "\u{1F949}", silver: "\u{1F948}", gold: "\u{1F947}" };
+  const labels = { bronze: "3", silver: "2", gold: "1" };
   return (
-    <div className={`${dim} rounded-full ${colors.bg} ring-1 ${colors.ring} flex items-center justify-center ${iconSize}`}>
-      {icons[medal]}
+    <div className={`w-7 h-7 rounded-full ${colors.bg} ring-1 ${colors.ring} flex items-center justify-center text-xs font-bold ${colors.text} shrink-0`}>
+      {labels[medal]}
     </div>
   );
 }
@@ -619,11 +617,11 @@ function AchievementProgressBar({ current, target, tier }: { current: number; ta
   const medal = tierToMedal(tier);
   const barColor = MEDAL_COLORS[medal].bar;
   return (
-    <div className="mt-1.5">
-      <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
+    <div className="mt-1">
+      <div className="h-1 rounded-full bg-[var(--color-border)] overflow-hidden">
         <div className={`h-full rounded-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5 tabular-nums">{current}/{target} (%{pct})</p>
+      <p className="text-[10px] text-[var(--color-text-secondary)] tabular-nums">{current}/{target} (%{pct})</p>
     </div>
   );
 }
@@ -735,31 +733,32 @@ function AchievementsContent({ userId, t }: { userId?: string; t: T }) {
                   {catUnlocked}/{defs.length}
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                 {[...byGame.entries()].map(([gameId, gameDefs]) => {
                   const stat = statsMap.get(gameId);
                   const currentValue = cat === "game-score" ? (stat?.bestScore ?? 0) : (stat?.totalPlays ?? 0);
                   const thresholds = cat === "game-score" ? SCORE_THRESHOLDS : PLAY_THRESHOLDS;
-                  // Find the next unachieved tier for progress
+                  const highestUnlocked = [...gameDefs].reverse().find((d) => unlockedSet.has(d.id));
                   const nextDef = gameDefs.find((d) => !unlockedSet.has(d.id));
                   const nextThreshold = nextDef ? thresholds[(nextDef.tier ?? 1) - 1] : null;
 
                   return (
                     <div
                       key={gameId}
-                      className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3"
+                      className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-2 flex items-center gap-2"
                     >
-                      <p className="text-xs font-semibold text-[var(--color-text-primary)] mb-2 truncate">
-                        {GAME_TITLES[gameId] ?? gameId}
-                      </p>
-                      <div className="flex gap-2">
-                        {gameDefs.map((def) => (
-                          <MedalIcon key={def.id} tier={def.tier ?? 1} unlocked={unlockedSet.has(def.id)} size="sm" />
-                        ))}
+                      <MedalIcon
+                        tier={highestUnlocked?.tier ?? nextDef?.tier ?? 1}
+                        unlocked={!!highestUnlocked}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-medium text-[var(--color-text-primary)] truncate">
+                          {GAME_TITLES[gameId] ?? gameId}
+                        </p>
+                        {nextThreshold != null && (
+                          <AchievementProgressBar current={currentValue} target={nextThreshold} tier={nextDef!.tier ?? 1} />
+                        )}
                       </div>
-                      {nextThreshold != null && (
-                        <AchievementProgressBar current={currentValue} target={nextThreshold} tier={nextDef!.tier ?? 1} />
-                      )}
                     </div>
                   );
                 })}
@@ -777,7 +776,7 @@ function AchievementsContent({ userId, t }: { userId?: string; t: T }) {
                 {catUnlocked}/{defs.length}
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               {defs.map((def) => {
                 const isUnlocked = unlockedSet.has(def.id);
                 let name: string;
@@ -794,14 +793,14 @@ function AchievementsContent({ userId, t }: { userId?: string; t: T }) {
                 return (
                   <div
                     key={def.id}
-                    className={`rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 flex items-center gap-3 transition-opacity ${isUnlocked ? "" : "opacity-50"}`}
+                    className={`rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-2 flex items-center gap-2 transition-opacity ${isUnlocked ? "" : "opacity-50"}`}
                   >
                     <MedalIcon tier={def.tier ?? 1} unlocked={isUnlocked} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[var(--color-text-primary)]">
+                      <p className="text-[11px] font-medium text-[var(--color-text-primary)] truncate">
                         {name}
                       </p>
-                      <p className="text-[11px] text-[var(--color-text-secondary)] leading-tight">
+                      <p className="text-[10px] text-[var(--color-text-secondary)] leading-tight truncate">
                         {desc}
                       </p>
                     </div>

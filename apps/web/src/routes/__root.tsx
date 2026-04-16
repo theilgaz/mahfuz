@@ -143,7 +143,20 @@ function AppHeader() {
   const isAlifbaGame = path.startsWith("/alifba/games/");
   const isAlifbaSubRoute = path.startsWith("/alifba/") && path !== "/alifba/";
 
-  // Sayfa başlığı (non-reading routes only)
+  // Game sub-route tespiti (e.g. /games/fill-blank)
+  const isGameSubRoute = path.startsWith("/games/") && path !== "/games/" && path !== "/games";
+  const gameTitle = isGameSubRoute
+    ? path === "/games/fill-blank" ? t.gamesHub.fillBlankTitle
+    : path === "/games/surah-guess" ? t.gamesHub.surahGuessTitle
+    : path === "/games/verse-chain" ? t.gamesHub.verseChainTitle
+    : path === "/games/word-meaning" ? t.wordMeaningGame.title
+    : path === "/games/hexagon" ? t.hexagonGame.title
+    : path === "/games/kelime-tahmini" ? t.gamesHub.kelimeTahminiTitle
+    : path === "/games/ayah-2048" ? t.gamesHub.ayet2048Title
+    : null
+    : null;
+
+  // Sayfa basligi (non-reading routes only)
   const title = isHome || isReadingRoute ? null
     : path === "/discover" ? t.hub.title
     : path === "/search" ? t.nav.search
@@ -157,13 +170,7 @@ function AppHeader() {
     : path === "/qaida" || path === "/qaida/" ? t.hub.qaida
     : path.startsWith("/qaida/lesson/") ? t.hub.qaida
     : path.startsWith("/qaida/exam/") ? t.hub.qaidaExamTitle
-    : path === "/games/fill-blank" ? t.gamesHub.fillBlankTitle
-    : path === "/games/surah-guess" ? t.gamesHub.surahGuessTitle
-    : path === "/games/verse-chain" ? t.gamesHub.verseChainTitle
-    : path === "/games/word-meaning" ? t.wordMeaningGame.title
-    : path === "/games/hexagon" ? t.hexagonGame.title
-    : path === "/games/kelime-tahmini" ? t.gamesHub.kelimeTahminiTitle
-    : path === "/games/ayah-2048" ? t.gamesHub.ayet2048Title
+    : isGameSubRoute ? null // handled by breadcrumb
     : path === "/games" || path === "/games/" ? t.gamesHub.title
     : null;
 
@@ -196,7 +203,8 @@ function AppHeader() {
             <div className="flex items-center shrink-0">
               <button
                 onClick={() => {
-                  if (window.history.length > 1) window.history.back();
+                  if (isGameSubRoute) navigate({ to: "/games" });
+                  else if (window.history.length > 1) window.history.back();
                   else navigate({ to: "/" });
                 }}
                 className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
@@ -218,6 +226,17 @@ function AppHeader() {
               ) : pageNumMatch ? (
                 <PagePickerNav page={currentPage!} />
               ) : null}
+            </div>
+          ) : isGameSubRoute && gameTitle ? (
+            <div className="flex items-center gap-1 min-w-0 flex-1">
+              <Link to="/games" className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] shrink-0">
+                {t.gamesHub.title}
+              </Link>
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
+                <path d="M7 4L13 10L7 16" />
+              </svg>
+              <span className="text-sm font-medium truncate">{gameTitle}</span>
+              <div className="flex-1" />
             </div>
           ) : title ? (
             <>

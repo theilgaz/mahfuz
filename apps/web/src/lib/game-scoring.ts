@@ -2,11 +2,11 @@
  * Unified game scoring & timer system.
  *
  * Scoring:
- * - Base points per correct answer: 100
- * - Time bonus: up to +50 (decays linearly over 10 seconds)
- * - Streak bonus: +10 per consecutive correct (max +50 at 5+ streak)
- * - Difficulty multiplier: Easy 1x, Medium 1.5x, Hard 2x, Hafiz 3x
- * - Wrong answer penalty: -50 (also scaled by difficulty)
+ * - Base points per correct answer: 10
+ * - Time bonus: up to +5 (decays linearly over 10 seconds)
+ * - Streak bonus: +2 per consecutive correct (max +10 at 5+ streak)
+ * - Difficulty multiplier: Easy 1x, Medium 1.25x, Hard 1.5x, Hafiz 2x
+ * - Wrong answer penalty: -5 (also scaled by difficulty)
  *
  * Timer:
  * - Real-time countdown (1:1, no speed tricks)
@@ -25,9 +25,9 @@ export type Difficulty = "easy" | "medium" | "hard" | "hafiz";
 
 export const DIFFICULTY_MULTIPLIER: Record<Difficulty, number> = {
   easy: 1,
-  medium: 1.5,
-  hard: 2,
-  hafiz: 3,
+  medium: 1.25,
+  hard: 1.5,
+  hafiz: 2,
 };
 
 /** Starting time per difficulty (ms). */
@@ -54,12 +54,12 @@ export const OPTION_COUNT: Record<Difficulty, number> = {
 
 // ── Point scoring ───────────────────────────────────────
 
-const BASE_POINTS = 100;
-const MAX_TIME_BONUS = 50;
+const BASE_POINTS = 10;
+const MAX_TIME_BONUS = 5;
 const TIME_BONUS_WINDOW_MS = 10_000;
-const WRONG_PENALTY = 50;
-const STREAK_BONUS_PER = 10;
-const MAX_STREAK_BONUS = 50;
+const WRONG_PENALTY = 5;
+const STREAK_BONUS_PER = 2;
+const MAX_STREAK_BONUS = 10;
 
 /** Points earned for a correct answer. */
 export function calcCorrectPoints(

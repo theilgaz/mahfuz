@@ -40,9 +40,9 @@ export interface AchievementContext {
 // ── Tier thresholds ───────────────────────────────────────
 
 const SCORE_TIERS = [
-  { tier: 1, threshold: 100 },
-  { tier: 2, threshold: 500 },
-  { tier: 3, threshold: 1000 },
+  { tier: 1, threshold: 250 },
+  { tier: 2, threshold: 1000 },
+  { tier: 3, threshold: 2500 },
 ];
 
 const PLAY_TIERS = [
@@ -98,19 +98,19 @@ function buildDefinitions(): AchievementDef[] {
       id: "total-1000",
       category: "cross-game",
       tier: 1,
-      check: (ctx) => ctx.totalBestScore >= 1000,
+      check: (ctx) => ctx.totalBestScore >= 2500,
     },
     {
       id: "total-5000",
       category: "cross-game",
       tier: 2,
-      check: (ctx) => ctx.totalBestScore >= 5000,
+      check: (ctx) => ctx.totalBestScore >= 10000,
     },
     {
       id: "total-10000",
       category: "cross-game",
       tier: 3,
-      check: (ctx) => ctx.totalBestScore >= 10000,
+      check: (ctx) => ctx.totalBestScore >= 25000,
     },
     {
       id: "daily-3",

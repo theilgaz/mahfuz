@@ -2,19 +2,27 @@
  * Ayet Zinciri -- Ayetin devamini bul.
  * Dinamik soru uretimi (DB'den), gercek zincir mekanigi:
  * dogru cevaplarsan ayni surede sonraki ayetle devam eder.
+ * Timer-based: sure doldugunda oyun biter.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { submitScore } from "~/lib/score-service";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
+import { GameScoreBar } from "~/components/GameScoreBar";
 import { useTranslation } from "~/hooks/useTranslation";
+import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameOverCard } from "~/components/GameOverCard";
+import { GameVerseLabel } from "~/components/GameVerseLabel";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
+import { getSurahName } from "~/lib/surah-names-i18n";
+import { useLocaleStore } from "~/stores/locale.store";
 import { getVerseChainRounds, type ChainRound, type ChainVerse } from "~/lib/quran-service";
 import {
   calcCorrectPoints,
   calcWrongPenalty,
+  calcTimeBonusMs,
+  WRONG_TIME_PENALTY_MS,
   formatDelta,
   OPTION_COUNT,
   type Difficulty,
@@ -72,10 +80,13 @@ function VerseChainGame({
   onSetup: () => void;
 }) {
   const { t } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
   const optCount = OPTION_COUNT[difficulty];
+  const timer = useGameTimer(difficulty);
 
   const [rounds, setRounds] = useState<ChainRound[]>([]);
   const [roundIndex, setRoundIndex] = useState(0);
+  const [round, setRound] = useState(1);
   const [state, setState] = useState<GameState>("loading");
   const submittedRef = useRef(false);
   const sessionStart = useRef(Date.now());
@@ -87,7 +98,6 @@ function VerseChainGame({
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
   const [lastDelta, setLastDelta] = useState<number | null>(null);
-  const [lives, setLives] = useState(3);
   const [chainLength, setChainLength] = useState(0);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
@@ -109,21 +119,38 @@ function VerseChainGame({
         questionStart.current = Date.now();
       }
     } catch {
-      // Fallback: retry once
       setTimeout(() => loadRounds(), 1000);
     }
   }, [surahIds, optCount]);
+
+  // Start timer when first question loads
+  useEffect(() => {
+    if (state === "playing" && round === 1 && !timer.isExpired) {
+      timer.start();
+    }
+  }, [state === "playing" && round === 1]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     loadRounds();
   }, [loadRounds]);
 
-  const round = rounds[roundIndex];
+  // Timer expired -> end game
+  useEffect(() => {
+    if (timer.isExpired && state !== "gameover") {
+      setState("gameover");
+    }
+  }, [timer.isExpired]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const currentRound = rounds[roundIndex];
+
+  const endGame = useCallback(() => {
+    timer.pause();
+    setState("gameover");
+  }, [timer]);
 
   const advanceToNext = useCallback(
     (nextIdx: number) => {
       if (nextIdx >= rounds.length) {
-        // Load more rounds
         loadRounds().then(() => {
           setRoundIndex(0);
         });
@@ -134,21 +161,26 @@ function VerseChainGame({
       setState("playing");
       setSelected(null);
       setLastDelta(null);
+      setRound((r) => r + 1);
       questionStart.current = Date.now();
+      timer.start();
     },
-    [rounds, optCount, loadRounds],
+    [rounds, optCount, loadRounds, timer],
   );
 
   const handleAnswer = (idx: number) => {
-    if (state !== "playing" || !round) return;
+    if (state !== "playing" || !currentRound || timer.isExpired) return;
     setSelected(idx);
     const isCorrect = options[idx].isCorrect;
     const answerTime = Date.now() - questionStart.current;
+    timer.pause();
 
     if (isCorrect) {
       setState("correct");
       const newStreak = streak + 1;
       const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
+      const timeBonus = calcTimeBonusMs(answerTime);
+      if (timeBonus > 0) timer.addTime(timeBonus);
       setScore((s) => s + pts);
       setStreak(newStreak);
       setBestStreak((b) => Math.max(b, newStreak));
@@ -159,23 +191,19 @@ function VerseChainGame({
     } else {
       setState("wrong");
       const penalty = calcWrongPenalty(difficulty);
+      timer.penalizeTime(WRONG_TIME_PENALTY_MS);
       setScore((s) => Math.max(0, s - penalty));
       setStreak(0);
       setWrongCount((c) => c + 1);
       setChainLength(0);
       setLastDelta(-penalty);
-      const newLives = lives - 1;
-      setLives(newLives);
-      if (newLives <= 0) {
-        setTimeout(() => setState("gameover"), 1200);
-      } else {
-        setTimeout(() => advanceToNext(roundIndex + 1), 1500);
-      }
+      setTimeout(() => advanceToNext(roundIndex + 1), 1500);
     }
   };
 
   const handleRestart = () => {
     setRoundIndex(0);
+    setRound(1);
     setState("loading");
     setSelected(null);
     setScore(0);
@@ -184,12 +212,12 @@ function VerseChainGame({
     setCorrectCount(0);
     setWrongCount(0);
     setLastDelta(null);
-    setLives(3);
     setChainLength(0);
     setIsNewHighScore(false);
     setNewAchievements([]);
     submittedRef.current = false;
     sessionStart.current = Date.now();
+    timer.reset();
     loadRounds();
   };
 
@@ -233,7 +261,7 @@ function VerseChainGame({
     );
   }
 
-  if (state === "loading" || !round) {
+  if (state === "loading" || !currentRound) {
     return (
       <div
         className="min-h-dvh flex items-center justify-center game-bg"
@@ -252,142 +280,114 @@ function VerseChainGame({
     );
   }
 
-  const currentText = round.current.textUthmani;
+  const currentText = currentRound.current.textUthmani;
+  const lastW = lastWord(currentText);
+  const bodyWords = currentText.trim().split(/\s+/).slice(0, -1).join(" ");
 
   return (
     <div
-      className="max-w-lg mx-auto pb-24 game-bg"
+      className="max-w-lg mx-auto min-h-dvh game-bg"
       style={gameBgStyle(THEME, "verse-chain")}
     >
-      <div className="px-4 pt-2">
-        {/* Score and lives */}
-        <div className="flex items-center justify-between mb-3">
-          <span
-            className="game-score-badge"
-            style={{ backgroundColor: `${P}25`, color: P }}
-          >
-            {score}
-          </span>
-          <div className="flex gap-1.5 items-center">
-            {Array.from({ length: 3 }, (_, i) => (
-              <span
-                key={i}
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${i < lives ? "game-heart-beat" : "opacity-20"}`}
-                style={
-                  i < lives
-                    ? { backgroundColor: `${P}20`, color: P, animationDelay: `${i * 0.15}s` }
-                    : { backgroundColor: "var(--color-border)", color: "var(--color-text-secondary)" }
-                }
-              >
-                {i < lives ? "\u2713" : "\u2717"}
-              </span>
-            ))}
-          </div>
-        </div>
+      <div className="px-4 pt-2 pb-8">
+        {/* Timer + Score bar */}
+        <GameScoreBar
+          theme={THEME}
+          timerDisplay={timer.display}
+          timerProgress={timer.progress}
+          score={score}
+          streak={streak}
+          lastDelta={lastDelta}
+          round={round}
+        />
 
-        {/* Chain counter */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="flex gap-1.5">
-            {Array.from({ length: Math.min(chainLength, 8) }, (_, i) => (
-              <div
-                key={i}
-                className="w-3 h-3 rounded-full game-chain-link"
-                style={{
-                  backgroundColor: P,
-                  animationDelay: `${i * 0.05}s`,
-                  boxShadow: `0 0 6px ${THEME.glow}`,
-                }}
-              />
-            ))}
-            {chainLength > 8 && (
-              <span className="text-xs font-bold" style={{ color: P }}>
-                +{chainLength - 8}
-              </span>
-            )}
-          </div>
-          <span className="text-xs text-[var(--color-text-secondary)] font-medium">
-            {chainLength === 0
-              ? t.verseChainGame.startChain
-              : t.verseChainGame.chainCount.replace("{count}", String(chainLength))}
-          </span>
-          {streak >= 2 && (
-            <span
-              className="game-streak-fire ml-auto"
-              style={{
-                color: P,
-                backgroundColor: `${P}20`,
-                ["--glow-color" as string]: THEME.glow,
-              }}
-            >
-              {streak}x
+        {/* Chain indicator */}
+        {chainLength > 0 && (
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex gap-1">
+              {Array.from({ length: Math.min(chainLength, 10) }, (_, i) => (
+                <div
+                  key={i}
+                  className="w-2 h-2 rounded-full game-chain-link"
+                  style={{
+                    backgroundColor: P,
+                    animationDelay: `${i * 0.05}s`,
+                    opacity: 0.5 + (i / Math.min(chainLength, 10)) * 0.5,
+                  }}
+                />
+              ))}
+            </div>
+            <span className="text-[11px] font-medium" style={{ color: P }}>
+              {t.verseChainGame.chainCount.replace("{count}", String(chainLength))}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Current verse */}
+        {/* Verse label */}
+        <GameVerseLabel surahId={currentRound.current.surahId} ayahNumber={currentRound.current.ayahNumber} primary={P} fallbackName={currentRound.current.surahName} />
+
+        {/* Current verse card */}
         <div
-          className="px-5 py-4 rounded-2xl border bg-[var(--color-surface)] mb-5 game-slide-up"
-          style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
+          className="rounded-2xl border bg-[var(--color-surface)] mb-4 overflow-hidden game-slide-up"
+          style={{ borderColor: `${P}20` }}
         >
-          <p className="text-xs text-[var(--color-text-secondary)] mb-2">
-            {round.current.surahName} &middot; {round.current.ayahNumber}. Ayet
-          </p>
-          <p
-            className="text-[2.5rem] text-right leading-[2.6] text-[var(--color-text-primary)] mb-3"
-            dir="rtl"
-            lang="ar"
-            style={{ fontFamily: "var(--font-arabic)" }}
-          >
-            {currentText.trim().split(/\s+/).slice(0, -1).join(" ")}{" "}
-            <span
-              className="font-medium px-2 py-0.5 rounded-lg game-pulse-glow"
-              style={{
-                color: P,
-                backgroundColor: `${P}18`,
-                ["--glow-color" as string]: THEME.glow,
-              }}
-            >
-              {lastWord(currentText)}
-            </span>
-          </p>
-          <div className="flex items-center gap-2 pt-2 border-t border-[var(--color-border)]">
-            <span className="text-xs text-[var(--color-text-secondary)]">
-              {t.verseChainGame.lastWord}
-            </span>
-            <span
-              className="text-xl font-medium"
+          {/* Verse text */}
+          <div className="px-5 py-4">
+            <p
+              className="text-3xl text-right leading-[2.4] text-[var(--color-text-primary)]"
               dir="rtl"
               lang="ar"
-              style={{ fontFamily: "var(--font-arabic)", color: P }}
+              style={{ fontFamily: "var(--font-arabic)" }}
             >
-              {lastWord(currentText)}
-            </span>
-            <span className="text-xs text-[var(--color-text-secondary)] ml-auto">
+              {bodyWords}{" "}
+              <span
+                className="font-semibold px-1.5 py-0.5 rounded-lg"
+                style={{
+                  color: P,
+                  backgroundColor: `${P}15`,
+                }}
+              >
+                {lastW}
+              </span>
+            </p>
+          </div>
+
+          {/* Prompt */}
+          <div
+            className="px-4 py-2.5 border-t flex items-center gap-2"
+            style={{ borderColor: `${P}12` }}
+          >
+            <svg width="14" height="14" fill="none" stroke={P} strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+            </svg>
+            <span className="text-xs text-[var(--color-text-secondary)]">
               {t.verseChainGame.whichVerseContinues}
             </span>
           </div>
         </div>
 
         {/* Options */}
-        <div className="flex flex-col gap-2.5 mb-4">
+        <div className="flex flex-col gap-2">
           {options.map((opt, idx) => {
-            let bgColor = "var(--color-surface)";
-            let borderColor = `${P}20`;
+            const isUnlocked = state !== "playing";
+            const isSelected = selected === idx;
+            const isRight = opt.isCorrect;
+
+            let borderColor = `${P}15`;
+            let bg = "var(--color-surface)";
             let extraClass = "";
 
-            if (selected === idx) {
-              if (state === "correct" || opt.isCorrect) {
-                bgColor = `${P}12`;
-                borderColor = `${P}60`;
-                extraClass = "game-bounce-in";
-              } else if (state === "wrong") {
-                bgColor = "rgba(220,38,38,0.12)";
-                borderColor = "rgba(239,68,68,0.5)";
-                extraClass = "game-shake";
-              }
-            } else if (state !== "playing" && opt.isCorrect) {
-              bgColor = `${P}08`;
-              borderColor = `${P}40`;
+            if (isSelected && state === "correct") {
+              bg = `${P}10`;
+              borderColor = `${P}50`;
+              extraClass = "game-bounce-in";
+            } else if (isSelected && state === "wrong") {
+              bg = "rgba(220,38,38,0.08)";
+              borderColor = "rgba(239,68,68,0.4)";
+              extraClass = "game-shake";
+            } else if (isUnlocked && isRight && !isSelected) {
+              bg = `${P}06`;
+              borderColor = `${P}30`;
             }
 
             return (
@@ -395,34 +395,31 @@ function VerseChainGame({
                 key={idx}
                 onClick={() => handleAnswer(idx)}
                 disabled={state !== "playing"}
-                className={`game-option-card w-full text-left ${extraClass}`}
-                style={{ backgroundColor: bgColor, borderColor }}
+                className={`w-full text-right rounded-xl border px-4 py-3 transition-all ${extraClass}`}
+                style={{ backgroundColor: bg, borderColor }}
               >
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span
-                    className="text-xs font-medium text-[var(--color-text-secondary)]"
-                    style={opt.isCorrect && state !== "playing" ? { color: P } : {}}
-                  >
-                    {state !== "playing" ? opt.surahName : `${opt.surahId}:${opt.ayahNumber}`}
+                <div className="flex items-center justify-between gap-3 mb-1">
+                  <span className="text-[10px] text-[var(--color-text-secondary)]">
+                    {isUnlocked ? `${getSurahName(opt.surahId, locale) || opt.surahName} - ${opt.ayahNumber}. Ayet` : ""}
                   </span>
-                  {selected === idx && state === "correct" && (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: P }}>
-                      {"\u2713"} {lastDelta !== null && formatDelta(lastDelta)}
+                  {isSelected && state === "correct" && (
+                    <span className="text-xs font-bold" style={{ color: P }}>
+                      +{lastDelta}
                     </span>
                   )}
-                  {selected === idx && state === "wrong" && !opt.isCorrect && (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: "#f87171" }}>
-                      {"\u2717"} {lastDelta !== null && formatDelta(lastDelta)}
+                  {isSelected && state === "wrong" && !isRight && (
+                    <span className="text-xs font-bold text-red-400">
+                      {lastDelta !== null && formatDelta(lastDelta)}
                     </span>
                   )}
-                  {state !== "playing" && opt.isCorrect && selected !== idx && (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium" style={{ color: P }}>
-                      &#10003; {t.verseChainGame.correctAnswer}
+                  {isUnlocked && isRight && !isSelected && (
+                    <span className="text-[10px] font-medium" style={{ color: P }}>
+                      {t.verseChainGame.correctAnswer}
                     </span>
                   )}
                 </div>
                 <p
-                  className="text-[2.5rem] text-right leading-[2.6] text-[var(--color-text-primary)]"
+                  className="text-2xl leading-[2.2] text-[var(--color-text-primary)]"
                   dir="rtl"
                   lang="ar"
                   style={{ fontFamily: "var(--font-arabic)" }}
@@ -433,12 +430,6 @@ function VerseChainGame({
             );
           })}
         </div>
-
-        {state === "playing" && (
-          <p className="text-center text-xs text-[var(--color-text-secondary)]">
-            {t.verseChainGame.hintQuestion}
-          </p>
-        )}
       </div>
     </div>
   );

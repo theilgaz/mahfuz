@@ -15,6 +15,7 @@ import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { GameOverCard } from "~/components/GameOverCard";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
+import { GameVerseLabel } from "~/components/GameVerseLabel";
 import {
   OPTION_COUNT,
   calcCorrectPoints,
@@ -238,13 +239,7 @@ function GameScreen({
         />
 
         {/* Verse label */}
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <span className="h-px flex-1 max-w-12" style={{ background: `linear-gradient(90deg, transparent, ${P}40)` }} />
-          <p className="text-xs font-semibold tracking-wide" style={{ color: `${P}cc` }}>
-            {t.fillBlankGame.verseLabel.replace("{surahName}", verse.surahName).replace("{verseNum}", String(verse.verseNum))}
-          </p>
-          <span className="h-px flex-1 max-w-12" style={{ background: `linear-gradient(270deg, transparent, ${P}40)` }} />
-        </div>
+        <GameVerseLabel surahId={verse.surahId} ayahNumber={verse.verseNum} primary={P} fallbackName={verse.surahName} />
 
         {/* Verse card -- mushaf style */}
         <div

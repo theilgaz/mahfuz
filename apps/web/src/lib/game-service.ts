@@ -83,6 +83,7 @@ export const getRandomVerseForGame = createServerFn({ method: "POST" })
 
       return {
         ayahId: ayah.id,
+        surahId: ayah.surahId,
         surahName: surah?.nameSimple ?? "",
         verseNum: ayah.ayahNumber,
         words,
@@ -178,6 +179,7 @@ export const getWordConstructionQuestion = createServerFn({ method: "POST" })
 
       return {
         ayahId: ayah.id,
+        surahId: ayah.surahId,
         surahName: surah?.nameSimple ?? "",
         verseNum: ayah.ayahNumber,
         words,

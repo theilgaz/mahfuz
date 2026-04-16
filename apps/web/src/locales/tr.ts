@@ -598,11 +598,12 @@ export const tr = {
     startChain: "Zinciri başlat",
     chainCount: "{count} halka",
     lastWord: "Son kelime:",
-    whichVerseContinues: "devam eden ayet hangisi?",
+    whichVerseContinues: "Devam eden ayet hangisi?",
     correctAnswer: "Doğru cevap",
     hintQuestion: "Vurgulanan son kelimeden sonra hangi ayet gelir?",
     showSurahName: "Sure adını göster",
     loading: "Sorular hazirlaniyor...",
+    ayah: "Ayet",
   },
   surahGuessGame: {
     questionPrompt: "Bu ayet hangi sureye ait?",
