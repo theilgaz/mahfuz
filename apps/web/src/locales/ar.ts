@@ -140,4 +140,16 @@ export const ar: PartialMessages = {
     curatedAmma: "جزء عمّ",
     curatedTabaraka: "جزء تبارك",
   },
+  ayahMenu: {
+    save: "حفظ",
+    remove: "إزالة",
+    listen: "استماع",
+    share: "مشاركة",
+    note: "ملاحظة",
+    translations: "الترجمات",
+    copyArabic: "العربية",
+    copyTranslation: "الترجمة",
+    copyAll: "الكل",
+    analyse: "تحليل",
+  },
 } as const;
