@@ -11,6 +11,7 @@ import {
   markSectionComplete,
   unmarkSectionComplete,
 } from "~/lib/hatim-group-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/khatm/$groupId")({
   component: GroupDashboardPage,
@@ -20,6 +21,7 @@ function GroupDashboardPage() {
   const { groupId } = Route.useParams();
   const [inviteCopied, setInviteCopied] = useState(false);
   const qc = useQueryClient();
+  const { t } = useTranslation();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["hatim-dashboard", groupId],
@@ -68,9 +70,9 @@ function GroupDashboardPage() {
   if (error || !data) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-6 text-center">
-        <p className="text-[var(--color-text-secondary)]">Grup bulunamadı.</p>
+        <p className="text-[var(--color-text-secondary)]">{t.khatm.groupNotFound}</p>
         <Link to="/khatm/" className="mt-4 inline-block text-[var(--color-accent)] text-sm">
-          ← Geri dön
+          ← {t.khatm.back}
         </Link>
       </div>
     );
@@ -91,9 +93,9 @@ function GroupDashboardPage() {
         <div className="flex-1">
           <h1 className="text-xl font-bold text-[var(--color-text-primary)]">{group.name}</h1>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            {group.scopeType === "full" ? "Tam Hatim" : group.scopeType === "juz" ? "Cüz Hatmi" : "Sayfa Aralığı"}
+            {group.scopeType === "full" ? t.khatm.fullKhatm : group.scopeType === "juz" ? t.khatm.juzKhatm : t.khatm.pageRange}
             {" · "}
-            {members.length} üye
+            {t.khatm.memberCount.replace("{count}", String(members.length))}
           </p>
         </div>
         <span
@@ -103,14 +105,14 @@ function GroupDashboardPage() {
               : "bg-[var(--color-border)] text-[var(--color-text-secondary)]"
           }`}
         >
-          {group.status === "active" ? "Aktif" : "Tamamlandı"}
+          {group.status === "active" ? t.khatm.active : t.khatm.completed}
         </span>
       </div>
 
-      {/* Genel İlerleme */}
+      {/* Overall Progress */}
       <div className="py-3 px-1 border-b border-[var(--color-border)] mb-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-[var(--color-text-primary)]">Genel İlerleme</span>
+          <span className="text-sm font-semibold text-[var(--color-text-primary)]">{t.khatm.overallProgress}</span>
           <span className="text-sm font-bold text-[var(--color-accent)]">%{overallPct}</span>
         </div>
         <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
@@ -120,14 +122,14 @@ function GroupDashboardPage() {
           />
         </div>
         <p className="text-xs text-[var(--color-text-secondary)] mt-1.5">
-          {totalProgress} / {totalSections} bölüm tamamlandı
+          {t.khatm.sectionsCompleted.replace("{done}", String(totalProgress)).replace("{total}", String(totalSections))}
         </p>
       </div>
 
-      {/* Üyeler */}
+      {/* Members */}
       <div className="mb-5">
         <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
-          Üyeler ({members.length})
+          {t.khatm.members} ({members.length})
         </h2>
         <div>
           {members.map((m) => (
@@ -144,7 +146,7 @@ function GroupDashboardPage() {
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
-                  {m.userName ?? "Kullanıcı"}
+                  {m.userName ?? t.khatm.defaultUser}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <div className="flex-1 h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
@@ -166,11 +168,11 @@ function GroupDashboardPage() {
         </div>
       </div>
 
-      {/* Cüz İlerleme */}
+      {/* Juz Progress */}
       {group.status === "active" && (
         <div className="mb-5">
           <h2 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-3">
-            Cüz İlerlemem
+            {t.khatm.myJuzProgress}
           </h2>
           <div className="grid grid-cols-6 gap-1.5">
             {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => {
@@ -197,14 +199,14 @@ function GroupDashboardPage() {
             })}
           </div>
           <p className="text-[10px] text-[var(--color-text-secondary)] mt-2 text-center">
-            Tamamladığınız cüze dokunun
+            {t.khatm.tapCompletedJuz}
           </p>
         </div>
       )}
 
-      {/* Davet Kodu */}
+      {/* Invite Code */}
       <div className="py-3 px-1 border-b border-[var(--color-border)]">
-        <p className="text-xs text-[var(--color-text-secondary)] mb-2">Davet Kodu</p>
+        <p className="text-xs text-[var(--color-text-secondary)] mb-2">{t.khatm.inviteCode}</p>
         <div className="flex items-center gap-3">
           <span className="flex-1 text-2xl font-mono font-bold tracking-[0.2em] text-[var(--color-text-primary)]">
             {group.inviteCode}
@@ -216,13 +218,13 @@ function GroupDashboardPage() {
             {inviteCopied ? (
               <span className="flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                Kopyalandı
+                {t.khatm.copied}
               </span>
-            ) : "Kopyala"}
+            ) : t.khatm.copy}
           </button>
         </div>
         <p className="text-[10px] text-[var(--color-text-secondary)] mt-1.5">
-          Bu kodu arkadaşlarınızla paylaşın
+          {t.khatm.shareInviteCode}
         </p>
       </div>
     </div>

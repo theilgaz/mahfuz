@@ -25,6 +25,7 @@ interface HubCardProps {
 }
 
 function HubCard({ to, icon, title, description, badge, disabled, labs }: HubCardProps) {
+  const { t } = useTranslation();
   const content = (
     <div
       className={`flex items-center gap-3 py-3 px-1 border-b border-[var(--color-border)] transition-colors ${
@@ -46,12 +47,12 @@ function HubCard({ to, icon, title, description, badge, disabled, labs }: HubCar
           )}
           {disabled && (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-border)]/50 text-[var(--color-text-secondary)] font-medium">
-              Yakında
+              {t.premium.comingSoon}
             </span>
           )}
           {labs && !disabled && (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium">
-              Keşif
+              {t.settings.labs}
             </span>
           )}
         </span>

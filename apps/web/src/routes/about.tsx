@@ -46,11 +46,11 @@ function AboutPage() {
         <div className="flex-1 min-w-0">
           <p className="font-bold text-base text-[var(--color-text-primary)]">Mahfuz</p>
           <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 leading-relaxed">
-            Dikkat dağıtmadan Kuran okuma ve öğrenme uygulaması
+            {t.about.description}
           </p>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium border border-[var(--color-accent)]/20">
-              Açık Kaynak
+              {t.about.openSource}
             </span>
             <a
               href="https://github.com/theilgaz/mahfuz"

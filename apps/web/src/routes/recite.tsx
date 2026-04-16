@@ -41,10 +41,10 @@ function RecitePage() {
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       <h1 className="text-lg font-semibold mb-1">
-        {t.recitation?.title ?? "Tilavet Tanıma"}
+        {t.recitation.title}
       </h1>
       <p className="text-sm text-[var(--color-text-secondary)] mb-6">
-        Kur'an okuyun, hangi ayet olduğunu tanıyalım
+        {t.recitation.findVerseDesc}
       </p>
 
       {mode === "select" && (
@@ -64,9 +64,9 @@ function RecitePage() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-semibold">{t.recitation?.findVerse ?? "Ayetimi Bul"}</p>
+                <p className="text-sm font-semibold">{t.recitation.findVerse}</p>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  {t.recitation?.findVerseDesc ?? "Okuyun, hangi ayet olduğunu bulalım"}
+                  {t.recitation.findVerseDesc}
                 </p>
               </div>
             </div>
@@ -85,9 +85,9 @@ function RecitePage() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-semibold">{t.recitation?.verify ?? "Ezberimi Doğrula"}</p>
+                <p className="text-sm font-semibold">{t.recitation.verify}</p>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  {t.recitation?.verifyDesc ?? "Ezberlediğiniz ayetleri sesinizle doğrulayın"}
+                  {t.recitation.verifyDesc}
                 </p>
               </div>
             </div>
@@ -109,9 +109,9 @@ function RecitePage() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-semibold">{t.recitation?.followAlong ?? "Takip Et"}</p>
+                <p className="text-sm font-semibold">{t.recitation.followAlong}</p>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  {t.recitation?.followAlongDesc ?? "Okurken sizi takip edelim"}
+                  {t.recitation.followAlongDesc}
                 </p>
               </div>
             </div>
@@ -124,7 +124,7 @@ function RecitePage() {
         <div>
           <button onClick={() => setMode("select")} className="text-xs text-[var(--color-text-secondary)] mb-4 flex items-center gap-1">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M9 3L5 7l4 4" /></svg>
-            Geri
+            {t.nav.back}
           </button>
           <FindVerseSheet />
         </div>
@@ -135,9 +135,9 @@ function RecitePage() {
         <div>
           <button onClick={() => setMode("select")} className="text-xs text-[var(--color-text-secondary)] mb-4 flex items-center gap-1">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M9 3L5 7l4 4" /></svg>
-            Geri
+            {t.nav.back}
           </button>
-          <h2 className="text-sm font-semibold mb-3">Sure seçin</h2>
+          <h2 className="text-sm font-semibold mb-3">{t.surahPicker.subtitle}</h2>
           <div className="space-y-1">
             {surahs.slice(0, 30).map((s) => (
               <button
@@ -146,7 +146,7 @@ function RecitePage() {
                 className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
               >
                 <span className="text-sm">{s.id}. {getSurahName(s.id, locale) || s.nameSimple}</span>
-                <span className="text-xs text-[var(--color-text-secondary)]">{s.ayahCount} ayet</span>
+                <span className="text-xs text-[var(--color-text-secondary)]">{s.ayahCount} {t.surahList.verses}</span>
               </button>
             ))}
           </div>
@@ -160,7 +160,7 @@ function RecitePage() {
             className="text-xs text-[var(--color-text-secondary)] mb-4 flex items-center gap-1"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M9 3L5 7l4 4" /></svg>
-            Geri
+            {t.nav.back}
           </button>
           <VerificationMode surahId={verifySurahId} />
         </div>

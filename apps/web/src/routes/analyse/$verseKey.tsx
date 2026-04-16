@@ -9,6 +9,7 @@ import { getVerseAnalysis, getSimilarVerses } from "~/lib/analyse-service";
 import { getThemesForSurah, detectVerseThemes } from "~/lib/themes-data";
 import { getVerseContext } from "~/lib/verse-context-data";
 import { MealComparisonSheet } from "~/components/MealComparisonSheet";
+import { useTranslation } from "~/hooks/useTranslation";
 
 // ── Route ────────────────────────────────────────────────
 
@@ -22,17 +23,11 @@ export const Route = createFileRoute("/analyse/$verseKey")({
 const TABS = ["meal", "morfoloji", "temalar", "benzer", "bagit"] as const;
 type Tab = (typeof TABS)[number];
 
-const TAB_LABELS: Record<Tab, string> = {
-  meal: "Mealler",
-  morfoloji: "Morfoloji",
-  temalar: "Temalar",
-  benzer: "Benzer Ayetler",
-  bagit: "Bağlam",
-};
 
 // ── Benzer Ayetler Tab ───────────────────────────────────
 
 function SimilarVersesTab({ verseKey }: { verseKey: string }) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["similar-verses", verseKey],
     queryFn: () => getSimilarVerses({ data: verseKey }),
@@ -58,10 +53,10 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
           </svg>
         </div>
         <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">
-          Semantik Benzerlik
+          {t.analyse.semanticSimilarity}
         </p>
         <p className="text-xs text-[var(--color-text-secondary)]">
-          Benzerlik indeksi henüz oluşturulmamış.
+          {t.analyse.similarityNotBuilt}
           <br />
           <code className="mt-1 inline-block text-[10px] bg-[var(--color-surface)] border border-[var(--color-border)] px-2 py-0.5 rounded">
             pnpm tsx scripts/build-similarity.ts
@@ -74,7 +69,7 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
   return (
     <div className="space-y-2">
       <p className="text-xs text-[var(--color-text-secondary)] mb-3">
-        Kelime örtüşmesine göre en benzer {data.length} ayet
+        {t.analyse.mostSimilarVerses.replace("{count}", String(data.length))}
       </p>
       {data.map((v) => (
         <Link
@@ -88,7 +83,7 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
               {v.surahName} · {v.ayahNumber}
             </span>
             <span className="text-[10px] text-[var(--color-text-secondary)] shrink-0">
-              %{Math.round(v.score * 100)} benzer
+              {t.analyse.percentSimilar.replace("{score}", String(Math.round(v.score * 100)))}
             </span>
           </div>
           <p
@@ -113,6 +108,7 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
 // ── Bağlam Tab ───────────────────────────────────────────
 
 function BaglamTab({ verseKey }: { verseKey: string }) {
+  const { t } = useTranslation();
   const ctx = getVerseContext(verseKey);
   const [open, setOpen] = useState<number | null>(null);
 
@@ -124,9 +120,9 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
         </div>
-        <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">Bağlam & Savunma</p>
+        <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">{t.analyse.contextAndDefense}</p>
         <p className="text-xs text-[var(--color-text-secondary)]">
-          Bu ayet için henüz bağlam notu eklenmemiş.
+          {t.analyse.noContextNote}
         </p>
       </div>
     );
@@ -136,7 +132,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
     <div className="space-y-4">
       {/* Konu */}
       <div className="px-4 py-3 rounded bg-[var(--color-accent)]/8 border border-[var(--color-accent)]/20">
-        <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-accent)] mb-0.5">Konu</p>
+        <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-accent)] mb-0.5">{t.analyse.topic}</p>
         <p className="text-sm font-medium text-[var(--color-text-primary)]">{ctx.topic}</p>
       </div>
 
@@ -144,7 +140,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
       {ctx.revelationContext && (
         <div className="px-4 py-4 rounded border border-[var(--color-border)] bg-[var(--color-surface)]">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2">
-            Nüzul Sebebi
+            {t.analyse.revelationReason}
           </p>
           <p className="text-sm text-[var(--color-text-primary)] leading-relaxed">{ctx.revelationContext}</p>
         </div>
@@ -153,7 +149,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
       {/* Tarihsel Bağlam */}
       <div className="px-4 py-4 rounded border border-[var(--color-border)] bg-[var(--color-surface)]">
         <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2">
-          Tarihsel Bağlam
+          {t.analyse.historicalContext}
         </p>
         <p className="text-sm text-[var(--color-text-primary)] leading-relaxed">{ctx.historicalNote}</p>
       </div>
@@ -161,7 +157,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
       {/* Yanlış Anlamalar */}
       <div>
         <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2 px-1">
-          Yaygın İtirazlar ve Yanıtlar
+          {t.analyse.commonObjections}
         </p>
         <div className="space-y-2">
           {ctx.misconceptions.map((m, i) => (
@@ -204,7 +200,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
       {ctx.legalNote && (
         <div className="px-4 py-4 rounded border border-amber-500/20 bg-amber-500/5">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400 mb-2">
-            Fıkhi Tartışma
+            {t.analyse.legalDiscussion}
           </p>
           <p className="text-sm text-[var(--color-text-primary)] leading-relaxed">{ctx.legalNote}</p>
         </div>
@@ -214,13 +210,13 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
       {ctx.comparativeLaw && ctx.comparativeLaw.length > 0 && (
         <div>
           <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2 px-1">
-            Karşılaştırmalı Hukuk
+            {t.analyse.comparativeLaw}
           </p>
           <div className="rounded border border-[var(--color-border)] overflow-hidden">
             <div className="grid grid-cols-3 bg-[var(--color-surface)] px-3 py-2 border-b border-[var(--color-border)]">
-              <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Sistem</span>
-              <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Hüküm</span>
-              <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Koruma</span>
+              <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">{t.analyse.system}</span>
+              <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">{t.analyse.ruling}</span>
+              <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">{t.analyse.protection}</span>
             </div>
             {ctx.comparativeLaw.map((row, i) => (
               <div
@@ -248,7 +244,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
       {ctx.relatedVerses.length > 0 && (
         <div>
           <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2 px-1">
-            Konuyla İlgili Diğer Ayetler
+            {t.analyse.relatedVerses}
           </p>
           <div className="space-y-1.5">
             {ctx.relatedVerses.map((rv) => (
@@ -272,7 +268,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
       {ctx.sources && ctx.sources.length > 0 && (
         <div className="px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-surface)]">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] mb-2">
-            Kaynaklar
+            {t.analyse.sources}
           </p>
           <ul className="space-y-1">
             {ctx.sources.map((s, i) => (
@@ -291,12 +287,13 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
 // ── Temalar Tab ──────────────────────────────────────────
 
 function ThemesTab({ surahId, translation }: { surahId: number; translation: string }) {
+  const { t } = useTranslation();
   const themes = detectVerseThemes(surahId, translation);
 
   if (themes.length === 0) {
     return (
       <div className="px-4 py-6 rounded border border-dashed border-[var(--color-border)] text-center">
-        <p className="text-sm text-[var(--color-text-secondary)]">Bu sure için tema verisi yükleniyor...</p>
+        <p className="text-sm text-[var(--color-text-secondary)]">{t.analyse.loadingThemes}</p>
       </div>
     );
   }
@@ -304,7 +301,7 @@ function ThemesTab({ surahId, translation }: { surahId: number; translation: str
   return (
     <div className="space-y-2">
       <p className="text-xs text-[var(--color-text-secondary)] mb-3">
-        Bu ayet {themes.length} temayla ilişkili
+        {t.analyse.relatedThemes.replace("{count}", String(themes.length))}
       </p>
       {themes.map((theme, i) => (
         <div
@@ -324,7 +321,7 @@ function ThemesTab({ surahId, translation }: { surahId: number; translation: str
           </div>
           {i === 0 && (
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-medium shrink-0">
-              Öne çıkan
+              {t.analyse.featured}
             </span>
           )}
         </div>
@@ -336,6 +333,7 @@ function ThemesTab({ surahId, translation }: { surahId: number; translation: str
 // ── Ana Bileşen ──────────────────────────────────────────
 
 function AnalysePage() {
+  const { t } = useTranslation();
   const { verseKey } = Route.useParams();
   const { tab: initialTab } = Route.useSearch();
   const [tab, setTab] = useState<Tab>(initialTab as Tab ?? "meal");
@@ -348,7 +346,15 @@ function AnalysePage() {
   });
 
   // Temalar için meal metni (ilk Türkçe meal)
-  const firstTrMeal = data?.translations.find((t) => t.source.language === "tr")?.text ?? "";
+  const firstTrMeal = data?.translations.find((tr) => tr.source.language === "tr")?.text ?? "";
+
+  const tabLabels: Record<Tab, string> = {
+    meal: t.analyse.translations,
+    morfoloji: t.analyse.morphology,
+    temalar: t.analyse.themes,
+    benzer: t.analyse.similarVerses,
+    bagit: t.analyse.context,
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
@@ -365,9 +371,9 @@ function AnalysePage() {
           </svg>
         </Link>
         <div>
-          <h1 className="text-lg font-bold text-[var(--color-text-primary)]">Ayet Tahlili</h1>
+          <h1 className="text-lg font-bold text-[var(--color-text-primary)]">{t.analyse.title}</h1>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            {isLoading ? "Yükleniyor..." : `${data?.surah?.nameSimple ?? ""} · ${verseNum}. Ayet`}
+            {isLoading ? t.common.loading : `${data?.surah?.nameSimple ?? ""} · ${t.analyse.verse.replace("{verseNum}", String(verseNum))}`}
           </p>
         </div>
       </div>
@@ -393,17 +399,17 @@ function AnalysePage() {
 
       {/* Tab bar */}
       <div className="flex gap-1 bg-[var(--color-surface)] rounded p-1 border border-[var(--color-border)] mb-5 overflow-x-auto">
-        {TABS.map((t) => (
+        {TABS.map((tb) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tb}
+            onClick={() => setTab(tb)}
             className={`flex-1 py-1.5 px-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
-              tab === t
+              tab === tb
                 ? "bg-[var(--color-accent)] text-white shadow-sm"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
-            {TAB_LABELS[t]}
+            {tabLabels[tb]}
           </button>
         ))}
       </div>
@@ -438,10 +444,10 @@ function AnalysePage() {
             </svg>
           </div>
           <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">
-            Morfoloji Analizi
+            {t.analyse.morphAnalysis}
           </p>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            Her kelimenin kök, vezin ve gramer rolü. Yakında Mürşid ile.
+            {t.analyse.morphAnalysisDesc}
           </p>
           <div
             className="mt-4 text-right text-lg leading-loose px-4 py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)]"
@@ -453,7 +459,7 @@ function AnalysePage() {
               <span
                 key={i}
                 className="inline-block mx-1 px-1.5 py-0.5 rounded-lg cursor-pointer hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-accent)] transition-colors"
-                title="Kelimeye tıklayın"
+                title={t.analyse.clickWord}
               >
                 {word}
               </span>

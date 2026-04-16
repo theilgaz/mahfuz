@@ -4,6 +4,7 @@
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "~/hooks/useTranslation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getMyHatimGroups,
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/khatm/")({
 });
 
 function HatimPage() {
+  const { t: tr } = useTranslation();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"groups" | "create" | "join">("groups");
@@ -58,9 +60,9 @@ function HatimPage() {
           </svg>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Hatim Grubu</h1>
+          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">{tr.khatm.title}</h1>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            Beraber hatim yapın, ilerlemeyi takip edin
+            {tr.khatm.subtitle}
           </p>
         </div>
       </div>
@@ -77,7 +79,7 @@ function HatimPage() {
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
-            {t === "groups" ? "Gruplarım" : t === "create" ? "Yeni Grup" : "Katıl"}
+            {t === "groups" ? tr.khatm.tabGroups : t === "create" ? tr.khatm.tabCreate : tr.khatm.tabJoin}
           </button>
         ))}
       </div>
@@ -106,20 +108,20 @@ function HatimPage() {
               </svg>
             </div>
               <p className="text-[var(--color-text-secondary)] text-sm mb-4">
-                Henüz bir hatim grubuna üye değilsiniz
+                {tr.khatm.noGroupsYet}
               </p>
               <div className="flex gap-2 justify-center">
                 <button
                   onClick={() => setTab("create")}
                   className="px-4 py-2 rounded bg-[var(--color-accent)] text-white text-sm font-medium"
                 >
-                  Grup Oluştur
+                  {tr.khatm.createGroup}
                 </button>
                 <button
                   onClick={() => setTab("join")}
                   className="px-4 py-2 rounded border border-[var(--color-border)] text-[var(--color-text-secondary)] text-sm"
                 >
-                  Katıl
+                  {tr.khatm.join}
                 </button>
               </div>
             </div>
@@ -138,20 +140,20 @@ function HatimPage() {
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5 uppercase tracking-wider">
-              Grup Adı
+              {tr.khatm.groupName}
             </label>
             <input
               type="text"
               value={createName}
               onChange={(e) => setCreateName(e.target.value)}
-              placeholder="örn. Aile Hatmi 2025"
+              placeholder={tr.khatm.groupNamePlaceholder}
               className="w-full px-3.5 py-2.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5 uppercase tracking-wider">
-              Kapsam
+              {tr.khatm.scope}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {(["full", "juz"] as const).map((s) => (
@@ -175,9 +177,9 @@ function HatimPage() {
                       </svg>
                     )}
                   </div>
-                  <div>{s === "full" ? "Tam Hatim" : "Seçili Cüzler"}</div>
+                  <div>{s === "full" ? tr.khatm.fullKhatm : tr.khatm.selectedJuz}</div>
                   <div className="text-[10px] opacity-70 mt-0.5">
-                    {s === "full" ? "30 cüz, tüm Kuran" : "Belirli cüzler"}
+                    {s === "full" ? tr.khatm.fullKhatmDesc : tr.khatm.selectedJuzDesc}
                   </div>
                 </button>
               ))}
@@ -189,7 +191,7 @@ function HatimPage() {
             disabled={!createName.trim() || createMutation.isPending}
             className="w-full py-3 rounded bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-50 transition-opacity"
           >
-            {createMutation.isPending ? "Oluşturuluyor..." : "Grup Oluştur"}
+            {createMutation.isPending ? tr.khatm.creating : tr.khatm.createGroup}
           </button>
         </div>
       )}
@@ -199,7 +201,7 @@ function HatimPage() {
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5 uppercase tracking-wider">
-              Davet Kodu
+              {tr.khatm.inviteCode}
             </label>
             <input
               type="text"
@@ -210,7 +212,7 @@ function HatimPage() {
               className="w-full px-3.5 py-2.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-mono text-center tracking-widest text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 uppercase"
             />
             <p className="text-xs text-[var(--color-text-secondary)] mt-1.5 text-center">
-              Grup kurucusundan 8 haneli davet kodunu alın
+              {tr.khatm.inviteCodeHint}
             </p>
           </div>
 
@@ -219,7 +221,7 @@ function HatimPage() {
             disabled={joinCode.trim().length !== 8 || joinMutation.isPending}
             className="w-full py-3 rounded bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-50 transition-opacity"
           >
-            {joinMutation.isPending ? "Katılınıyor..." : "Gruba Katıl"}
+            {joinMutation.isPending ? tr.khatm.joining : tr.khatm.joinGroup}
           </button>
         </div>
       )}
@@ -230,6 +232,7 @@ function HatimPage() {
 // ── Grup Kartı ────────────────────────────────────────
 
 function GroupCard({ group: g }: { group: { id: string; name: string; scopeType: string; status: string } }) {
+  const { t: tr } = useTranslation();
   return (
     <Link
       to="/khatm/$groupId"
@@ -250,10 +253,10 @@ function GroupCard({ group: g }: { group: { id: string; name: string; scopeType:
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate">{g.name}</p>
         <p className="text-xs text-[var(--color-text-secondary)]">
-          {g.scopeType === "full" ? "Tam Hatim" : g.scopeType === "juz" ? "Cuz Hatmi" : "Sayfa Araligi"}
+          {g.scopeType === "full" ? tr.khatm.fullKhatm : g.scopeType === "juz" ? tr.khatm.juzKhatm : tr.khatm.pageRange}
           {" · "}
           <span className={`font-medium ${g.status === "active" ? "text-green-600" : "text-[var(--color-text-secondary)]"}`}>
-            {g.status === "active" ? "Aktif" : "Tamamlandi"}
+            {g.status === "active" ? tr.khatm.active : tr.khatm.completed}
           </span>
         </p>
       </div>

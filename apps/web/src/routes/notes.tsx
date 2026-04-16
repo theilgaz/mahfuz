@@ -6,12 +6,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { getMyVerseNotes, deleteVerseNote } from "~/lib/verse-notes-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/notes")({
   component: NotesPage,
 });
 
 function NotesPage() {
+  const { t, locale } = useTranslation();
   const qc = useQueryClient();
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -39,9 +41,9 @@ function NotesPage() {
           </svg>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Notlarım</h1>
+          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">{t.notes.title}</h1>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            {notes.length > 0 ? `${notes.length} ayet notu` : "Henüz not yok"}
+            {notes.length > 0 ? t.notes.verseNotes.replace("{count}", String(notes.length)) : t.notes.noNotesYet}
           </p>
         </div>
       </div>
@@ -61,10 +63,10 @@ function NotesPage() {
             </svg>
           </div>
           <p className="text-[var(--color-text-secondary)] text-sm mb-2">
-            Henüz not eklemediniz
+            {t.notes.noNotesAdded}
           </p>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            Herhangi bir ayette uzun basın ve "Not" seçeneğine tıklayın
+            {t.notes.noNotesHint}
           </p>
         </div>
       ) : (
@@ -98,7 +100,7 @@ function NotesPage() {
                   {note.content}
                 </p>
                 <p className="text-[10px] text-[var(--color-text-secondary)] mt-2">
-                  {new Date(note.updatedAt).toLocaleDateString("tr-TR", {
+                  {new Date(note.updatedAt).toLocaleDateString(locale, {
                     day: "numeric", month: "long", year: "numeric"
                   })}
                 </p>

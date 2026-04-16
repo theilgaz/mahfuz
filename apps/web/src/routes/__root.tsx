@@ -251,7 +251,7 @@ function AppHeader() {
           ) : path.startsWith("/qaida/exam/") ? (
             <BreadcrumbNav items={[{ label: t.hub.qaida, to: "/qaida" }, { label: title ?? "" }]} />
           ) : path.startsWith("/khatm/") && path !== "/khatm" && path !== "/khatm/" ? (
-            <BreadcrumbNav items={[{ label: "Hatim", to: "/khatm" }, { label: title ?? "" }]} />
+            <BreadcrumbNav items={[{ label: t.khatm.title, to: "/khatm" }, { label: title ?? "" }]} />
           ) : path.startsWith("/analyse/") ? (
             <BreadcrumbNav items={[{ label: title ?? "" }]} />
           ) : title ? (

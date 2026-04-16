@@ -15,28 +15,28 @@ export const Route = createFileRoute("/alifba/")({
   component: AlifbaIndexPage,
 });
 
-// Sütun sırası: soldan sağa → Sonda | Ortada | Başta | Tek başına
-const FORM_COLS: { label: string; key: FormPosition; formFn: (f: ReturnType<typeof getLetterForms>) => string }[] = [
-  { label: "Sonda",      key: "final",    formFn: (f) => f.final    },
-  { label: "Ortada",     key: "medial",   formFn: (f) => f.medial   },
-  { label: "Başta",      key: "initial",  formFn: (f) => f.initial  },
-  { label: "Tek başına", key: "isolated", formFn: (f) => f.isolated },
+const FORM_COL_KEYS: { key: FormPosition; labelKey: "final" | "medial" | "initial" | "isolated"; formFn: (f: ReturnType<typeof getLetterForms>) => string }[] = [
+  { key: "final",    labelKey: "final",    formFn: (f) => f.final    },
+  { key: "medial",   labelKey: "medial",   formFn: (f) => f.medial   },
+  { key: "initial",  labelKey: "initial",  formFn: (f) => f.initial  },
+  { key: "isolated", labelKey: "isolated", formFn: (f) => f.isolated },
 ];
 
 function LetterFormsSection() {
+  const { t } = useTranslation();
   return (
     <section className="mt-8">
-      <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-0.5">Harf Formları</h2>
+      <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-0.5">{t.alifba.letterForms}</h2>
       <p className="text-xs text-[var(--color-text-secondary)] mb-3">
-        Her harf, kelime içindeki konumuna göre farklı yazılır
+        {t.alifba.letterFormsDesc}
       </p>
 
       {/* Kolon başlıkları */}
       <div className="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] px-3 mb-1">
         <div />
-        {FORM_COLS.map(({ label }) => (
-          <div key={label} className="text-[9px] text-center text-[var(--color-text-secondary)] font-medium uppercase tracking-wide">
-            {label}
+        {FORM_COL_KEYS.map(({ key, labelKey }) => (
+          <div key={key} className="text-[9px] text-center text-[var(--color-text-secondary)] font-medium uppercase tracking-wide">
+            {t.alifba[labelKey]}
           </div>
         ))}
       </div>
@@ -68,7 +68,7 @@ function LetterFormsSection() {
                   </span>
                 </div>
 
-                {FORM_COLS.map(({ key, formFn }) => {
+                {FORM_COL_KEYS.map(({ key, formFn }) => {
                   const isDisabled = isNonConnector && (key === "initial" || key === "medial");
                   const form = formFn(forms);
                   return (
@@ -92,7 +92,7 @@ function LetterFormsSection() {
               {examples.length > 0 && (
                 <div className="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] px-3 pb-2">
                   <div />
-                  {FORM_COLS.map(({ key }) => {
+                  {FORM_COL_KEYS.map(({ key }) => {
                     const ex = examples.find((e) => e.position === key);
                     if (!ex) return <div key={key} />;
                     return (
@@ -118,17 +118,18 @@ function LetterFormsSection() {
       </div>
 
       <p className="text-[10px] text-[var(--color-text-secondary)] mt-2 px-1">
-        * Soldan bağlanmayan harflerde (ا، د، ذ، ر، ز، و) başta ve ortada formu yoktur.
+        {t.alifba.nonConnectorNote}
       </p>
     </section>
   );
 }
 
 function NextStepsSection() {
+  const { t } = useTranslation();
   return (
     <section className="mt-8">
-      <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">Sıradaki Adım</h2>
-      <p className="text-xs text-[var(--color-text-secondary)] mb-3">Harfleri öğrendikten sonra ne yapmalısın?</p>
+      <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">{t.alifba.nextStep}</h2>
+      <p className="text-xs text-[var(--color-text-secondary)] mb-3">{t.alifba.nextStepDesc}</p>
 
       <div className="space-y-2">
         <Link
@@ -142,8 +143,8 @@ function NextStepsSection() {
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">Kaide ile Devam Et</p>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">10 adımlı okuma müfredatı</p>
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.alifba.continueWithQaida}</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{t.alifba.continueWithQaidaDesc}</p>
           </div>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-border)] shrink-0">
             <path d="M5 3l4 4-4 4" />
@@ -163,8 +164,8 @@ function NextStepsSection() {
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">Elifba Oyunları</p>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">Sesli quiz, form quizi ve mini oyunlar</p>
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.alifba.games}</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{t.alifba.gamesDesc}</p>
           </div>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-border)] shrink-0">
             <path d="M5 3l4 4-4 4" />
@@ -181,8 +182,8 @@ function NextStepsSection() {
             <span className="text-base leading-none" style={{ fontFamily: "var(--font-arabic)" }}>ا</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">Kuran'ı Oku</p>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">Fatiha'dan başla</p>
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.alifba.readQuran}</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{t.alifba.readQuranDesc}</p>
           </div>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--color-border)] shrink-0">
             <path d="M5 3l4 4-4 4" />
