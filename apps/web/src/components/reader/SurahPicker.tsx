@@ -10,7 +10,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { TOTAL_CHAPTERS, JUZ_FIRST_SURAH, JUZ_FIRST_PAGE, getJuzForSurah, getJuzForPage } from "@mahfuz/shared";
 import { useSurahs } from "~/hooks/useQuranQuery";
 import { surahSlug } from "~/lib/surah-slugs";
-import { getSurahName } from "~/lib/surah-names-i18n";
+import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
 
@@ -206,13 +206,13 @@ export function SurahPicker({
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-sm font-medium truncate">{getSurahName(surah.id, locale) || surah.nameSimple}</span>
+                          <span className="text-sm font-medium truncate">{surah.nameSimple}</span>
                           <span className="text-sm shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
                             {surah.nameArabic}
                           </span>
                         </div>
                         <span className="text-xs text-[var(--color-text-secondary)]">
-                          {surah.ayahCount} {t.surahList.verses}
+                          {getSurahMeaning(surah.id, locale)} - {surah.ayahCount} {t.surahList.verses}
                         </span>
                       </div>
                     </Link>
@@ -288,6 +288,33 @@ export function SurahPicker({
           {tab === "curated" && (
             /* Secmeler -- curated surah collections */
             <div className="flex flex-col flex-1 overflow-hidden">
+              {/* Collection pills -- pinned at top */}
+              <div className="flex flex-wrap gap-1.5 px-2.5 py-2 border-b border-[var(--color-border)] shrink-0">
+                {(
+                  [
+                    { key: "prayer" as CollectionKey, label: t.surahList.curatedPrayer },
+                    { key: "popular" as CollectionKey, label: t.surahList.curatedPopular },
+                    { key: "amma" as CollectionKey, label: t.surahList.curatedAmma },
+                    { key: "tabaraka" as CollectionKey, label: t.surahList.curatedTabaraka },
+                  ] as const
+                ).map(({ key, label }) => {
+                  const isSelected = expandedCollection === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setExpandedCollection(isSelected ? null : key)}
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
+                        isSelected
+                          ? "bg-[var(--color-accent)] text-white"
+                          : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* Surah list for selected collection */}
               <div className="overflow-y-auto flex-1">
                 {expandedCollection ? (
@@ -315,11 +342,14 @@ export function SurahPicker({
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm truncate">{getSurahName(id, locale) || surah.nameSimple}</span>
+                            <span className="text-sm truncate">{surah.nameSimple}</span>
                             <span className="text-xs shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
                               {surah.nameArabic}
                             </span>
                           </div>
+                          <span className="text-xs text-[var(--color-text-secondary)]">
+                            {getSurahMeaning(id, locale)}
+                          </span>
                         </div>
                       </Link>
                     );
@@ -329,38 +359,6 @@ export function SurahPicker({
                     {t.surahList.curated}
                   </p>
                 )}
-              </div>
-
-              {/* Collection chips -- pinned at bottom */}
-              <div className="grid grid-cols-2 gap-1.5 px-2.5 py-2 border-t border-[var(--color-border)] shrink-0">
-                {(
-                  [
-                    { key: "prayer" as CollectionKey, label: t.surahList.curatedPrayer },
-                    { key: "popular" as CollectionKey, label: t.surahList.curatedPopular },
-                    { key: "amma" as CollectionKey, label: t.surahList.curatedAmma },
-                    { key: "tabaraka" as CollectionKey, label: t.surahList.curatedTabaraka },
-                  ] as const
-                ).map(({ key, label }) => {
-                  const isSelected = expandedCollection === key;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setExpandedCollection(isSelected ? null : key)}
-                      className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                        isSelected
-                          ? "bg-[var(--color-accent)] text-white"
-                          : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
-                      }`}
-                    >
-                      {isSelected && (
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M2.5 6L5 8.5L9.5 3.5" />
-                        </svg>
-                      )}
-                      {label}
-                    </button>
-                  );
-                })}
               </div>
             </div>
           )}

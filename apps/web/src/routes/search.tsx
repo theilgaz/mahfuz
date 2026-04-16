@@ -8,7 +8,6 @@ import { useState, useCallback, useRef, useMemo, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchQuran, type SearchResult } from "~/lib/search-service";
 import { useSettingsStore } from "~/stores/settings.store";
-import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { SettingsButton } from "~/components/SettingsButton";
 import { surahSlug } from "~/lib/surah-slugs";
@@ -22,85 +21,86 @@ export const Route = createFileRoute("/search")({
 
 interface AppPage {
   id: string;
-  label: string;
   keywords: string[];
   route: string;
-  desc: string;
   iconColor: string;
   icon: ReactNode;
 }
 
 const APP_PAGES: AppPage[] = [
   {
-    id: "alifba", label: "Elifba",
+    id: "alifba",
     keywords: ["elif", "harf", "arapca", "alfabe", "letter", "arabic"],
-    route: "/alifba", desc: "Arap harflerini ogren",
+    route: "/alifba",
     iconColor: "bg-orange-600 text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" y1="20" x2="15" y2="20" /><line x1="12" y1="4" x2="12" y2="20" /></svg>,
   },
   {
-    id: "qaida", label: "Kaide",
+    id: "qaida",
     keywords: ["okuma", "kural", "reading", "qaida", "kaide"],
-    route: "/qaida", desc: "Kuran okuma rehberi",
+    route: "/qaida",
     iconColor: "bg-orange-600 text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>,
   },
   {
-    id: "tajweed", label: "Tecvid",
+    id: "tajweed",
     keywords: ["tecvid", "kural", "ihfa", "idgam", "tajweed", "ihfaa", "iklap"],
-    route: "/tajweed", desc: "Tecvid kurallari",
+    route: "/tajweed",
     iconColor: "bg-orange-600 text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" /><path d="M12 8v4l3 3" /></svg>,
   },
   {
-    id: "games", label: "Oyunlar",
+    id: "games",
     keywords: ["oyun", "quiz", "game", "kelime", "dizme", "sure", "bilmece", "yarismak"],
-    route: "/games", desc: "Kuran oyunlari",
+    route: "/games",
     iconColor: "bg-orange-600 text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" /><path d="M7 10v4M5 12h4" /><path d="M17 10h.01M19 12h.01" /></svg>,
   },
   {
-    id: "hatim", label: "Hatim",
+    id: "hatim",
     keywords: ["hatim", "grup", "cuz", "okuma", "group"],
-    route: "/khatm", desc: "Hatim gruplari",
+    route: "/khatm",
     iconColor: "bg-[var(--color-accent)] text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
   },
   {
-    id: "bookmarks", label: "Yer Imleri",
+    id: "bookmarks",
     keywords: ["yer imi", "kayit", "bookmark", "isaret", "favori"],
-    route: "/bookmarks", desc: "Kayitli ayetler",
+    route: "/bookmarks",
     iconColor: "bg-[var(--color-accent)] text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>,
   },
   {
-    id: "notes", label: "Notlar",
+    id: "notes",
     keywords: ["not", "yazi", "note", "notlarim"],
-    route: "/notes", desc: "Ayet notlarin",
+    route: "/notes",
     iconColor: "bg-[var(--color-accent)] text-white",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>,
   },
   {
-    id: "discover", label: "Kesfet",
+    id: "discover",
     keywords: ["kesfet", "kok", "latin", "discover", "arastir"],
-    route: "/discover", desc: "Kesfet ve arastir",
+    route: "/discover",
     iconColor: "bg-[var(--color-text-secondary)]/15 text-[var(--color-text-primary)]",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" /></svg>,
   },
   {
-    id: "premium", label: "Mursid",
+    id: "premium",
     keywords: ["premium", "mursid", "plan", "abone", "subscribe"],
-    route: "/premium", desc: "Premium ozellikler",
+    route: "/premium",
     iconColor: "bg-[var(--color-text-secondary)]/15 text-[var(--color-text-primary)]",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>,
   },
 ];
 
-function matchAppPages(q: string): AppPage[] {
+function matchAppPages(q: string, pageLabels: Record<string, string>): AppPage[] {
   if (!q || q.length < 2) return [];
   const lower = q.toLowerCase();
   return APP_PAGES.filter(
-    (p) => p.label.toLowerCase().includes(lower) || p.keywords.some((kw) => kw.includes(lower)),
+    (p) => {
+      const label = pageLabels[p.id];
+      return (label && label.toLowerCase().includes(lower)) || p.keywords.some((kw) => kw.includes(lower));
+    },
   );
 }
 
@@ -133,7 +133,8 @@ function SearchPage() {
     staleTime: 60_000,
   });
 
-  const appResults = useMemo(() => matchAppPages(query), [query]);
+  const sp = t.search.pages;
+  const appResults = useMemo(() => matchAppPages(query, sp as unknown as Record<string, string>), [query, sp]);
   const hasAnyResults = (results && results.length > 0) || appResults.length > 0;
 
   return (
@@ -168,7 +169,7 @@ function SearchPage() {
       {appResults.length > 0 && (
         <section className="mb-6">
           <h3 className="text-sm font-bold text-[var(--color-text-primary)] mb-3">
-            {locale === "tr" ? "Ozellikler" : "Features"}
+            {t.search.features}
           </h3>
           <div>
             {appResults.map((page) => (
@@ -181,8 +182,8 @@ function SearchPage() {
                   {page.icon}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium text-[var(--color-text-primary)]">{page.label}</span>
-                  <p className="text-xs text-[var(--color-text-secondary)] truncate">{page.desc}</p>
+                  <span className="text-sm font-medium text-[var(--color-text-primary)]">{(sp as any)[page.id] ?? page.id}</span>
+                  <p className="text-xs text-[var(--color-text-secondary)] truncate">{(sp as any)[`${page.id}Desc`] ?? ""}</p>
                 </div>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 text-[var(--color-text-secondary)]/50">
                   <path d="M5 3l4 4-4 4" />
@@ -223,12 +224,6 @@ function SearchPage() {
 
 // ── Gruplandirmis sonuclar ──────────────────────────────
 
-const GROUP_LABELS: Record<string, { tr: string; en: string }> = {
-  surah: { tr: "Sureler", en: "Surahs" },
-  translation: { tr: "Meal Sonuçları", en: "Translation Results" },
-  arabic: { tr: "Arapça Metin", en: "Arabic Text" },
-};
-
 function GroupedResults({ results, readingMode, locale, t, navigate }: {
   results: SearchResult[];
   readingMode: string;
@@ -254,7 +249,7 @@ function GroupedResults({ results, readingMode, locale, t, navigate }: {
       {groups.map((group) => (
         <section key={group.type}>
           <h3 className="text-sm font-bold text-[var(--color-text-primary)] mb-3">
-            {GROUP_LABELS[group.type]?.[locale as "tr" | "en"] ?? GROUP_LABELS[group.type]?.tr ?? group.type}
+            {group.type === "surah" ? t.search.groupSurah : group.type === "translation" ? t.search.groupTranslation : group.type === "arabic" ? t.search.groupArabic : group.type}
           </h3>
           <ul className="list-none p-0">
             {group.items.map((r) => (
@@ -284,7 +279,7 @@ function ResultCard({ r, readingMode, locale, t, navigate }: {
       className="block w-full text-left py-3 px-1 border-b border-[var(--color-border)] hover:bg-[var(--color-surface)] active:scale-[0.99] transition-all"
     >
       <div className="flex items-center gap-2 mb-2.5">
-        <span className="text-sm font-semibold text-[var(--color-text-primary)]">{getSurahName(r.surahId, locale) || r.surahNameSimple}</span>
+        <span className="text-sm font-semibold text-[var(--color-text-primary)]">{r.surahNameSimple}</span>
         <span className="text-xs px-1.5 py-0.5 rounded-md bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium">
           {r.ayahNumber}
         </span>
@@ -307,16 +302,16 @@ function ResultCard({ r, readingMode, locale, t, navigate }: {
 // ── Populer sureler ve sik aranan kelimeler ─────────────
 
 const POPULAR_SURAHS = [
-  { id: 1, nameAr: "\u0627\u0644\u0641\u0627\u062a\u062d\u0629" },
-  { id: 36, nameAr: "\u064a\u0633" },
-  { id: 67, nameAr: "\u0627\u0644\u0645\u0644\u0643" },
-  { id: 55, nameAr: "\u0627\u0644\u0631\u062d\u0645\u0646" },
-  { id: 56, nameAr: "\u0627\u0644\u0648\u0627\u0642\u0639\u0629" },
-  { id: 18, nameAr: "\u0627\u0644\u0643\u0647\u0641" },
-  { id: 112, nameAr: "\u0627\u0644\u0625\u062e\u0644\u0627\u0635" },
-  { id: 2, nameAr: "\u0627\u0644\u0628\u0642\u0631\u0629" },
-  { id: 48, nameAr: "\u0627\u0644\u0641\u062a\u062d" },
-  { id: 78, nameAr: "\u0627\u0644\u0646\u0628\u0623" },
+  { id: 1, nameAr: "\u0627\u0644\u0641\u0627\u062a\u062d\u0629", nameSimple: "Al-Fatihah" },
+  { id: 36, nameAr: "\u064a\u0633", nameSimple: "Ya-Sin" },
+  { id: 67, nameAr: "\u0627\u0644\u0645\u0644\u0643", nameSimple: "Al-Mulk" },
+  { id: 55, nameAr: "\u0627\u0644\u0631\u062d\u0645\u0646", nameSimple: "Ar-Rahman" },
+  { id: 56, nameAr: "\u0627\u0644\u0648\u0627\u0642\u0639\u0629", nameSimple: "Al-Waqi'ah" },
+  { id: 18, nameAr: "\u0627\u0644\u0643\u0647\u0641", nameSimple: "Al-Kahf" },
+  { id: 112, nameAr: "\u0627\u0644\u0625\u062e\u0644\u0627\u0635", nameSimple: "Al-Ikhlas" },
+  { id: 2, nameAr: "\u0627\u0644\u0628\u0642\u0631\u0629", nameSimple: "Al-Baqarah" },
+  { id: 48, nameAr: "\u0627\u0644\u0641\u062a\u062d", nameSimple: "Al-Fath" },
+  { id: 78, nameAr: "\u0627\u0644\u0646\u0628\u0623", nameSimple: "An-Naba" },
 ];
 
 const SUGGESTED_KEYWORDS: Record<string, string[]> = {
@@ -336,14 +331,15 @@ function SearchSuggestions({ onSelect, locale, t }: { onSelect: (q: string) => v
         </h3>
         <div className="flex flex-wrap gap-2">
           {POPULAR_SURAHS.map((s) => (
-            <button
+            <Link
               key={s.id}
-              onClick={() => onSelect(getSurahName(s.id, locale) || s.nameAr)}
+              to="/surah/$surahSlug"
+              params={{ surahSlug: surahSlug(s.id) }}
               className="flex items-center gap-2 px-3 py-2 rounded bg-[var(--color-surface)] hover:bg-[var(--color-accent)]/8 active:scale-[0.97] text-xs transition-all"
             >
               <span dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "0.85rem" }}>{s.nameAr}</span>
-              <span className="text-[var(--color-text-secondary)]">{getSurahName(s.id, locale)}</span>
-            </button>
+              <span className="text-[var(--color-text-secondary)]">{s.nameSimple}</span>
+            </Link>
           ))}
         </div>
       </div>

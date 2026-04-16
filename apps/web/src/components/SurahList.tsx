@@ -8,8 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { JUZ_FIRST_SURAH, JUZ_FIRST_PAGE, TOTAL_JUZ } from "@mahfuz/shared";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
-import { getSurahName } from "~/lib/surah-names-i18n";
-import { SURAH_MEANINGS_TR } from "~/lib/surah-names-tr";
+import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
 
@@ -190,10 +189,10 @@ export function SurahList({ surahs }: SurahListProps) {
                   {/* Sure adi + meta */}
                   <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-sm font-medium text-[var(--color-text-primary)] truncate">
-                      {getSurahName(surah.id, locale)}
+                      {surah.nameSimple}
                     </span>
                     <span className="text-[11px] text-[var(--color-text-secondary)]">
-                      {locale === "tr" ? SURAH_MEANINGS_TR[surah.id] : surah.nameSimple}
+                      {getSurahMeaning(surah.id, locale)}
                       <span className="opacity-50"> · </span>
                       {surah.ayahCount} {t.surahList.verses}
                     </span>
