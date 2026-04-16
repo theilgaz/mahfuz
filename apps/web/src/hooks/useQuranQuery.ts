@@ -167,16 +167,16 @@ export function useMushafLines(pageNumber: number, enabled: boolean) {
   });
 }
 
-export function dailyVerseQueryOptions() {
+export function dailyVerseQueryOptions(locale?: string) {
   return queryOptions({
-    queryKey: ["daily-verse", new Date().toDateString()],
-    queryFn: () => getDailyVerse(),
-    staleTime: 1000 * 60 * 60, // 1 saat
+    queryKey: ["daily-verse", new Date().toDateString(), locale],
+    queryFn: () => getDailyVerse({ data: { locale } }),
+    staleTime: 1000 * 60 * 60,
   });
 }
 
-export function useDailyVerse() {
-  return useQuery(dailyVerseQueryOptions());
+export function useDailyVerse(locale?: string) {
+  return useQuery(dailyVerseQueryOptions(locale));
 }
 
 export function multiTranslationQueryOptions(surahId: number, ayahNumber: number, sourceSlugs: string[]) {

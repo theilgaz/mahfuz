@@ -219,12 +219,13 @@ export const getPageData = createServerFn({ method: "GET" })
 // ── Günün Ayeti ──────────────────────────────────────────
 // Tarihe göre deterministik — gün boyunca aynı ayet, gece yarısı değişir.
 
-export const getDailyVerse = createServerFn({ method: "GET" }).handler(async () => {
+export const getDailyVerse = createServerFn({ method: "GET" })
+  .inputValidator((input: { locale?: string }) => input)
+  .handler(async ({ data: { locale } }) => {
   const TOTAL_VERSES = 6236;
-  const dayIndex = Math.floor(Date.now() / 86_400_000); // ms → gün sayısı
+  const dayIndex = Math.floor(Date.now() / 86_400_000);
   const verseOffset = dayIndex % TOTAL_VERSES;
 
-  // Tüm ayetleri id sırasına göre orderla, offset'teki ayeti al
   const [verse] = await db
     .select()
     .from(ayahs)
@@ -234,11 +235,10 @@ export const getDailyVerse = createServerFn({ method: "GET" }).handler(async () 
 
   if (!verse) return null;
 
-  // Türkçe meali çek
-  const [source] = await db
-    .select()
-    .from(translationSources)
-    .where(eq(translationSources.isDefault, true));
+  // Pick translation source matching locale, fallback to default
+  const lang = locale === "en" ? "en" : locale === "ar" ? "ar" : "tr";
+  const sources = await db.select().from(translationSources).where(eq(translationSources.language, lang));
+  const source = sources[0] ?? (await db.select().from(translationSources).where(eq(translationSources.isDefault, true)))[0];
 
   const [translation] = source
     ? await db

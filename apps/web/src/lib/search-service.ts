@@ -219,6 +219,9 @@ export const searchQuran = createServerFn({ method: "GET" })
       }
     }
 
+    const results: SearchResult[] = [];
+    const seenKeys = new Set<string>();
+
     // Sure sonuçlarını oluştur
     if (surahNameHits.length > 0) {
       const surahResults: SearchResult[] = [];
@@ -246,9 +249,6 @@ export const searchQuran = createServerFn({ method: "GET" })
       results.push(...surahResults);
       for (const r of surahResults) seenKeys.add(`${r.surahId}:${r.ayahNumber}`);
     }
-
-    const results: SearchResult[] = [];
-    const seenKeys = new Set<string>();
 
     const pattern = `%${trimmed}%`;
 

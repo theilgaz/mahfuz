@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { bearer } from "better-auth/plugins/bearer";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { db } from "~/db";
 
@@ -31,8 +32,8 @@ export const auth = betterAuth({
       maxAge: 5 * 60,
     },
   },
-  trustedOrigins: ["http://localhost:3001"],
-  plugins: [tanstackStartCookies()],
+  trustedOrigins: ["http://localhost:3001", "mahfuz://"],
+  plugins: [tanstackStartCookies(), bearer()],
 });
 
 export type Session = typeof auth.$Infer.Session;
