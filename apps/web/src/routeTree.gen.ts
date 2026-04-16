@@ -34,8 +34,10 @@ import { Route as JuzJuzIdRouteImport } from './routes/juz/$juzId'
 import { Route as GamesWordMeaningRouteImport } from './routes/games/word-meaning'
 import { Route as GamesVerseChainRouteImport } from './routes/games/verse-chain'
 import { Route as GamesSurahGuessRouteImport } from './routes/games/surah-guess'
+import { Route as GamesKelimeTahminiRouteImport } from './routes/games/kelime-tahmini'
 import { Route as GamesHexagonRouteImport } from './routes/games/hexagon'
 import { Route as GamesFillBlankRouteImport } from './routes/games/fill-blank'
+import { Route as GamesAyah2048RouteImport } from './routes/games/ayah-2048'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AnalyseVerseKeyRouteImport } from './routes/analyse/$verseKey'
@@ -179,6 +181,11 @@ const GamesSurahGuessRoute = GamesSurahGuessRouteImport.update({
   path: '/surah-guess',
   getParentRoute: () => GamesRoute,
 } as any)
+const GamesKelimeTahminiRoute = GamesKelimeTahminiRouteImport.update({
+  id: '/kelime-tahmini',
+  path: '/kelime-tahmini',
+  getParentRoute: () => GamesRoute,
+} as any)
 const GamesHexagonRoute = GamesHexagonRouteImport.update({
   id: '/hexagon',
   path: '/hexagon',
@@ -187,6 +194,11 @@ const GamesHexagonRoute = GamesHexagonRouteImport.update({
 const GamesFillBlankRoute = GamesFillBlankRouteImport.update({
   id: '/fill-blank',
   path: '/fill-blank',
+  getParentRoute: () => GamesRoute,
+} as any)
+const GamesAyah2048Route = GamesAyah2048RouteImport.update({
+  id: '/ayah-2048',
+  path: '/ayah-2048',
   getParentRoute: () => GamesRoute,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
@@ -297,8 +309,10 @@ export interface FileRoutesByFullPath {
   '/analyse/$verseKey': typeof AnalyseVerseKeyRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
+  '/games/ayah-2048': typeof GamesAyah2048Route
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
+  '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
@@ -341,8 +355,10 @@ export interface FileRoutesByTo {
   '/analyse/$verseKey': typeof AnalyseVerseKeyRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
+  '/games/ayah-2048': typeof GamesAyah2048Route
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
+  '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
@@ -388,8 +404,10 @@ export interface FileRoutesById {
   '/analyse/$verseKey': typeof AnalyseVerseKeyRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
+  '/games/ayah-2048': typeof GamesAyah2048Route
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
+  '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
@@ -436,8 +454,10 @@ export interface FileRouteTypes {
     | '/analyse/$verseKey'
     | '/auth/callback'
     | '/auth/login'
+    | '/games/ayah-2048'
     | '/games/fill-blank'
     | '/games/hexagon'
+    | '/games/kelime-tahmini'
     | '/games/surah-guess'
     | '/games/verse-chain'
     | '/games/word-meaning'
@@ -480,8 +500,10 @@ export interface FileRouteTypes {
     | '/analyse/$verseKey'
     | '/auth/callback'
     | '/auth/login'
+    | '/games/ayah-2048'
     | '/games/fill-blank'
     | '/games/hexagon'
+    | '/games/kelime-tahmini'
     | '/games/surah-guess'
     | '/games/verse-chain'
     | '/games/word-meaning'
@@ -526,8 +548,10 @@ export interface FileRouteTypes {
     | '/analyse/$verseKey'
     | '/auth/callback'
     | '/auth/login'
+    | '/games/ayah-2048'
     | '/games/fill-blank'
     | '/games/hexagon'
+    | '/games/kelime-tahmini'
     | '/games/surah-guess'
     | '/games/verse-chain'
     | '/games/word-meaning'
@@ -764,6 +788,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesSurahGuessRouteImport
       parentRoute: typeof GamesRoute
     }
+    '/games/kelime-tahmini': {
+      id: '/games/kelime-tahmini'
+      path: '/kelime-tahmini'
+      fullPath: '/games/kelime-tahmini'
+      preLoaderRoute: typeof GamesKelimeTahminiRouteImport
+      parentRoute: typeof GamesRoute
+    }
     '/games/hexagon': {
       id: '/games/hexagon'
       path: '/hexagon'
@@ -776,6 +807,13 @@ declare module '@tanstack/react-router' {
       path: '/fill-blank'
       fullPath: '/games/fill-blank'
       preLoaderRoute: typeof GamesFillBlankRouteImport
+      parentRoute: typeof GamesRoute
+    }
+    '/games/ayah-2048': {
+      id: '/games/ayah-2048'
+      path: '/ayah-2048'
+      fullPath: '/games/ayah-2048'
+      preLoaderRoute: typeof GamesAyah2048RouteImport
       parentRoute: typeof GamesRoute
     }
     '/auth/login': {
@@ -901,8 +939,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface GamesRouteChildren {
+  GamesAyah2048Route: typeof GamesAyah2048Route
   GamesFillBlankRoute: typeof GamesFillBlankRoute
   GamesHexagonRoute: typeof GamesHexagonRoute
+  GamesKelimeTahminiRoute: typeof GamesKelimeTahminiRoute
   GamesSurahGuessRoute: typeof GamesSurahGuessRoute
   GamesVerseChainRoute: typeof GamesVerseChainRoute
   GamesWordMeaningRoute: typeof GamesWordMeaningRoute
@@ -910,8 +950,10 @@ interface GamesRouteChildren {
 }
 
 const GamesRouteChildren: GamesRouteChildren = {
+  GamesAyah2048Route: GamesAyah2048Route,
   GamesFillBlankRoute: GamesFillBlankRoute,
   GamesHexagonRoute: GamesHexagonRoute,
+  GamesKelimeTahminiRoute: GamesKelimeTahminiRoute,
   GamesSurahGuessRoute: GamesSurahGuessRoute,
   GamesVerseChainRoute: GamesVerseChainRoute,
   GamesWordMeaningRoute: GamesWordMeaningRoute,

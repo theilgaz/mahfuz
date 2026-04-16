@@ -17,6 +17,7 @@ import { AudioBar } from "~/components/reader/AudioBar";
 import { BottomNav } from "~/components/BottomNav";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
+import { useGamesFavoritesStore } from "~/stores/gamesFavorites.store";
 import { SettingsPanel } from "~/components/reader/SettingsPanel";
 import { SurahPicker } from "~/components/reader/SurahPicker";
 import { VerseJumpDialog } from "~/components/reader/VerseJumpDialog";
@@ -161,6 +162,8 @@ function AppHeader() {
     : path === "/games/verse-chain" ? t.gamesHub.verseChainTitle
     : path === "/games/word-meaning" ? t.wordMeaningGame.title
     : path === "/games/hexagon" ? t.hexagonGame.title
+    : path === "/games/kelime-tahmini" ? t.gamesHub.kelimeTahminiTitle
+    : path === "/games/ayah-2048" ? t.gamesHub.ayet2048Title
     : path === "/games" || path === "/games/" ? t.gamesHub.title
     : null;
 
@@ -263,6 +266,9 @@ function AppHeader() {
             <SmartPlayButton mode="page" pageNumber={currentPage} />
           )}
 
+          {/* Game favorite star */}
+          <GameFavoriteStar path={path} />
+
           {/* User avatar / login */}
           {session?.user ? (
             <Link
@@ -314,6 +320,44 @@ function AppHeader() {
         />
       )}
     </>
+  );
+}
+
+// ── Game favorite star (header) ──────────────────────────
+
+const GAME_ROUTE_TO_ID: Record<string, string> = {
+  "/games/fill-blank": "kelime-doldurma",
+  "/games/verse-chain": "ayet-zinciri",
+  "/games/surah-guess": "sure-tanima",
+  "/games/word-meaning": "kelime-anlami",
+  "/games/hexagon": "hexagon-harf",
+  "/games/kelime-tahmini": "kelime-tahmini",
+  "/games/ayah-2048": "ayet-2048",
+};
+
+function GameFavoriteStar({ path }: { path: string }) {
+  const gameId = GAME_ROUTE_TO_ID[path];
+  const toggle = useGamesFavoritesStore((s) => s.toggle);
+  const isFavorite = useGamesFavoritesStore((s) => gameId ? s.isFavorite(gameId) : false);
+
+  if (!gameId) return null;
+
+  return (
+    <button
+      onClick={() => toggle(gameId)}
+      className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
+      aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
+    >
+      <svg
+        width="16" height="16" viewBox="0 0 24 24"
+        className={isFavorite ? "text-amber-400" : "text-[var(--color-text-secondary)]"}
+        fill={isFavorite ? "currentColor" : "none"}
+        stroke="currentColor" strokeWidth="2"
+        strokeLinecap="round" strokeLinejoin="round"
+      >
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+      </svg>
+    </button>
   );
 }
 

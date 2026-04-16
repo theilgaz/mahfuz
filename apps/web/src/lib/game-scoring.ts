@@ -1,15 +1,19 @@
 /**
- * Unified game scoring system.
+ * Unified game scoring & timer system.
  *
- * All games use the same formula so scores are comparable:
+ * Scoring:
  * - Base points per correct answer: 100
  * - Time bonus: up to +50 (decays linearly over 10 seconds)
  * - Streak bonus: +10 per consecutive correct (max +50 at 5+ streak)
  * - Difficulty multiplier: Easy 1x, Medium 1.5x, Hard 2x, Hafiz 3x
  * - Wrong answer penalty: -50 (also scaled by difficulty)
  *
- * Timer mode: 2 minute base, drains at multiplier speed.
- * Effective play time: Easy 120s, Medium 80s, Hard 60s, Hafiz 40s.
+ * Timer:
+ * - Real-time countdown (1:1, no speed tricks)
+ * - Starting time varies by difficulty
+ * - Fast correct answers earn bonus seconds
+ * - Wrong answers cost seconds
+ * - Max cap prevents infinite play
  *
  * Question difficulty: option count scales with difficulty.
  * Easy 3, Medium 4, Hard 5, Hafiz 6.
@@ -26,13 +30,19 @@ export const DIFFICULTY_MULTIPLIER: Record<Difficulty, number> = {
   hafiz: 3,
 };
 
-/** Base game duration in ms (2 minutes). */
-export const GAME_DURATION_MS = 120_000;
+/** Starting time per difficulty (ms). */
+export const STARTING_TIME_MS: Record<Difficulty, number> = {
+  easy: 90_000,   // 1:30
+  medium: 75_000, // 1:15
+  hard: 60_000,   // 1:00
+  hafiz: 45_000,  // 0:45
+};
 
-/** Effective play time in ms, adjusted by difficulty drain speed. */
-export function getEffectiveDuration(difficulty: Difficulty): number {
-  return Math.round(GAME_DURATION_MS / DIFFICULTY_MULTIPLIER[difficulty]);
-}
+/** Absolute max time cap (ms) -- prevents infinite accumulation. */
+export const MAX_TIME_MS = 120_000; // 2:00
+
+/** Time penalty for wrong answer (ms). */
+export const WRONG_TIME_PENALTY_MS = 5_000; // -5s
 
 /** Number of answer options per difficulty. */
 export const OPTION_COUNT: Record<Difficulty, number> = {
@@ -41,6 +51,8 @@ export const OPTION_COUNT: Record<Difficulty, number> = {
   hard: 5,
   hafiz: 6,
 };
+
+// ── Point scoring ───────────────────────────────────────
 
 const BASE_POINTS = 100;
 const MAX_TIME_BONUS = 50;
@@ -66,9 +78,31 @@ export function calcWrongPenalty(difficulty: Difficulty): number {
   return Math.round(WRONG_PENALTY * DIFFICULTY_MULTIPLIER[difficulty]);
 }
 
+// ── Time bonus ──────────────────────────────────────────
+
+/**
+ * Bonus seconds (in ms) earned for a fast correct answer.
+ *   <= 3s  → +4s
+ *   <= 5s  → +2s
+ *   <= 8s  → +1s
+ *   > 8s   → +0s
+ */
+export function calcTimeBonusMs(answerTimeMs: number): number {
+  if (answerTimeMs <= 3_000) return 4_000;
+  if (answerTimeMs <= 5_000) return 2_000;
+  if (answerTimeMs <= 8_000) return 1_000;
+  return 0;
+}
+
 /** Format points change for display, e.g. "+150" or "-50". */
 export function formatDelta(delta: number): string {
   return delta >= 0 ? `+${delta}` : String(delta);
+}
+
+/** Format time bonus for display, e.g. "+4s". */
+export function formatTimeDelta(ms: number): string {
+  const s = Math.round(ms / 1000);
+  return s >= 0 ? `+${s}s` : `${s}s`;
 }
 
 /** Difficulty display labels (Turkish). */

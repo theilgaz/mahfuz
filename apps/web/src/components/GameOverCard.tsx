@@ -3,6 +3,10 @@
  */
 import { Link } from "@tanstack/react-router";
 import type { GameTheme } from "~/lib/game-themes";
+import { gameBgStyle } from "~/lib/game-themes";
+import { ACHIEVEMENT_MAP } from "~/lib/game-achievements";
+import { GAME_TITLES } from "~/lib/score-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface GameOverCardProps {
   theme: GameTheme;
@@ -12,6 +16,7 @@ interface GameOverCardProps {
   bestStreak: number;
   isNewHighScore: boolean;
   t: any;
+  newAchievements?: string[];
   onRestart: () => void;
   onSetup?: () => void;
   setupLabel?: string;
@@ -19,7 +24,7 @@ interface GameOverCardProps {
 
 export function GameOverCard({
   theme, score, correctCount, wrongCount, bestStreak,
-  isNewHighScore, t, onRestart, onSetup, setupLabel,
+  isNewHighScore, t, newAchievements, onRestart, onSetup, setupLabel,
 }: GameOverCardProps) {
   const P = theme.primary;
   const total = correctCount + wrongCount;
@@ -27,8 +32,8 @@ export function GameOverCard({
 
   return (
     <div
-      className="max-w-md mx-auto px-4 py-8 text-center game-bounce-in"
-      style={{ "--game-bg-gradient": `linear-gradient(135deg, ${theme.bg}, ${theme.secondary})` } as React.CSSProperties}
+      className="max-w-md mx-auto px-4 pt-8 pb-28 text-center game-bounce-in min-h-dvh flex flex-col items-center justify-center game-bg"
+      style={gameBgStyle(theme)}
     >
       {/* Trophy circle */}
       <div
@@ -65,6 +70,11 @@ export function GameOverCard({
         <p className="text-xs text-[var(--color-text-secondary)] mt-1">%{pct}</p>
       </div>
 
+      {/* Achievements unlocked */}
+      {newAchievements && newAchievements.length > 0 && (
+        <AchievementBanner achievements={newAchievements} primary={P} />
+      )}
+
       {/* Actions */}
       <div className="flex flex-col gap-2">
         <button
@@ -85,6 +95,52 @@ export function GameOverCard({
         <Link to="/games" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] font-medium">
           {t.gameScoring.backToGames}
         </Link>
+      </div>
+    </div>
+  );
+}
+
+function AchievementBanner({ achievements, primary }: { achievements: string[]; primary: string }) {
+  const { t } = useTranslation();
+  const achT = t.achievements;
+  const TIER_ICONS = ["", "\u25CB", "\u25CE", "\u2605"]; // bronze, silver, gold
+
+  return (
+    <div className="mb-6 p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <p className="text-xs font-bold mb-2" style={{ color: primary }}>
+        {achT?.unlocked ?? "Achievements Unlocked!"}
+      </p>
+      <div className="flex flex-col gap-1.5">
+        {achievements.map((id) => {
+          const def = ACHIEVEMENT_MAP.get(id);
+          const tierIcon = def?.tier ? TIER_ICONS[def.tier] : "\u2713";
+          let name: string;
+          if (def?.category === "game-score" && def.gameId && def.tier) {
+            const tierKey = `score-${def.tier}` as keyof typeof achT;
+            const gameTitle = GAME_TITLES[def.gameId] ?? def.gameId;
+            name = `${gameTitle} - ${(achT?.[tierKey] ?? id) as string}`;
+          } else if (def?.category === "game-plays" && def.gameId && def.tier) {
+            const tierKey = `plays-${def.tier}` as keyof typeof achT;
+            const gameTitle = GAME_TITLES[def.gameId] ?? def.gameId;
+            name = `${gameTitle} - ${(achT?.[tierKey] ?? id) as string}`;
+          } else if (def?.category === "flawless" && def.gameId) {
+            const gameTitle = GAME_TITLES[def.gameId] ?? def.gameId;
+            name = `${gameTitle} - ${(achT?.["flawless" as keyof typeof achT] ?? "Hatasız") as string}`;
+          } else {
+            name = (achT?.[id as keyof typeof achT] ?? id) as string;
+          }
+          return (
+            <div key={id} className="flex items-center gap-2 text-left">
+              <span
+                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={{ backgroundColor: `${primary}20`, color: primary }}
+              >
+                {tierIcon}
+              </span>
+              <span className="text-sm text-[var(--color-text-primary)]">{name}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

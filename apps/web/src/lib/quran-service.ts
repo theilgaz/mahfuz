@@ -9,7 +9,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 import { db } from "~/db";
 import { surahs, ayahs, translations, translationSources, reciters } from "~/db/quran-schema";
-import { eq, and, asc, desc, inArray } from "drizzle-orm";
+import { eq, and, asc, desc, inArray, ne, sql } from "drizzle-orm";
 
 // ── Sureler ──────────────────────────────────────────────
 
@@ -364,4 +364,107 @@ export const getSurahData = createServerFn({ method: "GET" })
         };
       }),
     };
+  });
+
+// ── Ayet Zinciri: dinamik soru uretimi ─────────────────────
+
+export interface ChainVerse {
+  surahId: number;
+  ayahNumber: number;
+  textUthmani: string;
+  surahName: string;
+}
+
+export interface ChainRound {
+  current: ChainVerse;
+  correct: ChainVerse;
+  distractors: ChainVerse[];
+}
+
+/**
+ * Generate a batch of verse-chain rounds.
+ * Each round: show a verse, ask which verse comes next.
+ * If surahIds is provided, only pick from those surahs.
+ */
+export const getVerseChainRounds = createServerFn({ method: "GET" })
+  .inputValidator((input: { surahIds?: number[]; count?: number }) => input)
+  .handler(async ({ data: { surahIds, count = 15 } }) => {
+    // 1. Pick candidate surahs (need at least 2 ayahs for a chain)
+    const allSurahs = await db.select().from(surahs).orderBy(asc(surahs.id));
+    const surahMap = new Map(allSurahs.map((s) => [s.id, s]));
+
+    let candidateSurahIds = allSurahs
+      .filter((s) => s.ayahCount >= 2)
+      .map((s) => s.id);
+
+    if (surahIds && surahIds.length > 0) {
+      const set = new Set(surahIds);
+      candidateSurahIds = candidateSurahIds.filter((id) => set.has(id));
+    }
+
+    if (candidateSurahIds.length === 0) {
+      candidateSurahIds = allSurahs.filter((s) => s.ayahCount >= 2).map((s) => s.id);
+    }
+
+    // 2. Pick random surahs and random starting ayahs
+    const rounds: ChainRound[] = [];
+    const usedKeys = new Set<string>();
+
+    for (let attempt = 0; attempt < count * 3 && rounds.length < count; attempt++) {
+      const surahId = candidateSurahIds[Math.floor(Math.random() * candidateSurahIds.length)];
+      const surah = surahMap.get(surahId)!;
+
+      // Pick a random ayah that has a next ayah (not the last one)
+      const ayahNum = 1 + Math.floor(Math.random() * (surah.ayahCount - 1));
+      const key = `${surahId}:${ayahNum}`;
+      if (usedKeys.has(key)) continue;
+      usedKeys.add(key);
+
+      // Fetch the current and next ayah
+      const [currentAyah] = await db
+        .select()
+        .from(ayahs)
+        .where(and(eq(ayahs.surahId, surahId), eq(ayahs.ayahNumber, ayahNum)));
+
+      const [nextAyah] = await db
+        .select()
+        .from(ayahs)
+        .where(and(eq(ayahs.surahId, surahId), eq(ayahs.ayahNumber, ayahNum + 1)));
+
+      if (!currentAyah || !nextAyah) continue;
+
+      // 3. Get 3 distractor ayahs from random surahs
+      const distractorAyahs = await db
+        .select({
+          surahId: ayahs.surahId,
+          ayahNumber: ayahs.ayahNumber,
+          textUthmani: ayahs.textUthmani,
+        })
+        .from(ayahs)
+        .where(
+          and(
+            ne(ayahs.surahId, surahId),
+            ne(ayahs.ayahNumber, 1), // skip bismillah-like first ayahs for variety
+          ),
+        )
+        .orderBy(sql`RANDOM()`)
+        .limit(3);
+
+      if (distractorAyahs.length < 3) continue;
+
+      const toVerse = (a: { surahId: number; ayahNumber: number; textUthmani: string }): ChainVerse => ({
+        surahId: a.surahId,
+        ayahNumber: a.ayahNumber,
+        textUthmani: a.textUthmani,
+        surahName: surahMap.get(a.surahId)?.nameSimple ?? "",
+      });
+
+      rounds.push({
+        current: toVerse(currentAyah),
+        correct: toVerse(nextAyah),
+        distractors: distractorAyahs.map(toVerse),
+      });
+    }
+
+    return rounds;
   });

@@ -198,6 +198,23 @@ export const verseSimilarity = sqliteTable("verse_similarity", {
   index("verse_similarity_similar_idx").on(t.similarAyahId),
 ]);
 
+// ── Kullanıcı Başarımları ────────────────────────────────
+
+export const userAchievements = sqliteTable("user_achievements", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  /** Achievement ID from code definitions (e.g. "fill-blank-score-bronze") */
+  achievementId: text("achievement_id").notNull(),
+  unlockedAt: integer("unlocked_at").notNull(),
+  /** Context data when unlocked -- JSON (e.g. score, gameId) */
+  context: text("context").default("{}"),
+}, (t) => [
+  index("user_achievements_user_idx").on(t.userId),
+  index("user_achievements_user_ach_idx").on(t.userId, t.achievementId),
+]);
+
 // ── Günlük Meydan Okuma (Daily Challenge) ────────────────
 
 export const dailyChallengeResults = sqliteTable("daily_challenge_results", {

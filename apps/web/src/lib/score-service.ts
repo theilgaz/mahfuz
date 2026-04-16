@@ -5,10 +5,11 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { db, gameScores } from "~/db";
+import { db, gameScores, userAchievements } from "~/db";
 import { user } from "~/db";
 import { auth } from "~/lib/auth";
 import { eq, sql, desc, and } from "drizzle-orm";
+import { checkAndGrantAchievements } from "./achievement-service";
 
 // ── Oyun isimleri (UI için) ────────────────────────────────
 
@@ -18,6 +19,8 @@ export const GAME_TITLES: Record<string, string> = {
   "word-meaning": "Kelime Anlamı",
   "verse-chain": "Ayet Zinciri",
   "hexagon": "Kelime Dizme",
+  "kelime-tahmini": "Kelime Tahmini",
+  "ayet-2048": "Ayet 2048",
 };
 
 export const GAME_IDS = Object.keys(GAME_TITLES);
@@ -25,16 +28,24 @@ export const GAME_IDS = Object.keys(GAME_TITLES);
 // ── Skor Kaydet ────────────────────────────────────────────
 
 export const submitScore = createServerFn({ method: "POST" })
-  .inputValidator((input: { gameId: string; score: number; durationMs?: number; difficulty?: string }) => input)
+  .inputValidator((input: {
+    gameId: string;
+    score: number;
+    durationMs?: number;
+    difficulty?: string;
+    correctCount?: number;
+    wrongCount?: number;
+    bestStreak?: number;
+  }) => input)
   .handler(async ({ data }) => {
-    if (data.score <= 0) return { saved: false, isNewHighScore: false };
+    if (data.score <= 0) return { saved: false, isNewHighScore: false, newAchievements: [] as string[] };
 
     const session = await auth.api.getSession({ headers: getRequestHeaders() });
-    if (!session?.user?.id) return { saved: false, isNewHighScore: false };
+    if (!session?.user?.id) return { saved: false, isNewHighScore: false, newAchievements: [] as string[] };
 
     const userId = session.user.id;
 
-    // Mevcut kişisel rekoru kontrol et
+    // Mevcut kisisel rekoru kontrol et
     const [existing] = await db
       .select({ best: sql<number>`MAX(${gameScores.score})` })
       .from(gameScores)
@@ -54,7 +65,23 @@ export const submitScore = createServerFn({ method: "POST" })
       createdAt: Date.now(),
     });
 
-    return { saved: true, isNewHighScore };
+    // Check achievements
+    let newAchievements: string[] = [];
+    try {
+      newAchievements = await checkAndGrantAchievements(userId, {
+        currentGameId: data.gameId,
+        currentScore: data.score,
+        currentCorrect: data.correctCount ?? 0,
+        currentWrong: data.wrongCount ?? 0,
+        currentBestStreak: data.bestStreak ?? 0,
+        currentDurationMs: data.durationMs ?? 0,
+        isNewHighScore,
+      });
+    } catch {
+      // Don't fail score submission if achievements fail
+    }
+
+    return { saved: true, isNewHighScore, newAchievements };
   });
 
 // ── Oyun Liderlik Tablosu ──────────────────────────────────
@@ -135,6 +162,24 @@ export const getMyScoreStats = createServerFn({ method: "GET" })
       .where(eq(gameScores.userId, session.user.id))
       .groupBy(gameScores.gameId)
       .orderBy(desc(sql`MAX(${gameScores.score})`));
+
+    return rows;
+  });
+
+// ── Kullanıcı Basarimlari ─────────────────────────────────
+
+export const getUserAchievements = createServerFn({ method: "GET" })
+  .handler(async (): Promise<{ achievementId: string; unlockedAt: number }[]> => {
+    const session = await auth.api.getSession({ headers: getRequestHeaders() });
+    if (!session?.user?.id) return [];
+
+    const rows = await db
+      .select({
+        achievementId: userAchievements.achievementId,
+        unlockedAt: userAchievements.unlockedAt,
+      })
+      .from(userAchievements)
+      .where(eq(userAchievements.userId, session.user.id));
 
     return rows;
   });

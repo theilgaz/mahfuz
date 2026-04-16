@@ -405,8 +405,15 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
 
 @keyframes game-pop {
   0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
+  30% { transform: scale(1.25); }
+  60% { transform: scale(0.95); }
   100% { transform: scale(1); }
+}
+
+@keyframes game-tile-appear {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes game-shake {
@@ -455,7 +462,8 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
 }
 
 .game-bounce-in { animation: game-bounce-in 0.4s ease-out; }
-.game-pop { animation: game-pop 0.3s ease-out; }
+.game-pop { animation: game-pop 0.2s ease-out 0.2s both; }
+.game-tile-appear { animation: game-tile-appear 0.2s ease-out 0.2s both; }
 .game-shake { animation: game-shake 0.4s ease; }
 .game-pulse-glow { animation: game-pulse-glow 2s ease-in-out infinite; }
 .game-score-fly { animation: game-score-fly 0.8s ease-out forwards; }
@@ -464,10 +472,17 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
 .game-chain-link { animation: game-chain-link 0.4s ease-out; }
 .game-slide-up { animation: game-slide-up 0.3s ease-out; }
 
+@keyframes game-cell-flip {
+  0% { transform: scaleY(1); }
+  50% { transform: scaleY(0); }
+  100% { transform: scaleY(1); }
+}
+
 /* Themed game body background */
 .game-bg {
   min-height: 100dvh;
   position: relative;
+  background: var(--game-bg-color, transparent);
 }
 .game-bg::before {
   content: "";
@@ -475,8 +490,20 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
   inset: 0;
   z-index: -1;
   background: var(--game-bg-gradient);
-  opacity: 0.08;
   pointer-events: none;
+}
+/* Subtle pattern overlay */
+.game-bg::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: var(--game-pattern-opacity, 0.04);
+  pointer-events: none;
+  background-image: var(--game-bg-pattern, none);
+  background-size: var(--game-pattern-size, 60px 60px);
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
 }
 
 /* Score badge */
@@ -519,11 +546,14 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
 /* Game card with glow hover */
 .game-option-card {
   position: relative;
-  border-radius: 12px;
-  border: 2px solid transparent;
+  border-radius: 14px;
+  border: 1.5px solid transparent;
   padding: 14px 16px;
   transition: all 0.2s ease;
   cursor: pointer;
+}
+.game-option-card:not(:disabled):hover {
+  transform: translateY(-1px);
 }
 .game-option-card:active:not(:disabled) {
   transform: scale(0.97);

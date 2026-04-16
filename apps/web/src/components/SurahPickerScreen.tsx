@@ -98,17 +98,19 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
 
   const hifzTotalVerses = memorizedEntries.reduce((s, e) => s + e.verses.length, 0);
 
+  const MIN_CUSTOM_SURAHS = 10;
+
   const startButtonLabel = difficultyOnly
     ? t.surahPicker.startAll
     : mode === "all"
     ? t.surahPicker.startAll
     : mode === "hifz"
     ? t.surahPicker.testMyHifz.replace("{count}", String(hifzTotalVerses))
-    : selected.size > 0
+    : selected.size >= MIN_CUSTOM_SURAHS
     ? t.surahPicker.startWithSurahs.replace("{count}", String(selected.size))
-    : t.surahPicker.modeCustomHint;
+    : t.surahPicker.minSurahHint.replace("{count}", String(MIN_CUSTOM_SURAHS));
 
-  const startDisabled = !difficultyOnly && mode === "custom" && selected.size === 0;
+  const startDisabled = !difficultyOnly && mode === "custom" && selected.size < MIN_CUSTOM_SURAHS;
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-28">
@@ -241,7 +243,9 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
             <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.surahPicker.modeCustom}</p>
             <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
               {selected.size > 0
-                ? t.surahPicker.selectedCount.replace("{count}", String(selected.size))
+                ? selected.size < MIN_CUSTOM_SURAHS
+                  ? t.surahPicker.selectedCount.replace("{count}", String(selected.size)) + ` (min ${MIN_CUSTOM_SURAHS})`
+                  : t.surahPicker.selectedCount.replace("{count}", String(selected.size))
                 : t.surahPicker.modeCustomHint}
             </p>
           </div>

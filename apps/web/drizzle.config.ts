@@ -4,6 +4,7 @@ export default defineConfig({
   schema: [
     "./src/db/schema.ts",
     "./src/db/quran-schema.ts",
+    "./src/db/ikra-schema.ts",
   ],
   out: "./drizzle",
   dialect: "turso",

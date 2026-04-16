@@ -14,12 +14,15 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { GameOverCard } from "~/components/GameOverCard";
-import { GAME_THEMES } from "~/lib/game-themes";
+import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import {
   OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,
+  calcTimeBonusMs,
+  WRONG_TIME_PENALTY_MS,
   formatDelta,
+  formatTimeDelta,
   type Difficulty,
 } from "~/lib/game-scoring";
 
@@ -56,6 +59,7 @@ function GameScreen({
   const [wrongCount, setWrongCount] = useState(0);
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
+  const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const sessionStart = useRef(Date.now());
   const questionStart = useRef(Date.now());
   const submittedRef = useRef(false);
@@ -122,6 +126,8 @@ function GameScreen({
       if (option === verse.correctWord) {
         const newStreak = streak + 1;
         const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
+        const timeBonus = calcTimeBonusMs(answerTime);
+        if (timeBonus > 0) timer.addTime(timeBonus);
         setScore((s) => s + pts);
         setStreak(newStreak);
         setBestStreak((b) => Math.max(b, newStreak));
@@ -130,6 +136,7 @@ function GameScreen({
         setGameState("correct");
       } else {
         const penalty = calcWrongPenalty(difficulty);
+        timer.penalizeTime(WRONG_TIME_PENALTY_MS);
         setScore((s) => Math.max(0, s - penalty));
         setStreak(0);
         setWrongCount((c) => c + 1);
@@ -144,8 +151,8 @@ function GameScreen({
     timer.pause();
     if (!submittedRef.current && score > 0) {
       submittedRef.current = true;
-      submitScore({ data: { gameId: "fill-blank", score, durationMs: Date.now() - sessionStart.current, difficulty } })
-        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); })
+      submitScore({ data: { gameId: "fill-blank", score, durationMs: Date.now() - sessionStart.current, difficulty, correctCount, wrongCount, bestStreak } })
+        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); if (r?.newAchievements?.length) setNewAchievements(r.newAchievements); })
         .catch(() => {});
     }
     setScreen("gameover");
@@ -164,7 +171,7 @@ function GameScreen({
   const handleRestart = () => {
     setScore(0); setRound(1); setStreak(0); setBestStreak(0);
     setCorrectCount(0); setWrongCount(0); setLastDelta(null);
-    setIsNewHighScore(false); submittedRef.current = false;
+    setIsNewHighScore(false); setNewAchievements([]); submittedRef.current = false;
     usedAyahIdsRef.current = [];
     sessionStart.current = Date.now(); setSelectedOption(null);
     setGameState("loading"); setRefreshKey((k) => k + 1); setScreen("game");
@@ -189,6 +196,7 @@ function GameScreen({
       <GameOverCard
         theme={THEME} score={score} correctCount={correctCount} wrongCount={wrongCount}
         bestStreak={bestStreak} isNewHighScore={isNewHighScore} t={t}
+        newAchievements={newAchievements}
         onRestart={handleRestart} onSetup={onSetup}
       />
     );
@@ -217,7 +225,7 @@ function GameScreen({
   const isAnswered = gameState !== "playing";
 
   return (
-    <div className="max-w-lg mx-auto pb-32 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
+    <div className="max-w-lg mx-auto pb-32 game-bg" style={gameBgStyle(THEME, "fill-blank")}>
       <div className="px-4 pt-2">
         <GameScoreBar
           theme={THEME}
@@ -229,29 +237,76 @@ function GameScreen({
           round={round}
         />
 
-        <p className="text-xs font-medium text-[var(--color-text-secondary)] text-center mb-3">
-          {t.fillBlankGame.verseLabel.replace("{surahName}", verse.surahName).replace("{verseNum}", String(verse.verseNum))}
-        </p>
+        {/* Verse label */}
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <span className="h-px flex-1 max-w-12" style={{ background: `linear-gradient(90deg, transparent, ${P}40)` }} />
+          <p className="text-xs font-semibold tracking-wide" style={{ color: `${P}cc` }}>
+            {t.fillBlankGame.verseLabel.replace("{surahName}", verse.surahName).replace("{verseNum}", String(verse.verseNum))}
+          </p>
+          <span className="h-px flex-1 max-w-12" style={{ background: `linear-gradient(270deg, transparent, ${P}40)` }} />
+        </div>
 
-        {/* Verse card */}
+        {/* Verse card -- mushaf style */}
         <div
-          className="rounded-2xl border bg-[var(--color-surface)] mb-5 overflow-hidden game-slide-up"
-          style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
+          className="relative rounded-sm mb-6 overflow-hidden game-slide-up"
+          style={{
+            backgroundColor: "var(--mushaf-bg, #f8f4ec)",
+            boxShadow: `
+              0 1px 3px var(--mushaf-shadow, rgba(0,0,0,0.06)),
+              0 6px 16px var(--mushaf-shadow, rgba(0,0,0,0.06)),
+              0 20px 40px var(--mushaf-shadow, rgba(0,0,0,0.06))
+            `,
+          }}
         >
-          <div className="px-6 py-8 text-right leading-[2.6] text-[2.5rem]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>
+          {/* Outer border */}
+          <div
+            className="absolute inset-0 pointer-events-none rounded-sm"
+            style={{ border: "1.5px solid var(--mushaf-border, rgba(0,0,0,0.1))" }}
+          />
+          {/* Inner border */}
+          <div
+            className="absolute pointer-events-none"
+            style={{ inset: "6px", border: "0.5px solid var(--mushaf-border, rgba(0,0,0,0.1))", opacity: 0.6 }}
+          />
+          {/* Top accent line */}
+          <div
+            className="absolute top-[6px] left-[16px] right-[16px] h-[0.5px] pointer-events-none"
+            style={{ background: `${P}30` }}
+          />
+          {/* Bottom accent line */}
+          <div
+            className="absolute bottom-[6px] left-[16px] right-[16px] h-[0.5px] pointer-events-none"
+            style={{ background: `${P}30` }}
+          />
+          {/* Inner shadow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              boxShadow: `
+                inset 0 0 30px var(--mushaf-inner-shadow, rgba(0,0,0,0.03)),
+                inset 0 0 60px var(--mushaf-inner-shadow, rgba(0,0,0,0.03))
+              `,
+            }}
+          />
+          <div className="relative px-5 py-7 sm:px-8 sm:py-9 text-right leading-[2.8] text-[1.75rem] sm:text-[2.2rem]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)", color: "var(--color-text-primary)" }}>
             {verse.words.map((w, i) => {
               if (i === verse.blankIndex) {
                 const blankStyle =
                   gameState === "correct"
-                    ? { borderColor: `${P}80`, backgroundColor: `${P}18`, color: P }
+                    ? { borderColor: `${P}90`, backgroundColor: `${P}15`, color: P }
                     : gameState === "wrong"
-                      ? { borderColor: "#ef444480", backgroundColor: "#fef2f2", color: "#dc2626" }
-                      : { borderColor: `${P}40`, backgroundColor: `${P}0a`, color: "transparent" };
+                      ? { borderColor: "rgba(239,68,68,0.5)", backgroundColor: "rgba(220,38,38,0.12)", color: "#f87171" }
+                      : { borderColor: `${P}50`, backgroundColor: "var(--mushaf-bg, #f8f4ec)" };
                 return (
                   <span
                     key={i}
-                    className={`inline-block mx-1 px-3 py-0.5 rounded-xl border-2 min-w-[72px] text-center align-middle font-semibold transition-all ${isAnswered ? "game-pop" : "game-pulse-glow"}`}
-                    style={{ ...blankStyle, ["--glow-color" as string]: THEME.glow }}
+                    className={`inline-block mx-1 px-4 py-1 rounded-lg min-w-[72px] text-center align-middle font-semibold transition-all ${isAnswered ? "game-pop" : "game-pulse-glow"}`}
+                    style={{
+                      ...blankStyle,
+                      border: isAnswered ? `2px solid ${blankStyle.borderColor}` : `2px dashed ${blankStyle.borderColor}`,
+                      color: isAnswered ? blankStyle.color : "transparent",
+                      ["--glow-color" as string]: THEME.glow,
+                    }}
                   >
                     {isAnswered ? verse.correctWord : "\u200C"}
                   </span>
@@ -262,39 +317,43 @@ function GameScreen({
           </div>
         </div>
 
-        {/* Options */}
-        <div className="flex flex-col gap-2.5 mb-4">
+        {/* Options -- 2x2 grid */}
+        <div className="grid grid-cols-2 gap-2.5 mb-4">
           {verse.options.map((opt, idx) => {
             let bgColor = "var(--color-surface)";
-            let borderColor = `${P}20`;
+            let borderColor = "var(--color-border)";
             let textColor = "var(--color-text-primary)";
-            let labelBg = `${P}12`;
-            let labelColor = `${P}cc`;
+            let labelBg = `${P}15`;
+            let labelColor = P;
+            let shadow = "0 1px 3px rgba(0,0,0,0.04)";
             let icon: React.ReactNode = null;
             let extraClass = "";
 
             if (isAnswered) {
               if (opt === verse.correctWord) {
-                bgColor = `${P}12`;
-                borderColor = `${P}60`;
+                bgColor = `${P}10`;
+                borderColor = `${P}50`;
                 textColor = P;
-                labelBg = `${P}30`;
+                labelBg = `${P}25`;
                 labelColor = P;
+                shadow = `0 2px 8px ${THEME.glow}`;
                 extraClass = "game-bounce-in";
-                icon = <span className="text-base">&#10003;</span>;
+                icon = <span className="text-sm font-bold">&#10003;</span>;
               } else if (opt === selectedOption) {
-                bgColor = "#fef2f2";
-                borderColor = "#fca5a5";
-                textColor = "#dc2626";
-                labelBg = "#fee2e2";
-                labelColor = "#ef4444";
+                bgColor = "rgba(220,38,38,0.12)";
+                borderColor = "rgba(239,68,68,0.5)";
+                textColor = "#f87171";
+                labelBg = "rgba(220,38,38,0.2)";
+                labelColor = "#f87171";
+                shadow = "none";
                 extraClass = "game-shake";
-                icon = <span className="text-base">&#10007;</span>;
+                icon = <span className="text-sm font-bold">&#10007;</span>;
               } else {
                 bgColor = "transparent";
-                borderColor = `${P}10`;
+                borderColor = "transparent";
                 textColor = "var(--color-text-secondary)";
-                extraClass = "opacity-35";
+                shadow = "none";
+                extraClass = "opacity-30";
               }
             }
 
@@ -303,22 +362,23 @@ function GameScreen({
                 key={opt}
                 onClick={() => handleSelect(opt)}
                 disabled={isAnswered}
-                className={`game-option-card flex items-center gap-3 py-4 ${extraClass}`}
-                style={{ backgroundColor: bgColor, borderColor, color: textColor }}
+                className={`game-option-card flex flex-col items-center justify-center py-3 ${extraClass}`}
+                style={{ backgroundColor: bgColor, borderColor, color: textColor, boxShadow: shadow }}
               >
                 <span
-                  className="text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                  className="text-[0.6rem] font-bold w-5 h-5 rounded flex items-center justify-center self-start"
                   style={{ backgroundColor: labelBg, color: labelColor }}
                 >
                   {OPTION_LABELS[idx]}
                 </span>
                 <span
-                  className="flex-1 text-right text-[2.5rem] leading-relaxed"
-                  style={{ fontFamily: "var(--font-arabic)", direction: "rtl" }}
+                  className="text-[1.6rem] sm:text-[1.85rem] leading-snug mt-1"
+                  dir="rtl" lang="ar"
+                  style={{ fontFamily: "var(--font-arabic)" }}
                 >
                   {opt}
                 </span>
-                {icon}
+                {icon && <span className="absolute top-2 right-2.5">{icon}</span>}
               </button>
             );
           })}
@@ -327,27 +387,27 @@ function GameScreen({
         {/* Feedback + Next */}
         {isAnswered && (
           <div
-            className="rounded-xl border px-5 py-4 flex items-center justify-between gap-4 game-slide-up"
+            className="rounded-xl border px-4 py-3.5 flex items-center justify-between gap-3 game-slide-up"
             style={
               gameState === "correct"
-                ? { backgroundColor: `${P}10`, borderColor: `${P}30`, boxShadow: `0 2px 12px ${THEME.glow}` }
-                : { backgroundColor: "#fef2f2", borderColor: "#fecaca" }
+                ? { backgroundColor: `${P}08`, borderColor: `${P}25`, boxShadow: `0 2px 12px ${THEME.glow}` }
+                : { backgroundColor: "rgba(220,38,38,0.10)", borderColor: "rgba(239,68,68,0.3)" }
             }
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <span
-                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-base font-bold ${gameState === "correct" ? "game-star-spin" : ""}`}
-                style={gameState === "correct" ? { backgroundColor: `${P}20`, color: P } : { backgroundColor: "#fecaca", color: "#dc2626" }}
+                className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${gameState === "correct" ? "game-star-spin" : ""}`}
+                style={gameState === "correct" ? { backgroundColor: `${P}18`, color: P } : { backgroundColor: "rgba(220,38,38,0.2)", color: "#f87171" }}
               >
                 {gameState === "correct" ? "\u2713" : "\u2717"}
               </span>
               <div>
-                <p className="text-sm font-bold" style={gameState === "correct" ? { color: P } : { color: "#dc2626" }}>
+                <p className="text-sm font-bold" style={gameState === "correct" ? { color: P } : { color: "#f87171" }}>
                   {gameState === "correct" ? t.fillBlankGame.correct : t.fillBlankGame.wrong}{" "}
                   {lastDelta !== null && <span className="font-semibold">{formatDelta(lastDelta)}</span>}
                 </p>
                 {gameState === "wrong" && (
-                  <p className="text-xs text-red-500 mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: "#f87171" }}>
                     {t.fillBlankGame.correctAnswer} <span style={{ fontFamily: "var(--font-arabic)" }}>{verse.correctWord}</span>
                   </p>
                 )}

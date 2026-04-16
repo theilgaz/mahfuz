@@ -14,13 +14,15 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { GameOverCard } from "~/components/GameOverCard";
-import { GAME_THEMES } from "~/lib/game-themes";
+import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useLocaleStore } from "~/stores/locale.store";
 import {
   OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,
+  calcTimeBonusMs,
+  WRONG_TIME_PENALTY_MS,
   formatDelta,
   type Difficulty,
 } from "~/lib/game-scoring";
@@ -47,6 +49,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
   const [wrongCount, setWrongCount] = useState(0);
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
+  const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const [showGameOver, setShowGameOver] = useState(false);
   const submittedRef = useRef(false);
   const sessionStart = useRef(Date.now());
@@ -103,6 +106,8 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
       if (surahId === question.correctSurahId) {
         const newStreak = streak + 1;
         const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
+        const timeBonus = calcTimeBonusMs(answerTime);
+        if (timeBonus > 0) timer.addTime(timeBonus);
         setScore((s) => s + pts);
         setStreak(newStreak);
         setBestStreak((b) => Math.max(b, newStreak));
@@ -111,6 +116,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
         setGameState("correct");
       } else {
         const penalty = calcWrongPenalty(difficulty);
+        timer.penalizeTime(WRONG_TIME_PENALTY_MS);
         setScore((s) => Math.max(0, s - penalty));
         setStreak(0);
         setWrongCount((c) => c + 1);
@@ -125,8 +131,8 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     timer.pause();
     if (!submittedRef.current && score > 0) {
       submittedRef.current = true;
-      submitScore({ data: { gameId: "surah-guess", score, durationMs: Date.now() - sessionStart.current, difficulty } })
-        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); })
+      submitScore({ data: { gameId: "surah-guess", score, durationMs: Date.now() - sessionStart.current, difficulty, correctCount, wrongCount, bestStreak } })
+        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); if (r?.newAchievements?.length) setNewAchievements(r.newAchievements); })
         .catch(() => {});
     }
     setShowGameOver(true);
@@ -145,7 +151,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
   const handleRestart = () => {
     setScore(0); setRound(1); setStreak(0); setBestStreak(0);
     setCorrectCount(0); setWrongCount(0); setLastDelta(null);
-    setIsNewHighScore(false); submittedRef.current = false;
+    setIsNewHighScore(false); setNewAchievements([]); submittedRef.current = false;
     usedAyahIdsRef.current = [];
     sessionStart.current = Date.now(); setGameState("playing");
     setSelectedId(null); setRefreshKey((k) => k + 1); setShowGameOver(false);
@@ -157,6 +163,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
       <GameOverCard
         theme={THEME} score={score} correctCount={correctCount} wrongCount={wrongCount}
         bestStreak={bestStreak} isNewHighScore={isNewHighScore} t={t}
+        newAchievements={newAchievements}
         onRestart={handleRestart} onSetup={onSetup}
       />
     );
@@ -183,7 +190,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
   }
 
   return (
-    <div className="max-w-lg mx-auto pb-24 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
+    <div className="max-w-lg mx-auto pb-24 game-bg" style={gameBgStyle(THEME, "surah-guess")}>
       <div className="px-4 pt-2">
         <GameScoreBar
           theme={THEME}
@@ -223,9 +230,9 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
                 textColor = P;
                 extraClass = "game-bounce-in";
               } else if (isSelected) {
-                bgColor = "#fef2f2";
-                borderColor = "#fca5a5";
-                textColor = "#dc2626";
+                bgColor = "rgba(220,38,38,0.12)";
+                borderColor = "rgba(239,68,68,0.5)";
+                textColor = "#f87171";
                 extraClass = "game-shake";
               } else {
                 bgColor = "transparent";
@@ -272,8 +279,8 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
 
         {gameState === "wrong" && (
           <>
-            <div className="px-4 py-3 rounded-xl text-center bg-red-50 border border-red-100 mb-3 game-slide-up">
-              <p className="text-sm font-semibold text-red-600 flex items-center justify-center gap-2">
+            <div className="px-4 py-3 rounded-xl text-center border mb-3 game-slide-up" style={{ backgroundColor: "rgba(220,38,38,0.10)", borderColor: "rgba(239,68,68,0.3)" }}>
+              <p className="text-sm font-semibold flex items-center justify-center gap-2" style={{ color: "#f87171" }}>
                 <span>{"\u2717"}</span>
                 {t.fillBlankGame.wrong} {lastDelta !== null && formatDelta(lastDelta)} &middot; {getSurahName(question.correctSurahId, locale) || question.correctSurahName}
               </p>

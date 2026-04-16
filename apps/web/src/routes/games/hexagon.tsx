@@ -1,53 +1,36 @@
 /**
- * Kelime Dizme -- Ayetteki bos kelimeyi karisik harflerden siraya tiklayarak tamamla.
- * Bulmaca bazli zorluk, zaman bonusu, yanlis cezasi.
+ * Kelime Olusturma -- ayetteki eksik kelimeyi karistirilan harflerden siraya
+ * tiklayarak tamamla. Sunucu tabanli, sonsuz tekrar, zorluk + timer.
  */
 
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getWordConstructionQuestion, type VerseFilter } from "~/lib/game-service";
 import { submitScore } from "~/lib/score-service";
+import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { useTranslation } from "~/hooks/useTranslation";
-import { GAME_THEMES } from "~/lib/game-themes";
+import { useGameTimer } from "~/hooks/useGameTimer";
+import { GameScoreBar } from "~/components/GameScoreBar";
+import { GameOverCard } from "~/components/GameOverCard";
+import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import {
   calcCorrectPoints,
   calcWrongPenalty,
+  calcTimeBonusMs,
+  WRONG_TIME_PENALTY_MS,
   formatDelta,
   type Difficulty,
 } from "~/lib/game-scoring";
 
+export const Route = createFileRoute("/games/hexagon")({
+  component: WordConstructionPage,
+});
+
 const THEME = GAME_THEMES["hexagon"];
 const P = THEME.primary;
 
-export const Route = createFileRoute("/games/hexagon")({
-  component: HexagonPage,
-});
-
-// -- Bulmaca Verisi --
-
-interface WordPuzzle {
-  id: number;
-  label: string;
-  ayahBefore: string;
-  ayahAfter: string;
-  targetWord: string;
-  meaning: string;
-  difficulty: Difficulty;
-}
-
-const PUZZLES: WordPuzzle[] = [
-  { id: 1, label: "\u0627\u0644\u0641\u0627\u062A\u062D\u0629 \u00b7 \u0661", ayahBefore: "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650", ayahAfter: "", targetWord: "\u0627\u0644\u0631\u062D\u064A\u0645", meaning: "\u00e7ok merhametli", difficulty: "easy" },
-  { id: 2, label: "\u0627\u0644\u0641\u0627\u062A\u062D\u0629 \u00b7 \u0662", ayahBefore: "", ayahAfter: "\u0644\u0650\u0644\u0651\u064E\u0647\u0650 \u0631\u064E\u0628\u0651\u0650 \u0671\u0644\u0652\u0639\u064E\u0670\u0644\u064E\u0645\u0650\u064A\u0646\u064E", targetWord: "\u0627\u0644\u062D\u0645\u062F", meaning: "hamd, \u00f6vg\u00fc", difficulty: "easy" },
-  { id: 3, label: "\u0627\u0644\u0625\u062E\u0644\u0627\u0635 \u00b7 \u0661", ayahBefore: "\u0642\u064F\u0644\u0652 \u0647\u064F\u0648\u064E \u0671\u0644\u0644\u0651\u064E\u0647\u064F", ayahAfter: "", targetWord: "\u0627\u062D\u062F", meaning: "bir, tek", difficulty: "easy" },
-  { id: 4, label: "\u0627\u0644\u0641\u0627\u062A\u062D\u0629 \u00b7 \u0664", ayahBefore: "\u0645\u064E\u0670\u0644\u0650\u0643\u0650 \u064A\u064E\u0648\u0652\u0645\u0650", ayahAfter: "", targetWord: "\u0627\u0644\u062F\u064A\u0646", meaning: "din, hesap g\u00fcn\u00fc", difficulty: "easy" },
-  { id: 5, label: "\u0622\u064A\u0629 \u0627\u0644\u0643\u0631\u0633\u064A \u00b7 \u0662\u0665\u0665", ayahBefore: "\u0671\u0644\u0644\u0651\u064E\u0647\u064F \u0644\u064E\u0622 \u0625\u0650\u0644\u064E\u0670\u0647\u064E \u0625\u0650\u0644\u0651\u064E\u0627 \u0647\u064F\u0648\u064E", ayahAfter: "\u0671\u0644\u0652\u0642\u064E\u064A\u0651\u064F\u0648\u0645\u064F", targetWord: "\u0627\u0644\u062D\u064A", meaning: "diri olan (el-Hayy)", difficulty: "medium" },
-  { id: 6, label: "\u0627\u0644\u0646\u0627\u0633 \u00b7 \u0661", ayahBefore: "\u0642\u064F\u0644\u0652 \u0623\u064E\u0639\u064F\u0648\u0630\u064F \u0628\u0650\u0631\u064E\u0628\u0651\u0650", ayahAfter: "", targetWord: "\u0627\u0644\u0646\u0627\u0633", meaning: "insanlar", difficulty: "easy" },
-  { id: 7, label: "\u0627\u0644\u0628\u0642\u0631\u0629 \u00b7 \u0662\u0668\u0666", ayahBefore: "\u0644\u064E\u0627 \u064A\u064F\u0643\u064E\u0644\u0651\u0650\u0641\u064F \u0671\u0644\u0644\u0651\u064E\u0647\u064F", ayahAfter: "\u0625\u0650\u0644\u0651\u064E\u0627 \u0648\u064F\u0633\u0652\u0639\u064E\u0647\u064E\u0627", targetWord: "\u0646\u0641\u0633\u0627", meaning: "bir nefsi", difficulty: "medium" },
-  { id: 8, label: "\u0627\u0644\u0623\u0646\u0641\u0627\u0644 \u00b7 \u0662", ayahBefore: "\u0625\u0650\u0646\u0651\u064E\u0645\u064E\u0627 \u0671\u0644\u0652\u0645\u064F\u0624\u0652\u0645\u0650\u0646\u064F\u0648\u0646\u064E \u0671\u0644\u0651\u064E\u0630\u0650\u064A\u0646\u064E \u0625\u0650\u0630\u064E\u0627 \u0630\u064F\u0643\u0650\u0631\u064E", ayahAfter: "\u0648\u064E\u062C\u0650\u0644\u064E\u062A\u0652 \u0642\u064F\u0644\u064F\u0648\u0628\u064F\u0647\u064F\u0645\u0652", targetWord: "\u0627\u0644\u0644\u0647", meaning: "Allah", difficulty: "easy" },
-  { id: 9, label: "\u0627\u0644\u0628\u0642\u0631\u0629 \u00b7 \u0662", ayahBefore: "\u0630\u064E\u0670\u0644\u0650\u0643\u064E \u0671\u0644\u0652\u0643\u0650\u062A\u064E\u0670\u0628\u064F \u0644\u064E\u0627", ayahAfter: "\u0641\u0650\u064A\u0647\u0650 \u0647\u064F\u062F\u064B\u0649 \u0644\u0651\u0650\u0644\u0652\u0645\u064F\u062A\u0651\u064E\u0642\u0650\u064A\u0646\u064E", targetWord: "\u0631\u064A\u0628", meaning: "\u015f\u00fcphe", difficulty: "medium" },
-  { id: 10, label: "\u0627\u0644\u0641\u062A\u062D \u00b7 \u0662\u0669", ayahBefore: "\u0645\u0651\u064F\u062D\u064E\u0645\u0651\u064E\u062F\u064C \u0631\u0651\u064E\u0633\u064F\u0648\u0644\u064F", ayahAfter: "\u0648\u064E\u0671\u0644\u0651\u064E\u0630\u0650\u064A\u0646\u064E \u0645\u064E\u0639\u064E\u0647\u064F\u06E5\u0653", targetWord: "\u0627\u0644\u0644\u0647", meaning: "Allah", difficulty: "easy" },
-];
-
-// -- Yardimci --
+type Screen = "setup" | "game" | "gameover";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -58,70 +41,130 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-const ARABIC_NUMS = "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669";
-const toAr = (n: number) => String(n).replace(/\d/g, (d) => ARABIC_NUMS[+d]);
-
-// -- Oyun --
-
-function WordGame({
-  puzzle,
-  onBack,
-  onNext,
+function GameScreen({
+  surahIds,
+  verseFilter,
+  difficulty,
+  onSetup,
 }: {
-  puzzle: WordPuzzle;
-  onBack: () => void;
-  onNext?: () => void;
+  surahIds: number[];
+  verseFilter?: VerseFilter;
+  difficulty: Difficulty;
+  onSetup: () => void;
 }) {
   const { t } = useTranslation();
-  const letters = [...puzzle.targetWord];
-  const n = letters.length;
-
-  const [cells] = useState<string[]>(() => shuffle(letters));
-  const [selected, setSelected] = useState<number[]>([]);
-  const [shake, setShake] = useState(false);
-  const [wrongAttempts, setWrongAttempts] = useState(0);
-  const [status, setStatus] = useState<"playing" | "success">("playing");
-  const [totalScore, setTotalScore] = useState(0);
+  const timer = useGameTimer(difficulty);
+  const [score, setScore] = useState(0);
+  const [round, setRound] = useState(1);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
   const [lastDelta, setLastDelta] = useState<number | null>(null);
-  const submittedRef = useRef(false);
+  const [isNewHighScore, setIsNewHighScore] = useState(false);
+  const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const sessionStart = useRef(Date.now());
-  const puzzleStart = useRef(Date.now());
+  const questionStart = useRef(Date.now());
+  const submittedRef = useRef(false);
+  const [screen, setScreen] = useState<"game" | "gameover">("game");
+  const usedAyahIdsRef = useRef<number[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const selectedSet = new Set(selected);
+  // Per-round state
+  const [selected, setSelected] = useState<number[]>([]);
+  const [shuffledLetters, setShuffledLetters] = useState<string[]>([]);
+  const [status, setStatus] = useState<"playing" | "correct" | "wrong" | "loading">("loading");
+  const [shaking, setShaking] = useState(false);
+  const nextBtnRef = useRef<HTMLButtonElement>(null);
+
+  const {
+    data: question,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["word-construction", refreshKey, surahIds, verseFilter, difficulty],
+    queryFn: () =>
+      getWordConstructionQuestion({
+        data: {
+          surahIds,
+          verseFilter,
+          excludeAyahIds: usedAyahIdsRef.current,
+          difficulty,
+        },
+      }),
+    staleTime: Infinity,
+    retry: 1,
+  });
+
+  // Initialize round when question loads
+  useEffect(() => {
+    if (!isLoading && question) {
+      usedAyahIdsRef.current.push(question.ayahId);
+      setShuffledLetters(shuffle(question.letters));
+      setSelected([]);
+      setStatus("playing");
+      questionStart.current = Date.now();
+    }
+  }, [isLoading, question]);
+
+  // Start timer on first load
+  useEffect(() => {
+    if (!isLoading && question && round === 1 && !timer.isExpired) {
+      timer.start();
+    }
+  }, [isLoading, question]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Timer expired
+  useEffect(() => {
+    if (timer.isExpired && screen === "game") {
+      endGame();
+    }
+  }, [timer.isExpired]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (status === "success" && !submittedRef.current) {
-      submittedRef.current = true;
-      submitScore({ data: { gameId: "hexagon", score: totalScore, durationMs: Date.now() - sessionStart.current, difficulty: puzzle.difficulty } }).catch(() => {});
-    }
-  }, [status, totalScore]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (status === "correct") nextBtnRef.current?.focus();
+  }, [status]);
 
-  function autoCheck(next: number[]) {
-    if (next.length !== n) return;
-    const word = next.map((i) => cells[i]).join("");
-    if (word === puzzle.targetWord) {
-      const answerTime = Date.now() - puzzleStart.current;
-      const pts = calcCorrectPoints(puzzle.difficulty, answerTime, 1);
-      setTotalScore((s) => s + pts);
-      setLastDelta(pts);
-      setStatus("success");
-    } else {
-      const penalty = calcWrongPenalty(puzzle.difficulty);
-      setTotalScore((s) => Math.max(0, s - penalty));
-      setLastDelta(-penalty);
-      setWrongAttempts((c) => c + 1);
-      setShake(true);
-      setTimeout(() => {
-        setShake(false);
-        setSelected([]);
-        setLastDelta(null);
-      }, 600);
-    }
-  }
+  const autoCheck = useCallback(
+    (nextSelected: number[]) => {
+      if (!question || nextSelected.length !== question.letters.length) return;
+      const word = nextSelected.map((i) => shuffledLetters[i]).join("");
+      timer.pause();
 
-  function handleCellClick(idx: number) {
-    if (status !== "playing") return;
-    if (selectedSet.has(idx)) {
+      if (word === question.targetWord) {
+        const answerTime = Date.now() - questionStart.current;
+        const newStreak = streak + 1;
+        const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
+        const timeBonus = calcTimeBonusMs(answerTime);
+        if (timeBonus > 0) timer.addTime(timeBonus);
+        setScore((s) => s + pts);
+        setStreak(newStreak);
+        setBestStreak((b) => Math.max(b, newStreak));
+        setCorrectCount((c) => c + 1);
+        setLastDelta(pts);
+        setStatus("correct");
+      } else {
+        const penalty = calcWrongPenalty(difficulty);
+        timer.penalizeTime(WRONG_TIME_PENALTY_MS);
+        setScore((s) => Math.max(0, s - penalty));
+        setStreak(0);
+        setWrongCount((c) => c + 1);
+        setLastDelta(-penalty);
+        setShaking(true);
+        setTimeout(() => {
+          setShaking(false);
+          setSelected([]);
+          setLastDelta(null);
+          if (!timer.isExpired) timer.start();
+        }, 600);
+      }
+    },
+    [question, shuffledLetters, streak, difficulty, timer],
+  );
+
+  function handleLetterClick(idx: number) {
+    if (status !== "playing" || timer.isExpired) return;
+    if (selected.includes(idx)) {
       setSelected((prev) => prev.filter((i) => i !== idx));
     } else {
       const next = [...selected, idx];
@@ -135,106 +178,287 @@ function WordGame({
     setSelected((prev) => prev.filter((_, i) => i !== pos));
   }
 
-  const isSuccess = status === "success";
+  const endGame = useCallback(() => {
+    timer.pause();
+    if (!submittedRef.current && score > 0) {
+      submittedRef.current = true;
+      submitScore({
+        data: {
+          gameId: "hexagon",
+          score,
+          durationMs: Date.now() - sessionStart.current,
+          difficulty,
+          correctCount,
+          wrongCount,
+          bestStreak,
+        },
+      })
+        .then((r) => {
+          if (r?.isNewHighScore) setIsNewHighScore(true);
+          if (r?.newAchievements?.length) setNewAchievements(r.newAchievements);
+        })
+        .catch(() => {});
+    }
+    setScreen("gameover");
+  }, [score, difficulty, timer]);
+
+  const nextRound = () => {
+    if (timer.isExpired) {
+      endGame();
+      return;
+    }
+    timer.start();
+    setRound((r) => r + 1);
+    setSelected([]);
+    setLastDelta(null);
+    setStatus("loading");
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleRestart = () => {
+    setScore(0);
+    setRound(1);
+    setStreak(0);
+    setBestStreak(0);
+    setCorrectCount(0);
+    setWrongCount(0);
+    setLastDelta(null);
+    setIsNewHighScore(false);
+    setNewAchievements([]);
+    submittedRef.current = false;
+    usedAyahIdsRef.current = [];
+    sessionStart.current = Date.now();
+    setSelected([]);
+    setStatus("loading");
+    setRefreshKey((k) => k + 1);
+    setScreen("game");
+    timer.reset();
+  };
+
+  if (screen === "gameover") {
+    return (
+      <GameOverCard
+        theme={THEME}
+        score={score}
+        correctCount={correctCount}
+        wrongCount={wrongCount}
+        bestStreak={bestStreak}
+        isNewHighScore={isNewHighScore}
+        t={t}
+        newAchievements={newAchievements}
+        onRestart={handleRestart}
+        onSetup={onSetup}
+      />
+    );
+  }
+
+  if (isError || (!isLoading && !question)) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-10 text-center">
+        <p className="text-[var(--color-text-secondary)] text-sm mb-4">
+          {t.hexagonGame.noWord}
+        </p>
+        <button
+          onClick={() => setRefreshKey((k) => k + 1)}
+          className="px-5 py-2 rounded-xl text-sm font-bold text-white"
+          style={{ backgroundColor: P }}
+        >
+          {t.hexagonGame.next}
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading || !question) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-10 text-center">
+        <div
+          className="w-10 h-10 border-3 rounded-full animate-spin mx-auto mb-3"
+          style={{ borderColor: `${P}30`, borderTopColor: P }}
+        />
+        <p className="text-[var(--color-text-secondary)] text-sm">
+          {t.fillBlankGame.loadingVerse}
+        </p>
+      </div>
+    );
+  }
+
+  const isAnswered = status === "correct";
+  const letterCount = question.letters.length;
 
   return (
     <div
-      className={`max-w-md mx-auto pb-24 flex flex-col items-center game-bg${shake ? " game-shake" : ""}`}
-      style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}
+      className={`max-w-lg mx-auto pb-32 game-bg${shaking ? " game-shake" : ""}`}
+      style={gameBgStyle(THEME, "hexagon")}
     >
-      {/* Score and puzzle label */}
-      <div className="flex items-center justify-between px-5 pt-3 mb-3">
-        <span className="game-score-badge" style={{ backgroundColor: `${P}25`, color: P }}>
-          {totalScore}
-        </span>
-        <span className="text-xs opacity-80" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{puzzle.label}</span>
-      </div>
+      <div className="px-4 pt-2">
+        <GameScoreBar
+          theme={THEME}
+          timerDisplay={timer.display}
+          timerProgress={timer.progress}
+          score={score}
+          streak={streak}
+          lastDelta={lastDelta}
+          round={round}
+        />
 
-      {/* Verse context */}
-      <div
-        className="w-full px-5 py-4 rounded-2xl bg-[var(--color-surface)] border mb-6 text-center leading-loose game-slide-up"
-        dir="rtl" lang="ar"
-        style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
-      >
-        {puzzle.ayahBefore && (
-          <span className="text-[2rem] text-[var(--color-text-primary)]" style={{ fontFamily: "var(--font-arabic)" }}>{puzzle.ayahBefore}{" "}</span>
-        )}
-        <span className="inline-flex flex-row-reverse gap-1.5 items-center align-middle mx-1">
-          {letters.map((_, i) => (
-            <span
-              key={i}
-              className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${!isSuccess ? "game-pulse-glow" : ""}`}
-              style={{ backgroundColor: isSuccess ? P : `${P}50`, ["--glow-color" as string]: THEME.glow }}
-            />
-          ))}
-        </span>
-        {puzzle.ayahAfter && (
-          <span className="text-[2rem] text-[var(--color-text-primary)]" style={{ fontFamily: "var(--font-arabic)" }}>{" "}{puzzle.ayahAfter}</span>
-        )}
-      </div>
-
-      {/* Answer slots */}
-      <div className="flex flex-row-reverse gap-2 mb-6 flex-wrap justify-center">
-        {letters.map((_, i) => {
-          const cellIdx = selected[i];
-          const letter = cellIdx !== undefined ? cells[cellIdx] : null;
-          return (
-            <button
-              key={i}
-              onClick={() => letter && handleSlotClick(i)}
-              disabled={!letter || isSuccess}
-              className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl font-medium transition-all duration-200"
-              dir="rtl" lang="ar"
-              style={{
-                fontFamily: "var(--font-arabic)",
-                ...(letter
-                  ? isSuccess
-                    ? { borderColor: P, backgroundColor: `${P}18`, color: P, border: `2px solid ${P}`, boxShadow: `0 0 12px ${THEME.glow}` }
-                    : { border: `2px solid var(--color-accent)`, backgroundColor: "var(--color-surface)" }
-                  : { border: "2px dashed var(--color-border)" }),
-              }}
-            >
-              {letter ?? ""}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Success feedback */}
-      {isSuccess && (
-        <div
-          className="mb-6 px-5 py-4 rounded-2xl border text-center w-full game-bounce-in"
-          style={{ backgroundColor: `${P}12`, borderColor: `${P}40`, boxShadow: `0 4px 20px ${THEME.glow}` }}
-        >
-          <p className="font-bold text-sm flex items-center justify-center gap-2" style={{ color: P }}>
-            <span className="game-star-spin">{"\u2713"}</span>
-            {t.hexagonGame.correct} {lastDelta !== null && formatDelta(lastDelta)}
+        {/* Verse label */}
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <span
+            className="h-px flex-1 max-w-12"
+            style={{ background: `linear-gradient(90deg, transparent, ${P}40)` }}
+          />
+          <p className="text-xs font-semibold tracking-wide" style={{ color: `${P}cc` }}>
+            {t.fillBlankGame.verseLabel
+              .replace("{surahName}", question.surahName)
+              .replace("{verseNum}", String(question.verseNum))}
           </p>
-          <p className="text-3xl my-2 leading-loose" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)", color: P }}>{puzzle.targetWord}</p>
-          <p className="text-xs" style={{ color: `${P}cc` }}>{puzzle.meaning}</p>
-          {wrongAttempts > 0 && (
-            <p className="text-xs text-[var(--color-text-secondary)] mt-1">{wrongAttempts} {t.hexagonGame.wrongAttempts}</p>
-          )}
+          <span
+            className="h-px flex-1 max-w-12"
+            style={{ background: `linear-gradient(270deg, transparent, ${P}40)` }}
+          />
         </div>
-      )}
 
-      {/* Letter tiles */}
-      {!isSuccess && (
-        <>
-          <div className="flex flex-row-reverse gap-2.5 flex-wrap justify-center mb-6">
-            {cells.map((letter, idx) => {
-              const isSel = selectedSet.has(idx);
+        {/* Verse card -- mushaf style */}
+        <div
+          className="relative rounded-sm mb-5 overflow-hidden game-slide-up"
+          style={{
+            backgroundColor: "var(--mushaf-bg, #f8f4ec)",
+            boxShadow: `
+              0 1px 3px var(--mushaf-shadow, rgba(0,0,0,0.06)),
+              0 6px 16px var(--mushaf-shadow, rgba(0,0,0,0.06))
+            `,
+          }}
+        >
+          <div
+            className="absolute inset-0 pointer-events-none rounded-sm"
+            style={{ border: "1.5px solid var(--mushaf-border, rgba(0,0,0,0.1))" }}
+          />
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              inset: "6px",
+              border: "0.5px solid var(--mushaf-border, rgba(0,0,0,0.1))",
+              opacity: 0.6,
+            }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              boxShadow: `
+                inset 0 0 30px var(--mushaf-inner-shadow, rgba(0,0,0,0.03)),
+                inset 0 0 60px var(--mushaf-inner-shadow, rgba(0,0,0,0.03))
+              `,
+            }}
+          />
+          <div
+            className="relative px-5 py-7 sm:px-8 sm:py-9 text-right leading-[2.8] text-[1.75rem] sm:text-[2.2rem]"
+            dir="rtl"
+            lang="ar"
+            style={{ fontFamily: "var(--font-arabic)", color: "var(--color-text-primary)" }}
+          >
+            {question.words.map((w, i) => {
+              if (i === question.blankIndex) {
+                return (
+                  <span
+                    key={i}
+                    className="inline-flex flex-row-reverse gap-1 items-center align-middle mx-1"
+                  >
+                    {question.letters.map((_, li) => (
+                      <span
+                        key={li}
+                        className={`w-2 h-2 rounded-full transition-colors duration-300 ${!isAnswered ? "game-pulse-glow" : ""}`}
+                        style={{
+                          backgroundColor: isAnswered ? P : `${P}50`,
+                          ["--glow-color" as string]: THEME.glow,
+                        }}
+                      />
+                    ))}
+                  </span>
+                );
+              }
+              return (
+                <span key={i} className="mx-0.5">
+                  {w}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Answer slots */}
+        <div className="flex flex-row-reverse gap-1.5 sm:gap-2 mb-4 flex-wrap justify-center">
+          {question.letters.map((_, i) => {
+            const cellIdx = selected[i];
+            const letter = cellIdx !== undefined ? shuffledLetters[cellIdx] : null;
+            return (
+              <button
+                key={i}
+                onClick={() => letter && handleSlotClick(i)}
+                disabled={!letter || isAnswered}
+                className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-xl sm:text-2xl font-medium transition-all duration-200"
+                dir="rtl"
+                lang="ar"
+                style={{
+                  fontFamily: "var(--font-arabic)",
+                  ...(letter
+                    ? isAnswered
+                      ? {
+                          borderColor: P,
+                          backgroundColor: `${P}18`,
+                          color: P,
+                          border: `2px solid ${P}`,
+                          boxShadow: `0 0 12px ${THEME.glow}`,
+                        }
+                      : {
+                          border: "2px solid var(--color-accent)",
+                          backgroundColor: "var(--color-surface)",
+                        }
+                    : { border: "2px dashed var(--color-border)" }),
+                }}
+              >
+                {letter ?? ""}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Letter count hint */}
+        <p
+          className="text-center text-[0.65rem] mb-3"
+          style={{ color: `${P}80` }}
+        >
+          {letterCount} {t.hexagonGame.letterUnit}
+        </p>
+
+        {/* Shuffled letter tiles */}
+        {!isAnswered && (
+          <div className="flex flex-row-reverse gap-2 sm:gap-2.5 flex-wrap justify-center mb-4">
+            {shuffledLetters.map((letter, idx) => {
+              const isSel = selected.includes(idx);
               return (
                 <button
                   key={idx}
-                  onClick={() => handleCellClick(idx)}
-                  className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-medium transition-all duration-150 active:scale-90"
-                  dir="rtl" lang="ar"
+                  onClick={() => handleLetterClick(idx)}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-xl sm:text-2xl font-medium transition-all duration-150 active:scale-90"
+                  dir="rtl"
+                  lang="ar"
                   style={{
                     fontFamily: "var(--font-arabic)",
                     ...(isSel
-                      ? { backgroundColor: P, color: "white", border: `2px solid ${P}`, opacity: 0.4, boxShadow: `0 0 8px ${THEME.glow}` }
-                      : { backgroundColor: "var(--color-surface)", color: "var(--color-text-primary)", border: `2px solid ${P}30` }),
+                      ? {
+                          backgroundColor: P,
+                          color: "white",
+                          border: `2px solid ${P}`,
+                          opacity: 0.3,
+                          boxShadow: `0 0 8px ${THEME.glow}`,
+                        }
+                      : {
+                          backgroundColor: "var(--color-surface)",
+                          color: "var(--color-text-primary)",
+                          border: `2px solid ${P}30`,
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                        }),
                   }}
                 >
                   {letter}
@@ -242,117 +466,103 @@ function WordGame({
               );
             })}
           </div>
+        )}
 
-          {lastDelta !== null && lastDelta < 0 && (
-            <p className="text-xs text-red-500 font-bold mb-3 game-shake">{formatDelta(lastDelta)}</p>
-          )}
-        </>
-      )}
-
-      {/* Buttons */}
-      {!isSuccess ? (
-        <button
-          onClick={() => setSelected([])}
-          disabled={selected.length === 0}
-          className="px-6 py-2.5 rounded-xl border text-sm font-medium transition-all active:scale-95 disabled:opacity-40"
-          style={{ borderColor: `${P}30`, color: "var(--color-text-secondary)", backgroundColor: "var(--color-surface)" }}
-        >
-          {t.hexagonGame.clear}
-        </button>
-      ) : (
-        <div className="flex gap-3">
-          <button
-            onClick={onBack}
-            className="px-5 py-2.5 rounded-xl border text-sm font-medium transition-all active:scale-95"
-            style={{ borderColor: `${P}30`, color: "var(--color-text-secondary)", backgroundColor: "var(--color-surface)" }}
-          >
-            {t.hexagonGame.backToList}
-          </button>
-          {onNext && (
+        {/* Clear button */}
+        {!isAnswered && selected.length > 0 && (
+          <div className="text-center mb-4">
             <button
-              onClick={onNext}
-              className="px-6 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95"
-              style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
+              onClick={() => setSelected([])}
+              className="px-5 py-2 rounded-xl border text-xs font-medium transition-all active:scale-95"
+              style={{
+                borderColor: `${P}30`,
+                color: "var(--color-text-secondary)",
+                backgroundColor: "var(--color-surface)",
+              }}
+            >
+              {t.hexagonGame.clear}
+            </button>
+          </div>
+        )}
+
+        {/* Feedback + Next */}
+        {isAnswered && (
+          <div
+            className="rounded-xl border px-4 py-3.5 flex items-center justify-between gap-3 game-slide-up"
+            style={{
+              backgroundColor: `${P}08`,
+              borderColor: `${P}25`,
+              boxShadow: `0 2px 12px ${THEME.glow}`,
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span
+                className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-sm font-bold game-star-spin"
+                style={{ backgroundColor: `${P}18`, color: P }}
+              >
+                {"\u2713"}
+              </span>
+              <div>
+                <p className="text-sm font-bold" style={{ color: P }}>
+                  {t.hexagonGame.correct}{" "}
+                  {lastDelta !== null && (
+                    <span className="font-semibold">{formatDelta(lastDelta)}</span>
+                  )}
+                </p>
+                {streak >= 2 && (
+                  <p
+                    className="text-xs mt-0.5 flex items-center gap-1"
+                    style={{ color: P }}
+                  >
+                    {t.fillBlankGame.streak.replace("{count}", String(streak))}
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              ref={nextBtnRef}
+              onClick={nextRound}
+              className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
+              style={{
+                background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`,
+                boxShadow: `0 2px 10px ${THEME.glow}`,
+              }}
             >
               {t.hexagonGame.next}
             </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// -- Bulmaca Listesi --
-
-function PuzzleSelect({ onSelect }: { onSelect: (p: WordPuzzle, idx: number) => void }) {
-  const { t } = useTranslation();
-  return (
-    <div className="max-w-md mx-auto pb-24 game-bg" style={{ "--game-bg-gradient": `linear-gradient(180deg, ${THEME.bg}, ${THEME.surface})` } as React.CSSProperties}>
-      <div className="px-4 pt-2 mb-4">
-        <p className="text-sm text-[var(--color-text-secondary)]">{t.hexagonGame.listSubtitle}</p>
-      </div>
-
-      <div className="flex flex-col gap-2.5 px-4">
-        {PUZZLES.map((puzzle, idx) => (
-          <button
-            key={puzzle.id}
-            onClick={() => onSelect(puzzle, idx)}
-            className="game-option-card w-full flex items-center gap-4 text-left game-slide-up"
-            style={{
-              backgroundColor: "var(--color-surface)",
-              borderColor: `${P}20`,
-              animationDelay: `${idx * 0.05}s`,
-            }}
-          >
-            <div
-              className="w-12 h-12 flex flex-col items-center justify-center rounded-xl shrink-0"
-              style={{ backgroundColor: `${P}15`, border: `1px solid ${P}30` }}
-            >
-              <span className="text-lg font-bold" style={{ fontFamily: "var(--font-arabic)", color: P }}>{toAr([...puzzle.targetWord].length)}</span>
-              <span className="text-[9px]" style={{ color: `${P}99` }}>{t.hexagonGame.letterUnit}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-base font-semibold text-[var(--color-text-primary)]" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{puzzle.targetWord}</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                  puzzle.difficulty === "easy" ? "bg-green-100 text-green-700" :
-                  puzzle.difficulty === "medium" ? "bg-yellow-100 text-yellow-700" :
-                  "bg-red-100 text-red-700"
-                }`}>
-                  {puzzle.difficulty === "easy" ? t.hexagonGame.diffEasy : puzzle.difficulty === "medium" ? t.hexagonGame.diffMedium : t.hexagonGame.diffHard}
-                </span>
-              </div>
-              <p className="text-xs text-[var(--color-text-secondary)]">{puzzle.meaning}</p>
-              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 opacity-70" dir="rtl" lang="ar" style={{ fontFamily: "var(--font-arabic)" }}>{puzzle.label}</p>
-            </div>
-            <svg className="w-4 h-4 text-[var(--color-text-secondary)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// -- Sayfa --
+function WordConstructionPage() {
+  const [screen, setScreen] = useState<Screen>("setup");
+  const [surahIds, setSurahIds] = useState<number[]>([]);
+  const [verseFilter, setVerseFilter] = useState<VerseFilter | undefined>();
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
 
-function HexagonPage() {
-  const [active, setActive] = useState<{ puzzle: WordPuzzle; idx: number } | null>(null);
-
-  if (!active) {
-    return <PuzzleSelect onSelect={(puzzle, idx) => setActive({ puzzle, idx })} />;
+  if (screen === "setup") {
+    return (
+      <SurahPickerScreen
+        gameImg={THEME.img}
+        onStart={(ids, vf, diff) => {
+          setSurahIds(ids);
+          setVerseFilter(vf);
+          setDifficulty(diff ?? "medium");
+          setScreen("game");
+        }}
+      />
+    );
   }
 
-  const nextPuzzle = PUZZLES[active.idx + 1];
-
   return (
-    <WordGame
-      key={active.idx}
-      puzzle={active.puzzle}
-      onBack={() => setActive(null)}
-      onNext={nextPuzzle ? () => setActive({ puzzle: nextPuzzle, idx: active.idx + 1 }) : undefined}
+    <GameScreen
+      surahIds={surahIds}
+      verseFilter={verseFilter}
+      difficulty={difficulty}
+      onSetup={() => setScreen("setup")}
     />
   );
 }

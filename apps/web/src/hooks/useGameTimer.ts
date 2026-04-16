@@ -1,37 +1,44 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { GAME_DURATION_MS, DIFFICULTY_MULTIPLIER } from "~/lib/game-scoring";
+import { STARTING_TIME_MS, MAX_TIME_MS } from "~/lib/game-scoring";
 import type { Difficulty } from "~/lib/game-scoring";
 
 interface GameTimerReturn {
-  /** Remaining time in ms (visual, always counts from GAME_DURATION_MS). */
+  /** Remaining time in ms. */
   remainingMs: number;
   /** True when timer has reached zero. */
   isExpired: boolean;
   /** Formatted as "M:SS". */
   display: string;
-  /** Progress from 1 (full) to 0 (expired). */
+  /** Progress from 1 (full) to 0 (expired), relative to starting time. */
   progress: number;
-  /** Start the countdown. */
+  /** Start / resume the countdown. */
   start: () => void;
   /** Pause the countdown. */
   pause: () => void;
-  /** Reset to initial state. */
+  /** Reset to initial state (paused, full time). */
   reset: () => void;
+  /** Add bonus time (capped at MAX_TIME_MS). */
+  addTime: (ms: number) => void;
+  /** Subtract penalty time. */
+  penalizeTime: (ms: number) => void;
 }
 
 /**
- * Game countdown timer that drains at difficulty-based speed.
- * Visual display always starts at 2:00 but ticks faster for harder difficulties.
+ * Real-time game countdown timer.
  *
- * Effective play time:
- * - Easy (1x):   120s
- * - Medium (1.5x): 80s
- * - Hard (2x):    60s
- * - Hafiz (3x):   40s
+ * Starting time varies by difficulty:
+ * - Easy:   1:30  (90s)
+ * - Medium: 1:15  (75s)
+ * - Hard:   1:00  (60s)
+ * - Hafiz:  0:45  (45s)
+ *
+ * Fast correct answers earn bonus seconds via addTime().
+ * Wrong answers cost seconds via penalizeTime().
+ * Max cap at 2:00 prevents infinite accumulation.
  */
 export function useGameTimer(difficulty: Difficulty): GameTimerReturn {
-  const multiplier = DIFFICULTY_MULTIPLIER[difficulty];
-  const [remainingMs, setRemainingMs] = useState(GAME_DURATION_MS);
+  const startingMs = STARTING_TIME_MS[difficulty];
+  const [remainingMs, setRemainingMs] = useState(startingMs);
   const [running, setRunning] = useState(false);
   const lastTickRef = useRef(0);
   const rafRef = useRef(0);
@@ -42,12 +49,12 @@ export function useGameTimer(difficulty: Difficulty): GameTimerReturn {
     lastTickRef.current = now;
 
     setRemainingMs((prev) => {
-      const next = prev - elapsed * multiplier;
+      const next = prev - elapsed;
       return next <= 0 ? 0 : next;
     });
 
     rafRef.current = requestAnimationFrame(tick);
-  }, [multiplier]);
+  }, []);
 
   useEffect(() => {
     if (running && remainingMs > 0) {
@@ -69,14 +76,22 @@ export function useGameTimer(difficulty: Difficulty): GameTimerReturn {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   const display = `${minutes}:${String(seconds).padStart(2, "0")}`;
-  const progress = remainingMs / GAME_DURATION_MS;
+  const progress = Math.min(1, remainingMs / startingMs);
 
   const start = useCallback(() => setRunning(true), []);
   const pause = useCallback(() => setRunning(false), []);
   const reset = useCallback(() => {
     setRunning(false);
-    setRemainingMs(GAME_DURATION_MS);
+    setRemainingMs(startingMs);
+  }, [startingMs]);
+
+  const addTime = useCallback((ms: number) => {
+    setRemainingMs((prev) => Math.min(prev + ms, MAX_TIME_MS));
   }, []);
 
-  return { remainingMs, isExpired, display, progress, start, pause, reset };
+  const penalizeTime = useCallback((ms: number) => {
+    setRemainingMs((prev) => Math.max(prev - ms, 0));
+  }, []);
+
+  return { remainingMs, isExpired, display, progress, start, pause, reset, addTime, penalizeTime };
 }

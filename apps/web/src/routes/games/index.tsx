@@ -16,7 +16,9 @@ import {
   GAME_IDS,
   type LeaderboardEntry,
   type MyGameStat,
+  getUserAchievements,
 } from "~/lib/score-service";
+import { ACHIEVEMENT_DEFS } from "~/lib/game-achievements";
 
 export const Route = createFileRoute("/games/")({
   component: GamesPage,
@@ -53,6 +55,8 @@ const GAME_IMGS: Record<string, string> = {
   "elifba-hiz":           "/images/games/mahfuz-speed-game.webp",
   "elifba-harf-bul":      "/images/games/mahfuz-letter-find.webp",
   "elifba-kelime-bul":    "/images/games/mahfuz-word-find.webp",
+  "kelime-tahmini":       "/images/games/mahfuz-kelime-tahmini.webp",
+  "ayet-2048":            "/images/games/mahfuz-ayet-2048.webp",
 };
 
 const GAME_COLORS: Record<string, { bg: string; glow: string }> = {
@@ -63,6 +67,7 @@ const GAME_COLORS: Record<string, { bg: string; glow: string }> = {
   "kiraet-karaoke":       { bg: "#7B4A2D", glow: "#C4814A" },
   "sure-tanima":          { bg: "#B8C9B0", glow: "#5C7A55" },
   "kelime-tahmini":       { bg: "#1A3D2B", glow: "#4A9B6A" },
+  "ayet-2048":            { bg: "#1A1A2E", glow: "#E94560" },
   "elifba-sesli-quiz":    { bg: "#1B2B4A", glow: "#4A7BB5" },
   "elifba-form-quiz":     { bg: "#C49B6B", glow: "#8B6B3A" },
   "elifba-karisik-sinav": { bg: "#2D6B5A", glow: "#4A9B7B" },
@@ -78,8 +83,9 @@ function makeGames(t: T): Game[] {
     { id: "ayet-zinciri", img: GAME_IMGS["ayet-zinciri"], title: t.gamesHub.verseChainTitle, description: t.gamesHub.verseChainDesc, category: t.gamesHub.catHifz, link: "/games/verse-chain", surahScoped: true },
     { id: "sure-tanima", img: GAME_IMGS["sure-tanima"], title: t.gamesHub.surahGuessTitle, description: t.gamesHub.surahGuessDesc, category: t.gamesHub.catListening, link: "/games/surah-guess", surahScoped: true },
     { id: "kelime-anlami", img: GAME_IMGS["kelime-anlami"], title: t.gamesHub.wordMeaningTitle, description: t.gamesHub.wordMeaningDesc, category: t.gamesHub.catWord, link: "/games/word-meaning" },
-    { id: "hexagon-harf", img: GAME_IMGS["hexagon-harf"], title: t.gamesHub.hexagonTitle, description: t.gamesHub.hexagonDesc, category: t.gamesHub.catWord, link: "/games/hexagon" },
-    { id: "kelime-tahmini", title: t.gamesHub.kelimeTahminiTitle, description: t.gamesHub.kelimeTahminiDesc, category: t.gamesHub.catPuzzle, link: "/games/kelime-tahmini" },
+    { id: "hexagon-harf", img: GAME_IMGS["hexagon-harf"], title: t.gamesHub.hexagonTitle, description: t.gamesHub.hexagonDesc, category: t.gamesHub.catWord, link: "/games/hexagon", surahScoped: true },
+    { id: "kelime-tahmini", img: GAME_IMGS["kelime-tahmini"], title: t.gamesHub.kelimeTahminiTitle, description: t.gamesHub.kelimeTahminiDesc, category: t.gamesHub.catPuzzle, link: "/games/kelime-tahmini" },
+    { id: "ayet-2048", img: GAME_IMGS["ayet-2048"], title: t.gamesHub.ayet2048Title, description: t.gamesHub.ayet2048Desc, category: t.gamesHub.catPuzzle, link: "/games/ayah-2048" },
   ];
   return games.map((g) => ({ ...g, colors: GAME_COLORS[g.id] }));
 }
@@ -110,33 +116,6 @@ function makeComingSoon(t: T): Omit<Game, "link">[] {
 
 // ── Components ─────────────────────────────────────────────
 
-function StarButton({ id, t }: { id: string; t: T }) {
-  const toggle = useGamesFavoritesStore((s) => s.toggle);
-  const isFavorite = useGamesFavoritesStore((s) => s.isFavorite(id));
-  return (
-    <button
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(id); }}
-      className="absolute top-0 right-0 z-10 w-12 h-12"
-      aria-label={isFavorite ? t.gamesHub.removeFavorite : t.gamesHub.addFavorite}
-    >
-      {/* Diagonal cut background */}
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 32 32" fill="none">
-        <path d="M32 0 L32 32 L0 0 Z" fill="black" fillOpacity="0.6" />
-      </svg>
-      {/* Star icon */}
-      <svg
-        className={`absolute top-[9px] right-[9px] ${isFavorite ? "text-amber-400" : "text-white/70"}`}
-        width="12" height="12" viewBox="0 0 24 24"
-        fill={isFavorite ? "currentColor" : "none"}
-        stroke="currentColor" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round"
-      >
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-    </button>
-  );
-}
-
 function AppIcon({ img, title, glow }: { img?: string; title: string; glow?: string }) {
   const shadowStyle = glow ? { filter: `drop-shadow(0 4px 12px ${glow}60)` } : undefined;
   if (img) {
@@ -159,7 +138,7 @@ function AppIcon({ img, title, glow }: { img?: string; title: string; glow?: str
 }
 
 /** Standard 4-col game card */
-function GameCard({ game, t, showStar = true }: { game: Game; t: T; showStar?: boolean }) {
+function GameCard({ game, t }: { game: Game; t: T }) {
   const selectedSurahIds = useSurahSelectionStore((s) => s.selectedSurahIds);
   return (
     <Link
@@ -168,7 +147,6 @@ function GameCard({ game, t, showStar = true }: { game: Game; t: T; showStar?: b
     >
       <div className="relative w-full rounded-[22%] overflow-hidden">
         <AppIcon img={game.img} title={game.title} glow={game.colors?.glow} />
-        {showStar && <StarButton id={game.id} t={t} />}
         {game.surahScoped && selectedSurahIds.length > 0 && (
           <span className="absolute bottom-1 left-1 text-[8px] font-bold text-white bg-[var(--color-accent)] px-1.5 py-0.5 rounded-full leading-none">
             {selectedSurahIds.length}
@@ -243,19 +221,17 @@ function EditorChoiceCard({ game, t }: { game: Game; t: T }) {
             </p>
           </div>
 
-          {/* Star */}
-          <StarButton id={game.id} t={t} />
         </div>
       </div>
     </Link>
   );
 }
 
-function GamesGrid({ games, t, showStar = true }: { games: Game[]; t: T; showStar?: boolean }) {
+function GamesGrid({ games, t }: { games: Game[]; t: T }) {
   return (
     <div className="grid grid-cols-5 gap-x-2 gap-y-3">
       {games.map((g) => (
-        <GameCard key={g.id} game={g} t={t} showStar={showStar} />
+        <GameCard key={g.id} game={g} t={t} />
       ))}
     </div>
   );
@@ -598,13 +574,255 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
   );
 }
 
+// ── Achievements ──────────────────────────────────────────
+
+const SCORE_THRESHOLDS = [100, 500, 1000];
+const PLAY_THRESHOLDS = [1, 10, 50];
+const CATEGORY_ORDER = ["cross-game", "streak", "flawless", "special", "game-score", "game-plays"] as const;
+
+const MEDAL_COLORS = {
+  bronze: { bg: "bg-amber-700/15", text: "text-amber-700", ring: "ring-amber-700/30", bar: "bg-amber-700" },
+  silver: { bg: "bg-slate-400/15", text: "text-slate-400", ring: "ring-slate-400/30", bar: "bg-slate-400" },
+  gold: { bg: "bg-yellow-500/15", text: "text-yellow-500", ring: "ring-yellow-500/30", bar: "bg-yellow-500" },
+} as const;
+
+function tierToMedal(tier: number): keyof typeof MEDAL_COLORS {
+  if (tier >= 3) return "gold";
+  if (tier >= 2) return "silver";
+  return "bronze";
+}
+
+function MedalIcon({ tier, unlocked, size = "md" }: { tier: number; unlocked: boolean; size?: "sm" | "md" }) {
+  const medal = tierToMedal(tier);
+  const colors = MEDAL_COLORS[medal];
+  const dim = size === "sm" ? "w-8 h-8" : "w-10 h-10";
+  const iconSize = size === "sm" ? "text-sm" : "text-base";
+
+  if (!unlocked) {
+    return (
+      <div className={`${dim} rounded-full bg-[var(--color-border)] flex items-center justify-center ${iconSize} text-[var(--color-text-secondary)] opacity-40`}>
+        ?
+      </div>
+    );
+  }
+
+  const icons = { bronze: "\u{1F949}", silver: "\u{1F948}", gold: "\u{1F947}" };
+  return (
+    <div className={`${dim} rounded-full ${colors.bg} ring-1 ${colors.ring} flex items-center justify-center ${iconSize}`}>
+      {icons[medal]}
+    </div>
+  );
+}
+
+function AchievementProgressBar({ current, target, tier }: { current: number; target: number; tier: number }) {
+  const pct = Math.min(100, Math.round((current / target) * 100));
+  const medal = tierToMedal(tier);
+  const barColor = MEDAL_COLORS[medal].bar;
+  return (
+    <div className="mt-1.5">
+      <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
+        <div className={`h-full rounded-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
+      </div>
+      <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5 tabular-nums">{current}/{target} (%{pct})</p>
+    </div>
+  );
+}
+
+function AchievementsContent({ userId, t }: { userId?: string; t: T }) {
+  const achT = t.achievements;
+  const { data: userAchs } = useQuery<{ achievementId: string; unlockedAt: number }[]>({
+    queryKey: ["user-achievements"],
+    queryFn: () => getUserAchievements(),
+    staleTime: 30_000,
+    enabled: !!userId,
+  });
+
+  const { data: myStats } = useQuery<MyGameStat[]>({
+    queryKey: ["my-score-stats"],
+    queryFn: () => getMyScoreStats(),
+    staleTime: 30_000,
+    enabled: !!userId,
+  });
+
+  const unlockedSet = useMemo(
+    () => new Set((userAchs ?? []).map((a) => a.achievementId)),
+    [userAchs],
+  );
+
+  const statsMap = useMemo(() => {
+    const map = new Map<string, MyGameStat>();
+    for (const s of myStats ?? []) map.set(s.gameId, s);
+    return map;
+  }, [myStats]);
+
+  const total = ACHIEVEMENT_DEFS.length;
+  const unlocked = unlockedSet.size;
+
+  const catLabels: Record<string, string> = {
+    "game-score": achT?.catScore ?? "Score",
+    "game-plays": achT?.catPlays ?? "Plays",
+    "cross-game": achT?.catCrossGame ?? "General",
+    "streak": achT?.catStreak ?? "Streak",
+    "flawless": achT?.catFlawless ?? "Flawless",
+    "special": achT?.catSpecial ?? "Special",
+  };
+
+  // Group definitions by category
+  const grouped = useMemo(() => {
+    const map = new Map<string, typeof ACHIEVEMENT_DEFS>();
+    for (const cat of CATEGORY_ORDER) {
+      map.set(cat, ACHIEVEMENT_DEFS.filter((d) => d.category === cat));
+    }
+    return map;
+  }, []);
+
+  if (!userId) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          {t.gamesHub.loginPrompt}{" "}
+          <Link to="/auth/login" search={{ redirect: "/games" }} className="text-[var(--color-accent)] underline">{t.gamesHub.loginLink}</Link>
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Progress hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent)]/70 p-5 text-white">
+        <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
+            <TrophySvg className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <p className="text-xs text-white/70 uppercase tracking-wider">{achT?.title ?? "Achievements"}</p>
+            <p className="text-2xl font-extrabold tabular-nums">{unlocked}/{total} <span className="text-sm font-semibold text-white/60">%{total > 0 ? Math.round((unlocked / total) * 100) : 0}</span></p>
+          </div>
+          <div className="flex-1">
+            <div className="h-2.5 rounded-full bg-white/20 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-white/80 transition-all duration-700"
+                style={{ width: `${total > 0 ? Math.round((unlocked / total) * 100) : 0}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Achievement categories */}
+      {CATEGORY_ORDER.map((cat) => {
+        const defs = grouped.get(cat);
+        if (!defs?.length) return null;
+
+        const catUnlocked = defs.filter((d) => unlockedSet.has(d.id)).length;
+
+        // For per-game categories, group by gameId
+        if (cat === "game-score" || cat === "game-plays") {
+          const byGame = new Map<string, typeof defs>();
+          for (const d of defs) {
+            const gId = d.gameId ?? "unknown";
+            if (!byGame.has(gId)) byGame.set(gId, []);
+            byGame.get(gId)!.push(d);
+          }
+
+          return (
+            <section key={cat} className="space-y-2">
+              <div className="flex items-center gap-2 px-1">
+                <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">{catLabels[cat]}</h3>
+                <span className="text-xs text-[var(--color-text-secondary)] ml-auto">
+                  {catUnlocked}/{defs.length}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[...byGame.entries()].map(([gameId, gameDefs]) => {
+                  const stat = statsMap.get(gameId);
+                  const currentValue = cat === "game-score" ? (stat?.bestScore ?? 0) : (stat?.totalPlays ?? 0);
+                  const thresholds = cat === "game-score" ? SCORE_THRESHOLDS : PLAY_THRESHOLDS;
+                  // Find the next unachieved tier for progress
+                  const nextDef = gameDefs.find((d) => !unlockedSet.has(d.id));
+                  const nextThreshold = nextDef ? thresholds[(nextDef.tier ?? 1) - 1] : null;
+
+                  return (
+                    <div
+                      key={gameId}
+                      className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3"
+                    >
+                      <p className="text-xs font-semibold text-[var(--color-text-primary)] mb-2 truncate">
+                        {GAME_TITLES[gameId] ?? gameId}
+                      </p>
+                      <div className="flex gap-2">
+                        {gameDefs.map((def) => (
+                          <MedalIcon key={def.id} tier={def.tier ?? 1} unlocked={unlockedSet.has(def.id)} size="sm" />
+                        ))}
+                      </div>
+                      {nextThreshold != null && (
+                        <AchievementProgressBar current={currentValue} target={nextThreshold} tier={nextDef!.tier ?? 1} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+
+        // Cross-game and streak categories
+        return (
+          <section key={cat} className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">{catLabels[cat]}</h3>
+              <span className="text-xs text-[var(--color-text-secondary)] ml-auto">
+                {catUnlocked}/{defs.length}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {defs.map((def) => {
+                const isUnlocked = unlockedSet.has(def.id);
+                let name: string;
+                let desc: string;
+                if (def.category === "flawless" && def.gameId) {
+                  name = GAME_TITLES[def.gameId] ?? def.gameId;
+                  desc = (achT?.["flawless-desc" as keyof typeof achT] ?? "") as string;
+                } else {
+                  const nameKey = def.id as keyof typeof achT;
+                  const descKey = `${def.id}-desc` as keyof typeof achT;
+                  name = (achT?.[nameKey] ?? def.id) as string;
+                  desc = (achT?.[descKey] ?? "") as string;
+                }
+                return (
+                  <div
+                    key={def.id}
+                    className={`rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 flex items-center gap-3 transition-opacity ${isUnlocked ? "" : "opacity-50"}`}
+                  >
+                    <MedalIcon tier={def.tier ?? 1} unlocked={isUnlocked} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[var(--color-text-primary)]">
+                        {name}
+                      </p>
+                      <p className="text-[11px] text-[var(--color-text-secondary)] leading-tight">
+                        {desc}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────
 
 function GamesPage() {
   const { session } = useRouteContext({ from: "__root__" });
   const { t } = useTranslation();
   const favoriteIds = useGamesFavoritesStore((s) => s.favoriteIds);
-  const [pageTab, setPageTab] = useState<"games" | "scoreboard">("games");
+  const [pageTab, setPageTab] = useState<"games" | "scoreboard" | "achievements">("games");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const GAMES = makeGames(t);
@@ -643,6 +861,12 @@ function GamesPage() {
             {t.gamesHub.title}
           </button>
           <button
+            onClick={() => setPageTab("achievements")}
+            className={`px-3 py-1.5 transition-colors ${pageTab === "achievements" ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"}`}
+          >
+            {t.achievements?.tabTitle ?? "Basarimlar"}
+          </button>
+          <button
             onClick={() => setPageTab("scoreboard")}
             className={`px-3 py-1.5 transition-colors ${pageTab === "scoreboard" ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"}`}
           >
@@ -651,7 +875,9 @@ function GamesPage() {
         </div>
       </div>
 
-      {pageTab === "scoreboard" ? (
+      {pageTab === "achievements" ? (
+        <AchievementsContent userId={session?.user?.id} t={t} />
+      ) : pageTab === "scoreboard" ? (
         <ScoreboardContent userId={session?.user?.id} t={t} />
       ) : (
         <>
