@@ -7,7 +7,7 @@ import { useMemo, useEffect, useRef, useState, useCallback, type ReactNode } fro
 import { useFocusTrap } from "~/hooks/useFocusTrap";
 import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type ReadingMode, type ColorPaletteId } from "~/stores/settings.store";
 import { useQuery } from "@tanstack/react-query";
-import { recitersQueryOptions, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
+import { recitersQueryOptions, translationSourcesQueryOptions, useSurahs } from "~/hooks/useQuranQuery";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { surahSlug } from "~/lib/surah-slugs";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -101,6 +101,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
   const store = useSettingsStore();
   const { data: reciterList } = useQuery(recitersQueryOptions());
   const { data: translationList } = useQuery(translationSourcesQueryOptions());
+  const { data: surahs } = useSurahs();
 
   // Auto-switch translation on locale change
   const prevLocaleRef = useRef(locale);
@@ -120,9 +121,15 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
     store.setReadingMode(mode);
     const isOnPage = currentPath.startsWith("/page/");
     const isOnSurah = currentPath.startsWith("/surah/");
-    if (mode !== "mushaf" && isOnPage && context?.surahId) {
+    if (mode !== "mushaf" && isOnPage) {
+      // Derive surahId from the current page number
+      const pageNum = parseInt(currentPath.replace("/page/", ""), 10) || 1;
+      const sid = surahs.reduce<number>((best, s) => {
+        if (s.pageStart <= pageNum && s.pageStart > (surahs.find(x => x.id === best)?.pageStart ?? 0)) return s.id;
+        return best;
+      }, 1);
       onClose();
-      navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(context.surahId) }, search: { ayah: undefined } });
+      navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(sid) }, search: { ayah: undefined } });
     } else if (mode === "mushaf" && isOnSurah) {
       onClose();
       navigate({ to: "/page/$pageNumber", params: { pageNumber: String(context?.pageNumber || 1) }, search: { ayah: undefined } });
@@ -131,8 +138,8 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t.settings.title} className="fixed right-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-sm overflow-y-auto">
+      <div className="fixed inset-0 z-[60] bg-black/30" onClick={onClose} />
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t.settings.title} className="fixed right-0 top-0 bottom-0 z-[60] w-80 max-w-[85vw] bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-sm overflow-y-auto">
         <div className="flex flex-col min-h-full p-4 pb-24">
           {/* Header + tabs */}
           <div className="flex items-center justify-between mb-3">
@@ -267,7 +274,7 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
             <button onClick={() => store.setArabicFontSize(store.arabicFontSize + 0.2)} className="w-7 h-7 rounded-lg border border-[var(--color-border)] flex items-center justify-center text-xs font-bold shrink-0" aria-label={`${t.a11y?.arabicFontSize ?? "Arabic font size"} +`}>A+</button>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-[var(--color-text-secondary)] w-7 text-center shrink-0">{t.settings.translation}</span>
+            <span className="text-[10px] text-[var(--color-text-secondary)] w-7 text-center shrink-0">Aa</span>
             <input type="range" min={mealMin} max={mealMax} step={0.05} value={store.translationFontSize}
               onChange={(e) => store.setTranslationFontSize(parseFloat(e.target.value))} className="settings-range flex-1"
               aria-label={t.a11y?.translationFontSize ?? "Translation font size"} aria-valuemin={mealMin} aria-valuemax={mealMax} aria-valuenow={store.translationFontSize} />
@@ -510,6 +517,7 @@ function GeneralTab({ store, locale, setLocale, t }: {
 // ── Translation Reorder ──────────────────────────────────
 
 function TranslationReorder({ store, translationOptions }: { store: any; translationOptions: any[] }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-2 space-y-0.5">
       {store.translationSlugs.map((slug: string, i: number) => {
@@ -519,15 +527,15 @@ function TranslationReorder({ store, translationOptions }: { store: any; transla
             <span className="text-[0.65rem] font-bold text-[var(--color-accent)] w-4 text-center shrink-0">{i + 1}</span>
             <span className="flex-1 text-xs truncate">{opt ? `${opt.group} / ${opt.label}` : slug}</span>
             <button type="button" onClick={() => store.moveTranslationSlug(slug, "up")} disabled={i === 0}
-              className="p-0.5 rounded hover:bg-[var(--color-border)] disabled:opacity-20 transition-colors" aria-label="Yukarı">
+              className="p-0.5 rounded hover:bg-[var(--color-border)] disabled:opacity-20 transition-colors" aria-label={t.reader.moveUp}>
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 7.5L6 4.5L9 7.5" /></svg>
             </button>
             <button type="button" onClick={() => store.moveTranslationSlug(slug, "down")} disabled={i === store.translationSlugs.length - 1}
-              className="p-0.5 rounded hover:bg-[var(--color-border)] disabled:opacity-20 transition-colors" aria-label="Aşağı">
+              className="p-0.5 rounded hover:bg-[var(--color-border)] disabled:opacity-20 transition-colors" aria-label={t.reader.moveDown}>
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 4.5L6 7.5L9 4.5" /></svg>
             </button>
             <button type="button" onClick={() => store.toggleTranslationSlug(slug)}
-              className="p-0.5 rounded hover:bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-red-500 transition-colors" aria-label="Kaldır">
+              className="p-0.5 rounded hover:bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-red-500 transition-colors" aria-label={t.reader.removeItem}>
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 3L9 9M9 3L3 9" /></svg>
             </button>
           </div>

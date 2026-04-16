@@ -7,7 +7,7 @@ import { useTranslation } from "~/hooks/useTranslation";
 interface CreditItem {
   name: string;
   url: string;
-  desc: string;
+  descKey: string | null;
 }
 
 interface CreditGroup {
@@ -29,9 +29,9 @@ const CREDIT_GROUPS: CreditGroup[] = [
       </svg>
     ),
     items: [
-      { name: "Quran.com API", url: "https://quran.com", desc: "Ayet metinleri, kelime kelime veri, mealler" },
-      { name: "EveryAyah.com", url: "https://everyayah.com", desc: "Kari ses dosyaları" },
-      { name: "Tanzil.net", url: "https://tanzil.net", desc: "Kuran veritabanı ve doğrulama" },
+      { name: "Quran.com API", url: "https://quran.com", descKey: "quranApiDesc" as const },
+      { name: "EveryAyah.com", url: "https://everyayah.com", descKey: "everyAyahDesc" as const },
+      { name: "Tanzil.net", url: "https://tanzil.net", descKey: "tanzilDesc" as const },
     ],
   },
   {
@@ -44,8 +44,8 @@ const CREDIT_GROUPS: CreditGroup[] = [
       </svg>
     ),
     items: [
-      { name: "Scheherazade New", url: "https://software.sil.org/scheherazade", desc: "Mushaf yazı tipi · SIL International" },
-      { name: "Inter", url: "https://rsms.me/inter", desc: "UI yazı tipi" },
+      { name: "Scheherazade New", url: "https://software.sil.org/scheherazade", descKey: "scheherazadeDesc" as const },
+      { name: "Inter", url: "https://rsms.me/inter", descKey: "interDesc" as const },
     ],
   },
   {
@@ -57,11 +57,11 @@ const CREDIT_GROUPS: CreditGroup[] = [
       </svg>
     ),
     items: [
-      { name: "React 19", url: "https://react.dev", desc: "UI framework" },
-      { name: "TanStack Start / Router", url: "https://tanstack.com", desc: "SSR + file-based routing" },
-      { name: "Tailwind CSS v4", url: "https://tailwindcss.com", desc: "Utility-first CSS" },
-      { name: "Drizzle ORM", url: "https://orm.drizzle.team", desc: "TypeScript ORM" },
-      { name: "Better Auth", url: "https://better-auth.com", desc: "Kimlik doğrulama" },
+      { name: "React 19", url: "https://react.dev", descKey: null },
+      { name: "TanStack Start", url: "https://tanstack.com", descKey: null },
+      { name: "Tailwind CSS v4", url: "https://tailwindcss.com", descKey: null },
+      { name: "Drizzle ORM", url: "https://orm.drizzle.team", descKey: null },
+      { name: "Better Auth", url: "https://better-auth.com", descKey: "betterAuthDesc" as const },
     ],
   },
   {
@@ -72,9 +72,9 @@ const CREDIT_GROUPS: CreditGroup[] = [
       </svg>
     ),
     items: [
-      { name: "Quran.com", url: "https://quran.com", desc: "Modern Kuran okuma deneyimi" },
-      { name: "Tarteel AI", url: "https://tarteel.ai", desc: "Yapay zeka destekli Kuran uygulaması" },
-      { name: "Mushaf Medine", url: "https://qurancomplex.gov.sa", desc: "Sayfa düzeni referansı" },
+      { name: "Quran.com", url: "https://quran.com", descKey: "quranComDesc" as const },
+      { name: "Tarteel AI", url: "https://tarteel.ai", descKey: "tarteelDesc" as const },
+      { name: "Mushaf Medine", url: "https://qurancomplex.gov.sa", descKey: "mushafDesc" as const },
     ],
   },
 ];
@@ -82,6 +82,7 @@ const CREDIT_GROUPS: CreditGroup[] = [
 export function Credits() {
   const { t } = useTranslation();
   const c = t.hub.credits;
+  const cr = t.credits;
 
   return (
     <section className="mt-6 rounded border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
@@ -131,7 +132,7 @@ export function Credits() {
                     {item.name}
                   </span>
                   <span className="text-[10px] text-[var(--color-text-secondary)] leading-snug truncate">
-                    {item.desc}
+                    {item.descKey ? (cr[item.descKey as keyof typeof cr] as string) ?? item.name : item.name}
                   </span>
                 </a>
               ))}

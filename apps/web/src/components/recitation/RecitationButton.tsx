@@ -3,6 +3,7 @@
  */
 
 import { useRecitationStore, type RecitationMode } from "~/stores/recitation.store";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface RecitationButtonProps {
   mode?: RecitationMode;
@@ -21,6 +22,7 @@ export function RecitationButton({
   className = "",
   label,
 }: RecitationButtonProps) {
+  const { t } = useTranslation();
   const setMode = useRecitationStore((s) => s.setMode);
   const showBar = useRecitationStore((s) => s.showBar);
   const engineState = useRecitationStore((s) => s.engineState);
@@ -34,7 +36,7 @@ export function RecitationButton({
         showBar();
       }}
       className={`flex items-center gap-1.5 rounded-lg transition-colors hover:bg-[var(--color-surface)] ${className}`}
-      aria-label={label ?? "Tilavet tanıma"}
+      aria-label={label ?? t.recitation.title}
     >
       {isLoading ? (
         <svg width={size} height={size} viewBox="0 0 24 24" className="animate-spin text-[var(--color-accent)]">

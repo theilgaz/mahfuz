@@ -85,7 +85,7 @@ export function RecitationBar() {
         {/* Header */}
         <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
           <span className="text-[11px] font-semibold text-[var(--color-accent)] uppercase tracking-wide">
-            {t.recitation?.title ?? "Tilavet Tanıma"}
+            {t.recitation.title}
           </span>
           <button
             onClick={hideBar}
@@ -103,7 +103,7 @@ export function RecitationBar() {
           {isDownloading && (
             <div className="py-3">
               <p className="text-xs text-[var(--color-text-secondary)] mb-2">
-                {t.recitation?.downloading ?? "Model indiriliyor..."} ({engine.progress}%)
+                {t.recitation.downloading} ({engine.progress}%)
               </p>
               <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
                 <div
@@ -112,7 +112,7 @@ export function RecitationBar() {
                 />
               </div>
               <p className="text-[10px] text-[var(--color-text-secondary)] mt-1.5">
-                {t.recitation?.downloadDesc ?? "Yapay zeka modeli indiriliyor. Sadece bir kez indirilir."}
+                {t.recitation.downloadDesc}
               </p>
             </div>
           )}
@@ -125,7 +125,7 @@ export function RecitationBar() {
                 onClick={() => engine.init()}
                 className="text-xs px-3 py-1.5 rounded-lg bg-[var(--color-accent)] text-white"
               >
-                {t.recitation?.tryAgain ?? "Tekrar Dene"}
+                {t.recitation.tryAgain}
               </button>
             </div>
           )}
@@ -141,7 +141,7 @@ export function RecitationBar() {
                     ? "bg-red-500 text-white animate-pulse"
                     : "bg-[var(--color-accent)] text-white hover:opacity-90"
                 }`}
-                aria-label={isListening ? (t.recitation?.stop ?? "Durdur") : (t.recitation?.start ?? "Başlat")}
+                aria-label={isListening ? t.recitation.stop : t.recitation.start}
               >
                 {isListening ? (
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -162,7 +162,7 @@ export function RecitationBar() {
                   <div className="flex items-center gap-2">
                     <WaveformVisualizer rmsLevel={engine.rmsLevel} isActive={true} />
                     <span className="text-xs text-[var(--color-text-secondary)]">
-                      {t.recitation?.listening ?? "Dinleniyor..."}
+                      {t.recitation.listening}
                     </span>
                   </div>
                 )}
@@ -195,7 +195,7 @@ export function RecitationBar() {
 
                 {!isListening && !hasResult && (isReady || engine.state === "idle") && (
                   <p className="text-xs text-[var(--color-text-secondary)]">
-                    {t.recitation?.findVerseDesc ?? "Okuyun, hangi ayet olduğunu bulalım"}
+                    {t.recitation.findVerseDesc}
                   </p>
                 )}
               </div>
@@ -206,7 +206,7 @@ export function RecitationBar() {
                   onClick={handleGoToVerse}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--color-accent)] text-white text-xs font-medium shrink-0 hover:opacity-90 transition-opacity"
                 >
-                  {t.recitation?.goToVerse ?? "Git"}
+                  {t.recitation.goToVerse}
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                     <path d="M4 2L8 6L4 10" />
                   </svg>

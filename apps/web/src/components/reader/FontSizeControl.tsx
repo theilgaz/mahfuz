@@ -9,6 +9,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSettingsStore } from "~/stores/settings.store";
+import { useTranslation } from "~/hooks/useTranslation";
 
 const STEP = 0.15;
 
@@ -19,6 +20,7 @@ const BTN_ACTIVE =
 const BTN_IDLE = "border-[var(--color-border)]";
 
 export function FontSizeControl({ mushaf = false }: { mushaf?: boolean }) {
+  const { t } = useTranslation();
   const arabicFontSize = useSettingsStore((s) => s.arabicFontSize);
   const setArabicFontSize = useSettingsStore((s) => s.setArabicFontSize);
   const mushafSizeMode = useSettingsStore((s) => s.mushafSizeMode);
@@ -47,8 +49,8 @@ export function FontSizeControl({ mushaf = false }: { mushaf?: boolean }) {
         <button
           onClick={() => setMushafSizeMode("fill")}
           className={`${BTN} ${mushafSizeMode === "fill" ? BTN_ACTIVE : BTN_IDLE}`}
-          aria-label="Ekrana uygun boyut"
-          title="Ekrana uygun"
+          aria-label={t.reader.fitScreen}
+          title={t.reader.fitScreenShort}
         >
           <span className="text-sm font-bold leading-none select-none" style={{ fontFamily: "var(--font-ui)" }}>
             A<sup className="text-[8px] font-bold">+</sup>
@@ -58,8 +60,8 @@ export function FontSizeControl({ mushaf = false }: { mushaf?: boolean }) {
         <button
           onClick={() => setMushafSizeMode("standard")}
           className={`${BTN} ${mushafSizeMode === "standard" ? BTN_ACTIVE : BTN_IDLE}`}
-          aria-label="Mushaf orijinal boyutu"
-          title="Orijinal"
+          aria-label={t.reader.originalSize}
+          title={t.reader.originalShort}
         >
           <span className="text-[11px] font-bold leading-none select-none" style={{ fontFamily: "var(--font-ui)" }}>
             A<sup className="text-[8px] font-bold">&minus;</sup>
@@ -74,7 +76,7 @@ export function FontSizeControl({ mushaf = false }: { mushaf?: boolean }) {
       <button
         onClick={() => setArabicFontSize(arabicFontSize + STEP)}
         className={`${BTN} ${BTN_IDLE}`}
-        aria-label="Yazı boyutunu büyüt"
+        aria-label={t.reader.increaseFont}
       >
         <span className="text-sm font-bold leading-none select-none" style={{ fontFamily: "var(--font-ui)" }}>
           A<sup className="text-[8px] font-bold">+</sup>
@@ -83,7 +85,7 @@ export function FontSizeControl({ mushaf = false }: { mushaf?: boolean }) {
       <button
         onClick={() => setArabicFontSize(arabicFontSize - STEP)}
         className={`${BTN} ${BTN_IDLE}`}
-        aria-label="Yazı boyutunu küçült"
+        aria-label={t.reader.decreaseFont}
       >
         <span className="text-[11px] font-bold leading-none select-none" style={{ fontFamily: "var(--font-ui)" }}>
           A<sup className="text-[8px] font-bold">&minus;</sup>

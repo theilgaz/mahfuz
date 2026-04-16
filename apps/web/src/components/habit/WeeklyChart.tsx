@@ -3,7 +3,7 @@
  * Minimal, animasyonsuz, sadece veri.
  */
 
-const DAY_LABELS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface WeeklyChartProps {
   days: Array<{ date: string; pagesRead: number }>;
@@ -11,11 +11,13 @@ interface WeeklyChartProps {
 }
 
 export function WeeklyChart({ days, dailyTarget }: WeeklyChartProps) {
+  const { t } = useTranslation();
   const maxPages = Math.max(dailyTarget, ...days.map((d) => d.pagesRead));
+  const DAY_LABELS = [t.habit.dayMon, t.habit.dayTue, t.habit.dayWed, t.habit.dayThu, t.habit.dayFri, t.habit.daySat, t.habit.daySun];
 
   return (
     <div className="px-4 py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
-      <p className="text-xs text-[var(--color-text-secondary)] mb-3">Son 7 gün</p>
+      <p className="text-xs text-[var(--color-text-secondary)] mb-3">{t.habit.lastSevenDays}</p>
 
       <div className="flex items-end gap-1.5 h-16">
         {days.map((day, i) => {

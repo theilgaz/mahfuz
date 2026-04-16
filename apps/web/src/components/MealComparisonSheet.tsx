@@ -4,6 +4,7 @@
  */
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import { getTranslationSources, getTranslationsForVerse } from "~/lib/quran-service";
 import { getAcikKuranTranslations, ACIK_KURAN_AUTHORS } from "~/lib/analyse-service";
@@ -297,37 +298,24 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
 
   if (inline) return content;
 
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-[var(--color-bg)] border-t border-[var(--color-border)] max-h-[85dvh] flex flex-col">
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-[var(--color-border)]" />
-        </div>
-
-        {/* Başlık */}
-        <div className="flex items-center justify-between px-4 pb-3 shrink-0 border-b border-[var(--color-border)]">
-          <h2 className="text-base font-semibold text-[var(--color-text-primary)]">Meal Karşılaştır</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-surface)] transition-colors text-[var(--color-text-secondary)]"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {content}
+  return createPortal(
+    <div className="fixed inset-0 z-[100] bg-[var(--color-bg)] flex flex-col">
+      {/* Header */}
+      <div className="flex items-center h-11 px-4 border-b border-[var(--color-border)] shrink-0">
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors text-[var(--color-text-secondary)]"
+        >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M13 4L7 10L13 16" />
+          </svg>
+        </button>
+        <h2 className="text-sm font-semibold text-[var(--color-text-primary)] ml-1">Meal Karşılaştır</h2>
       </div>
-    </>
+
+      {content}
+    </div>,
+    document.body,
   );
 }

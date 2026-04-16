@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface GameHeaderProps {
   img: string;
@@ -14,6 +15,7 @@ interface GameHeaderProps {
  * Uses the game's cover-image palette as a gradient fade.
  */
 export function GameHeader({ img, bg, isDark, title, onBack, right }: GameHeaderProps) {
+  const { t } = useTranslation();
   const fg = isDark ? "rgba(255,255,255,0.92)" : "rgba(20,12,4,0.88)";
   const btnBg = isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)";
 
@@ -31,7 +33,7 @@ export function GameHeader({ img, bg, isDark, title, onBack, right }: GameHeader
           onClick={onBack}
           className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 active:opacity-60 transition-opacity"
           style={{ background: btnBg }}
-          aria-label="Geri"
+          aria-label={t.nav.back}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: fg }}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

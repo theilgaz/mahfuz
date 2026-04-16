@@ -3,14 +3,17 @@
  * 4 tab: Ana sayfa, Ara, Kesfet, Ayarlar.
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "~/hooks/useTranslation";
 import { SettingsPanel } from "~/components/reader/SettingsPanel";
+import { surahIdFromSlug } from "~/lib/surah-slugs";
+import { useReadingStore } from "~/stores/reading.store";
 
 export function BottomNav() {
   const pathname = useLocation({ select: (l) => l.pathname });
   const { t } = useTranslation();
+  const lastPosition = useReadingStore((s) => s.lastPosition);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const openSettings = useCallback(() => setSettingsOpen(true), []);
@@ -18,6 +21,18 @@ export function BottomNav() {
 
   // Route degisince settings kapat
   useEffect(() => { setSettingsOpen(false); }, [pathname]);
+
+  // Derive context for SettingsPanel (needed for reading mode switch navigation)
+  const settingsContext = useMemo(() => {
+    const ctx: { surahId?: number; pageNumber?: number } = {};
+    const surahMatch = pathname.match(/^\/surah\/(.+)$/);
+    const pageMatch = pathname.match(/^\/page\/(\d+)$/);
+    if (surahMatch) ctx.surahId = surahIdFromSlug(surahMatch[1]);
+    if (pageMatch) ctx.pageNumber = parseInt(pageMatch[1], 10) || undefined;
+    if (!ctx.surahId && lastPosition) ctx.surahId = lastPosition.surahId;
+    if (!ctx.pageNumber && lastPosition) ctx.pageNumber = lastPosition.pageNumber;
+    return ctx;
+  }, [pathname, lastPosition]);
 
   const tabs = [
     {
@@ -60,7 +75,7 @@ export function BottomNav() {
 
   return (
     <>
-      <SettingsPanel open={settingsOpen} onClose={closeSettings} />
+      <SettingsPanel open={settingsOpen} onClose={closeSettings} context={settingsContext} />
 
       <nav
         aria-label="Mahfuz"

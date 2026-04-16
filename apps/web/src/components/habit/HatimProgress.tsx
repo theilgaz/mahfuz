@@ -2,6 +2,8 @@
  * Hatim ilerleme kartı — aktif hatim varsa gösterilir.
  */
 
+import { useTranslation } from "~/hooks/useTranslation";
+
 const TOTAL_PAGES = 604;
 
 interface HatimProgressProps {
@@ -25,12 +27,14 @@ export function HatimProgress({ lastPage, startedAt, onStart }: HatimProgressPro
   const remainingPages = TOTAL_PAGES - lastPage;
   const estimatedDays = pagesPerDay > 0 ? Math.ceil(remainingPages / pagesPerDay) : null;
 
+  const { t } = useTranslation();
+
   return (
     <div className="px-4 py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-sm font-medium">Hatim</p>
+        <p className="text-sm font-medium">{t.habit.hatim}</p>
         <span className="text-xs text-[var(--color-text-secondary)]">
-          {lastPage}/{TOTAL_PAGES} sayfa
+          {t.habit.pagesProgress.replace("{current}", String(lastPage)).replace("{total}", String(TOTAL_PAGES))}
         </span>
       </div>
 
@@ -45,7 +49,7 @@ export function HatimProgress({ lastPage, startedAt, onStart }: HatimProgressPro
       <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
         <span>%{pct}</span>
         {estimatedDays && estimatedDays > 0 && (
-          <span>~{estimatedDays} gün kaldı</span>
+          <span>{t.habit.daysRemaining.replace("{days}", String(estimatedDays))}</span>
         )}
       </div>
     </div>
@@ -56,14 +60,15 @@ export function HatimProgress({ lastPage, startedAt, onStart }: HatimProgressPro
  * Hatim yokken gösterilen başlatma kartı.
  */
 export function HatimStartCard({ onStart }: { onStart: () => void }) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onStart}
       className="w-full px-4 py-3 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors text-left"
     >
-      <p className="text-sm font-medium">Hatim Başlat</p>
+      <p className="text-sm font-medium">{t.habit.startHatim}</p>
       <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-        604 sayfa, kendi hızında
+        {t.habit.startHatimDesc}
       </p>
     </button>
   );

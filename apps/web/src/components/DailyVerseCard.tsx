@@ -9,8 +9,8 @@ import { surahSlug } from "~/lib/surah-slugs";
 import { getSurahName } from "~/lib/surah-names-i18n";
 
 export function DailyVerseCard() {
-  const { data, isLoading } = useDailyVerse();
   const { t, locale } = useTranslation();
+  const { data, isLoading } = useDailyVerse(locale);
 
   if (isLoading) {
     return (

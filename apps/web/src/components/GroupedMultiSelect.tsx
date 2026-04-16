@@ -3,6 +3,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface Option {
   value: string;
@@ -32,6 +33,7 @@ export function GroupedMultiSelect({
   noResultsText,
   groupOrder = [],
 }: GroupedMultiSelectProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -162,7 +164,7 @@ export function GroupedMultiSelect({
           <div className="max-h-64 overflow-y-auto overscroll-contain p-1">
             {filtered.length === 0 ? (
               <p className="px-3 py-2 text-xs text-[var(--color-text-secondary)]">
-                {noResultsText || "Sonuç bulunamadı"}
+                {noResultsText || t.common.noResults}
               </p>
             ) : (
               sortedGroupKeys.map((groupKey) => (

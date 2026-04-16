@@ -5,6 +5,7 @@
  */
 
 import { useState } from "react";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface StreakCardProps {
   currentStreak: number;
@@ -16,6 +17,7 @@ interface StreakCardProps {
 const GOAL_OPTIONS = [1, 2, 3, 5, 10, 20];
 
 export function StreakCard({ currentStreak, todayPages, dailyTarget, onSetGoal }: StreakCardProps) {
+  const { t } = useTranslation();
   const [showGoalPicker, setShowGoalPicker] = useState(false);
   const progress = Math.min(todayPages / dailyTarget, 1);
 
@@ -25,8 +27,8 @@ export function StreakCard({ currentStreak, todayPages, dailyTarget, onSetGoal }
         {/* Streak */}
         <span className="text-sm font-medium">
           {currentStreak > 0
-            ? `${currentStreak} günlük seri`
-            : "Bugün başla"}
+            ? t.habit.streakDays.replace("{count}", String(currentStreak))
+            : t.habit.startToday}
         </span>
 
         <span className="text-[var(--color-border)]">&middot;</span>
@@ -37,7 +39,7 @@ export function StreakCard({ currentStreak, todayPages, dailyTarget, onSetGoal }
             onClick={() => setShowGoalPicker(!showGoalPicker)}
             className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
           >
-            Bugün: {todayPages}/{dailyTarget} sayfa
+            {t.habit.todayProgress.replace("{today}", String(todayPages)).replace("{target}", String(dailyTarget))}
           </button>
 
           {/* Mini progress bar */}
@@ -53,7 +55,7 @@ export function StreakCard({ currentStreak, todayPages, dailyTarget, onSetGoal }
       {/* Hedef ayarlama */}
       {showGoalPicker && onSetGoal && (
         <div className="px-4 pb-3 border-t border-[var(--color-border)]">
-          <p className="text-xs text-[var(--color-text-secondary)] py-2">Günlük hedef:</p>
+          <p className="text-xs text-[var(--color-text-secondary)] py-2">{t.habit.dailyGoal}</p>
           <div className="flex gap-2">
             {GOAL_OPTIONS.map((n) => (
               <button
@@ -68,7 +70,7 @@ export function StreakCard({ currentStreak, todayPages, dailyTarget, onSetGoal }
                     : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
-                {n} sayfa
+                {t.habit.nPages.replace("{n}", String(n))}
               </button>
             ))}
           </div>

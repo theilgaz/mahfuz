@@ -5,6 +5,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { saveVerseNote, getVerseNote, deleteVerseNote } from "~/lib/verse-notes-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface Props {
   verseKey: string;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [content, setContent] = useState("");
@@ -69,7 +71,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
           {/* Başlık */}
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
-              Ayet Notu · {verseKey}
+              {t.verseNote.title} · {verseKey}
             </h2>
             <button
               onClick={onClose}
@@ -101,7 +103,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
               ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Bu ayet hakkında notlarınızı yazın..."
+              placeholder={t.verseNote.placeholder}
               rows={5}
               className="w-full px-3.5 py-2.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 resize-none"
             />
@@ -117,9 +119,9 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
               {saved ? (
                 <span className="flex items-center justify-center gap-1.5">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                  Kaydedildi
+                  {t.verseNote.saved}
                 </span>
-              ) : saveMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+              ) : saveMutation.isPending ? t.verseNote.saving : t.verseNote.save}
             </button>
             {existingNote && (
               <button

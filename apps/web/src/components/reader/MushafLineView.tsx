@@ -19,9 +19,13 @@ function fromArabicIndic(s: string): number {
 interface MushafLineViewProps {
   lineData: MushafPageLines;
   arabicFontSize: number;
+  /** Called with sequential verse index (0-based) on this segment */
+  onVerseEndClick?: (verseIndex: number, rect: DOMRect) => void;
+  /** Offset for verse index when this is a segment of a larger page */
+  verseIndexOffset?: number;
 }
 
-export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps) {
+export function MushafLineView({ lineData, arabicFontSize, onVerseEndClick, verseIndexOffset = 0 }: MushafLineViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -99,6 +103,7 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
       >
         {(() => {
           let wordCounter = 0;
+          let endMarkerCounter = 0;
           return lineData.lines.map((line, lineIdx) => (
             <div
               key={lineIdx}
@@ -111,9 +116,20 @@ export function MushafLineView({ lineData, arabicFontSize }: MushafLineViewProps
                 if (word.c === "e") {
                   const ayahNum = fromArabicIndic(word.t);
                   const markerSize = Math.max(20, Math.round(arabicFontSize * 14));
+                  const currentVerseIdx = verseIndexOffset + endMarkerCounter;
+                  endMarkerCounter++;
                   return (
                     <span key={wordIdx} className="self-center shrink-0 inline-flex">
-                      <VerseEndMarker ayahNumber={ayahNum} size={markerSize} variant="inline" />
+                      <VerseEndMarker
+                        ayahNumber={ayahNum}
+                        size={markerSize}
+                        variant="inline"
+                        onClick={onVerseEndClick ? (e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                          onVerseEndClick(currentVerseIdx, rect);
+                        } : undefined}
+                      />
                     </span>
                   );
                 }

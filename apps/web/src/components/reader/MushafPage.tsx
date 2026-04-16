@@ -26,6 +26,7 @@ import { VerseEndMarker } from "~/components/quran/VerseEndMarker";
 import { SajdahMarker } from "~/components/quran/SajdahMarker";
 import { MushafFrame } from "~/components/quran/MushafFrame";
 import { PageMedallion } from "~/components/quran/PageMedallion";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface MushafPageProps {
   pageNumber: number;
@@ -34,6 +35,7 @@ interface MushafPageProps {
 }
 
 export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
+  const { t } = useTranslation();
   const { showTranslation, showTajweed, translationSlugs, arabicFontSize, textStyle, mushafSizeMode } = useSettingsStore(
     useShallow((s) => ({
       showTranslation: s.showTranslation,
@@ -112,6 +114,27 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
     }
   }, [pageNumber, pageData, savePosition]);
 
+  // Verse end marker click state for lineData branch
+  const [lineMenuOpen, setLineMenuOpen] = useState(false);
+  const [lineMenuAnchor, setLineMenuAnchor] = useState<DOMRect | null>(null);
+  const [lineMenuVerse, setLineMenuVerse] = useState<{ surahId: number; ayahNumber: number; textUthmani: string; translation: string | null } | null>(null);
+
+  // Flat verse list (sequential, matching end marker order in lineData)
+  const verseList = useMemo(() => {
+    if (!pageData) return [];
+    return pageData.surahGroups.flatMap((g) =>
+      g.ayahs.map((a) => ({ surahId: a.surahId, ayahNumber: a.ayahNumber, textUthmani: a.textUthmani, translation: a.translation }))
+    );
+  }, [pageData]);
+
+  const handleLineVerseClick = useCallback((verseIndex: number, rect: DOMRect) => {
+    const verse = verseList[verseIndex];
+    if (!verse) return;
+    setLineMenuVerse(verse);
+    setLineMenuAnchor(rect);
+    setLineMenuOpen(true);
+  }, [verseList]);
+
   if (!pageData) {
     return <MushafSkeleton />;
   }
@@ -170,6 +193,11 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
               const firstGroup = pageData.surahGroups[0];
               const segments: ReactNode[] = [];
               let prevLineIdx = 0;
+              let verseOffset = 0;
+
+              // Count end markers in a set of lines
+              const countEndMarkers = (lines: MushafPageLines["lines"]) =>
+                lines.reduce((n, line) => n + line.words.filter((w) => w.c === "e").length, 0);
 
               // Sayfanın ilk grubu isStart ise üste başlık göster
               if (firstGroup?.isStart) {
@@ -188,11 +216,13 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
 
               for (const { lineIndex, group } of surahTransitions) {
                 // Geçişten önceki satırlar
-                const beforeLines: MushafPageLines = { lines: lineData.lines.slice(prevLineIdx, lineIndex) };
+                const segmentLines = lineData.lines.slice(prevLineIdx, lineIndex);
+                const beforeLines: MushafPageLines = { lines: segmentLines };
                 if (beforeLines.lines.length > 0) {
                   segments.push(
-                    <MushafLineView key={`mlv-${prevLineIdx}`} lineData={beforeLines} arabicFontSize={effectiveFontSize} />
+                    <MushafLineView key={`mlv-${prevLineIdx}`} lineData={beforeLines} arabicFontSize={effectiveFontSize} onVerseEndClick={handleLineVerseClick} verseIndexOffset={verseOffset} />
                   );
+                  verseOffset += countEndMarkers(segmentLines);
                 }
                 // Sure ayraç başlığı — compact
                 segments.push(
@@ -213,7 +243,7 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
               const remainingLines: MushafPageLines = { lines: lineData.lines.slice(prevLineIdx) };
               if (remainingLines.lines.length > 0) {
                 segments.push(
-                  <MushafLineView key={`mlv-${prevLineIdx}-end`} lineData={remainingLines} arabicFontSize={effectiveFontSize} />
+                  <MushafLineView key={`mlv-${prevLineIdx}-end`} lineData={remainingLines} arabicFontSize={effectiveFontSize} onVerseEndClick={handleLineVerseClick} verseIndexOffset={verseOffset} />
                 );
               }
 
@@ -288,6 +318,20 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
           ))
         )}
       </div>
+
+      {/* Ayet menüsü — lineData branch (MushafLineView) */}
+      {lineMenuVerse && (
+        <AyahActionMenu
+          open={lineMenuOpen}
+          onClose={() => setLineMenuOpen(false)}
+          textUthmani={lineMenuVerse.textUthmani}
+          translation={lineMenuVerse.translation}
+          surahId={lineMenuVerse.surahId}
+          ayahNumber={lineMenuVerse.ayahNumber}
+          pageNumber={pageNumber}
+          anchorRect={lineMenuAnchor}
+        />
+      )}
     </MushafFrame>
   );
 }
@@ -306,6 +350,7 @@ interface MushafVerseProps {
 }
 
 function MushafVerse({ surahId, ayahNumber, textUthmani, textTajweed, translation, pageNumber, highlight, sajdah }: MushafVerseProps) {
+  const { t } = useTranslation();
   const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surahId, ayahNumber));
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
   const colorizeWords = useSettingsStore((s) => s.colorizeWords);
@@ -391,7 +436,7 @@ function MushafVerse({ surahId, ayahNumber, textUthmani, textTajweed, translatio
         <button
           onClick={handleBookmarkClick}
           className="inline-flex items-center justify-center w-4 h-4 text-[var(--color-accent)] align-middle -mr-1"
-          aria-label="Yer imini kaldır"
+          aria-label={t.reader.removeBookmark}
         >
           <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="1">
             <path d="M4 2h8a1 1 0 011 1v11.5l-4.5-3-4.5 3V3a1 1 0 011-1z" />

@@ -37,7 +37,7 @@ export function FollowAlongMode({ surahId, onVerseRecognized }: FollowAlongModeP
             ? "bg-red-500 text-white animate-pulse"
             : "bg-[var(--color-accent)] text-white"
         }`}
-        aria-label={engine.isRecording ? (t.recitation?.stop ?? "Durdur") : (t.recitation?.start ?? "Başlat")}
+        aria-label={engine.isRecording ? t.recitation.stop : t.recitation.start}
       >
         {engine.isRecording ? (
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -62,13 +62,13 @@ export function FollowAlongMode({ surahId, onVerseRecognized }: FollowAlongModeP
               </span>
             ) : (
               <span className="text-xs text-[var(--color-text-secondary)]">
-                {t.recitation?.listening ?? "Dinleniyor..."}
+                {t.recitation.listening}
               </span>
             )}
           </div>
         ) : (
           <span className="text-xs text-[var(--color-text-secondary)]">
-            {t.recitation?.followAlongDesc ?? "Okurken sizi takip edelim"}
+            {t.recitation.followAlongDesc}
           </span>
         )}
       </div>

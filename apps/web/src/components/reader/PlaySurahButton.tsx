@@ -6,6 +6,7 @@ import { useState, useCallback } from "react";
 import { useAudioStore } from "~/stores/audio.store";
 import { useSettingsStore } from "~/stores/settings.store";
 import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface PlaySurahButtonProps {
   surahId: number;
@@ -13,6 +14,7 @@ interface PlaySurahButtonProps {
 }
 
 export function PlaySurahButton({ surahId, surahName }: PlaySurahButtonProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const playSurah = useAudioStore((s) => s.playSurah);
   const playbackState = useAudioStore((s) => s.playbackState);
@@ -46,7 +48,7 @@ export function PlaySurahButton({ surahId, surahName }: PlaySurahButtonProps) {
       onClick={handleClick}
       disabled={loading}
       className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50"
-      aria-label={isThisSurahPlaying ? "Duraklat" : `${surahName} dinle`}
+      aria-label={isThisSurahPlaying ? t.reader.pauseAudio : t.reader.listenSurah.replace("{name}", surahName)}
     >
       {loading ? (
         <svg width="18" height="18" viewBox="0 0 18 18" className="animate-spin" stroke="currentColor" fill="none" strokeWidth="2">

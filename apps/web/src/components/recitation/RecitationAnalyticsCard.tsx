@@ -4,17 +4,19 @@
  */
 
 import { useRecitationStore } from "~/stores/recitation.store";
+import { useTranslation } from "~/hooks/useTranslation";
 
 export function RecitationAnalyticsCard() {
+  const { t } = useTranslation();
   const matchHistory = useRecitationStore((s) => s.matchHistory);
   const totalMatches = matchHistory.length;
 
   if (totalMatches === 0) {
     return (
       <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">Kıraet Analitikleri</h3>
+        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">{t.recitationAnalytics.title}</h3>
         <p className="text-xs text-[var(--color-text-secondary)]">
-          Tilavet seansı başlattığında burada istatistiklerin görünür.
+          {t.recitationAnalytics.emptyDesc}
         </p>
       </div>
     );
@@ -39,32 +41,32 @@ export function RecitationAnalyticsCard() {
 
   return (
     <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-4 space-y-4">
-      <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Kıraet Analitikleri</h3>
+      <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">{t.recitationAnalytics.title}</h3>
 
       {/* Özet istatistikler */}
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded bg-[var(--color-bg)] border border-[var(--color-border)] px-3 py-2.5 text-center">
           <p className="text-xl font-bold text-[var(--color-text-primary)]">{totalMatches}</p>
-          <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">Tanınan Ayet</p>
+          <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">{t.recitationAnalytics.recognizedVerses}</p>
         </div>
         <div className="rounded bg-[var(--color-bg)] border border-[var(--color-border)] px-3 py-2.5 text-center">
           <p className="text-xl font-bold text-[var(--color-text-primary)]">
             {avgScore > 0 ? `${Math.round(avgScore * 100)}%` : "-"}
           </p>
-          <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">Ort. Skor</p>
+          <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">{t.recitationAnalytics.avgScore}</p>
         </div>
       </div>
 
       {/* En çok okunan sureler */}
       {topSurahs.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-[var(--color-text-secondary)]">En çok okunan sureler</p>
+          <p className="text-xs font-medium text-[var(--color-text-secondary)]">{t.recitationAnalytics.topSurahs}</p>
           <div className="space-y-1.5">
             {topSurahs.map(([surahId, count], i) => (
               <div key={surahId} className="flex items-center gap-3">
                 <span className="text-xs text-[var(--color-text-secondary)] w-4">{i + 1}.</span>
                 <span className="flex-1 text-sm text-[var(--color-text-primary)]">
-                  Sure {surahId}
+                  {t.recitationAnalytics.surahLabel.replace("{id}", String(surahId))}
                 </span>
                 <span className="text-xs font-medium text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-2 py-0.5 rounded-full">
                   {count}×

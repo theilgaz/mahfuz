@@ -14,6 +14,7 @@ import { WordTooltip } from "./WordTooltip";
 import { VerseEndMarker } from "~/components/quran/VerseEndMarker";
 import { SajdahMarker } from "~/components/quran/SajdahMarker";
 import type { WbwWord } from "~/hooks/useWbwData";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface AyahBlockProps {
   surahId?: number;
@@ -48,6 +49,7 @@ export const AyahBlock = memo(function AyahBlock({
   wbwWords,
   sajdah,
 }: AyahBlockProps) {
+  const { t } = useTranslation();
   const blockRef = useRef<HTMLDivElement>(null);
   const [flash, setFlash] = useState(highlight);
 
@@ -226,7 +228,7 @@ export const AyahBlock = memo(function AyahBlock({
               ? "opacity-100 text-[var(--color-accent)]"
               : "opacity-0 group-hover:opacity-60 text-[var(--color-text-secondary)]"
           }`}
-          aria-label={isBookmarked ? "Yer imini kaldır" : "Yer imine ekle"}
+          aria-label={isBookmarked ? t.reader.removeBookmark : t.reader.bookmark}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
             <path d="M4 2h8a1 1 0 011 1v11.5l-4.5-3-4.5 3V3a1 1 0 011-1z" />

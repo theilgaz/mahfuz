@@ -111,6 +111,7 @@ const FEATURES: Feature[] = [
 ];
 
 export function FeatureGuide() {
+  const { t } = useTranslation();
   const g = useGuideKeys();
 
   return (
@@ -142,7 +143,7 @@ export function FeatureGuide() {
               </span>
               {f.disabled && (
                 <span className="text-[8px] px-1.5 py-0.5 rounded bg-[var(--color-surface)] text-[var(--color-text-secondary)] font-medium">
-                  Yakında
+                  {t.premium.comingSoon}
                 </span>
               )}
             </div>

@@ -51,7 +51,7 @@ export function FindVerseSheet() {
               onClick={() => handleGo(lastMatch.surah, lastMatch.ayah)}
               className="px-3 py-2 rounded-lg bg-[var(--color-accent)] text-white text-xs font-medium shrink-0"
             >
-              {t.recitation?.goToVerse ?? "Ayete Git"}
+              {t.recitation.goToVerse}
             </button>
           </div>
           {/* Confidence */}
@@ -66,7 +66,7 @@ export function FindVerseSheet() {
               />
             </div>
             <span className="text-xs text-[var(--color-text-secondary)]">
-              %{Math.round(lastMatch.score * 100)} {t.recitation?.confidence ?? "güven"}
+              %{Math.round(lastMatch.score * 100)} {t.recitation.confidence}
             </span>
           </div>
         </div>
@@ -76,7 +76,7 @@ export function FindVerseSheet() {
       {!lastMatch && engine.lastTranscript && !engine.isRecording && (
         <div className="text-center py-4">
           <p className="text-sm text-[var(--color-text-secondary)]">
-            {t.recitation?.noMatch ?? "Tanınamadı. Tekrar deneyin."}
+            {t.recitation.noMatch}
           </p>
         </div>
       )}

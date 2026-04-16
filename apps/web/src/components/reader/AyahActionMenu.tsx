@@ -12,6 +12,7 @@ import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 import { VerseNoteSheet } from "~/components/VerseNoteSheet";
 import { MealComparisonSheet } from "~/components/MealComparisonSheet";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface AyahActionMenuProps {
   open: boolean;
@@ -34,6 +35,7 @@ export function AyahActionMenu({
   pageNumber,
   anchorRect,
 }: AyahActionMenuProps) {
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surahId, ayahNumber));
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
@@ -117,7 +119,7 @@ export function AyahActionMenu({
   const primaryActions = [
     {
       key: "bookmark",
-      label: isBookmarked ? "Kaldır" : "Kaydet",
+      label: isBookmarked ? t.ayahMenu.remove : t.ayahMenu.save,
       active: isBookmarked,
       icon: (
         <svg width="20" height="20" viewBox="0 0 20 20" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
@@ -131,7 +133,7 @@ export function AyahActionMenu({
     },
     {
       key: "play",
-      label: "Dinle",
+      label: t.ayahMenu.listen,
       active: false,
       icon: audioLoading ? (
         <svg width="20" height="20" viewBox="0 0 20 20" className="animate-spin" stroke="currentColor" fill="none" strokeWidth="1.5">
@@ -146,7 +148,7 @@ export function AyahActionMenu({
     },
     {
       key: "share",
-      label: "Paylaş",
+      label: t.ayahMenu.share,
       active: false,
       icon: (
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -157,7 +159,7 @@ export function AyahActionMenu({
     },
     {
       key: "note",
-      label: "Not",
+      label: t.ayahMenu.note,
       active: noteOpen,
       icon: (
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -169,7 +171,7 @@ export function AyahActionMenu({
     },
     {
       key: "meals",
-      label: "Mealler",
+      label: t.ayahMenu.translations,
       active: mealsOpen,
       icon: (
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -182,95 +184,84 @@ export function AyahActionMenu({
 
   // Kopyala eylemleri — yatay chip'ler
   const copyActions = [
-    { key: "arabic", label: "Arapça", text: textUthmani },
-    ...(translation ? [{ key: "translation", label: "Meal", text: translation }] : []),
-    { key: "both", label: "Tümü", text: [textUthmani, translation].filter(Boolean).join("\n\n") },
+    { key: "arabic", label: t.ayahMenu.copyArabic, text: textUthmani },
+    ...(translation ? [{ key: "translation", label: t.ayahMenu.copyTranslation, text: translation }] : []),
+    { key: "both", label: t.ayahMenu.copyAll, text: [textUthmani, translation].filter(Boolean).join("\n\n") },
   ];
 
   return (
     <>
-      {/* Blur backdrop — ayetin tamamını kaplar */}
+      {/* Backdrop */}
       <div
-        className="absolute inset-0 z-40 rounded-lg backdrop-blur-[6px] bg-[var(--color-bg)]/40"
+        className="absolute inset-0 z-40 rounded-lg backdrop-blur-md bg-[var(--color-bg)]/70"
         onClick={onClose}
       />
 
-      {/* Menü içeriği */}
+      {/* Menu */}
       <div
         ref={menuRef}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-3"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[280px] rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg overflow-hidden"
         style={{ fontFamily: "var(--font-ui)" }}
       >
-        {/* Ayet referansı badge */}
-        <div className="px-3 py-1 rounded-full bg-[var(--color-accent)] text-white text-[11px] font-semibold tracking-wide shadow-sm">
-          {surahId}:{ayahNumber}
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--color-border)]">
+          <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+            {surahName} {ayahNumber}
+          </span>
+          <Link
+            to="/analyse/$verseKey"
+            params={{ verseKey: `${surahId}:${ayahNumber}` }}
+            search={{ tab: "meal" }}
+            onClick={onClose}
+            className="text-[11px] font-medium text-[var(--color-accent)]"
+          >
+            {t.ayahMenu.analyse}
+          </Link>
         </div>
 
-        {/* Ana eylemler — dairesel ikonlar + label */}
-        <div className="flex items-center gap-4">
+        {/* Actions */}
+        <div className="grid grid-cols-5">
           {primaryActions.map((action) => (
             <button
               key={action.key}
               onClick={action.onClick}
-              className="flex flex-col items-center gap-1.5"
+              className={`flex flex-col items-center gap-1 py-3 transition-colors ${
+                action.active
+                  ? "text-[var(--color-accent)]"
+                  : "text-[var(--color-text-secondary)] active:text-[var(--color-accent)]"
+              }`}
               aria-label={action.label}
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm
-                ${action.active
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-[var(--color-bg)] text-[var(--color-text-primary)] border border-[var(--color-border)] hover:bg-[var(--color-accent)] hover:text-white hover:border-transparent hover:scale-110"
-                }`}
-              >
-                {action.icon}
-              </div>
-              <span className="text-[10px] font-medium text-[var(--color-text-secondary)]">
-                {action.label}
-              </span>
+              {action.icon}
+              <span className="text-[9px] font-medium">{action.label}</span>
             </button>
           ))}
         </div>
 
-        {/* Kopyala chip'leri */}
-        <div className="flex items-center gap-1.5">
-          {copyActions.map((action) => (
+        {/* Copy row */}
+        <div className="flex border-t border-[var(--color-border)]">
+          {copyActions.map((action, i) => (
             <button
               key={action.key}
               onClick={() => copyText(action.text, action.key)}
-              className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200
-                ${copied === action.key
-                  ? "bg-[var(--color-accent)] text-white scale-95"
-                  : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/40"
-                }`}
+              className={`flex-1 py-2 text-[11px] font-medium transition-colors ${
+                i > 0 ? "border-l border-[var(--color-border)]" : ""
+              } ${
+                copied === action.key
+                  ? "text-[var(--color-accent)] bg-[var(--color-accent)]/10"
+                  : "text-[var(--color-text-secondary)] active:text-[var(--color-accent)]"
+              }`}
             >
               {copied === action.key ? (
-                <span className="flex items-center gap-1">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M2 6l3 3 5-5" />
-                  </svg>
-                </span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto">
+                  <path d="M3 7l3 3 5-5" />
+                </svg>
               ) : (
-                <span className="flex items-center gap-1">
-                  <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <rect x="5" y="5" width="7" height="7" rx="1" />
-                    <path d="M9 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v5a1 1 0 001 1h2" />
-                  </svg>
-                  {action.label}
-                </span>
+                action.label
               )}
             </button>
           ))}
         </div>
-
-        {/* Tahlil linki */}
-        <Link
-          to="/analyse/$verseKey"
-          params={{ verseKey: `${surahId}:${ayahNumber}` }}
-          search={{ tab: "meal" }}
-          onClick={onClose}
-          className="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20 hover:bg-[var(--color-accent)]/20 transition-colors shadow-md"
-        >
-          Ayet Tahlili
-        </Link>
       </div>
 
       {/* Verse Note Sheet */}
@@ -282,7 +273,7 @@ export function AyahActionMenu({
         />
       )}
 
-      {/* Meal Karşılaştırma Sheet */}
+      {/* Meal Comparison Sheet */}
       {mealsOpen && (
         <MealComparisonSheet
           surahId={surahId}

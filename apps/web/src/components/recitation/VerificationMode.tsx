@@ -85,7 +85,7 @@ export function VerificationMode({ surahId, startAyah = 1, endAyah }: Verificati
             {getSurahName(surahId, locale)}
           </h3>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            {t.recitation?.verify ?? "Ezber Doğrulama"} · {startAyah}-{end}. ayetler
+            {t.recitation.verify} · {startAyah}-{end}. ayetler
           </p>
         </div>
         {!engine.isRecording && !isComplete && (
@@ -93,7 +93,7 @@ export function VerificationMode({ surahId, startAyah = 1, endAyah }: Verificati
             onClick={handleStart}
             className="px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white text-sm font-medium"
           >
-            {t.recitation?.start ?? "Başlat"}
+            {t.recitation.start}
           </button>
         )}
       </div>
@@ -127,7 +127,7 @@ export function VerificationMode({ surahId, startAyah = 1, endAyah }: Verificati
                 Ayet {r.ayah}
               </span>
               <span className={`text-xs font-medium ${r.success ? "text-green-600" : "text-red-500"}`}>
-                {r.success ? (t.recitation?.correct ?? "Doğru!") : (t.recitation?.incorrect ?? "Yanlış")}
+                {r.success ? t.recitation.correct : t.recitation.incorrect}
                 {r.score ? ` (%${Math.round(r.score * 100)})` : ""}
               </span>
             </div>
@@ -142,13 +142,13 @@ export function VerificationMode({ surahId, startAyah = 1, endAyah }: Verificati
             {correctCount} / {totalAttempted}
           </p>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-            {t.recitation?.accuracy ?? "Doğruluk"}: %{totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0}
+            {t.recitation.accuracy}: %{totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0}
           </p>
           <button
             onClick={handleStart}
             className="mt-3 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
           >
-            {t.recitation?.tryAgain ?? "Tekrar Dene"}
+            {t.recitation.tryAgain}
           </button>
         </div>
       )}
