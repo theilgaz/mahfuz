@@ -23,6 +23,22 @@ export const GAME_TITLES: Record<string, string> = {
   "ayet-2048": "Ayet 2048",
 };
 
+const GAME_TITLES_EN: Record<string, string> = {
+  "fill-blank": "Fill the Blank",
+  "surah-guess": "Surah Recognition",
+  "word-meaning": "Word Meaning",
+  "verse-chain": "Verse Chain",
+  "hexagon": "Word Construction",
+  "kelime-tahmini": "Word Guess",
+  "ayet-2048": "Ayah 2048",
+};
+
+/** Returns game title for the given locale. Falls back to Turkish. */
+export function getGameTitle(gameId: string, locale: string = "tr"): string {
+  if (locale === "tr") return GAME_TITLES[gameId] ?? gameId;
+  return GAME_TITLES_EN[gameId] ?? GAME_TITLES[gameId] ?? gameId;
+}
+
 export const GAME_IDS = Object.keys(GAME_TITLES);
 
 // ── Skor Kaydet ────────────────────────────────────────────
