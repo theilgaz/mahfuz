@@ -1163,6 +1163,7 @@ export const tr = {
     copied: "Kopyalandı",
     shareInviteCode: "Bu kodu arkadaşlarınızla paylaşın",
     groupNotFound: "Grup bulunamadı.",
+    loginRequired: "Giriş yapmanız gerekiyor.",
     back: "Geri dön",
   },
   notes: {

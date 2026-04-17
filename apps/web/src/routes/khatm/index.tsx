@@ -38,7 +38,7 @@ function HatimPage() {
       qc.invalidateQueries({ queryKey: ["hatim-groups"] });
       navigate({ to: "/khatm/$groupId", params: { groupId: id } });
     },
-    onError: (e) => setError(e.message),
+    onError: (e) => setError(e.message.includes("Giriş") ? tr.khatm.loginRequired : e.message),
   });
 
   const joinMutation = useMutation({
@@ -47,7 +47,7 @@ function HatimPage() {
       qc.invalidateQueries({ queryKey: ["hatim-groups"] });
       navigate({ to: "/khatm/$groupId", params: { groupId } });
     },
-    onError: (e) => setError(e.message),
+    onError: (e) => setError(e.message.includes("Giriş") ? tr.khatm.loginRequired : e.message),
   });
 
   return (
