@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { LOCALE_CODES, DEFAULT_LOCALE, type Locale } from "~/locales/registry";
+import { useSettingsStore } from "~/stores/settings.store";
+
+/** Default translation slug per locale */
+const LOCALE_DEFAULT_TRANSLATION: Partial<Record<Locale, string>> = {
+  en: "yusufali-en",
+  tr: "omer-celik",
+};
 
 /** Detect best matching locale from browser languages. */
 function detectBrowserLocale(): Locale {
@@ -26,7 +33,13 @@ export const useLocaleStore = create<LocaleState>()(
     (set) => ({
       locale: DEFAULT_LOCALE,
       hasChosenLocale: false,
-      setLocale: (locale) => set({ locale, hasChosenLocale: true }),
+      setLocale: (locale) => {
+        set({ locale, hasChosenLocale: true });
+        const defaultSlug = LOCALE_DEFAULT_TRANSLATION[locale];
+        if (defaultSlug) {
+          useSettingsStore.getState().setTranslation(defaultSlug);
+        }
+      },
       confirmLocale: () => set({ hasChosenLocale: true }),
     }),
     {

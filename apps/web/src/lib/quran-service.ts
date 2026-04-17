@@ -238,7 +238,11 @@ export const getDailyVerse = createServerFn({ method: "GET" })
   // Pick translation source matching locale, fallback to default
   const lang = locale === "en" ? "en" : locale === "ar" ? "ar" : "tr";
   const sources = await db.select().from(translationSources).where(eq(translationSources.language, lang));
-  const source = sources[0] ?? (await db.select().from(translationSources).where(eq(translationSources.isDefault, true)))[0];
+  // For English, prefer Yusuf Ali
+  const source =
+    (lang === "en" ? sources.find((s) => s.slug === "yusufali-en") : undefined) ??
+    sources[0] ??
+    (await db.select().from(translationSources).where(eq(translationSources.isDefault, true)))[0];
 
   const [translation] = source
     ? await db
