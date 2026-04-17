@@ -27,13 +27,13 @@ export function RouteErrorFallback({ error, reset }: RouteErrorFallbackProps) {
   try {
     ({ t } = useTranslation());
   } catch {
-    // If translation hook fails, use hardcoded Turkish fallback
+    // If translation hook fails, use hardcoded English fallback
     t = {
       error: {
-        generic: "Bir hata oluştu",
-        genericDesc: "Sayfa yüklenirken beklenmeyen bir hata oluştu.",
-        retry: "Tekrar Dene",
-        goHome: "Ana Sayfa",
+        generic: "Something went wrong",
+        genericDesc: "An unexpected error occurred while loading the page.",
+        retry: "Try Again",
+        goHome: "Home",
       },
     } as any;
   }

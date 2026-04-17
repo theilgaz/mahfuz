@@ -125,7 +125,7 @@ function AchievementBanner({ achievements, primary }: { achievements: string[]; 
             name = `${gameTitle} - ${(achT?.[tierKey] ?? id) as string}`;
           } else if (def?.category === "flawless" && def.gameId) {
             const gameTitle = GAME_TITLES[def.gameId] ?? def.gameId;
-            name = `${gameTitle} - ${(achT?.["flawless" as keyof typeof achT] ?? "Hatasız") as string}`;
+            name = `${gameTitle} - ${(achT?.["flawless" as keyof typeof achT] ?? "Flawless") as string}`;
           } else {
             name = (achT?.[id as keyof typeof achT] ?? id) as string;
           }

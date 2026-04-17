@@ -18,11 +18,11 @@ export function RouteError({ error }: { error: Error }) {
     t = null;
   }
 
-  const title = t?.error?.generic ?? "Bir hata oluştu";
-  const desc = error.message || (t?.error?.genericDesc ?? "Sayfa yüklenirken beklenmeyen bir hata oluştu.");
-  const retry = t?.error?.retry ?? "Tekrar Dene";
-  const home = t?.error?.goHome ?? "Ana Sayfa";
-  const report = t?.error?.report ?? "Bildir";
+  const title = t?.error?.generic ?? "Something went wrong";
+  const desc = error.message || (t?.error?.genericDesc ?? "An unexpected error occurred while loading the page.");
+  const retry = t?.error?.retry ?? "Try Again";
+  const home = t?.error?.goHome ?? "Home";
+  const report = t?.error?.report ?? "Report";
 
   const shortError = error.message?.slice(0, 80) || "Unknown error";
   const tweetText = `@theilgaz mahfuz.ilg.az${pathname} sayfasında hata oluştu:\n\n"${shortError}"`;
