@@ -61,14 +61,27 @@ async function loadTrPatch(): Promise<TrPatch> {
   return patchCache!;
 }
 
-async function fetchWbwChapter(chapterId: number): Promise<WbwData> {
-  const patch = await loadTrPatch();
+/** Map app locale to Quran.com API language code */
+const LOCALE_TO_WBW_LANG: Record<string, string> = {
+  tr: "tr",
+  en: "en",
+  es: "es",
+  fr: "fr",
+  de: "de",
+  nl: "nl",
+  ar: "ar",
+};
+
+async function fetchWbwChapter(chapterId: number, locale: string = "tr"): Promise<WbwData> {
+  const isTr = locale === "tr";
+  const patch = isTr ? await loadTrPatch() : {};
+  const lang = LOCALE_TO_WBW_LANG[locale] ?? "en";
   const map: WbwData = new Map();
   let page = 1;
   let totalPages = 1;
 
   while (page <= totalPages) {
-    const url = `${QDC_API}/verses/by_chapter/${chapterId}?language=tr&words=true&word_fields=text_uthmani,translation,transliteration&word_translation_language=tr&per_page=50&page=${page}`;
+    const url = `${QDC_API}/verses/by_chapter/${chapterId}?language=${lang}&words=true&word_fields=text_uthmani,translation,transliteration&word_translation_language=${lang}&per_page=50&page=${page}`;
     const res = await fetch(url);
     if (!res.ok) break;
 
@@ -79,13 +92,12 @@ async function fetchWbwChapter(chapterId: number): Promise<WbwData> {
       const words: WbwWord[] = verse.words
         .filter((w) => w.char_type_name === "word")
         .map((w) => {
-          const isTurkish = w.translation?.language_name === "turkish";
-          const apiTranslation = isTurkish ? (w.translation?.text ?? "") : "";
-          const patchTranslation = !isTurkish ? (patch[w.text_uthmani] ?? "") : "";
+          const translation = w.translation?.text ?? "";
+          const patchTranslation = isTr && !translation ? (patch[w.text_uthmani] ?? "") : "";
           return {
             position: w.position,
             textUthmani: w.text_uthmani,
-            translation: apiTranslation || patchTranslation,
+            translation: translation || patchTranslation,
             transliteration: w.transliteration?.text ?? "",
           };
         });
@@ -98,17 +110,17 @@ async function fetchWbwChapter(chapterId: number): Promise<WbwData> {
   return map;
 }
 
-export const wbwQueryOptions = (chapterId: number) =>
+export const wbwQueryOptions = (chapterId: number, locale: string = "tr") =>
   queryOptions({
-    queryKey: ["wbw", chapterId],
-    queryFn: () => fetchWbwChapter(chapterId),
+    queryKey: ["wbw", chapterId, locale],
+    queryFn: () => fetchWbwChapter(chapterId, locale),
     staleTime: Infinity,
     gcTime: 30 * 60 * 1000, // 30 min
   });
 
-export function useWbwData(chapterId: number, enabled: boolean) {
+export function useWbwData(chapterId: number, enabled: boolean, locale: string = "tr") {
   return useQuery({
-    ...wbwQueryOptions(chapterId),
+    ...wbwQueryOptions(chapterId, locale),
     enabled,
   });
 }

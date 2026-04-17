@@ -36,6 +36,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const isVerse = readingMode === "verse";
   // Tecvid: WBW modunda çalışmaz (HTML renderı WBW kelime kartlarıyla çakışır)
   const effectiveTajweed = showTajweed && !useBasic && !isWbw;
+  const { locale } = useTranslation();
   const savePosition = useReadingStore((s) => s.savePosition);
   // keepPreviousData: translationSlugs değiştiğinde askıya almak yerine
   // eski veriyi göster — sync veya ayar güncellemelerinde "reload" görüntüsünü önler
@@ -46,7 +47,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const { data: tajweedData } = useTajweed(surahId, effectiveTajweed);
   const { data: imlaeiData } = useImlaei(surahId, useBasic);
   // WBW verisi: WBW modunda kelime kartları, verse modunda tooltip için
-  const { data: wbwData } = useWbwData(surahId, isWbw || isVerse);
+  const { data: wbwData } = useWbwData(surahId, isWbw || isVerse, locale);
 
   // Çoklu meal adları
   const { data: translationSourceList } = useQuery({ ...translationSourcesQueryOptions(), enabled: translationSlugs.length > 1 });
@@ -121,11 +122,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     return () => cancelAnimationFrame(id);
   }, [highlightAyah, data]);
 
-  if (!data) {
-    return <SurahSkeleton />;
-  }
-
-  const { surah, ayahs: ayahList } = data;
+  const { surah, ayahs: ayahList } = data ?? { surah: null, ayahs: [] as never[] };
   const useVirtual = ayahList.length >= 50;
 
   // Stable shared props for AyahBlock (memo-friendly)
@@ -165,6 +162,10 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     ),
     [sharedProps],
   );
+
+  if (!data) {
+    return <SurahSkeleton />;
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4">
