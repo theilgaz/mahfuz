@@ -46,7 +46,7 @@ export function useMicrophone(options: UseMicrophoneOptions = {}) {
     setError(null);
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError("Tarayıcınız mikrofon erişimini desteklemiyor.");
+      setError("Your browser does not support microphone access.");
       setPermissionState("unsupported");
       return;
     }
@@ -95,9 +95,9 @@ export function useMicrophone(options: UseMicrophoneOptions = {}) {
     } catch (err) {
       if (err instanceof DOMException && err.name === "NotAllowedError") {
         setPermissionState("denied");
-        setError("Mikrofon erişimi reddedildi.");
+        setError("Microphone access denied.");
       } else {
-        setError(err instanceof Error ? err.message : "Mikrofon hatası");
+        setError(err instanceof Error ? err.message : "Microphone error");
       }
     }
   }, []);
