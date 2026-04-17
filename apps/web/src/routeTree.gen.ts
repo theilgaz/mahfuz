@@ -49,7 +49,9 @@ import { Route as AlifbaGamesIndexRouteImport } from './routes/alifba/games/inde
 import { Route as QaidaLessonLessonIdRouteImport } from './routes/qaida/lesson/$lessonId'
 import { Route as QaidaExamStepIdRouteImport } from './routes/qaida/exam/$stepId'
 import { Route as ApiV1TranslationSourcesRouteImport } from './routes/api/v1/translation-sources'
+import { Route as ApiV1SyncRouteImport } from './routes/api/v1/sync'
 import { Route as ApiV1SurahsRouteImport } from './routes/api/v1/surahs'
+import { Route as ApiV1SearchRouteImport } from './routes/api/v1/search'
 import { Route as ApiV1DailyVerseRouteImport } from './routes/api/v1/daily-verse'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AlifbaQuizVoiceRouteImport } from './routes/alifba/quiz/voice'
@@ -60,6 +62,7 @@ import { Route as AlifbaGamesMemoryRouteImport } from './routes/alifba/games/mem
 import { Route as AlifbaGamesFillRouteImport } from './routes/alifba/games/fill'
 import { Route as ApiV1SurahsSurahIdRouteImport } from './routes/api/v1/surahs.$surahId'
 import { Route as ApiV1PagesPageNumberRouteImport } from './routes/api/v1/pages.$pageNumber'
+import { Route as ApiV1GamesScoresRouteImport } from './routes/api/v1/games.scores'
 import { Route as ApiV1SurahsSurahIdAyahsRouteImport } from './routes/api/v1/surahs.$surahId.ayahs'
 
 const TajweedRoute = TajweedRouteImport.update({
@@ -262,9 +265,19 @@ const ApiV1TranslationSourcesRoute = ApiV1TranslationSourcesRouteImport.update({
   path: '/api/v1/translation-sources',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1SyncRoute = ApiV1SyncRouteImport.update({
+  id: '/api/v1/sync',
+  path: '/api/v1/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1SurahsRoute = ApiV1SurahsRouteImport.update({
   id: '/api/v1/surahs',
   path: '/api/v1/surahs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SearchRoute = ApiV1SearchRouteImport.update({
+  id: '/api/v1/search',
+  path: '/api/v1/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1DailyVerseRoute = ApiV1DailyVerseRouteImport.update({
@@ -315,6 +328,11 @@ const ApiV1SurahsSurahIdRoute = ApiV1SurahsSurahIdRouteImport.update({
 const ApiV1PagesPageNumberRoute = ApiV1PagesPageNumberRouteImport.update({
   id: '/api/v1/pages/$pageNumber',
   path: '/api/v1/pages/$pageNumber',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1GamesScoresRoute = ApiV1GamesScoresRouteImport.update({
+  id: '/api/v1/games/scores',
+  path: '/api/v1/games/scores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1SurahsSurahIdAyahsRoute = ApiV1SurahsSurahIdAyahsRouteImport.update({
@@ -368,11 +386,14 @@ export interface FileRoutesByFullPath {
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/daily-verse': typeof ApiV1DailyVerseRoute
+  '/api/v1/search': typeof ApiV1SearchRoute
   '/api/v1/surahs': typeof ApiV1SurahsRouteWithChildren
+  '/api/v1/sync': typeof ApiV1SyncRoute
   '/api/v1/translation-sources': typeof ApiV1TranslationSourcesRoute
   '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
   '/qaida/lesson/$lessonId': typeof QaidaLessonLessonIdRoute
   '/alifba/games/': typeof AlifbaGamesIndexRoute
+  '/api/v1/games/scores': typeof ApiV1GamesScoresRoute
   '/api/v1/pages/$pageNumber': typeof ApiV1PagesPageNumberRoute
   '/api/v1/surahs/$surahId': typeof ApiV1SurahsSurahIdRouteWithChildren
   '/api/v1/surahs/$surahId/ayahs': typeof ApiV1SurahsSurahIdAyahsRoute
@@ -420,11 +441,14 @@ export interface FileRoutesByTo {
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/daily-verse': typeof ApiV1DailyVerseRoute
+  '/api/v1/search': typeof ApiV1SearchRoute
   '/api/v1/surahs': typeof ApiV1SurahsRouteWithChildren
+  '/api/v1/sync': typeof ApiV1SyncRoute
   '/api/v1/translation-sources': typeof ApiV1TranslationSourcesRoute
   '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
   '/qaida/lesson/$lessonId': typeof QaidaLessonLessonIdRoute
   '/alifba/games': typeof AlifbaGamesIndexRoute
+  '/api/v1/games/scores': typeof ApiV1GamesScoresRoute
   '/api/v1/pages/$pageNumber': typeof ApiV1PagesPageNumberRoute
   '/api/v1/surahs/$surahId': typeof ApiV1SurahsSurahIdRouteWithChildren
   '/api/v1/surahs/$surahId/ayahs': typeof ApiV1SurahsSurahIdAyahsRoute
@@ -475,11 +499,14 @@ export interface FileRoutesById {
   '/alifba/quiz/voice': typeof AlifbaQuizVoiceRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/daily-verse': typeof ApiV1DailyVerseRoute
+  '/api/v1/search': typeof ApiV1SearchRoute
   '/api/v1/surahs': typeof ApiV1SurahsRouteWithChildren
+  '/api/v1/sync': typeof ApiV1SyncRoute
   '/api/v1/translation-sources': typeof ApiV1TranslationSourcesRoute
   '/qaida/exam/$stepId': typeof QaidaExamStepIdRoute
   '/qaida/lesson/$lessonId': typeof QaidaLessonLessonIdRoute
   '/alifba/games/': typeof AlifbaGamesIndexRoute
+  '/api/v1/games/scores': typeof ApiV1GamesScoresRoute
   '/api/v1/pages/$pageNumber': typeof ApiV1PagesPageNumberRoute
   '/api/v1/surahs/$surahId': typeof ApiV1SurahsSurahIdRouteWithChildren
   '/api/v1/surahs/$surahId/ayahs': typeof ApiV1SurahsSurahIdAyahsRoute
@@ -531,11 +558,14 @@ export interface FileRouteTypes {
     | '/alifba/quiz/voice'
     | '/api/auth/$'
     | '/api/v1/daily-verse'
+    | '/api/v1/search'
     | '/api/v1/surahs'
+    | '/api/v1/sync'
     | '/api/v1/translation-sources'
     | '/qaida/exam/$stepId'
     | '/qaida/lesson/$lessonId'
     | '/alifba/games/'
+    | '/api/v1/games/scores'
     | '/api/v1/pages/$pageNumber'
     | '/api/v1/surahs/$surahId'
     | '/api/v1/surahs/$surahId/ayahs'
@@ -583,11 +613,14 @@ export interface FileRouteTypes {
     | '/alifba/quiz/voice'
     | '/api/auth/$'
     | '/api/v1/daily-verse'
+    | '/api/v1/search'
     | '/api/v1/surahs'
+    | '/api/v1/sync'
     | '/api/v1/translation-sources'
     | '/qaida/exam/$stepId'
     | '/qaida/lesson/$lessonId'
     | '/alifba/games'
+    | '/api/v1/games/scores'
     | '/api/v1/pages/$pageNumber'
     | '/api/v1/surahs/$surahId'
     | '/api/v1/surahs/$surahId/ayahs'
@@ -637,11 +670,14 @@ export interface FileRouteTypes {
     | '/alifba/quiz/voice'
     | '/api/auth/$'
     | '/api/v1/daily-verse'
+    | '/api/v1/search'
     | '/api/v1/surahs'
+    | '/api/v1/sync'
     | '/api/v1/translation-sources'
     | '/qaida/exam/$stepId'
     | '/qaida/lesson/$lessonId'
     | '/alifba/games/'
+    | '/api/v1/games/scores'
     | '/api/v1/pages/$pageNumber'
     | '/api/v1/surahs/$surahId'
     | '/api/v1/surahs/$surahId/ayahs'
@@ -680,10 +716,13 @@ export interface RootRouteChildren {
   AlifbaQuizVoiceRoute: typeof AlifbaQuizVoiceRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiV1DailyVerseRoute: typeof ApiV1DailyVerseRoute
+  ApiV1SearchRoute: typeof ApiV1SearchRoute
   ApiV1SurahsRoute: typeof ApiV1SurahsRouteWithChildren
+  ApiV1SyncRoute: typeof ApiV1SyncRoute
   ApiV1TranslationSourcesRoute: typeof ApiV1TranslationSourcesRoute
   QaidaExamStepIdRoute: typeof QaidaExamStepIdRoute
   QaidaLessonLessonIdRoute: typeof QaidaLessonLessonIdRoute
+  ApiV1GamesScoresRoute: typeof ApiV1GamesScoresRoute
   ApiV1PagesPageNumberRoute: typeof ApiV1PagesPageNumberRoute
 }
 
@@ -969,11 +1008,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1TranslationSourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/sync': {
+      id: '/api/v1/sync'
+      path: '/api/v1/sync'
+      fullPath: '/api/v1/sync'
+      preLoaderRoute: typeof ApiV1SyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/surahs': {
       id: '/api/v1/surahs'
       path: '/api/v1/surahs'
       fullPath: '/api/v1/surahs'
       preLoaderRoute: typeof ApiV1SurahsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/search': {
+      id: '/api/v1/search'
+      path: '/api/v1/search'
+      fullPath: '/api/v1/search'
+      preLoaderRoute: typeof ApiV1SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/daily-verse': {
@@ -1044,6 +1097,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/pages/$pageNumber'
       fullPath: '/api/v1/pages/$pageNumber'
       preLoaderRoute: typeof ApiV1PagesPageNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/games/scores': {
+      id: '/api/v1/games/scores'
+      path: '/api/v1/games/scores'
+      fullPath: '/api/v1/games/scores'
+      preLoaderRoute: typeof ApiV1GamesScoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/surahs/$surahId/ayahs': {
@@ -1156,10 +1216,13 @@ const rootRouteChildren: RootRouteChildren = {
   AlifbaQuizVoiceRoute: AlifbaQuizVoiceRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiV1DailyVerseRoute: ApiV1DailyVerseRoute,
+  ApiV1SearchRoute: ApiV1SearchRoute,
   ApiV1SurahsRoute: ApiV1SurahsRouteWithChildren,
+  ApiV1SyncRoute: ApiV1SyncRoute,
   ApiV1TranslationSourcesRoute: ApiV1TranslationSourcesRoute,
   QaidaExamStepIdRoute: QaidaExamStepIdRoute,
   QaidaLessonLessonIdRoute: QaidaLessonLessonIdRoute,
+  ApiV1GamesScoresRoute: ApiV1GamesScoresRoute,
   ApiV1PagesPageNumberRoute: ApiV1PagesPageNumberRoute,
 }
 export const routeTree = rootRouteImport

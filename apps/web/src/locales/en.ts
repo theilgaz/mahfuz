@@ -92,6 +92,7 @@ export const en: Messages = {
     loginFailed: "Login failed",
     googleFailed: "Google sign-in failed",
     genericError: "An error occurred",
+    redirecting: "Redirecting...",
   },
 
   hub: {
@@ -1231,5 +1232,14 @@ export const en: Messages = {
     quranComDesc: "Modern Quran reading experience",
     tarteelDesc: "AI-powered Quran application",
     mushafDesc: "Page layout reference",
+  },
+  mealComparison: {
+    title: "Compare Translations",
+    translatorsMax4: "Translators (max 4)",
+    notFoundInDb: "Selected translators not found in database.",
+    alternativeViews: "Alternative Views",
+    alternative: "Alternative",
+    footnote: "footnote",
+    dataLoadFailed: "Failed to load data.",
   },
 } as const;

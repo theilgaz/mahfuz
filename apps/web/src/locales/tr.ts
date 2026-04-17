@@ -90,6 +90,7 @@ export const tr = {
     loginFailed: "Giriş başarısız",
     googleFailed: "Google ile giriş başarısız",
     genericError: "Bir hata oluştu",
+    redirecting: "Yönlendiriliyor...",
   },
 
   hub: {
@@ -1250,5 +1251,14 @@ export const tr = {
     quranComDesc: "Modern Kuran okuma deneyimi",
     tarteelDesc: "Yapay zeka destekli Kuran uygulaması",
     mushafDesc: "Sayfa düzeni referansı",
+  },
+  mealComparison: {
+    title: "Meal Karşılaştır",
+    translatorsMax4: "Mealciler (en fazla 4)",
+    notFoundInDb: "Seçili mealciler veritabanında bulunamadı.",
+    alternativeViews: "Farklı Yorumlar",
+    alternative: "Alternatif",
+    footnote: "dipnot",
+    dataLoadFailed: "Veri yüklenemedi.",
   },
 } as const;
