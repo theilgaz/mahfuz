@@ -129,7 +129,14 @@ export const useAudioStore = create<AudioState & AudioActions>()((set, get) => (
 
   stop: () => {
     get().engine?.stop();
-    set({ isVisible: false });
+    set({
+      isVisible: false,
+      chapterId: null,
+      chapterName: null,
+      verseKeys: [],
+      currentVerseKey: null,
+      playbackState: "idle",
+    });
   },
 
   nextVerse: () => {
