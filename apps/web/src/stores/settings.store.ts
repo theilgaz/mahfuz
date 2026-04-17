@@ -10,11 +10,11 @@ export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
 export type MushafSizeMode = "standard" | "fill";
 
-export const COLOR_PALETTES: Record<ColorPaletteId, { name: string; nameAr: string; colors: string[] }> = {
-  pastel: { name: "Zarif", nameAr: "زهري", colors: ["#e8a435", "#d45d5d", "#4db89a", "#9b6dcc", "#e07840", "#5b9ec9", "#d46a8e", "#6db85e"] },
-  ocean:  { name: "Işık",  nameAr: "برق",  colors: ["#e6197e", "#06b44e", "#2ba5dd", "#e8590c", "#9333ea", "#ca9215", "#0694a2", "#d63384"] },
-  earth:  { name: "Cevher", nameAr: "جوهر", colors: ["#3b82f6", "#ef4444", "#10b981", "#8b5cf6", "#f59e0b", "#ec4899", "#06b6d4", "#6366f1"] },
-  vivid:  { name: "Mürekkep", nameAr: "حبر", colors: ["#c4265e", "#5c8a18", "#0e7a8a", "#c96510", "#6f42c1", "#998a15", "#d94070", "#3e8948"] },
+export const COLOR_PALETTES: Record<ColorPaletteId, { name: string; nameEn: string; nameAr: string; colors: string[] }> = {
+  pastel: { name: "Zarif", nameEn: "Elegant", nameAr: "زهري", colors: ["#e8a435", "#d45d5d", "#4db89a", "#9b6dcc", "#e07840", "#5b9ec9", "#d46a8e", "#6db85e"] },
+  ocean:  { name: "Işık",  nameEn: "Light",   nameAr: "برق",  colors: ["#e6197e", "#06b44e", "#2ba5dd", "#e8590c", "#9333ea", "#ca9215", "#0694a2", "#d63384"] },
+  earth:  { name: "Cevher", nameEn: "Gem",    nameAr: "جوهر", colors: ["#3b82f6", "#ef4444", "#10b981", "#8b5cf6", "#f59e0b", "#ec4899", "#06b6d4", "#6366f1"] },
+  vivid:  { name: "Mürekkep", nameEn: "Ink",  nameAr: "حبر", colors: ["#c4265e", "#5c8a18", "#0e7a8a", "#c96510", "#6f42c1", "#998a15", "#d94070", "#3e8948"] },
 };
 
 interface SettingsState {
