@@ -14,7 +14,7 @@ import { GameOverCard } from "~/components/GameOverCard";
 
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
-import { WORD_PAIRS } from "~/lib/word-pairs";
+import { WORD_PAIRS, getLocalizedPair } from "~/lib/word-pairs";
 import {
   OPTION_COUNT,
   calcCorrectPoints,
@@ -42,29 +42,30 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function getRandomQuestion(usedIndices: Set<number>, optionCount = 4) {
+function getRandomQuestion(usedIndices: Set<number>, optionCount = 4, locale = "tr") {
   const available = WORD_PAIRS.map((_, i) => i).filter((i) => !usedIndices.has(i));
   const pool = available.length > 0 ? available : Array.from({ length: WORD_PAIRS.length }, (_, i) => i);
   const idx = pool[Math.floor(Math.random() * pool.length)];
   const pair = WORD_PAIRS[idx];
+  const localized = getLocalizedPair(pair, locale);
   // Base 3 wrong answers + extra distractors from other pairs for harder difficulties
-  const wrongs = [...pair.wrong];
+  const wrongs = [...localized.wrong];
   if (optionCount > 4) {
     const extras = WORD_PAIRS
       .filter((_, i) => i !== idx)
-      .map((p) => p.meaning)
-      .filter((m) => m !== pair.meaning && !wrongs.includes(m));
+      .map((p) => getLocalizedPair(p, locale).meaning)
+      .filter((m) => m !== localized.meaning && !wrongs.includes(m));
     const shuffledExtras = shuffle(extras);
     wrongs.push(...shuffledExtras.slice(0, optionCount - 4));
   }
-  const options = shuffle([pair.meaning, ...wrongs.slice(0, optionCount - 1)]);
-  return { ...pair, options, idx };
+  const options = shuffle([localized.meaning, ...wrongs.slice(0, optionCount - 1)]);
+  return { arabic: pair.arabic, meaning: localized.meaning, options, idx };
 }
 
 type GameState = "playing" | "correct" | "wrong";
 
 function WordMeaningPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [screen, setScreen] = useState<"setup" | "game" | "gameover">("setup");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const timer = useGameTimer(difficulty);
@@ -81,7 +82,7 @@ function WordMeaningPage() {
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
-  const [question, setQuestion] = useState(() => getRandomQuestion(new Set(), optionCount));
+  const [question, setQuestion] = useState(() => getRandomQuestion(new Set(), optionCount, locale));
   const [gameState, setGameState] = useState<GameState>("playing");
   const [selected, setSelected] = useState<string | null>(null);
   const submittedRef = useRef(false);
@@ -151,7 +152,7 @@ function WordMeaningPage() {
     if (timer.isExpired) { endGame(); return; }
     timer.start();
     const nextUsed = gameState === "correct" ? new Set([...usedIndices, question.idx]) : usedIndices;
-    setQuestion(getRandomQuestion(nextUsed, optionCount));
+    setQuestion(getRandomQuestion(nextUsed, optionCount, locale));
     setGameState("playing");
     setSelected(null);
     setLastDelta(null);
@@ -166,7 +167,7 @@ function WordMeaningPage() {
     setLastDelta(null); setIsNewHighScore(false); setNewAchievements([]);
     submittedRef.current = false; sessionStart.current = Date.now();
     questionStart.current = Date.now(); timerStartedRef.current = false;
-    setQuestion(getRandomQuestion(fresh, optionCount));
+    setQuestion(getRandomQuestion(fresh, optionCount, locale));
     setGameState("playing"); setSelected(null); setScreen("game");
     timer.reset();
   };

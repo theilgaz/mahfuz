@@ -8,7 +8,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
-import { WORD_PAIRS } from "~/lib/word-pairs";
+import { WORD_PAIRS, getLocalizedPair } from "~/lib/word-pairs";
 import { useTranslation } from "~/hooks/useTranslation";
 import { submitScore } from "~/lib/score-service";
 
@@ -260,6 +260,7 @@ function StatCell({ value, label }: { value: number; label: string }) {
 }
 
 function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBack: () => void }) {
+  const { locale } = useTranslation();
   const day = getDayNumber();
 
   // Pick word
@@ -269,6 +270,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
   }, [mode, day]);
 
   const pair = WORD_PAIRS[wordIndex];
+  const localizedMeaning = getLocalizedPair(pair, locale).meaning;
   const targetLetters = useMemo(() => getLetters(pair.arabic), [pair.arabic]);
   const letterCount = targetLetters.length;
 
@@ -444,7 +446,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
           </span>
         )}
         <span className="text-xs text-[var(--color-text-secondary)]">{t.kelimeTahmini.hint} </span>
-        <span className="text-sm font-bold text-[var(--color-text-primary)]">{pair.meaning}</span>
+        <span className="text-sm font-bold text-[var(--color-text-primary)]">{localizedMeaning}</span>
         <span className="text-xs text-[var(--color-text-secondary)] ml-2">({letterCount} harf)</span>
       </div>
 
@@ -534,7 +536,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
           )}
 
           <p className="text-xs text-[var(--color-text-secondary)] mb-3">
-            {pair.meaning}
+            {localizedMeaning}
           </p>
 
           <div className="flex gap-2 justify-center">
