@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import { getTranslationSources, getTranslationsForVerse } from "~/lib/quran-service";
 import { getAcikKuranTranslations, ACIK_KURAN_AUTHORS } from "~/lib/analyse-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 // Desteklenen mealciler (slug → görünen ad)
 const SUPPORTED_TRANSLATORS: Record<string, { name: string; author: string; lang: string; era?: string }> = {
@@ -66,6 +67,7 @@ function useVerseTranslations(surahId: number, ayahNumber: number, slugs: string
 }
 
 export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, inline = false }: Props) {
+  const { t } = useTranslation();
   const { data: allSources } = useAvailableTranslators();
 
   // Available slugs that are both in DB and in our supported list, sorted by preferred order
@@ -116,8 +118,8 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
     );
   }
 
-  const filteredAcikKuran = (acikKuranData ?? []).filter((t) =>
-    selectedAcikKuranIds.includes(t.authorId)
+  const filteredAcikKuran = (acikKuranData ?? []).filter((item) =>
+    selectedAcikKuranIds.includes(item.authorId)
   );
 
   const content = (
@@ -133,7 +135,7 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
           {/* Mealci seçici (max 4) */}
           {availableSlugs.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-xs text-[var(--color-text-secondary)] font-medium">Mealciler (en fazla 4)</p>
+              <p className="text-xs text-[var(--color-text-secondary)] font-medium">{t.mealComparison.translatorsMax4}</p>
               <div className="flex flex-wrap gap-2">
                 {availableSlugs.map((slug) => {
                   const info = SUPPORTED_TRANSLATORS[slug];
@@ -198,7 +200,7 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
               })}
               {(translations ?? []).length === 0 && selectedSlugs.length > 0 && (
                 <p className="text-sm text-[var(--color-text-secondary)] text-center py-4">
-                  Seçili mealciler veritabanında bulunamadı.
+                  {t.mealComparison.notFoundInDb}
                 </p>
               )}
             </div>
@@ -207,9 +209,9 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
           {/* Farklı Yorumlar seçici */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <p className="text-xs text-[var(--color-text-secondary)] font-medium">Farklı Yorumlar</p>
+              <p className="text-xs text-[var(--color-text-secondary)] font-medium">{t.mealComparison.alternativeViews}</p>
               <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-semibold border border-[var(--color-accent)]/20">
-                Alternatif
+                {t.mealComparison.alternative}
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -249,32 +251,32 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredAcikKuran.map((t) => (
+              {filteredAcikKuran.map((ak) => (
                 <div
-                  key={t.authorId}
+                  key={ak.authorId}
                   className="rounded border border-[var(--color-accent)]/15 bg-[var(--color-accent)]/5 p-3 space-y-1.5"
                 >
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-accent)]/15 text-[var(--color-accent)]">
-                      {t.tag}
+                      {ak.tag}
                     </span>
                     <span className="text-xs font-semibold text-[var(--color-text-primary)]">
-                      {t.authorName}
+                      {ak.authorName}
                     </span>
                     <span className="text-[10px] text-[var(--color-text-secondary)]">
-                      {t.description}
+                      {ak.description}
                     </span>
                   </div>
                   <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
-                    {t.text}
+                    {ak.text}
                   </p>
-                  {t.footnotes && t.footnotes.length > 0 && (
+                  {ak.footnotes && ak.footnotes.length > 0 && (
                     <details className="mt-0.5">
                       <summary className="text-[10px] text-[var(--color-accent)] cursor-pointer select-none">
-                        {t.footnotes.length} dipnot
+                        {ak.footnotes.length} {t.mealComparison.footnote}
                       </summary>
                       <div className="mt-1.5 space-y-1">
-                        {t.footnotes.map((fn) => (
+                        {ak.footnotes.map((fn) => (
                           <p key={fn.id} className="text-[10px] text-[var(--color-text-secondary)] leading-relaxed pl-2 border-l border-[var(--color-border)]">
                             {fn.text}
                           </p>
@@ -286,7 +288,7 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
               ))}
               {filteredAcikKuran.length === 0 && selectedAcikKuranIds.length > 0 && !acikKuranLoading && (
                 <p className="text-sm text-[var(--color-text-secondary)] text-center py-2">
-                  Veri yüklenemedi.
+                  {t.mealComparison.dataLoadFailed}
                 </p>
               )}
             </div>
@@ -311,7 +313,7 @@ export function MealComparisonSheet({ surahId, ayahNumber, ayahText, onClose, in
             <path d="M13 4L7 10L13 16" />
           </svg>
         </button>
-        <h2 className="text-sm font-semibold text-[var(--color-text-primary)] ml-1">Meal Karşılaştır</h2>
+        <h2 className="text-sm font-semibold text-[var(--color-text-primary)] ml-1">{t.mealComparison.title}</h2>
       </div>
 
       {content}
