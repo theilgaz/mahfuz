@@ -45,7 +45,6 @@ interface SurahListProps {
 }
 
 export function SurahList({ surahs }: SurahListProps) {
-  const readingMode = useSettingsStore((s) => s.readingMode);
   const surahListFilter = useSettingsStore((s) => s.surahListFilter);
   const setSurahListFilter = useSettingsStore((s) => s.setSurahListFilter);
   const lastSurahId = useReadingStore((s) => s.lastPosition?.surahId ?? null);
@@ -109,13 +108,11 @@ export function SurahList({ surahs }: SurahListProps) {
   ];
 
   const linkProps = useCallback((surah: Surah) => ({
-    to: (readingMode === "mushaf" ? "/page/$pageNumber" : "/surah/$surahSlug") as any,
-    params: readingMode === "mushaf"
-      ? { pageNumber: String(surah.pageStart) }
-      : { surahSlug: surahSlug(surah.id) },
+    to: "/surah/$surahSlug" as const,
+    params: { surahSlug: surahSlug(surah.id) },
     search: { ayah: undefined },
     preload: "intent" as const,
-  }), [readingMode]);
+  }), []);
 
   const displayNumber = useCallback((surah: Surah) =>
     surahListFilter === "nuzul" ? surah.revelationOrder : surah.id
@@ -285,8 +282,8 @@ export function SurahList({ surahs }: SurahListProps) {
                   return (
                     <div key={surahId} className="flex items-center hover:bg-[var(--color-surface)] transition-colors">
                       <Link
-                        to={readingMode === "mushaf" ? "/page/$pageNumber" : "/surah/$surahSlug"}
-                        params={readingMode === "mushaf" ? { pageNumber: String(surah.pageStart) } : { surahSlug: surahSlug(surah.id) }}
+                        to="/surah/$surahSlug"
+                        params={{ surahSlug: surahSlug(surah.id) }}
                         search={{ ayah: undefined }}
                         onClick={() => setJuzOpen(false)}
                         className="flex items-center gap-2 flex-1 px-3 py-2 text-left"

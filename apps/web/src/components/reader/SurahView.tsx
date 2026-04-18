@@ -35,6 +35,7 @@ interface SurahViewProps {
 export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const showTranslation = useSettingsStore((s) => s.showTranslation);
   const readingMode = useSettingsStore((s) => s.readingMode);
+  const setReadingMode = useSettingsStore((s) => s.setReadingMode);
   const showTajweed = useSettingsStore((s) => s.showTajweed);
   const translationSlugs = useSettingsStore(useShallow((s) => s.translationSlugs));
   const textStyle = useSettingsStore((s) => s.textStyle);
@@ -248,8 +249,34 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
               </span>
             </div>
 
-            {/* Right: bookmark + share */}
-            <div style={{ display: "flex", gap: 4 }}>
+            {/* Right: reading mode + bookmark + share */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {/* Reading mode segmented control */}
+              <div className="mu-mode-seg">
+                <button
+                  className={`mu-mode-seg-btn${readingMode === "verse" ? " on" : ""}`}
+                  onClick={() => setReadingMode("verse")}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="16" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </svg>
+                  {t.settings.modeVerse}
+                </button>
+                <button
+                  className={`mu-mode-seg-btn${readingMode === "wbw" ? " on" : ""}`}
+                  onClick={() => setReadingMode("wbw")}
+                >
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="11" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="2" y="12" width="7" height="5" rx="1.5" />
+                    <rect x="11" y="12" width="7" height="5" rx="1.5" />
+                  </svg>
+                  {t.settings.modeWbw}
+                </button>
+              </div>
               <button className="mu-icon-btn sm" aria-label={t.reader.bookmark} style={{ color: "var(--mu-ink-3)" }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M7 4h10v17l-5-3.5L7 21z" />

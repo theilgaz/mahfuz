@@ -134,9 +134,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
   const handleModeChange = (mode: ReadingMode) => {
     store.setReadingMode(mode);
     const isOnPage = currentPath.startsWith("/page/");
-    const isOnSurah = currentPath.startsWith("/surah/");
-    if (mode !== "mushaf" && isOnPage) {
-      // Derive surahId from the current page number
+    if (isOnPage) {
       const pageNum = parseInt(currentPath.replace("/page/", ""), 10) || 1;
       const sid = surahs.reduce<number>((best, s) => {
         if (s.pageStart <= pageNum && s.pageStart > (surahs.find(x => x.id === best)?.pageStart ?? 0)) return s.id;
@@ -144,9 +142,6 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
       }, 1);
       onClose();
       navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(sid) }, search: { ayah: undefined } });
-    } else if (mode === "mushaf" && isOnSurah) {
-      onClose();
-      navigate({ to: "/page/$pageNumber", params: { pageNumber: String(context?.pageNumber || 1) }, search: { ayah: undefined } });
     }
   };
 
@@ -367,24 +362,28 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
 
       <Divider />
 
-      {/* ── Okuma Modu -- 3 secenek ── */}
+      {/* ── Okuma Modu ── */}
       <div>
         <Label>{t.settings.readingMode}</Label>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 4 }}>
+        <div className="mu-rmode-group">
           {([
-            { value: "mushaf" as ReadingMode, label: t.settings.modeMushaf, icon: MushafIcon },
-            { value: "verse" as ReadingMode, label: t.settings.modeVerse, icon: VerseIcon },
-            { value: "wbw" as ReadingMode, label: t.settings.modeWbw, icon: WbwIcon },
-          ] as const).map(({ value, label, icon: Icon }) => {
+            { value: "verse" as ReadingMode, label: t.settings.modeVerse, icon: VerseIcon, desc: t.settings.verseList },
+            { value: "wbw" as ReadingMode, label: t.settings.modeWbw, icon: WbwIcon, desc: t.settings.wordByWord },
+          ] as const).map(({ value, label, icon: Icon, desc }) => {
             const active = store.readingMode === value;
             return (
               <button
                 key={value}
                 onClick={() => onModeChange(value)}
-                className={`mu-settings-mode-btn ${active ? "on" : ""}`}
+                className={`mu-rmode-btn${active ? " on" : ""}`}
               >
-                <Icon size={18} active={active} />
-                <span>{label}</span>
+                <span className="mu-rmode-icon">
+                  <Icon size={20} active={active} />
+                </span>
+                <span className="mu-rmode-text">
+                  <span className="mu-rmode-label">{label}</span>
+                  <span className="mu-rmode-desc">{desc}</span>
+                </span>
               </button>
             );
           })}

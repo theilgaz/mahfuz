@@ -5,7 +5,7 @@ import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 export type Theme = "light" | "sepia" | "dark";
 export type TextStyle = "uthmani" | "basic";
 export type WbwDisplay = "off" | "hover" | "on"; // geriye uyumluluk
-export type ReadingMode = "mushaf" | "verse" | "wbw";
+export type ReadingMode = "verse" | "wbw";
 export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
 export type MushafSizeMode = "standard" | "fill";
@@ -134,7 +134,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       showTranslit: false,
       showTajweed: false,
       textStyle: "uthmani" as TextStyle,
-      readingMode: "mushaf" as ReadingMode,
+      readingMode: "verse" as ReadingMode,
       surahListFilter: "all" as SurahListFilter,
       reciterSlug: "mishary-rashid-alafasy",
       arabicFontSize: 1.8,
@@ -200,7 +200,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           showTranslit: false,
           showTajweed: false,
           textStyle: "uthmani",
-          readingMode: "mushaf",
+          readingMode: "verse",
           surahListFilter: "all",
           reciterSlug: "mishary-rashid-alafasy",
           arabicFontSize: 1.8,
@@ -214,7 +214,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     }),
     {
       name: "mahfuz-core-settings",
-      version: 4,
+      version: 5,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
@@ -229,7 +229,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         if (version < 2) {
           const wasPage = persisted.readingMode === "page" || !persisted.readingMode;
           const hadWbw = persisted.showWbw === true;
-          persisted.readingMode = wasPage ? "mushaf" : hadWbw ? "wbw" : "verse";
+          persisted.readingMode = hadWbw ? "wbw" : "verse";
           persisted.showTranslit = persisted.wbwTranslit === "on";
           delete persisted.showWbw;
           delete persisted.wbwTranslation;
@@ -249,6 +249,10 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           if (theme === "night" || theme === "tezhip") persisted.theme = "dark";
           else if (theme === "quran") persisted.theme = "sepia";
           else persisted.theme = "light";
+        }
+        if (version < 5) {
+          // v4 -> v5: mushaf mode removed
+          if (persisted.readingMode === "mushaf") persisted.readingMode = "verse";
         }
         return persisted as any;
       },

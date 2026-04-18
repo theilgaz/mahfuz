@@ -895,6 +895,46 @@
   cursor: default;
 }
 
+.mu-mode-seg {
+  display: inline-flex;
+  border: 1px solid var(--mu-line-2, var(--mu-line));
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mu-mode-seg-btn {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: var(--mu-ff-ui);
+  font-weight: 500;
+  color: var(--mu-muted);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mu-mode-seg-btn:not(:last-child) {
+  border-right: 1px solid var(--mu-line-2, var(--mu-line));
+}
+
+.mu-mode-seg-btn:hover {
+  color: var(--mu-ink-3);
+  background: var(--mu-bg-soft, rgba(0,0,0,0.03));
+}
+
+.mu-mode-seg-btn.on {
+  color: var(--mu-accent);
+  background: var(--mu-accent-soft, rgba(0,0,0,0.04));
+}
+
+.mu-mode-seg-btn svg {
+  flex-shrink: 0;
+}
+
 @keyframes mu-spin {
   to { transform: rotate(360deg); }
 }
@@ -2535,6 +2575,79 @@
   border-color: var(--mu-accent);
   background: var(--mu-accent-soft);
   color: var(--mu-accent-ink);
+}
+
+/* Reading mode selector */
+.mu-rmode-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.mu-rmode-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--mu-line);
+  font-family: var(--mu-ff-ui);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.mu-rmode-btn:hover {
+  border-color: color-mix(in oklab, var(--mu-accent), transparent 50%);
+}
+
+.mu-rmode-btn.on {
+  border-color: var(--mu-accent);
+  background: var(--mu-accent-soft);
+}
+
+.mu-rmode-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--mu-bg-soft);
+  color: var(--mu-muted);
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mu-rmode-btn.on .mu-rmode-icon {
+  background: color-mix(in oklab, var(--mu-accent), transparent 80%);
+  color: var(--mu-accent-ink);
+}
+
+.mu-rmode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.mu-rmode-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mu-ink);
+  line-height: 1.2;
+}
+
+.mu-rmode-btn.on .mu-rmode-label {
+  color: var(--mu-accent-ink);
+}
+
+.mu-rmode-desc {
+  font-size: 11px;
+  color: var(--mu-muted);
+  line-height: 1.2;
 }
 
 .mu-settings-theme-btn {

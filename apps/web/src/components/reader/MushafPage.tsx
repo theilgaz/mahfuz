@@ -417,9 +417,7 @@ function MushafVerse({ surahId, ayahNumber, textUthmani, textTajweed, translatio
                   className={`inline rounded-sm px-[0.06em] transition-colors duration-150 cursor-default ${
                     isActive
                       ? "word-audio-active"
-                      : wc
-                        ? "hover:bg-[var(--color-word-hover)]"
-                        : "hover:bg-[var(--color-word-hover)] hover:text-[var(--color-word-hover-text)]"
+                      : "hover:text-[var(--color-word-hover-text)]"
                   }`}
                   style={wc ? { color: wc } : undefined}
                 >

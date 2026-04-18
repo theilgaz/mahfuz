@@ -28,7 +28,6 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   const { t } = useTranslation();
   const translationSlugs = useSettingsStore((s) => s.translationSlugs);
   const translationSlug = translationSlugs[0];
-  const readingMode = useSettingsStore((s) => s.readingMode);
 
   // Focus input on open
   useEffect(() => {
@@ -64,22 +63,14 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
   const openResult = useCallback(
     (r: SearchResult) => {
-      if (readingMode !== "mushaf") {
-        navigate({
-          to: "/surah/$surahSlug",
-          params: { surahSlug: surahSlug(r.surahId) },
-          search: { ayah: r.ayahNumber },
-        });
-      } else {
-        navigate({
-          to: "/page/$pageNumber",
-          params: { pageNumber: String(r.pageNumber) },
-          search: { ayah: `${r.surahId}:${r.ayahNumber}` },
-        });
-      }
+      navigate({
+        to: "/surah/$surahSlug",
+        params: { surahSlug: surahSlug(r.surahId) },
+        search: { ayah: r.ayahNumber },
+      });
       onClose();
     },
-    [readingMode, navigate, onClose],
+    [navigate, onClose],
   );
 
   if (!open) return null;

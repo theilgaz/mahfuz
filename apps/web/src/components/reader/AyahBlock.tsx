@@ -214,7 +214,7 @@ export const AyahBlock = memo(function AyahBlock({
               className={`group/wbw flex flex-col items-center min-w-[3rem] rounded-lg px-1.5 py-1 transition-colors duration-150 cursor-default ${
                 wordPosition === w.position
                   ? "word-audio-active"
-                  : "hover:bg-[var(--color-word-hover)]"
+                  : "hover:text-[var(--color-word-hover-text)]"
               }`}
             >
               <span
@@ -271,9 +271,7 @@ export const AyahBlock = memo(function AyahBlock({
                         ? "word-audio-active"
                         : isTooltipOpen
                           ? "bg-[var(--color-accent)]/15 text-[var(--color-text-primary)]"
-                          : wc
-                            ? "hover:bg-[var(--color-word-hover)]"
-                            : "hover:bg-[var(--color-word-hover)] hover:text-[var(--color-word-hover-text)]"
+                          : "hover:text-[var(--color-word-hover-text)]"
                     }`}
                     style={wc && !isTooltipOpen ? { color: wc } : undefined}
                     onClick={wbwWord ? (e) => {

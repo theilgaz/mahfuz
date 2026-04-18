@@ -139,7 +139,7 @@ export function MushafLineView({ lineData, arabicFontSize, onVerseEndClick, vers
                     className={
                       word.c === "p"
                         ? "mushaf-pause-marker text-[var(--color-text-secondary)] text-[0.7em] self-center select-none whitespace-nowrap"
-                        : "mushaf-word transition-colors duration-150 cursor-default rounded-sm px-[0.04em] hover:bg-[var(--color-word-hover)] hover:text-[var(--color-word-hover-text)] whitespace-nowrap"
+                        : "mushaf-word transition-colors duration-150 cursor-default rounded-sm px-[0.04em] hover:text-[var(--color-word-hover-text)] whitespace-nowrap"
                     }
                     style={wordColors && isWord ? { color: wordColors[colorIdx % wordColors.length] } : undefined}
                   >

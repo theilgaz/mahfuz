@@ -112,7 +112,6 @@ function SearchPage() {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const translationSlugs = useSettingsStore((s) => s.translationSlugs);
   const translationSlug = translationSlugs[0];
-  const readingMode = useSettingsStore((s) => s.readingMode);
   const navigate = useNavigate();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -216,7 +215,7 @@ function SearchPage() {
       </div>
 
       {results && results.length > 0 && (
-        <GroupedResults results={results as SearchResult[]} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />
+        <GroupedResults results={results as SearchResult[]} locale={locale} t={t} navigate={navigate} />
       )}
     </div>
   );
@@ -224,9 +223,8 @@ function SearchPage() {
 
 // ── Gruplandirmis sonuclar ──────────────────────────────
 
-function GroupedResults({ results, readingMode, locale, t, navigate }: {
+function GroupedResults({ results, locale, t, navigate }: {
   results: SearchResult[];
-  readingMode: string;
   locale: string;
   t: any;
   navigate: any;
@@ -254,7 +252,7 @@ function GroupedResults({ results, readingMode, locale, t, navigate }: {
           <ul className="list-none p-0">
             {group.items.map((r) => (
               <li key={`${r.surahId}:${r.ayahNumber}`}>
-                <ResultCard r={r} readingMode={readingMode} locale={locale} t={t} navigate={navigate} />
+                <ResultCard r={r} locale={locale} t={t} navigate={navigate} />
               </li>
             ))}
           </ul>
@@ -264,17 +262,13 @@ function GroupedResults({ results, readingMode, locale, t, navigate }: {
   );
 }
 
-function ResultCard({ r, readingMode, locale, t, navigate }: {
-  r: SearchResult; readingMode: string; locale: string; t: any; navigate: any;
+function ResultCard({ r, locale, t, navigate }: {
+  r: SearchResult; locale: string; t: any; navigate: any;
 }) {
   return (
     <button
       onClick={() => {
-        if (readingMode !== "mushaf") {
-          navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(r.surahId) }, search: { ayah: r.ayahNumber } });
-        } else {
-          navigate({ to: "/page/$pageNumber", params: { pageNumber: String(r.pageNumber) }, search: { ayah: `${r.surahId}:${r.ayahNumber}` } });
-        }
+        navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(r.surahId) }, search: { ayah: r.ayahNumber } });
       }}
       className="block w-full text-left py-3 px-1 border-b border-[var(--color-border)] hover:bg-[var(--color-surface)] active:scale-[0.99] transition-all"
     >

@@ -4,7 +4,6 @@
 
 import { Link } from "@tanstack/react-router";
 import { useReadingStore } from "~/stores/reading.store";
-import { useSettingsStore } from "~/stores/settings.store";
 import { useSurahs } from "~/hooks/useQuranQuery";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
@@ -15,7 +14,6 @@ import { MuIcons } from "./icons";
 export function HomeHero() {
   const { t, locale } = useTranslation();
   const lastPosition = useReadingStore((s) => s.lastPosition);
-  const readingMode = useSettingsStore((s) => s.readingMode);
   const { data: surahs } = useSurahs();
 
   const lastSurah = lastPosition
@@ -23,9 +21,7 @@ export function HomeHero() {
     : null;
 
   const continueLink = lastPosition && lastSurah
-    ? readingMode === "mushaf"
-      ? { to: "/page/$pageNumber" as const, params: { pageNumber: String(lastSurah.pageStart) } }
-      : { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(lastSurah.id) }, search: { ayah: lastPosition.ayahNumber } }
+    ? { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(lastSurah.id) }, search: { ayah: lastPosition.ayahNumber } }
     : null;
 
   return (
@@ -76,7 +72,6 @@ export function HomeHero() {
 function ReadingCard() {
   const { t, locale } = useTranslation();
   const lastPosition = useReadingStore((s) => s.lastPosition);
-  const readingMode = useSettingsStore((s) => s.readingMode);
   const { data: surahs } = useSurahs();
 
   const surah = lastPosition
@@ -89,9 +84,7 @@ function ReadingCard() {
     ? Math.round((lastPosition.ayahNumber / surah.ayahCount) * 100)
     : 0;
 
-  const linkProps = readingMode === "mushaf"
-    ? { to: "/page/$pageNumber" as const, params: { pageNumber: String(surah.pageStart) } }
-    : { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(surah.id) } };
+  const linkProps = { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(surah.id) } };
 
   return (
     <div className="mu-readcard">

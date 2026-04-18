@@ -7,7 +7,6 @@
 
 import { Link } from "@tanstack/react-router";
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useSettingsStore } from "~/stores/settings.store";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { surahSlug } from "~/lib/surah-slugs";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -35,7 +34,6 @@ export function BookmarkRow({
   showDivider = true,
 }: BookmarkRowProps) {
   const { t } = useTranslation();
-  const readingMode = useSettingsStore((s) => s.readingMode);
   const removeBookmark = useBookmarksStore((s) => s.removeBookmark);
 
   // "idle" | "dragging" | "revealed" | "deleting"
@@ -126,9 +124,7 @@ export function BookmarkRow({
 
   // ── Link destination ─────────────────────────────────────
 
-  const linkTo = readingMode !== "mushaf"
-    ? { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(surahId) }, search: { ayah: ayahNumber } }
-    : { to: "/page/$pageNumber" as const, params: { pageNumber: String(pageNumber) }, search: { ayah: undefined } };
+  const linkTo = { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(surahId) }, search: { ayah: ayahNumber } };
 
   const currentOffset = phase === "revealed" ? -DELETE_ZONE_WIDTH
     : phase === "dragging" ? dragX

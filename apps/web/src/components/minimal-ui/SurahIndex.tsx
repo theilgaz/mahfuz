@@ -4,7 +4,6 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { Link } from "@tanstack/react-router";
-import { useSettingsStore } from "~/stores/settings.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
 import { surahSlug } from "~/lib/surah-slugs";
@@ -35,7 +34,6 @@ interface SurahIndexProps {
 
 export function SurahIndex({ surahs }: SurahIndexProps) {
   const { t, locale } = useTranslation();
-  const readingMode = useSettingsStore((s) => s.readingMode);
   const [tab, setTab] = useState("all");
   const [q, setQ] = useState("");
   const [alphaFilter, setAlphaFilter] = useState<string | null>(null);
@@ -172,13 +170,7 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
 
       <ul className="mu-slist">
         {filtered.map((surah) => {
-          const linkProps =
-            readingMode === "mushaf"
-              ? {
-                  to: "/page/$pageNumber" as const,
-                  params: { pageNumber: String(surah.pageStart) },
-                }
-              : {
+          const linkProps = {
                   to: "/surah/$surahSlug" as const,
                   params: { surahSlug: surahSlug(surah.id) },
                 };
