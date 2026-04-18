@@ -190,10 +190,10 @@ export const AyahBlock = memo(function AyahBlock({
     <div
       ref={blockRef}
       data-longpress={longPressActive || menuOpen ? "true" : undefined}
-      className={`group py-3 border-b border-[var(--color-border)] last:border-b-0 relative transition-all duration-300 rounded-lg ${
+      className={`relative transition-all duration-300 ${
         longPressActive || menuOpen
-          ? "bg-[var(--color-accent)]/10 scale-[0.98] shadow-sm ring-1 ring-[var(--color-accent)]/20"
-          : flash ? "bg-[var(--color-accent)]/10" : isPlaying ? "bg-[var(--color-accent)]/6" : ""
+          ? "bg-[var(--mu-accent-soft)]/50"
+          : flash ? "bg-[var(--mu-accent-soft)]/50" : isPlaying ? "bg-[var(--mu-accent-soft)]/30" : ""
       }`}
       tabIndex={surahId ? 0 : undefined}
       role={surahId ? "button" : undefined}
@@ -204,39 +204,7 @@ export const AyahBlock = memo(function AyahBlock({
       onTouchEnd={cancelLongPress}
       onTouchMove={cancelLongPress}
     >
-      {/* Ayet numarası — büyük silik watermark */}
-      <span
-        className="absolute top-1 right-2 select-none pointer-events-none font-bold text-[var(--color-text-secondary)]"
-        style={{ fontSize: "3.5rem", lineHeight: 1, opacity: 0.07, fontFamily: "var(--font-ui)" }}
-        aria-hidden="true"
-      >
-        {ayahNumber}
-      </span>
-
-      {/* Yer imi butonu — hover'da görünür */}
-      {surahId && (
-        <button
-          onClick={() =>
-            toggleBookmark({
-              surahId,
-              ayahNumber,
-              pageNumber: pageNumber ?? 1,
-            })
-          }
-          className={`absolute top-2 left-1 p-1 rounded transition-opacity ${
-            isBookmarked
-              ? "opacity-100 text-[var(--color-accent)]"
-              : "opacity-0 group-hover:opacity-60 text-[var(--color-text-secondary)]"
-          }`}
-          aria-label={isBookmarked ? t.reader.removeBookmark : t.reader.bookmark}
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
-            <path d="M4 2h8a1 1 0 011 1v11.5l-4.5-3-4.5 3V3a1 1 0 011-1z" />
-          </svg>
-        </button>
-      )}
-
-      {/* Arapça metin — WBW / tecvid / normal */}
+      {/* Arapca metin -- WBW / tecvid / normal */}
       {isWbwLayout ? (
         /* Kelime kelime mod — kartlar */
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-3 py-2" dir="rtl">
@@ -284,8 +252,8 @@ export const AyahBlock = memo(function AyahBlock({
           </div>
         </div>
       ) : (
-        /* Normal metin — verse modunda kelimeye tıklayınca WordTooltip */
-        <div className="leading-[2.8] relative" dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: `${arabicFontSize}rem`, textAlign: "justify" }}>
+        /* Normal metin -- verse modunda kelimeye tiklayinca WordTooltip */
+        <div className="mu-v-ar relative" style={{ fontSize: `${arabicFontSize}rem` }}>
           {showTajweed && textTajweed && !colorizeWords
             ? parseTajweed(textTajweed, true)
             : splitWords(textUthmani).map((word, i) => {
@@ -331,23 +299,21 @@ export const AyahBlock = memo(function AyahBlock({
         />
       )}
 
-      {/* Meal — çoklu veya tekli */}
+      {/* Meal -- coklu veya tekli */}
       {showTranslation && translations && multiMode ? (
-        <div className="mt-2 space-y-1.5">
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {translationSlugs.map((slug) => {
             const text = translations[slug];
             if (!text) return null;
             return (
               <div key={slug}>
                 <span
-                  className="inline-block text-[0.6rem] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-0.5"
+                  className="mu-chap-eyebrow"
+                  style={{ margin: 0, fontSize: 10, display: "inline-block", marginBottom: 2 }}
                 >
                   {translationNames?.[slug] ?? slug}
                 </span>
-                <p
-                  className="text-[var(--color-text-translation)] leading-[1.7]"
-                  style={{ fontSize: `${translationFontSize}rem` }}
-                >
+                <p className="mu-v-tr" style={{ fontSize: `${translationFontSize}rem` }}>
                   {text}
                 </p>
               </div>
@@ -355,11 +321,7 @@ export const AyahBlock = memo(function AyahBlock({
           })}
         </div>
       ) : showTranslation && translation ? (
-        <p
-          className="mt-2 text-[var(--color-text-translation)] leading-[1.7]"
-          style={{ fontSize: `${translationFontSize}rem` }}
-        >
-          <span className="text-[var(--color-text-secondary)] text-xs mr-1">{ayahNumber}.</span>
+        <p className="mu-v-tr" style={{ fontSize: `${translationFontSize}rem` }}>
           {translation}
         </p>
       ) : null}

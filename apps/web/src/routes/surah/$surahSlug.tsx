@@ -8,7 +8,6 @@ import { SurahView } from "~/components/reader/SurahView";
 
 import { surahDataQueryOptions } from "~/hooks/useQuranQuery";
 import { ScrollToTop } from "~/components/ScrollToTop";
-import { FontSizeControl } from "~/components/reader/FontSizeControl";
 import { surahIdFromSlug, surahSlug } from "~/lib/surah-slugs";
 import { RouteErrorFallback } from "~/components/RouteErrorFallback";
 
@@ -45,9 +44,8 @@ function SurahRoute() {
   const id = surahIdFromSlug(slug)!;
 
   return (
-    <div className="min-h-screen relative pb-20">
+    <div className="min-h-screen relative">
       <SurahView surahId={id} highlightAyah={ayah} />
-      <FontSizeControl />
       <ScrollToTop />
     </div>
   );

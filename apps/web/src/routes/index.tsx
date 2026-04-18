@@ -2,18 +2,10 @@
  * Ana sayfa — devam et, alışkanlık, yer imleri, sure listesi.
  */
 
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSettingsStore } from "~/stores/settings.store";
-import { useBookmarksStore } from "~/stores/bookmarks.store";
+import { createFileRoute } from "@tanstack/react-router";
 import { useSurahs, surahsQueryOptions, dailyVerseQueryOptions } from "~/hooks/useQuranQuery";
-import { SurahList } from "~/components/SurahList";
-import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
-import { DailyVerseCard } from "~/components/DailyVerseCard";
-import { SettingsButton } from "~/components/SettingsButton";
-import { useTranslation } from "~/hooks/useTranslation";
-import { surahSlug } from "~/lib/surah-slugs";
-import { getSurahName } from "~/lib/surah-names-i18n";
-import { useShallow } from "zustand/react/shallow";
+import { HomeHero } from "~/components/minimal-ui/HomeHero";
+import { SurahIndex } from "~/components/minimal-ui/SurahIndex";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) => Promise.all([
@@ -58,65 +50,12 @@ function HomePageSkeleton() {
 }
 
 function HomePage() {
-  const { session } = Route.useRouteContext();
-  const { t, locale } = useTranslation();
-  const { readingMode } = useSettingsStore(
-    useShallow((s) => ({ readingMode: s.readingMode }))
-  );
-  const bookmarks = useBookmarksStore((s) => s.bookmarks);
   const { data: surahs } = useSurahs();
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
-      <DailyVerseCard />
-
-
-{/* Yer imleri */}
-      {bookmarks.length > 0 && (() => {
-        const surahMap = new Map(surahs.map((s) => [s.id, s]));
-        const visible = bookmarks.slice(0, 8);
-        const remaining = bookmarks.length - visible.length;
-        return (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[var(--color-text-secondary)]">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
-                  <path d="M4 2h8a1 1 0 011 1v11.5l-4.5-3-4.5 3V3a1 1 0 011-1z" />
-                </svg>
-              </span>
-              {visible.map((bm) => {
-                const surah = surahMap.get(bm.surahId);
-                const name = getSurahName(bm.surahId, locale) || String(bm.surahId);
-                const label = `${name} ${bm.ayahNumber}`;
-                const linkProps = readingMode !== "mushaf"
-                  ? { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(bm.surahId) }, search: { ayah: bm.ayahNumber } }
-                  : { to: "/page/$pageNumber" as const, params: { pageNumber: String(bm.pageNumber) }, search: { ayah: undefined } };
-                return (
-                  <Link
-                    key={`${bm.surahId}:${bm.ayahNumber}`}
-                    {...linkProps}
-                    className="px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] text-xs transition-colors"
-                  >
-                    {label}
-                  </Link>
-                );
-              })}
-              {remaining > 0 && (
-                <Link
-                  to="/bookmarks"
-                  className="px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] text-xs text-[var(--color-text-secondary)] transition-colors"
-                >
-                  +{remaining}
-                </Link>
-              )}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Sure listesi + yüzen cüz butonu */}
-      <SurahList surahs={surahs} />
-
+    <div className="mu-home">
+      <HomeHero />
+      <SurahIndex surahs={surahs} />
     </div>
   );
 }

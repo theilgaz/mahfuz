@@ -9,10 +9,17 @@ import { useSettingsStore } from "~/stores/settings.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
 import { getAllLocaleConfigs, loadLocaleMessages, type Locale } from "~/locales/registry";
+import { DiscoverPage } from "~/components/minimal-ui/DiscoverPage";
 
 export const Route = createFileRoute("/discover")({
-  component: HubPage,
+  component: DiscoverWrapper,
 });
+
+function DiscoverWrapper() {
+  return <DiscoverPage />;
+}
+
+// Legacy HubPage kept below for reference
 
 interface HubCardProps {
   to: string;

@@ -10,10 +10,13 @@ import type { FormPosition } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore, computeAlifbaStats } from "~/stores/alifba.store";
 import { useShallow } from "zustand/react/shallow";
+import { AlifbaPage } from "~/components/minimal-ui/AlifbaPage";
 
 export const Route = createFileRoute("/alifba/")({
-  component: AlifbaIndexPage,
+  component: () => <AlifbaPage />,
 });
+
+// Legacy AlifbaIndexPage kept below for reference
 
 const FORM_COL_KEYS: { key: FormPosition; labelKey: "final" | "medial" | "initial" | "isolated"; formFn: (f: ReturnType<typeof getLetterForms>) => string }[] = [
   { key: "final",    labelKey: "final",    formFn: (f) => f.final    },

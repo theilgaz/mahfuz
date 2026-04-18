@@ -3,6 +3,7 @@
  */
 
 import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { GamesPageMinimal } from "~/components/minimal-ui/GamesPage";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSurahSelectionStore } from "~/stores/surahSelection.store";
@@ -21,7 +22,7 @@ import {
 import { ACHIEVEMENT_DEFS } from "~/lib/game-achievements";
 
 export const Route = createFileRoute("/games/")({
-  component: GamesPage,
+  component: GamesPageMinimal,
 });
 
 interface Game {
