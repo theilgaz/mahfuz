@@ -173,28 +173,27 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
   return (
     <>
-      {/* Top bar */}
-      <div className="mu-reader-topbar">
-        <Link to="/" className="mu-btn ghost small">
-          {MuIcons.back}
-          {t.reader.index}
-        </Link>
-        <span className="mu-chap-eyebrow" style={{ margin: 0 }}>
-          Sure {surahId} · {activeAyah} / {surah.ayahCount}
-        </span>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className="mu-v-act-btn" aria-label={t.reader.bookmark}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 4h10v17l-5-3.5L7 21z" />
-            </svg>
-          </button>
-          <button className="mu-v-act-btn" aria-label="Share">
-            {MuIcons.share}
-          </button>
-        </div>
-      </div>
-
       <div className="mu-reader" style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
+        {/* Top bar */}
+        <div className="mu-reader-topbar">
+          <Link to="/" className="mu-btn ghost small">
+            {MuIcons.back}
+            {t.reader.index}
+          </Link>
+          <span className="mu-chap-eyebrow" style={{ margin: 0 }}>
+            Sure {surahId} · {activeAyah} / {surah.ayahCount}
+          </span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="mu-v-act-btn" aria-label={t.reader.bookmark}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 4h10v17l-5-3.5L7 21z" />
+              </svg>
+            </button>
+            <button className="mu-v-act-btn" aria-label="Share">
+              {MuIcons.share}
+            </button>
+          </div>
+        </div>
         {/* Main content */}
         <div>
           {/* Chapter header */}
