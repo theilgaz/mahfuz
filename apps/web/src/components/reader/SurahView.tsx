@@ -19,6 +19,7 @@ import { useEffect, useRef, useCallback, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { surahSlug } from "~/lib/surah-slugs";
 import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
+import { getSurahDescription } from "~/lib/surah-descriptions";
 import { useTranslation } from "~/hooks/useTranslation";
 import { Ornament } from "~/components/minimal-ui/Ornament";
 import { MuIcons } from "~/components/minimal-ui/icons";
@@ -169,6 +170,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const surah = data.surah;
   const surahName = getSurahName(surahId, locale) || surah.nameSimple;
   const surahMeaning = getSurahMeaning(surahId, locale);
+  const surahDesc = getSurahDescription(surahId, locale);
   const typeLabel = surah.revelation === "makkah" ? "Mekki sure" : "Medeni sure";
 
   return (
@@ -211,6 +213,9 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
             <div style={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
               <Ornament size={22} />
             </div>
+            {surahDesc && (
+              <p className="mu-chap-intro">{surahDesc}</p>
+            )}
           </header>
 
           {/* Bismillah */}
@@ -391,7 +396,7 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
           >
             -
           </button>
-          <div className="mu-rside-fontctl-preview">
+          <div className="mu-rside-fontctl-preview" style={{ fontSize: `${arabicFontSize}rem` }}>
             <span dir="rtl">ا</span>
           </div>
           <button

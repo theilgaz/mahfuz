@@ -8,6 +8,15 @@ import { useSurahs, useDailyVerse } from "~/hooks/useQuranQuery";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { surahSlug } from "~/lib/surah-slugs";
+
+/** Decode HTML entities like &quot; &amp; etc. */
+function decodeEntities(text: string): string {
+  if (!text || !text.includes("&")) return text;
+  const el = typeof document !== "undefined" ? document.createElement("textarea") : null;
+  if (!el) return text.replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'");
+  el.innerHTML = text;
+  return el.value;
+}
 import { MuIcons } from "./icons";
 
 const COLLECTIONS = [
@@ -58,22 +67,28 @@ export function DiscoverPage() {
             {dailyVerse ? (
               <>
                 <p className="mu-today-ar" dir="rtl">
-                  {dailyVerse.textUthmani || dailyVerse.textSimple}
+                  {dailyVerse.verse.textUthmani}
                 </p>
-                <p className="mu-today-tr">
-                  {dailyVerse.translation?.text ?? dailyVerse.translation}
-                </p>
-                <p className="mu-today-ref" style={{ fontFamily: "var(--mu-ff-mono)", fontSize: 12, color: "var(--mu-muted)", margin: "0 0 24px" }}>
-                  {dailyVerse.surahName} - ayet {dailyVerse.verseNumber}
-                </p>
-                <Link
-                  to="/surah/$surahSlug"
-                  params={{ surahSlug: surahSlug(dailyVerse.surahId) }}
-                  search={{ ayah: dailyVerse.verseNumber }}
-                  className="mu-btn ghost"
-                >
-                  Sureyi aç {MuIcons.arrowRight}
-                </Link>
+                {dailyVerse.translation && (
+                  <p className="mu-today-tr">
+                    {decodeEntities(dailyVerse.translation.text)}
+                  </p>
+                )}
+                {dailyVerse.surah && (
+                  <p className="mu-today-ref" style={{ fontFamily: "var(--mu-ff-mono)", fontSize: 12, color: "var(--mu-muted)", margin: "0 0 24px" }}>
+                    {getSurahName(dailyVerse.surah.id, locale)} - {dailyVerse.verse.ayahNumber}
+                  </p>
+                )}
+                {dailyVerse.surah && (
+                  <Link
+                    to="/surah/$surahSlug"
+                    params={{ surahSlug: surahSlug(dailyVerse.surah.id) }}
+                    search={{ ayah: dailyVerse.verse.ayahNumber }}
+                    className="mu-btn ghost"
+                  >
+                    Sureyi aç {MuIcons.arrowRight}
+                  </Link>
+                )}
               </>
             ) : (
               <>

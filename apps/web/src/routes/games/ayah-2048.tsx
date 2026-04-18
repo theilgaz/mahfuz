@@ -7,7 +7,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { useTranslation } from "~/hooks/useTranslation";
-import { submitScore } from "~/lib/score-service";
+import { submitScore, GAME_TITLES } from "~/lib/score-service";
+import { ACHIEVEMENT_MAP } from "~/lib/game-achievements";
 import {
   createGame,
   move,
@@ -140,18 +141,42 @@ function useSwipe(onSwipe: (dir: Direction) => void) {
 
 // ── Main page ──────────────────────────────────────────────
 
+interface GameOverData {
+  score: number;
+  discoveredCount: number;
+  totalSurahs: number;
+  highestSurah: SurahInfo | null;
+  isNewHighScore: boolean;
+  newAchievements: string[];
+}
+
 function Ayet2048Page() {
-  const [screen, setScreen] = useState<"menu" | "game" | "collection">("menu");
+  const [screen, setScreen] = useState<"menu" | "game" | "collection" | "gameover">("menu");
   const [mode, setMode] = useState<GameMode>(GAME_MODES[0]);
+  const [gameOverData, setGameOverData] = useState<GameOverData | null>(null);
 
   if (screen === "collection") {
     return <CollectionScreen mode={mode} onBack={() => setScreen("menu")} />;
+  }
+  if (screen === "gameover" && gameOverData) {
+    return (
+      <GameOverScreen
+        mode={mode}
+        data={gameOverData}
+        onRestart={() => setScreen("game")}
+        onMenu={() => setScreen("menu")}
+      />
+    );
   }
   if (screen === "game") {
     return (
       <GameScreen
         mode={mode}
         onBack={() => setScreen("menu")}
+        onGameOver={(data) => {
+          setGameOverData(data);
+          setScreen("gameover");
+        }}
       />
     );
   }
@@ -254,9 +279,11 @@ function MenuScreen({
 function GameScreen({
   mode,
   onBack,
+  onGameOver,
 }: {
   mode: GameMode;
   onBack: () => void;
+  onGameOver: (data: GameOverData) => void;
 }) {
   const { t, locale } = useTranslation();
   const tx = t.ayet2048;
@@ -345,19 +372,42 @@ function GameScreen({
   // Swipe
   const swipeHandlers = useSwipe(handleMove);
 
-  // Save score on game over
+  // Save score and show game over screen
   useEffect(() => {
     if (gameState.over && !scoreSaved) {
       setScoreSaved(true);
+      const highestLevel = gameState.tiles.reduce((max, t) => Math.max(max, t.value), 0);
+      const highestSurah = getSurahForLevel(sequence, highestLevel) ?? null;
+
       submitScore({
         data: {
           gameId: "ayet-2048",
           score: gameState.score,
           difficulty: mode.id,
         },
-      }).catch(() => {});
+      })
+        .then((result) => {
+          onGameOver({
+            score: gameState.score,
+            discoveredCount: discovered.size,
+            totalSurahs: sequence.length,
+            highestSurah,
+            isNewHighScore: result?.isNewHighScore ?? false,
+            newAchievements: result?.newAchievements ?? [],
+          });
+        })
+        .catch(() => {
+          onGameOver({
+            score: gameState.score,
+            discoveredCount: discovered.size,
+            totalSurahs: sequence.length,
+            highestSurah,
+            isNewHighScore: false,
+            newAchievements: [],
+          });
+        });
     }
-  }, [gameState.over, gameState.score, scoreSaved, mode.id]);
+  }, [gameState.over, gameState.score, gameState.tiles, scoreSaved, mode.id, sequence, discovered.size, onGameOver]);
 
   const restart = () => {
     setGameState(createGame(gridSize, SPAWN_VALUES));
@@ -475,27 +525,6 @@ function GameScreen({
             </div>
           )}
 
-          {/* Game over */}
-          {gameState.over && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl">
-              <div className="p-4 rounded-2xl text-center mx-4" style={{ background: THEME.surface }}>
-                <div className="text-2xl font-bold text-white mb-1">{tx.gameOver}</div>
-                <div className="text-white/60 text-sm mb-1">
-                  {tx.finalScore}: {gameState.score}
-                </div>
-                <div className="text-white/40 text-xs mb-4">
-                  {tx.discoveredSurahs}: {discovered.size}/{sequence.length}
-                </div>
-                <button
-                  onClick={restart}
-                  className="w-full py-3 rounded-xl text-white font-semibold"
-                  style={{ background: THEME.primary }}
-                >
-                  {tx.tryAgain}
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Instructions */}
@@ -563,6 +592,149 @@ function TileView({
             </span>
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ── Game over screen ──────────────────────────────────────
+
+function GameOverScreen({
+  mode,
+  data,
+  onRestart,
+  onMenu,
+}: {
+  mode: GameMode;
+  data: GameOverData;
+  onRestart: () => void;
+  onMenu: () => void;
+}) {
+  const { t, locale } = useTranslation();
+  const tx = t.ayet2048;
+  const achT = t.achievements;
+  const TIER_ICONS = ["", "\u25CB", "\u25CE", "\u2605"];
+
+  return (
+    <div
+      className="game-bg min-h-dvh flex flex-col items-center justify-center game-bounce-in"
+      style={gameBgStyle(THEME, "ayet-2048")}
+    >
+      <div className="mx-auto max-w-md px-4 py-8 text-center flex flex-col items-center gap-5 w-full">
+        {/* Trophy / highest surah */}
+        <div
+          className="w-24 h-24 rounded-full flex flex-col items-center justify-center game-star-spin"
+          style={{
+            background: `linear-gradient(135deg, ${THEME.primary}30, ${THEME.primary}10)`,
+            boxShadow: `0 0 24px ${THEME.glow}`,
+          }}
+        >
+          {data.highestSurah ? (
+            <>
+              <span
+                className="text-lg font-bold leading-none"
+                style={{ color: THEME.primary, fontFamily: "var(--font-arabic)" }}
+              >
+                {data.highestSurah.nameArabic}
+              </span>
+              <span className="text-[10px] mt-1" style={{ color: `${THEME.primary}99` }}>
+                {getSurahName(data.highestSurah.id, locale)}
+              </span>
+            </>
+          ) : (
+            <span className="text-2xl font-bold" style={{ color: THEME.primary }}>
+              --
+            </span>
+          )}
+        </div>
+
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-white">{tx.gameOver}</h2>
+
+        {/* New high score */}
+        {data.isNewHighScore && (
+          <p className="text-sm font-bold game-pop" style={{ color: THEME.primary }}>
+            {t.gameScoring?.newHighScore ?? "New High Score!"}
+          </p>
+        )}
+
+        {/* Final score */}
+        <p className="text-5xl font-extrabold tabular-nums" style={{ color: THEME.primary }}>
+          {data.score}
+        </p>
+
+        {/* Stats */}
+        <div className="flex justify-center gap-3 w-full">
+          <div className="flex-1 flex flex-col items-center py-3 rounded-xl" style={{ background: THEME.surface }}>
+            <span className="text-xl font-extrabold tabular-nums text-white">{data.discoveredCount}</span>
+            <span className="text-[10px] text-white/50 mt-0.5">{tx.discoveredSurahs}</span>
+          </div>
+          <div className="flex-1 flex flex-col items-center py-3 rounded-xl" style={{ background: THEME.surface }}>
+            <span className="text-xl font-extrabold tabular-nums text-white">{data.totalSurahs}</span>
+            <span className="text-[10px] text-white/50 mt-0.5">{tx.target}</span>
+          </div>
+        </div>
+
+        {/* Achievements */}
+        {data.newAchievements.length > 0 && (
+          <div className="w-full p-3 rounded-xl" style={{ background: THEME.surface }}>
+            <p className="text-xs font-bold mb-2" style={{ color: THEME.primary }}>
+              {achT?.unlocked ?? "Achievements Unlocked!"}
+            </p>
+            <div className="flex flex-col gap-1.5">
+              {data.newAchievements.map((id) => {
+                const def = ACHIEVEMENT_MAP.get(id);
+                const tierIcon = def?.tier ? TIER_ICONS[def.tier] : "\u2713";
+                let name: string;
+                if (def?.category === "game-score" && def.gameId && def.tier) {
+                  const tierKey = `score-${def.tier}` as keyof typeof achT;
+                  const gameTitle = GAME_TITLES[def.gameId] ?? def.gameId;
+                  name = `${gameTitle} - ${(achT?.[tierKey] ?? id) as string}`;
+                } else if (def?.category === "game-plays" && def.gameId && def.tier) {
+                  const tierKey = `plays-${def.tier}` as keyof typeof achT;
+                  const gameTitle = GAME_TITLES[def.gameId] ?? def.gameId;
+                  name = `${gameTitle} - ${(achT?.[tierKey] ?? id) as string}`;
+                } else {
+                  name = (achT?.[id as keyof typeof achT] ?? id) as string;
+                }
+                return (
+                  <div key={id} className="flex items-center gap-2 text-left">
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                      style={{ backgroundColor: `${THEME.primary}20`, color: THEME.primary }}
+                    >
+                      {tierIcon}
+                    </span>
+                    <span className="text-sm text-white">{name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex flex-col gap-2 w-full mt-2">
+          <button
+            onClick={onRestart}
+            className="w-full py-3.5 rounded-xl text-white font-bold text-sm transition-all active:scale-95"
+            style={{
+              background: `linear-gradient(135deg, ${THEME.primary}, ${THEME.secondary || THEME.primary})`,
+              boxShadow: `0 4px 14px ${THEME.glow}`,
+            }}
+          >
+            {tx.tryAgain}
+          </button>
+          <button
+            onClick={onMenu}
+            className="text-sm text-white/50 hover:text-white/70 py-2 font-medium"
+          >
+            {tx.newGame}
+          </button>
+          <Link to="/games" className="text-sm text-white/40 hover:text-white/60 font-medium">
+            {t.gameScoring?.backToGames ?? "Back to Games"}
+          </Link>
+        </div>
       </div>
     </div>
   );
