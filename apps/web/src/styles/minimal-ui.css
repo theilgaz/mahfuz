@@ -611,6 +611,7 @@
   cursor: pointer;
   padding: 12px 18px;
   font-size: 14px;
+  white-space: nowrap;
   font-family: var(--mu-ff-ui);
   color: var(--mu-muted);
   position: relative;
@@ -656,9 +657,15 @@
 /* Alpha bar */
 .mu-alpha-bar {
   display: flex;
-  flex-wrap: wrap;
   gap: 4px;
   padding: 8px 0 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mu-alpha-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .mu-alpha-btn {
@@ -666,6 +673,7 @@
   cursor: pointer;
   min-width: 32px;
   height: 32px;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
