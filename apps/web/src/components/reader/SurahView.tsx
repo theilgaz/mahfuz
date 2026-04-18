@@ -173,27 +173,100 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const surahDesc = getSurahDescription(surahId, locale);
   const typeLabel = surah.revelation === "makkah" ? "Mekki sure" : "Medeni sure";
 
+  const audioPlaybackState = useAudioStore((s) => s.playbackState);
+  const audioChapterId = useAudioStore((s) => s.chapterId);
+  const playSurahFn = useAudioStore((s) => s.playSurah);
+  const togglePlayPause = useAudioStore((s) => s.togglePlayPause);
+  const reciterSlug = useSettingsStore((s) => s.reciterSlug);
+
+  const isThisSurahPlaying = audioChapterId === surahId && (audioPlaybackState === "playing" || audioPlaybackState === "paused");
+  const isPlaying = audioChapterId === surahId && audioPlaybackState === "playing";
+  const [audioLoading, setAudioLoading] = useState(false);
+
+  const handleTopbarPlay = useCallback(async () => {
+    if (isThisSurahPlaying) {
+      togglePlayPause();
+      return;
+    }
+    setAudioLoading(true);
+    try {
+      const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
+      const audioData = await fetchChapterAudio(reciterId, surahId);
+      if (audioData) {
+        playSurahFn(surahId, SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`, audioData);
+      }
+    } finally {
+      setAudioLoading(false);
+    }
+  }, [surahId, reciterSlug, isThisSurahPlaying, togglePlayPause, playSurahFn]);
+
+  const progressPct = surah.ayahCount > 0 ? (activeAyah / surah.ayahCount) * 100 : 0;
+
   return (
     <>
       <div className="mu-reader" style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
         {/* Top bar */}
-        <div className="mu-reader-topbar">
-          <Link to="/" className="mu-btn ghost small">
-            {MuIcons.back}
-            {t.reader.index}
-          </Link>
-          <span className="mu-chap-eyebrow" style={{ margin: 0 }}>
-            Sure {surahId} · {activeAyah} / {surah.ayahCount}
-          </span>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="mu-v-act-btn" aria-label={t.reader.bookmark}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 4h10v17l-5-3.5L7 21z" />
+        <div className="mu-reader-topbar" style={{ flexDirection: "column", gap: 0, padding: "12px 0 0", borderBottom: "none", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "0 0 10px" }}>
+            {/* Left: back */}
+            <Link to="/" className="mu-icon-btn sm" aria-label={t.reader.index} style={{ color: "var(--mu-ink-3)" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 19l-7-7 7-7" />
               </svg>
-            </button>
-            <button className="mu-v-act-btn" aria-label="Share">
-              {MuIcons.share}
-            </button>
+            </Link>
+
+            {/* Center: surah name + progress */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  onClick={handleTopbarPlay}
+                  disabled={audioLoading}
+                  className="mu-topbar-play"
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {audioLoading ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="mu-spin">
+                      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                    </svg>
+                  ) : isPlaying ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="6" y="4" width="4" height="16" rx="1" />
+                      <rect x="14" y="4" width="4" height="16" rx="1" />
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
+                </button>
+                <span style={{ fontFamily: "var(--mu-ff-display)", fontSize: 16, fontWeight: 500, color: "var(--mu-ink)", whiteSpace: "nowrap" }}>
+                  {surahName}
+                </span>
+              </div>
+              <span style={{ fontFamily: "var(--mu-ff-mono)", fontSize: 10, letterSpacing: "0.08em", color: "var(--mu-muted)", textTransform: "uppercase" }}>
+                {activeAyah} / {surah.ayahCount}
+              </span>
+            </div>
+
+            {/* Right: bookmark + share */}
+            <div style={{ display: "flex", gap: 4 }}>
+              <button className="mu-icon-btn sm" aria-label={t.reader.bookmark} style={{ color: "var(--mu-ink-3)" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 4h10v17l-5-3.5L7 21z" />
+                </svg>
+              </button>
+              <button className="mu-icon-btn sm" aria-label="Share" style={{ color: "var(--mu-ink-3)" }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+                  <polyline points="16 6 12 2 8 6" />
+                  <line x1="12" y1="2" x2="12" y2="15" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          {/* Progress bar */}
+          <div style={{ width: "100%", height: 2, background: "var(--mu-line)", borderRadius: 1 }}>
+            <div style={{ width: `${progressPct}%`, height: "100%", background: "var(--mu-accent)", borderRadius: 1, transition: "width 0.3s ease" }} />
           </div>
         </div>
         {/* Main content */}
@@ -337,6 +410,12 @@ interface SurahSidebarProps {
   ayahRefs: React.RefObject<Map<number, HTMLDivElement>>;
 }
 
+const FONT_PRESETS = [
+  { id: "small", size: 1.5 },
+  { id: "medium", size: 1.8 },
+  { id: "large", size: 3.0 },
+] as const;
+
 function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarProps) {
   const { t } = useTranslation();
   const arabicFontSize = useSettingsStore((s) => s.arabicFontSize);
@@ -396,8 +475,8 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
           >
             -
           </button>
-          <div className="mu-rside-fontctl-preview" style={{ fontSize: `${arabicFontSize}rem` }}>
-            <span dir="rtl">ا</span>
+          <div className="mu-rside-fontctl-preview">
+            <span dir="rtl" style={{ fontSize: `${Math.min(arabicFontSize, 2.2)}rem` }}>ع</span>
           </div>
           <button
             onClick={() => setArabicFontSize(arabicFontSize + STEP)}

@@ -254,6 +254,12 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
     }));
   }, [reciterList]);
 
+  const FONT_PRESETS = [
+    { id: "small", size: 1.5, label: "S" },
+    { id: "medium", size: 1.8, label: "M" },
+    { id: "large", size: 3.0, label: "L" },
+  ];
+
   const arabicMin = 1.2, arabicMax = 5.0;
   const mealMin = 0.75, mealMax = 2.0;
 
@@ -274,6 +280,24 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
         >
           {t.settings.mealPreview}
         </p>
+
+        {/* Hazir boyut presetleri */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginBottom: 10 }}>
+          {FONT_PRESETS.map((p) => {
+            const active = Math.abs(store.arabicFontSize - p.size) < 0.05;
+            return (
+              <button
+                key={p.id}
+                onClick={() => store.setArabicFontSize(p.size)}
+                className={`mu-settings-mode-btn ${active ? "on" : ""}`}
+              >
+                <span dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: `${0.7 + (p.size - 1.5) * 0.55}rem`, lineHeight: 1 }}>ع</span>
+                <span>{p.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button onClick={() => store.setArabicFontSize(store.arabicFontSize - 0.2)} className="mu-settings-size-btn" aria-label={`${t.a11y?.arabicFontSize ?? "Arabic font size"} -`}>A-</button>

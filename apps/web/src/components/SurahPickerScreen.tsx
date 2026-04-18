@@ -125,15 +125,6 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
         </div>
       )}
 
-      {/* Başlat butonu */}
-      <button
-        onClick={handleStart}
-        disabled={startDisabled}
-        className="w-full py-3.5 rounded-xl bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90 mb-5"
-      >
-        {startButtonLabel}
-      </button>
-
       {/* Zorluk seçimi */}
       <div className="mb-5">
         <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden">
@@ -340,6 +331,15 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
           </div>
         )}
       </div>}
+
+      {/* Baslat butonu */}
+      <button
+        onClick={handleStart}
+        disabled={startDisabled}
+        className="w-full py-3.5 rounded-xl bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90 mt-5"
+      >
+        {startButtonLabel}
+      </button>
     </div>
   );
 }
