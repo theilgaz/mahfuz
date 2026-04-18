@@ -2,13 +2,21 @@
  * Surah index with refined badges, tabs, and search -- minimal UI.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
 import { surahSlug } from "~/lib/surah-slugs";
 import { MuIcons } from "./icons";
+
+/** Strip diacritics (â→a, î→i, û→u, etc.) for fuzzy search */
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
 
 interface Surah {
   id: number;
@@ -39,15 +47,22 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
     if (tab === "mekki") xs = xs.filter((s) => s.revelation === "makkah");
     else if (tab === "medeni") xs = xs.filter((s) => s.revelation === "madinah");
     else if (tab === "nuzul") xs.sort((a, b) => a.revelationOrder - b.revelationOrder);
+    else if (tab === "alfa") xs.sort((a, b) => {
+      const nameA = getSurahName(a.id, locale) || a.nameSimple;
+      const nameB = getSurahName(b.id, locale) || b.nameSimple;
+      return nameA.localeCompare(nameB, locale);
+    });
     if (q.trim()) {
-      const term = q.toLowerCase();
+      const term = normalize(q);
       xs = xs.filter((s) => {
-        const name = getSurahName(s.id, locale) || s.nameSimple;
-        const meaning = getSurahMeaning(s.id, locale) || s.nameTranslation;
+        const name = normalize(getSurahName(s.id, locale) || s.nameSimple);
+        const meaning = normalize(getSurahMeaning(s.id, locale) || s.nameTranslation);
+        const simple = normalize(s.nameSimple);
         return (
-          name.toLowerCase().includes(term) ||
-          meaning.toLowerCase().includes(term) ||
-          String(s.id).includes(term)
+          name.includes(term) ||
+          meaning.includes(term) ||
+          simple.includes(term) ||
+          String(s.id).includes(q.trim())
         );
       });
     }
@@ -58,7 +73,8 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
     { id: "all", label: t.surahList?.filterAll ?? "Tumu", count: 114 },
     { id: "mekki", label: t.surahList?.filterMakki ?? "Mekki", count: makkahCount },
     { id: "medeni", label: t.surahList?.filterMadani ?? "Medeni", count: madinahCount },
-    { id: "nuzul", label: t.surahList?.filterNuzul ?? "Nuzul sirasi", count: null },
+    { id: "alfa", label: t.surahList?.filterAlpha ?? "Alfabetik", count: null },
+    { id: "nuzul", label: t.surahList?.filterNuzul ?? "Nuzul", count: null },
   ];
 
   return (

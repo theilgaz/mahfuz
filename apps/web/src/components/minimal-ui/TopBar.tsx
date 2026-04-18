@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -16,6 +17,7 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
   const { t } = useTranslation();
   const theme = useSettingsStore((s) => s.theme);
   const setTheme = useSettingsStore((s) => s.setTheme);
+  const mobileNavRef = useRef<HTMLElement>(null);
 
   const navItems = [
     { name: "home", path: "/", icon: MuIcons.home, label: t.nav?.home ?? "Ana Sayfa" },
@@ -34,6 +36,23 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
     setTheme(next);
   };
 
+  // Scroll-hint animation on mobile nav mount
+  useEffect(() => {
+    const el = mobileNavRef.current;
+    if (!el) return;
+    const raf = requestAnimationFrame(() => {
+      if (el.scrollWidth > el.clientWidth) {
+        el.classList.add("mu-scroll-hint");
+      }
+    });
+    const onEnd = () => el.classList.remove("mu-scroll-hint");
+    el.addEventListener("animationend", onEnd);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener("animationend", onEnd);
+    };
+  }, []);
+
   return (
     <header className="mu-topbar">
       <div className="mu-topbar-inner">
@@ -41,10 +60,11 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
           <LogoMeem size={36} />
           <span className="mu-brand-wordmark">
             <span className="mu-brand-latin">Mahfuz</span>
-            <span className="mu-brand-ar">محفوظ</span>
+            <span className="mu-brand-ar">{"\u0645\u062D\u0641\u0648\u0638"}</span>
           </span>
         </Link>
 
+        {/* Desktop nav */}
         <nav className="mu-topnav">
           {navItems.map((item) => (
             <Link
@@ -75,19 +95,15 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
           </button>
         </nav>
 
+        {/* Right actions */}
         <div className="mu-topright">
-          <button
-            className="mu-icon-btn"
-            title="Tema"
-            onClick={cycleTheme}
-          >
+          <button className="mu-icon-btn mu-mobile-search-btn" onClick={onSearch} title="Ara">
+            {MuIcons.search}
+          </button>
+          <button className="mu-icon-btn" title="Tema" onClick={cycleTheme}>
             {theme === "dark" ? MuIcons.sun : MuIcons.moon}
           </button>
-          <button
-            className="mu-icon-btn"
-            title="Ayarlar"
-            onClick={onSettings}
-          >
+          <button className="mu-icon-btn" title="Ayarlar" onClick={onSettings}>
             {MuIcons.settings}
           </button>
           {session?.user ? (
@@ -105,11 +121,25 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
             </Link>
           ) : (
             <Link to="/auth/login" className="mu-btn small primary" style={{ fontSize: 13 }}>
-              {t.auth?.login ?? "Giriş yap"}
+              {t.auth?.login ?? "Giris yap"}
             </Link>
           )}
         </div>
       </div>
+
+      {/* Mobile: horizontal scrollable nav strip */}
+      <nav className="mu-mobile-strip" ref={mobileNavRef}>
+        {navItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            className={`mu-mobile-strip-item ${isActive(item.path) ? "on" : ""}`}
+          >
+            <span className="mu-mobile-strip-icon">{item.icon}</span>
+            {item.label}
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }

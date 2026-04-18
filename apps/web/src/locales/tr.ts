@@ -390,6 +390,7 @@ export const tr = {
     filterAll: "Tümü",
     filterMakki: "Mekki",
     filterMadani: "Medeni",
+    filterAlpha: "Alfabetik",
     filterNuzul: "Nüzul",
     curated: "Seçmeler",
     curatedPrayer: "Namaz Sureleri",

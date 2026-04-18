@@ -2558,22 +2558,85 @@
   letter-spacing: 0.05em;
 }
 
+/* ── Mobile nav strip ──────────────────────────────── */
+
+.mu-mobile-strip {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-top: 1px solid var(--mu-line);
+  padding: 6px 12px;
+  mask-image: linear-gradient(to right, transparent 0, black 8px, black calc(100% - 16px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 8px, black calc(100% - 16px), transparent 100%);
+}
+
+.mu-mobile-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.mu-mobile-strip-item {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--mu-ink-3);
+  font-size: 13px;
+  font-family: var(--mu-ff-ui);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mu-mobile-strip-item:hover {
+  background: var(--mu-bg-soft);
+  color: var(--mu-ink);
+}
+
+.mu-mobile-strip-item.on {
+  background: var(--mu-ink);
+  color: var(--mu-bg);
+}
+
+.mu-mobile-strip-icon {
+  display: inline-flex;
+}
+
+.mu-mobile-strip-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mu-mobile-search-btn {
+  display: none;
+}
+
+/* Scroll-hint animation */
+@keyframes mu-scroll-nudge {
+  0%   { transform: translateX(0); }
+  30%  { transform: translateX(-24px); }
+  60%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.mu-scroll-hint {
+  animation: mu-scroll-nudge 0.6s ease 0.4s 1;
+}
+
 /* ── Responsive ─────────────────────────────────────── */
 
 @media (max-width: 960px) {
   .mu-topbar-inner {
     grid-template-columns: auto 1fr auto;
-    padding: 14px 20px;
-    gap: 12px;
-  }
-
-  .mu-topnav {
-    gap: 0;
-  }
-
-  .mu-tnav {
-    padding: 8px 10px;
-    font-size: 13px;
+    padding: 10px 16px;
+    gap: 8px;
   }
 
   .mu-home,
@@ -2651,6 +2714,14 @@
     grid-template-columns: 1fr;
     padding: 28px;
   }
+}
+
+@media (max-width: 768px) {
+  .mu-topnav { display: none; }
+  .mu-brand-wordmark { display: none; }
+  .mu-mobile-strip { display: flex; }
+  .mu-mobile-search-btn { display: inline-grid; }
+  .mu-topbar-inner { padding: 8px 12px; gap: 8px; }
 }
 
 /* ── Subtle paper texture (light themes only) ──────── */

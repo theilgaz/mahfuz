@@ -392,6 +392,7 @@ export const en: Messages = {
     filterAll: "All",
     filterMakki: "Makki",
     filterMadani: "Madani",
+    filterAlpha: "Alphabetical",
     filterNuzul: "Revelation",
     curated: "Curated",
     curatedPrayer: "Prayer Surahs",
