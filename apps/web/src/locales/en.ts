@@ -48,6 +48,16 @@ export const en: Messages = {
     searchPlaceholder: "Search...",
     labs: "Discovery Mode",
     labsDesc: "Try new features before they're fully ready",
+    accentColor: "Accent Color",
+    accents: {
+      default: "Default",
+      olive: "Olive",
+      teal: "Teal",
+      indigo: "Indigo",
+      plum: "Plum",
+      crimson: "Crimson",
+      copper: "Copper",
+    },
   },
 
   nav: {
@@ -268,6 +278,15 @@ export const en: Messages = {
     readInSurah: "Read in surah",
     analyse: "Analyse",
     share: "Share",
+    slogan: "15:9",
+    heroTitle: "As it was preserved,",
+    heroAccent: "before you.",
+    heroDesc: "Begin your Quran journey.",
+  },
+
+  footer: {
+    verseArabic: "إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ",
+    verseTranslation: "We have sent down the Reminder, and We will preserve it.",
   },
 
   search: {
@@ -346,6 +365,12 @@ export const en: Messages = {
     moveUp: "Move up",
     moveDown: "Move down",
     removeItem: "Remove",
+    index: "Index",
+    endOfSurah: "End of surah",
+    backToIndex: "Back to index",
+    toc: "Contents",
+    fontType: "Font type",
+    bookmarksHint: "Use the marker next to a verse to add a bookmark.",
   },
 
   error: {

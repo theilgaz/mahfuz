@@ -2,13 +2,52 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 
-export type Theme = "sea" | "night" | "quran" | "tezhip";
+export type Theme = "light" | "sepia" | "dark";
 export type TextStyle = "uthmani" | "basic";
 export type WbwDisplay = "off" | "hover" | "on"; // geriye uyumluluk
 export type ReadingMode = "mushaf" | "verse" | "wbw";
 export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
 export type MushafSizeMode = "standard" | "fill";
+export type AccentColorId = "default" | "olive" | "teal" | "indigo" | "plum" | "crimson" | "copper";
+
+export const ACCENT_COLORS: Record<AccentColorId, { light: { accent: string; soft: string; ink: string }; dark: { accent: string; soft: string; ink: string }; swatch: string }> = {
+  default: {
+    light: { accent: "oklch(0.62 0.12 70)", soft: "oklch(0.92 0.04 70)", ink: "oklch(0.35 0.08 65)" },
+    dark:  { accent: "oklch(0.72 0.11 70)", soft: "oklch(0.28 0.05 70)", ink: "oklch(0.88 0.10 70)" },
+    swatch: "#9a7b2d",
+  },
+  olive: {
+    light: { accent: "oklch(0.55 0.12 145)", soft: "oklch(0.92 0.04 145)", ink: "oklch(0.30 0.08 145)" },
+    dark:  { accent: "oklch(0.70 0.12 145)", soft: "oklch(0.28 0.05 145)", ink: "oklch(0.88 0.08 145)" },
+    swatch: "#5a7a2d",
+  },
+  teal: {
+    light: { accent: "oklch(0.55 0.12 195)", soft: "oklch(0.92 0.04 195)", ink: "oklch(0.30 0.08 195)" },
+    dark:  { accent: "oklch(0.72 0.10 195)", soft: "oklch(0.28 0.05 195)", ink: "oklch(0.88 0.08 195)" },
+    swatch: "#1a8a8a",
+  },
+  indigo: {
+    light: { accent: "oklch(0.50 0.15 270)", soft: "oklch(0.92 0.04 270)", ink: "oklch(0.30 0.10 270)" },
+    dark:  { accent: "oklch(0.68 0.13 270)", soft: "oklch(0.28 0.05 270)", ink: "oklch(0.88 0.08 270)" },
+    swatch: "#4a4ab0",
+  },
+  plum: {
+    light: { accent: "oklch(0.52 0.16 320)", soft: "oklch(0.92 0.04 320)", ink: "oklch(0.30 0.10 320)" },
+    dark:  { accent: "oklch(0.70 0.13 320)", soft: "oklch(0.28 0.05 320)", ink: "oklch(0.88 0.08 320)" },
+    swatch: "#8a3a8a",
+  },
+  crimson: {
+    light: { accent: "oklch(0.55 0.18 25)", soft: "oklch(0.92 0.04 25)", ink: "oklch(0.30 0.12 25)" },
+    dark:  { accent: "oklch(0.70 0.14 25)", soft: "oklch(0.28 0.05 25)", ink: "oklch(0.88 0.08 25)" },
+    swatch: "#b03a3a",
+  },
+  copper: {
+    light: { accent: "oklch(0.58 0.14 50)", soft: "oklch(0.92 0.04 50)", ink: "oklch(0.32 0.10 50)" },
+    dark:  { accent: "oklch(0.72 0.12 50)", soft: "oklch(0.28 0.05 50)", ink: "oklch(0.88 0.08 50)" },
+    swatch: "#b06030",
+  },
+};
 
 export const COLOR_PALETTES: Record<ColorPaletteId, { name: string; nameEn: string; nameAr: string; colors: string[] }> = {
   pastel: { name: "Zarif", nameEn: "Elegant", nameAr: "زهري", colors: ["#e8a435", "#d45d5d", "#4db89a", "#9b6dcc", "#e07840", "#5b9ec9", "#d46a8e", "#6db85e"] },
@@ -16,6 +55,30 @@ export const COLOR_PALETTES: Record<ColorPaletteId, { name: string; nameEn: stri
   earth:  { name: "Cevher", nameEn: "Gem",    nameAr: "جوهر", colors: ["#3b82f6", "#ef4444", "#10b981", "#8b5cf6", "#f59e0b", "#ec4899", "#06b6d4", "#6366f1"] },
   vivid:  { name: "Mürekkep", nameEn: "Ink",  nameAr: "حبر", colors: ["#c4265e", "#5c8a18", "#0e7a8a", "#c96510", "#6f42c1", "#998a15", "#d94070", "#3e8948"] },
 };
+
+/** Apply accent color CSS custom properties to the DOM */
+export function applyAccentToDOM(id: AccentColorId, isDark: boolean) {
+  // Must apply to both <html> and <main#main-content> since both carry data-theme
+  const targets = [
+    document.documentElement,
+    document.getElementById("main-content"),
+  ].filter(Boolean) as HTMLElement[];
+
+  if (id === "default") {
+    for (const el of targets) {
+      el.style.removeProperty("--mu-accent");
+      el.style.removeProperty("--mu-accent-soft");
+      el.style.removeProperty("--mu-accent-ink");
+    }
+  } else {
+    const vals = isDark ? ACCENT_COLORS[id].dark : ACCENT_COLORS[id].light;
+    for (const el of targets) {
+      el.style.setProperty("--mu-accent", vals.accent);
+      el.style.setProperty("--mu-accent-soft", vals.soft);
+      el.style.setProperty("--mu-accent-ink", vals.ink);
+    }
+  }
+}
 
 interface SettingsState {
   theme: Theme;
@@ -33,6 +96,7 @@ interface SettingsState {
   colorPaletteId: ColorPaletteId;
   labsEnabled: boolean;
   mushafSizeMode: MushafSizeMode;
+  accentColor: AccentColorId;
 }
 
 interface SettingsActions {
@@ -56,14 +120,15 @@ interface SettingsActions {
   setColorPaletteId: (id: ColorPaletteId) => void;
   setLabsEnabled: (enabled: boolean) => void;
   setMushafSizeMode: (mode: MushafSizeMode) => void;
+  setAccentColor: (id: AccentColorId) => void;
   resetToDefaults: () => void;
 }
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Defaults
-      theme: "sea" as Theme,
+      theme: "light" as Theme,
       translationSlugs: [DEFAULT_TRANSLATION_SLUG],
       showTranslation: true,
       showTranslit: false,
@@ -78,10 +143,12 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       colorPaletteId: "earth" as ColorPaletteId,
       labsEnabled: false,
       mushafSizeMode: "standard" as MushafSizeMode,
+      accentColor: "default" as AccentColorId,
 
       // Actions
       setTheme: (theme) => {
         document.documentElement.setAttribute("data-theme", theme);
+        applyAccentToDOM(get().accentColor, theme === "dark");
         set({ theme });
       },
       toggleTranslationSlug: (slug) =>
@@ -118,10 +185,16 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setColorPaletteId: (id) => set({ colorPaletteId: id }),
       setLabsEnabled: (enabled) => set({ labsEnabled: enabled }),
       setMushafSizeMode: (mode) => set({ mushafSizeMode: mode }),
+      setAccentColor: (id) => {
+        const isDark = get().theme === "dark";
+        applyAccentToDOM(id, isDark);
+        set({ accentColor: id });
+      },
       resetToDefaults: () => {
-        document.documentElement.setAttribute("data-theme", "sea");
+        document.documentElement.setAttribute("data-theme", "light");
+        applyAccentToDOM("default", false);
         set({
-          theme: "sea",
+          theme: "light",
           translationSlugs: [DEFAULT_TRANSLATION_SLUG],
           showTranslation: true,
           showTranslit: false,
@@ -135,12 +208,13 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           colorizeWords: false,
           colorPaletteId: "earth",
           labsEnabled: false,
+          accentColor: "default",
         });
       },
     }),
     {
       name: "mahfuz-core-settings",
-      version: 3,
+      version: 4,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
@@ -168,6 +242,13 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           else if (theme === "seher") persisted.theme = "sea";
           delete persisted.seherOverride;
           delete persisted.seherLocation;
+        }
+        if (version < 4) {
+          // v3 -> v4: 4 tema -> light/sepia/dark
+          const theme = persisted.theme;
+          if (theme === "night" || theme === "tezhip") persisted.theme = "dark";
+          else if (theme === "quran") persisted.theme = "sepia";
+          else persisted.theme = "light";
         }
         return persisted as any;
       },

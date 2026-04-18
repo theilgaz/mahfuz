@@ -79,7 +79,7 @@ const APP_PAGES: AppPage[] = [
   },
   {
     id: "discover",
-    keywords: ["kesfet", "kok", "latin", "discover", "arastir"],
+    keywords: ["keşfet", "kök", "latin", "discover", "araştır"],
     route: "/discover",
     iconColor: "bg-[var(--color-text-secondary)]/15 text-[var(--color-text-primary)]",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" /></svg>,
@@ -315,7 +315,7 @@ const POPULAR_SURAHS = [
 ];
 
 const SUGGESTED_KEYWORDS: Record<string, string[]> = {
-  tr: ["rahmet", "sabir", "namaz", "tovbe", "cennet", "sukur", "adalet", "ihsan", "tevekkul", "hidayet"],
+  tr: ["rahmet", "sabır", "namaz", "tövbe", "cennet", "şükür", "adalet", "ihsan", "tevekkül", "hidayet"],
   en: ["mercy", "patience", "prayer", "repentance", "paradise", "grateful", "justice", "faith", "guidance", "forgiveness"],
 };
 

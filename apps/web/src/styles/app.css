@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./minimal-ui.css";
 
 /* ── Self-hosted fonts (no external requests) ────────── */
 
@@ -53,31 +54,23 @@
 /* ── Tema: Deniz (varsayılan) ──────────────────────── */
 
 :root,
-[data-theme="sea"] {
-  --color-bg: #eef3f2;
-  --color-surface: #e0eae6;
-  --color-text-primary: #1a2c28;
-  --color-text-secondary: #5a7a70;
-  --color-text-translation: #3d5c52;
-  --color-border: #c4d8d0;
-  --color-accent: #0d7377;
-  --color-word-hover: rgba(13, 115, 119, 0.12);
-  --color-word-hover-text: #065a5e;
-
-  /* Ayet sonu madalyonu */
-  --marker-g1: #2ab8c0;
-  --marker-g2: #0d9098;
-  --marker-g3: #075f64;
-  --marker-text: #e4f8f8;
+[data-theme="sea"],
+[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-text-primary: #1C1A15;
+  --color-text-secondary: #8A8170;
+  --color-text-translation: #4A4335;
+  --color-border: #E8E8E8;
 
   /* Sayfa cercevesi */
-  --frame-color: #0d7377;
-  --frame-opacity: 0.15;
-  --frame-corner-opacity: 0.2;
+  --frame-color: #b8860b;
+  --frame-opacity: 0.12;
+  --frame-corner-opacity: 0.18;
 
   /* Mushaf kagit */
-  --mushaf-bg: #f8f4ec;
-  --mushaf-border: rgba(13, 115, 119, 0.12);
+  --mushaf-bg: #fdfcfa;
+  --mushaf-border: rgba(180, 160, 120, 0.15);
   --mushaf-shadow: rgba(0, 0, 0, 0.06);
   --mushaf-inner-shadow: rgba(0, 0, 0, 0.03);
 
@@ -99,15 +92,6 @@
   --color-text-secondary: #7a6e5a;
   --color-text-translation: #5c5040;
   --color-border: #d9d0bc;
-  --color-accent: #8b6914;
-  --color-word-hover: rgba(139, 105, 20, 0.12);
-  --color-word-hover-text: #6b4c00;
-
-  /* Ayet sonu madalyonu */
-  --marker-g1: #d4a24e;
-  --marker-g2: #b8860b;
-  --marker-g3: #7a5800;
-  --marker-text: #fdf3d8;
 
   /* Sayfa cercevesi */
   --frame-color: #8b6914;
@@ -123,22 +107,14 @@
 
 /* ── Tema: Gece ──────────────────────────────────────── */
 
-[data-theme="night"] {
+[data-theme="night"],
+[data-theme="dark"] {
   --color-bg: #0f0e0c;
   --color-surface: #1a1814;
   --color-text-primary: #f0ece4;
   --color-text-secondary: #9a9080;
   --color-text-translation: #c4bdb0;
   --color-border: #2a2820;
-  --color-accent: #7aad4a;
-  --color-word-hover: rgba(122, 173, 74, 0.15);
-  --color-word-hover-text: #a4d470;
-
-  /* Ayet sonu madalyonu */
-  --marker-g1: #a4d470;
-  --marker-g2: #7aad4a;
-  --marker-g3: #3d6b14;
-  --marker-text: #f0f8e8;
 
   /* Sayfa cercevesi */
   --frame-color: #7aad4a;
@@ -161,15 +137,6 @@
   --color-text-secondary: #8a9ab0;
   --color-text-translation: #c0ccda;
   --color-border: #1e2e4a;
-  --color-accent: #c8a24e;
-  --color-word-hover: rgba(200, 162, 78, 0.15);
-  --color-word-hover-text: #e0c070;
-
-  /* Ayet sonu madalyonu */
-  --marker-g1: #e0c070;
-  --marker-g2: #c8a24e;
-  --marker-g3: #7a5a10;
-  --marker-text: #fdf3d8;
 
   /* Sayfa cercevesi */
   --frame-color: #c8a24e;
@@ -192,13 +159,6 @@
     --color-text-secondary: #9a9080;
     --color-text-translation: #c4bdb0;
     --color-border: #2a2820;
-    --color-accent: #7aad4a;
-    --color-word-hover: rgba(122, 173, 74, 0.15);
-    --color-word-hover-text: #a4d470;
-    --marker-g1: #a4d470;
-    --marker-g2: #7aad4a;
-    --marker-g3: #3d6b14;
-    --marker-text: #f0f8e8;
     --mushaf-bg: #1a1814;
     --mushaf-border: rgba(122, 173, 74, 0.15);
     --mushaf-shadow: rgba(0, 0, 0, 0.3);
@@ -243,7 +203,7 @@
 /* ── Tecvid karanlık tema ────────────────────────────── */
 
 /* Night + sistem karanlık → her zaman dark tecvid */
-:is([data-theme="night"], [data-theme="tezhip"], :root:not([data-theme])) {
+:is([data-theme="night"], [data-theme="dark"], [data-theme="tezhip"], :root:not([data-theme])) {
   & .tajweed-madda_normal { color: #5ab0e0; }
   & .tajweed-madda_permissible { color: #7ac4e8; }
   & .tajweed-madda_necessary { color: #3a8fc0; }

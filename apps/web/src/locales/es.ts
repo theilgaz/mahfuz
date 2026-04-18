@@ -215,6 +215,15 @@ export const es: PartialMessages = {
 
   home: {
     continueReading: "Seguir leyendo",
+    slogan: "15:9",
+    heroTitle: "Tal como fue preservado,",
+    heroAccent: "ante ti.",
+    heroDesc: "Comienza tu viaje con el Coran.",
+  },
+
+  footer: {
+    verseArabic: "إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ",
+    verseTranslation: "Nosotros hemos revelado el Recuerdo y somos sus guardianes.",
   },
 
   search: {

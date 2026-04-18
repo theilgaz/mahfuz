@@ -15,7 +15,10 @@ import { RecitationBar } from "~/components/recitation/RecitationBar";
 import { AudioProvider } from "~/components/reader/AudioProvider";
 import { AudioBar } from "~/components/reader/AudioBar";
 import { BottomNav } from "~/components/BottomNav";
-import { useSettingsStore } from "~/stores/settings.store";
+import { TopBar } from "~/components/minimal-ui/TopBar";
+import { Footer } from "~/components/minimal-ui/Footer";
+import { SearchOverlay } from "~/components/minimal-ui/SearchOverlay";
+import { useSettingsStore, applyAccentToDOM } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
 import { useGamesFavoritesStore } from "~/stores/gamesFavorites.store";
 import { SettingsPanel } from "~/components/reader/SettingsPanel";
@@ -73,6 +76,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.json" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Amiri:ital,wght@0,400;0,700;1,400&family=Amiri+Quran&display=swap" },
       { rel: "preload", href: "/fonts/KFGQPCUthmanicScriptHAFS.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "preload", href: "/fonts/ScheherazadeNew-Regular.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: appCss },
@@ -454,14 +460,18 @@ function RootDocument({ children }: { children: ReactNode }) {
   const locale = useLocaleStore((s) => s.locale);
   const { t } = useTranslation();
   const { session } = useRouteContext({ from: "__root__" });
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Unified cross-device sync
   useSyncEngine(session);
 
   // Tema uygula + FOUC engelle + favicon/theme-color senkronize et
   const theme = useSettingsStore((s) => s.theme);
+  const accentColor = useSettingsStore((s) => s.accentColor);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    applyAccentToDOM(accentColor ?? "default", theme === "dark");
     // CSS loaded — reveal content
     document.documentElement.classList.remove("loading");
     document.documentElement.classList.add("loaded");
@@ -479,7 +489,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 
     // Sync browser chrome color
     document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => { m.content = bg; });
-  }, [theme]);
+  }, [theme, accentColor]);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -487,17 +497,23 @@ function RootDocument({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Global Cmd+K / Ctrl+K → arama sayfası
+  // Global Cmd+K / Ctrl+K or "/" → search overlay
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        navigate({ to: "/search" });
+        setSearchOpen(true);
+        return;
+      }
+      // "/" shortcut (only when not typing in an input)
+      if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement).tagName)) {
+        e.preventDefault();
+        setSearchOpen(true);
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [navigate]);
+  }, []);
 
   return (
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} suppressHydrationWarning>
@@ -510,14 +526,16 @@ function RootDocument({ children }: { children: ReactNode }) {
         <a href="#main-content" className="skip-link">
           {t.a11y?.skipToContent ?? "Skip to content"}
         </a>
-        <AppHeader />
+        <TopBar session={session} onSearch={() => setSearchOpen(true)} onSettings={() => setSettingsOpen(true)} />
+        <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
         <AudioProvider />
-        <main id="main-content">
+        <main id="main-content" className="mu-app" data-theme={theme}>
           {children}
         </main>
+        <Footer />
         <AudioBar />
         <RecitationBar />
-        <BottomNav />
         <LanguageSelector />
         <Scripts />
       </body>

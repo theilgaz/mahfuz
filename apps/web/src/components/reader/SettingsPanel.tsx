@@ -5,7 +5,7 @@
 
 import { useMemo, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
-import { useSettingsStore, COLOR_PALETTES, type Theme, type TextStyle, type ReadingMode, type ColorPaletteId } from "~/stores/settings.store";
+import { useSettingsStore, COLOR_PALETTES, ACCENT_COLORS, type Theme, type TextStyle, type ReadingMode, type ColorPaletteId, type AccentColorId } from "~/stores/settings.store";
 import { useQuery } from "@tanstack/react-query";
 import { recitersQueryOptions, translationSourcesQueryOptions, useSurahs } from "~/hooks/useQuranQuery";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -26,20 +26,34 @@ const LANG_LABELS: Record<string, string> = {
   zh: "中文", ms: "Melayu", sw: "Kiswahili", vi: "Tiếng Việt",
 };
 
-interface ThemeDef {
-  id: Theme;
-  labelKey: "sea" | "night" | "quran" | "tezhip";
-  bg: string;
-  text: string;
-  accent: string;
+function SunIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  );
 }
 
-const THEMES: ThemeDef[] = [
-  { id: "sea",    labelKey: "sea",    bg: "#eef3f2", text: "#1a2c28", accent: "#0d7377" },
-  { id: "night",  labelKey: "night",  bg: "#0f0e0c", text: "#f0ece4", accent: "#7aad4a" },
-  { id: "quran",  labelKey: "quran",  bg: "#f5efe0", text: "#2c2416", accent: "#8b6914" },
-  { id: "tezhip", labelKey: "tezhip", bg: "#0a1628", text: "#f0e8d8", accent: "#c8a24e" },
-];
+function SepiaIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" strokeDasharray="2 3" />
+    </svg>
+  );
+}
+
+function MoonIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
 
 // ── Okuma modu ikonları ───────────────────────────────────
 
@@ -138,13 +152,13 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-[60] bg-black/30" onClick={onClose} />
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t.settings.title} className="fixed right-0 top-0 bottom-0 z-[60] w-80 max-w-[85vw] bg-[var(--color-bg)] border-l border-[var(--color-border)] shadow-sm overflow-y-auto">
-        <div className="flex flex-col min-h-full p-4 pb-24">
-          {/* Header + tabs */}
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-medium">{t.settings.title}</h2>
-            <button onClick={onClose} className="p-1 rounded-lg hover:bg-[var(--color-surface)] transition-colors" aria-label={t.settings.close}>
+      <div className="mu-settings-backdrop" onClick={onClose} />
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t.settings.title} className="mu-settings-panel">
+        <div className="mu-settings-inner">
+          {/* Header */}
+          <div className="mu-settings-header">
+            <h2>{t.settings.title}</h2>
+            <button onClick={onClose} className="mu-icon-btn" aria-label={t.settings.close}>
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M5 5L13 13M13 5L5 13" />
               </svg>
@@ -152,15 +166,13 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
           </div>
 
           {/* Tab bar */}
-          <div role="tablist" className="flex rounded-lg overflow-hidden border border-[var(--color-border)] mb-4">
+          <div role="tablist" className="mu-settings-tabs">
             <button
               role="tab"
               aria-selected={tab === "reading"}
               aria-controls="settings-tab-reading"
               onClick={() => setTab("reading")}
-              className={`flex-1 py-2 text-xs font-medium transition-colors ${
-                tab === "reading" ? "bg-[var(--color-accent)] text-white" : "bg-[var(--color-surface)] text-[var(--color-text-secondary)]"
-              }`}
+              className={`mu-settings-tab ${tab === "reading" ? "on" : ""}`}
             >
               {t.settings.tabs.reading}
             </button>
@@ -169,9 +181,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
               aria-selected={tab === "general"}
               aria-controls="settings-tab-general"
               onClick={() => setTab("general")}
-              className={`flex-1 py-2 text-xs font-medium transition-colors ${
-                tab === "general" ? "bg-[var(--color-accent)] text-white" : "bg-[var(--color-surface)] text-[var(--color-text-secondary)]"
-              }`}
+              className={`mu-settings-tab ${tab === "general" ? "on" : ""}`}
             >
               {t.settings.tabs.general}
             </button>
@@ -199,8 +209,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
           {/* لَا غَالِبَ إِلَّا ٱللّٰهُ */}
           <div className="flex-1" />
           <p
-            className="text-center text-[var(--color-text-secondary)] select-none mb-[5px]"
-            style={{ fontFamily: "var(--font-arabic)", fontSize: "1.1rem", opacity: 0.70, lineHeight: 1.8 }}
+            className="mu-settings-motto"
             dir="rtl"
           >
             لَا غَالِبَ إِلَّا ٱللّٰهُ
@@ -249,38 +258,38 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
   const mealMin = 0.75, mealMax = 2.0;
 
   return (
-    <div id="settings-tab-reading" role="tabpanel" className="space-y-4">
-      {/* ── Yazı Boyutu + canlı önizleme ── */}
+    <div id="settings-tab-reading" role="tabpanel" className="mu-settings-content">
+      {/* ── Yazı Boyutu + canli onizleme ── */}
       <div>
         <p
-          className="text-center mb-1 text-[var(--color-text-primary)] leading-[2]"
+          className="mu-settings-preview-ar"
           dir="rtl"
           style={{ fontFamily: "var(--font-arabic)", fontSize: `${store.arabicFontSize}rem` }}
         >
           بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
         </p>
         <p
-          className="text-center mb-2 text-[var(--color-text-translation)] leading-relaxed"
+          className="mu-settings-preview-tr"
           style={{ fontSize: `${store.translationFontSize}rem` }}
         >
           {t.settings.mealPreview}
         </p>
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <button onClick={() => store.setArabicFontSize(store.arabicFontSize - 0.2)} className="w-7 h-7 rounded-lg border border-[var(--color-border)] flex items-center justify-center text-xs font-bold shrink-0" aria-label={`${t.a11y?.arabicFontSize ?? "Arabic font size"} -`}>A-</button>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button onClick={() => store.setArabicFontSize(store.arabicFontSize - 0.2)} className="mu-settings-size-btn" aria-label={`${t.a11y?.arabicFontSize ?? "Arabic font size"} -`}>A-</button>
             <input type="range" min={arabicMin} max={arabicMax} step={0.1} value={store.arabicFontSize}
-              onChange={(e) => store.setArabicFontSize(parseFloat(e.target.value))} className="settings-range flex-1"
+              onChange={(e) => store.setArabicFontSize(parseFloat(e.target.value))} className="mu-settings-range"
               aria-label={t.a11y?.arabicFontSize ?? "Arabic font size"} aria-valuemin={arabicMin} aria-valuemax={arabicMax} aria-valuenow={store.arabicFontSize} />
-            <button onClick={() => store.setArabicFontSize(store.arabicFontSize + 0.2)} className="w-7 h-7 rounded-lg border border-[var(--color-border)] flex items-center justify-center text-xs font-bold shrink-0" aria-label={`${t.a11y?.arabicFontSize ?? "Arabic font size"} +`}>A+</button>
+            <button onClick={() => store.setArabicFontSize(store.arabicFontSize + 0.2)} className="mu-settings-size-btn" aria-label={`${t.a11y?.arabicFontSize ?? "Arabic font size"} +`}>A+</button>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-[var(--color-text-secondary)] w-7 text-center shrink-0">Aa</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 10, color: "var(--mu-muted)", width: 28, textAlign: "center", flexShrink: 0 }}>Aa</span>
             <input type="range" min={mealMin} max={mealMax} step={0.05} value={store.translationFontSize}
-              onChange={(e) => store.setTranslationFontSize(parseFloat(e.target.value))} className="settings-range flex-1"
+              onChange={(e) => store.setTranslationFontSize(parseFloat(e.target.value))} className="mu-settings-range"
               aria-label={t.a11y?.translationFontSize ?? "Translation font size"} aria-valuemin={mealMin} aria-valuemax={mealMax} aria-valuenow={store.translationFontSize} />
             <button
               onClick={() => { store.setArabicFontSize(1.8); store.setTranslationFontSize(0.95); }}
-              className="text-[10px] text-[var(--color-accent)] shrink-0"
+              style={{ fontSize: 10, color: "var(--mu-accent)", flexShrink: 0, background: "none", border: "none", cursor: "pointer", fontFamily: "var(--mu-ff-ui)" }}
             >
               {t.settings.fontDefault}
             </button>
@@ -310,7 +319,7 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
 
       {/* ── Meal ── */}
       <div>
-        <div className="flex items-center justify-between mb-1.5">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
           <Label>{t.settings.translation}</Label>
           <Toggle checked={store.showTranslation} onChange={store.toggleTranslation} />
         </div>
@@ -334,10 +343,10 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
 
       <Divider />
 
-      {/* ── Okuma Modu — 3 seçenek ── */}
+      {/* ── Okuma Modu -- 3 secenek ── */}
       <div>
         <Label>{t.settings.readingMode}</Label>
-        <div className="grid grid-cols-3 gap-1.5 mt-1">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 4 }}>
           {([
             { value: "mushaf" as ReadingMode, label: t.settings.modeMushaf, icon: MushafIcon },
             { value: "verse" as ReadingMode, label: t.settings.modeVerse, icon: VerseIcon },
@@ -348,32 +357,26 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
               <button
                 key={value}
                 onClick={() => onModeChange(value)}
-                className={`flex flex-col items-center gap-1.5 py-2.5 px-1 rounded border text-[10px] font-medium leading-tight transition-colors ${
-                  active
-                    ? "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
-                    : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/40"
-                }`}
+                className={`mu-settings-mode-btn ${active ? "on" : ""}`}
               >
                 <Icon size={18} active={active} />
-                <span className="text-center">{label}</span>
+                <span>{label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Mod bazlı seçenekler */}
-        <div className="mt-3 space-y-2">
-          {/* Mushaf + Ayet Ayet: Meal toggle */}
+        {/* Mod bazli secenekler */}
+        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
           {store.readingMode !== "wbw" && (
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[var(--color-text-secondary)]">{t.settings.translation}</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 12, color: "var(--mu-muted)" }}>{t.settings.translation}</span>
               <Toggle checked={store.showTranslation} onChange={store.toggleTranslation} />
             </div>
           )}
-          {/* Kırık Meal: Transliterasyon toggle */}
           {store.readingMode === "wbw" && (
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[var(--color-text-secondary)]">{t.settings.wbwTransliteration}</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 12, color: "var(--mu-muted)" }}>{t.settings.wbwTransliteration}</span>
               <Toggle checked={store.showTranslit} onChange={store.toggleTranslit} />
             </div>
           )}
@@ -392,41 +395,65 @@ function GeneralTab({ store, locale, setLocale, t }: {
   t: any;
 }) {
   return (
-    <div id="settings-tab-general" role="tabpanel" className="space-y-4">
+    <div id="settings-tab-general" role="tabpanel" className="mu-settings-content">
       {/* ── Tema ── */}
-      <div className="grid grid-cols-4 gap-1.5">
-        {THEMES.map((item) => {
+      <div style={{ display: "flex", gap: 6 }}>
+        {([
+          { id: "light" as const, icon: <SunIcon /> },
+          { id: "sepia" as const, icon: <SepiaIcon /> },
+          { id: "dark" as const, icon: <MoonIcon /> },
+        ]).map((item) => {
           const active = store.theme === item.id;
           return (
             <button
               key={item.id}
               onClick={() => store.setTheme(item.id)}
-              className="flex flex-col items-center gap-1 focus:outline-none"
-              aria-label={t.settings.themes[item.labelKey]}
+              aria-label={item.id}
+              style={{
+                display: "grid",
+                placeItems: "center",
+                width: 44,
+                height: 44,
+                borderRadius: "50%",
+                border: "1.5px solid",
+                borderColor: active ? "var(--mu-accent)" : "var(--mu-line)",
+                background: active ? "var(--mu-accent-soft)" : "transparent",
+                color: active ? "var(--mu-accent-ink)" : "var(--mu-muted)",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
             >
-              <div
-                className="w-full aspect-[3/4] rounded-lg overflow-hidden transition-all relative"
-                style={{
-                  background: item.bg,
-                  boxShadow: active ? `0 0 0 2px ${item.accent}` : "0 0 0 1px rgba(128,128,128,0.15)",
-                }}
-              >
-                <div className="flex flex-col items-center justify-center h-full gap-1 px-1.5">
-                  <span className="text-[11px] leading-none" style={{ color: item.text, fontFamily: "var(--font-arabic)" }}>
-                    بسم
-                  </span>
-                  <span className="block rounded-full h-[3px] w-[40%]" style={{ background: item.accent }} />
-                  <div className="flex flex-col gap-[3px] w-full items-center">
-                    <span className="block rounded-full h-[2px] w-[70%]" style={{ background: item.text, opacity: 0.15 }} />
-                  </div>
-                </div>
-              </div>
-              <span className="text-[10px] font-medium" style={{ color: active ? item.accent : "var(--color-text-secondary)" }}>
-                {t.settings.themes[item.labelKey]}
-              </span>
+              {item.icon}
             </button>
           );
         })}
+      </div>
+
+      {/* ── Vurgu Rengi ── */}
+      <div style={{ marginTop: 12 }}>
+        <Label>{t.settings.accentColor}</Label>
+        <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+          {(Object.keys(ACCENT_COLORS) as AccentColorId[]).map((id) => {
+            const active = store.accentColor === id;
+            return (
+              <button
+                key={id}
+                onClick={() => store.setAccentColor(id)}
+                aria-label={t.settings.accents?.[id] ?? id}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  background: ACCENT_COLORS[id].swatch,
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: active ? `0 0 0 2px var(--mu-bg), 0 0 0 4px ${ACCENT_COLORS[id].swatch}` : "none",
+                  transition: "box-shadow 0.15s",
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
 
       <Divider />
@@ -438,8 +465,7 @@ function GeneralTab({ store, locale, setLocale, t }: {
           aria-label={t.settings.language}
           value={locale}
           onChange={(e) => setLocale(e.target.value as Locale)}
-          className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-sm appearance-none cursor-pointer"
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}
+          className="mu-settings-select"
         >
           {getAllLocaleConfigs().map(({ code, config }) => (
             <option key={code} value={code}>{config.displayName}</option>
@@ -460,8 +486,8 @@ function GeneralTab({ store, locale, setLocale, t }: {
           value={store.textStyle}
           onChange={(v) => store.setTextStyle(v as TextStyle)}
         />
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-[11px] text-[var(--color-text-secondary)]">{t.settings.tajweed}</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
+          <span style={{ fontSize: 11, color: "var(--mu-muted)" }}>{t.settings.tajweed}</span>
           <Toggle checked={store.showTajweed} onChange={store.toggleTajweed} disabled={store.textStyle === "basic" || store.colorizeWords} />
         </div>
       </div>
@@ -470,44 +496,39 @@ function GeneralTab({ store, locale, setLocale, t }: {
 
       {/* ── Kelime Renklendirme ── */}
       <div>
-        <div className="flex items-center justify-between mb-1.5">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
           <Label>{t.settings.colorize}</Label>
           <Toggle checked={store.colorizeWords} onChange={() => store.setColorizeWords(!store.colorizeWords)} />
         </div>
         {store.colorizeWords && (
-          <div className="grid grid-cols-2 gap-1.5">
-            {(Object.entries(COLOR_PALETTES) as [ColorPaletteId, typeof COLOR_PALETTES[ColorPaletteId]][]).map(([id, palette]) => (
-              <button
-                key={id}
-                onClick={() => store.setColorPaletteId(id)}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-colors"
-                style={{
-                  borderColor: store.colorPaletteId === id ? "var(--color-accent)" : "var(--color-border)",
-                  background: store.colorPaletteId === id ? "var(--color-accent)" : "transparent",
-                }}
-              >
-                <div className="flex gap-[2px]">
-                  {palette.colors.slice(0, 5).map((c, i) => (
-                    <span key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
-                  ))}
-                </div>
-                <span className="text-[10px] font-medium" style={{ color: store.colorPaletteId === id ? "white" : "var(--color-text-secondary)" }}>
-                  {palette.name}
-                </span>
-              </button>
-            ))}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+            {(Object.entries(COLOR_PALETTES) as [ColorPaletteId, typeof COLOR_PALETTES[ColorPaletteId]][]).map(([id, palette]) => {
+              const active = store.colorPaletteId === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => store.setColorPaletteId(id)}
+                  className={`mu-settings-palette-btn ${active ? "on" : ""}`}
+                >
+                  <span style={{ display: "flex", gap: 2 }}>
+                    {palette.colors.slice(0, 5).map((c, i) => (
+                      <span key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />
+                    ))}
+                  </span>
+                  <span style={{ fontSize: 10, fontWeight: 500, color: active ? "var(--mu-bg)" : "var(--mu-muted)" }}>
+                    {palette.name}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-
       <Divider />
 
-      {/* ── Sıfırla ── */}
-      <button
-        onClick={store.resetToDefaults}
-        className="w-full py-2 rounded-lg border border-[var(--color-border)] text-[11px] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] transition-colors"
-      >
+      {/* ── Sifirla ── */}
+      <button onClick={store.resetToDefaults} className="mu-settings-reset">
         {t.settings.resetAll}
       </button>
     </div>
@@ -548,11 +569,11 @@ function TranslationReorder({ store, translationOptions }: { store: any; transla
 // ── Shared UI ────────────────────────────────────────────
 
 function Divider() {
-  return <div className="border-b border-[var(--color-border)]" />;
+  return <div className="mu-settings-divider" />;
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <p className="text-[11px] font-medium text-[var(--color-text-secondary)] mb-1">{children}</p>;
+  return <p className="mu-settings-label">{children}</p>;
 }
 
 function SegmentedControl({ options, value, onChange }: {
@@ -561,16 +582,12 @@ function SegmentedControl({ options, value, onChange }: {
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex rounded-lg overflow-hidden border border-[var(--color-border)]">
+    <div className="mu-settings-seg">
       {options.map((opt) => (
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`flex-1 py-1.5 text-[11px] font-medium transition-colors ${
-            value === opt.value
-              ? "bg-[var(--color-accent)] text-white"
-              : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
-          }`}
+          className={`mu-settings-seg-btn ${value === opt.value ? "on" : ""}`}
         >
           {opt.label}
         </button>
@@ -586,12 +603,9 @@ function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (
       aria-checked={checked}
       onClick={disabled ? undefined : onChange}
       disabled={disabled}
-      className={`relative w-9 h-5 rounded-full transition-colors ${
-        disabled ? "bg-[var(--color-border)] opacity-40 cursor-not-allowed"
-          : checked ? "bg-[var(--color-accent)]" : "bg-[var(--color-border)]"
-      }`}
+      className={`mu-settings-toggle ${checked ? "on" : ""} ${disabled ? "disabled" : ""}`}
     >
-      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-4" : ""}`} />
+      <span className="mu-settings-toggle-knob" />
     </button>
   );
 }
