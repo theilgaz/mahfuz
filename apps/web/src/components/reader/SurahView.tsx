@@ -1,24 +1,30 @@
 /**
- * Sure görünümü (liste modu) — tüm ayetleri sırayla gösterir.
- * Üst bardan sure picker ile başka surelere geçilebilir.
+ * Sure gorünümü (liste modu) — tüm ayetleri sırayla gosterir.
+ * Redesigned layout: top bar, chapter header, verse blocks with side actions,
+ * right sidebar (TOC + font control + bookmarks), footer with nav.
  */
 
 import { useSettingsStore } from "~/stores/settings.store";
 import { useShallow } from "zustand/react/shallow";
 import { useReadingStore } from "~/stores/reading.store";
+import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useTajweed, useImlaei, translationSourcesQueryOptions, useSurahs, surahDataQueryOptions } from "~/hooks/useQuranQuery";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useWbwData } from "~/hooks/useWbwData";
 import { cleanImlaei } from "~/lib/strip-diacritics";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { AyahBlock } from "./AyahBlock";
 import { SurahSkeleton } from "./SurahSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
-import { useEffect, useRef, useCallback, useMemo, type ReactNode } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useCallback, useMemo, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { surahSlug } from "~/lib/surah-slugs";
-import { getSurahName } from "~/lib/surah-names-i18n";
+import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
+import { Ornament } from "~/components/minimal-ui/Ornament";
+import { MuIcons } from "~/components/minimal-ui/icons";
+import { useAudioStore } from "~/stores/audio.store";
+import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
+import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 
 interface SurahViewProps {
   surahId: number;
@@ -34,23 +40,20 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const useBasic = textStyle === "basic";
   const isWbw = readingMode === "wbw";
   const isVerse = readingMode === "verse";
-  // Tecvid: WBW modunda çalışmaz (HTML renderı WBW kelime kartlarıyla çakışır)
   const effectiveTajweed = showTajweed && !useBasic && !isWbw;
-  const { locale } = useTranslation();
+  const { t, locale } = useTranslation();
   const savePosition = useReadingStore((s) => s.savePosition);
-  // keepPreviousData: translationSlugs değiştiğinde askıya almak yerine
-  // eski veriyi göster — sync veya ayar güncellemelerinde "reload" görüntüsünü önler
+  const arabicFontSize = useSettingsStore((s) => s.arabicFontSize);
+
   const { data } = useQuery({
     ...surahDataQueryOptions(surahId, translationSlugs),
     placeholderData: keepPreviousData,
   });
   const { data: tajweedData } = useTajweed(surahId, effectiveTajweed);
   const { data: imlaeiData } = useImlaei(surahId, useBasic);
-  // WBW verisi: WBW modunda kelime kartları, verse modunda tooltip için
   const { data: wbwData } = useWbwData(surahId, isWbw || isVerse, locale);
-
-  // Çoklu meal adları
   const { data: translationSourceList } = useQuery({ ...translationSourcesQueryOptions(), enabled: translationSlugs.length > 1 });
+
   const translationNames = useMemo(() => {
     const map: Record<string, string> = {};
     if (translationSourceList) {
@@ -62,7 +65,8 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const firstPage = data?.ayahs[0]?.pageNumber ?? 0;
   useReadingTracker(firstPage);
 
-  // Scroll'da görünen ayeti takip et
+  // Active verse tracking
+  const [activeAyah, setActiveAyah] = useState(1);
   const ayahRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const setAyahRef = useCallback((ayahNumber: number, el: HTMLDivElement | null) => {
     if (el) ayahRefs.current.set(ayahNumber, el);
@@ -72,7 +76,6 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   useEffect(() => {
     if (!data) return;
 
-    // Sayfa ilk açıldığında ilk ayeti kaydet
     savePosition({
       surahId,
       ayahNumber: 1,
@@ -81,7 +84,6 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Ekranın üst yarısında görünen en küçük ayet numarası
         const visible = entries
           .filter((e) => e.isIntersecting)
           .map((e) => Number(e.target.getAttribute("data-ayah")))
@@ -89,6 +91,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
         if (visible.length === 0) return;
         const topAyah = Math.min(...visible);
+        setActiveAyah(topAyah);
         const ayah = data.ayahs.find((a) => a.ayahNumber === topAyah);
         if (ayah) {
           savePosition({
@@ -101,7 +104,6 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
       { rootMargin: "-50% 0px -50% 0px", threshold: 0 },
     );
 
-    // Observer'a tüm ayet elementlerini ekle
     for (const el of ayahRefs.current.values()) {
       observer.observe(el);
     }
@@ -109,7 +111,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     return () => observer.disconnect();
   }, [surahId, data, savePosition]);
 
-  // highlightAyah varsa o ayete scroll et (double-rAF ensures paint is complete)
+  // Scroll to highlighted ayah
   useEffect(() => {
     if (!highlightAyah || !data) return;
     let id: number;
@@ -122,10 +124,8 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     return () => cancelAnimationFrame(id);
   }, [highlightAyah, data]);
 
-  const { surah, ayahs: ayahList } = data ?? { surah: null, ayahs: [] as never[] };
-  const useVirtual = ayahList.length >= 50;
+  const ayahList = data?.ayahs ?? [];
 
-  // Stable shared props for AyahBlock (memo-friendly)
   const sharedProps = useMemo(() => ({
     surahId,
     useBasic,
@@ -133,7 +133,6 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     effectiveTajweed,
     tajweedData,
     translationNames,
-    // WBW modunda ayah-level meal gösterilmez (kelime altında zaten var)
     showTranslation: showTranslation && !isWbw,
     showTajweed,
     highlightAyah,
@@ -163,151 +162,289 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     [sharedProps],
   );
 
-  if (!data) {
+  if (!data || !data.surah) {
     return <SurahSkeleton />;
   }
 
+  const surah = data.surah;
+  const surahName = getSurahName(surahId, locale) || surah.nameSimple;
+  const surahMeaning = getSurahMeaning(surahId, locale);
+  const typeLabel = surah.revelation === "makkah" ? "Mekki sure" : "Medeni sure";
+
   return (
-    <div className="max-w-3xl mx-auto px-4">
-      {/* Besmele */}
-      {surah.bismillahPre && (
-        <p
-          className="pt-6 pb-4 text-center text-[var(--color-text-primary)]"
-          dir="rtl"
-          style={{ fontFamily: "var(--font-arabic)", fontSize: "clamp(1.6rem, 4vw, 2.8rem)" }}
-        >
-          بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
-        </p>
-      )}
-
-      {useVirtual ? (
-        <VirtualAyahList
-          ayahs={ayahList}
-          renderAyah={renderAyah}
-          setAyahRef={setAyahRef}
-          highlightAyah={highlightAyah}
-        />
-      ) : (
-        <div className="pb-8">
-          {ayahList.map((ayah) => (
-            <div
-              key={ayah.ayahNumber}
-              ref={(el) => setAyahRef(ayah.ayahNumber, el)}
-              data-ayah={ayah.ayahNumber}
-            >
-              {renderAyah(ayah)}
-            </div>
-          ))}
+    <>
+      {/* Top bar */}
+      <div className="mu-reader-topbar">
+        <Link to="/" className="mu-btn ghost small">
+          {MuIcons.back}
+          {t.reader.index}
+        </Link>
+        <span className="mu-chap-eyebrow" style={{ margin: 0 }}>
+          Sure {surahId} · {activeAyah} / {surah.ayahCount}
+        </span>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="mu-v-act-btn" aria-label={t.reader.bookmark}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 4h10v17l-5-3.5L7 21z" />
+            </svg>
+          </button>
+          <button className="mu-v-act-btn" aria-label="Share">
+            {MuIcons.share}
+          </button>
         </div>
-      )}
+      </div>
 
-      {surahId < 114 && <NextSurahCard currentSurahId={surahId} />}
+      <div className="mu-reader" style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
+        {/* Main content */}
+        <div>
+          {/* Chapter header */}
+          <header className="mu-chap-head">
+            <p className="mu-chap-eyebrow">
+              {typeLabel} · {surah.ayahCount} ayet · Nuzul {surah.revelationOrder}
+            </p>
+            <div className="mu-chap-ar" dir="rtl">
+              سُورَةُ {surah.nameArabic}
+            </div>
+            <h1 className="mu-chap-title">
+              <span className="mu-chap-name">{surahName}</span>
+              {surahMeaning && <span className="mu-chap-tr">{surahMeaning}</span>}
+            </h1>
+            <div style={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
+              <Ornament size={22} />
+            </div>
+          </header>
+
+          {/* Bismillah */}
+          {surah.bismillahPre && (
+            <p className="mu-bismillah" dir="rtl">
+              بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
+            </p>
+          )}
+
+          {/* Verses */}
+          <div>
+            {ayahList.map((ayah) => (
+              <div
+                key={ayah.ayahNumber}
+                ref={(el) => setAyahRef(ayah.ayahNumber, el)}
+                data-ayah={ayah.ayahNumber}
+                className={`mu-verse${activeAyah === ayah.ayahNumber ? " active" : ""}`}
+              >
+                <VerseActions
+                  surahId={surahId}
+                  ayahNumber={ayah.ayahNumber}
+                  pageNumber={ayah.pageNumber}
+                />
+                <div>
+                  {renderAyah(ayah)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <footer className="mu-chap-foot">
+            <Ornament size={22} />
+            <p className="mu-chap-end">{t.reader.endOfSurah}</p>
+            <div className="mu-chap-nav">
+              <Link to="/" className="mu-btn ghost">
+                {t.reader.backToIndex}
+              </Link>
+              {surahId < 114 && (
+                <NextSurahButton currentSurahId={surahId} />
+              )}
+            </div>
+          </footer>
+        </div>
+
+        {/* Right sidebar */}
+        <SurahSidebar
+          ayahList={ayahList}
+          activeAyah={activeAyah}
+          surahId={surahId}
+          ayahRefs={ayahRefs}
+        />
+      </div>
+    </>
+  );
+}
+
+// -- Verse side actions (number + bookmark + play + copy) --
+
+function VerseActions({ surahId, ayahNumber, pageNumber }: { surahId: number; ayahNumber: number; pageNumber: number }) {
+  const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surahId, ayahNumber));
+  const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
+  const playSurah = useAudioStore((s) => s.playSurah);
+  const reciterSlug = useSettingsStore((s) => s.reciterSlug);
+
+  const handlePlay = useCallback(async () => {
+    const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
+    const audioData = await fetchChapterAudio(reciterId, surahId);
+    if (audioData) {
+      playSurah(surahId, SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`, audioData, `${surahId}:${ayahNumber}`);
+    }
+  }, [surahId, ayahNumber, reciterSlug, playSurah]);
+
+  return (
+    <div className="mu-v-side">
+      <div className="mu-v-num">
+        <span>{ayahNumber}</span>
+      </div>
+      <div className="mu-v-actions">
+        <button
+          className={`mu-v-act-btn${isBookmarked ? " on" : ""}`}
+          onClick={() => toggleBookmark({ surahId, ayahNumber, pageNumber })}
+          aria-label="Bookmark"
+        >
+          <svg viewBox="0 0 24 24" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 4h10v17l-5-3.5L7 21z" />
+          </svg>
+        </button>
+        <button className="mu-v-act-btn" onClick={handlePlay} aria-label="Play">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </button>
+        <button
+          className="mu-v-act-btn"
+          aria-label="Copy"
+          onClick={() => {
+            const el = document.querySelector(`[data-ayah="${ayahNumber}"]`);
+            const text = el?.textContent ?? "";
+            navigator.clipboard.writeText(text);
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="9" width="11" height="11" rx="1.5" />
+            <path d="M5 15V5a1.5 1.5 0 011.5-1.5H15" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
 
-// ── Sonraki Sure Kartı ───────────────────────────────────
+// -- Right sidebar --
 
-function NextSurahCard({ currentSurahId }: { currentSurahId: number }) {
-  const navigate = useNavigate();
+interface SurahSidebarProps {
+  ayahList: Array<{ ayahNumber: number; translation: string | null }>;
+  activeAyah: number;
+  surahId: number;
+  ayahRefs: React.RefObject<Map<number, HTMLDivElement>>;
+}
+
+function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarProps) {
+  const { t } = useTranslation();
+  const arabicFontSize = useSettingsStore((s) => s.arabicFontSize);
+  const setArabicFontSize = useSettingsStore((s) => s.setArabicFontSize);
+  const bookmarks = useBookmarksStore((s) => s.bookmarks);
+  const STEP = 0.15;
+  const sizeInPx = Math.round(arabicFontSize * 16);
+
+  const surahBookmarks = bookmarks.filter((b) => b.surahId === surahId);
+
+  const scrollToAyah = useCallback((ayahNumber: number) => {
+    const el = ayahRefs.current?.get(ayahNumber);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [ayahRefs]);
+
+  // Show max ~8 TOC items for short surahs, every Nth for long ones
+  const tocItems = useMemo(() => {
+    if (ayahList.length <= 10) return ayahList;
+    const step = Math.ceil(ayahList.length / 8);
+    const items = [];
+    for (let i = 0; i < ayahList.length; i += step) {
+      items.push(ayahList[i]);
+    }
+    return items;
+  }, [ayahList]);
+
+  return (
+    <aside className="mu-rside">
+      {/* Table of Contents */}
+      <div className="mu-rside-block">
+        <h3 className="mu-rside-label">{t.reader.toc}</h3>
+        <ul className="mu-rside-toc">
+          {tocItems.map((ayah) => (
+            <li key={ayah.ayahNumber} className={activeAyah === ayah.ayahNumber ? "on" : ""}>
+              <button onClick={() => scrollToAyah(ayah.ayahNumber)}>
+                <span className="mu-rside-toc-num">
+                  {String(ayah.ayahNumber).padStart(2, "0")}
+                </span>
+                <span className="mu-rside-toc-text">
+                  {ayah.translation
+                    ? ayah.translation.slice(0, 60) + (ayah.translation.length > 60 ? "..." : "")
+                    : `Ayet ${ayah.ayahNumber}`}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Font size control */}
+      <div className="mu-rside-block">
+        <h3 className="mu-rside-label">{t.reader.fontType}</h3>
+        <div className="mu-rside-fontctl">
+          <button
+            onClick={() => setArabicFontSize(arabicFontSize - STEP)}
+            aria-label={t.reader.decreaseFont}
+          >
+            -
+          </button>
+          <div className="mu-rside-fontctl-preview">
+            <span dir="rtl">ا</span>
+          </div>
+          <button
+            onClick={() => setArabicFontSize(arabicFontSize + STEP)}
+            aria-label={t.reader.increaseFont}
+          >
+            +
+          </button>
+          <span className="mu-rside-fontctl-size">{sizeInPx}px</span>
+        </div>
+      </div>
+
+      {/* Bookmarks */}
+      <div className="mu-rside-block">
+        <h3 className="mu-rside-label">{t.nav?.bookmarks ?? "Yer imleri"}</h3>
+        {surahBookmarks.length > 0 ? (
+          <ul className="mu-rside-toc">
+            {surahBookmarks.map((b) => (
+              <li key={b.ayahNumber}>
+                <button onClick={() => scrollToAyah(b.ayahNumber)}>
+                  <span className="mu-rside-toc-num">{b.ayahNumber}</span>
+                  <span className="mu-rside-toc-text">Ayet {b.ayahNumber}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mu-rside-hint">{t.reader.bookmarksHint}</p>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+// -- Next surah button --
+
+function NextSurahButton({ currentSurahId }: { currentSurahId: number }) {
   const { locale, t } = useTranslation();
   const { data: surahs } = useSurahs();
   const nextSurahId = currentSurahId + 1;
   const nextSurah = surahs.find((s) => s.id === nextSurahId);
   if (!nextSurah) return null;
 
-  const name = getSurahName(nextSurahId, locale) || nextSurah.nameSimple;
-
   return (
-    <div className="mt-8 mb-4">
-      <div className="h-px bg-[var(--color-border)] mb-6" />
-      <button
-        onClick={() =>
-          navigate({
-            to: "/surah/$surahSlug",
-            params: { surahSlug: surahSlug(nextSurahId) },
-            search: { ayah: undefined },
-          })
-        }
-        className="w-full flex items-center justify-between gap-3 px-4 py-4 rounded bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] active:bg-[var(--color-accent)]/10 transition-colors group"
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex flex-col items-start min-w-0">
-            <span className="text-xs text-[var(--color-text-secondary)] mb-0.5">{t.reader.nextSurah}</span>
-            <span className="text-sm font-medium text-[var(--color-text-primary)] truncate">{nextSurahId}. {name}</span>
-            <span className="text-xs text-[var(--color-text-secondary)]">{nextSurah.ayahCount} {t.common.verse.toLowerCase()}</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span
-            dir="rtl"
-            className="text-[var(--color-text-secondary)] group-hover:text-[var(--color-accent)] transition-colors"
-            style={{ fontFamily: "var(--font-arabic)", fontSize: "28px", lineHeight: "normal" }}
-          >
-            {nextSurah.nameArabic}
-          </span>
-          <svg
-            width="18" height="18" viewBox="0 0 18 18" fill="none"
-            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-            className="text-[var(--color-text-secondary)] group-hover:text-[var(--color-accent)] transition-colors"
-          >
-            <path d="M6 4l5 5-5 5" />
-          </svg>
-        </div>
-      </button>
-    </div>
-  );
-}
-
-// ── Virtual scrolling for long surahs (100+ ayahs) ──────
-
-const VIRTUAL_OVERSCAN = 5;
-const ESTIMATED_AYAH_HEIGHT = 180;
-
-interface VirtualAyahListProps<T extends { ayahNumber: number }> {
-  ayahs: Array<T>;
-  renderAyah: (ayah: T) => ReactNode;
-  setAyahRef: (ayahNumber: number, el: HTMLDivElement | null) => void;
-  highlightAyah?: number;
-}
-
-function VirtualAyahList<T extends { ayahNumber: number }>({ ayahs, renderAyah, setAyahRef, highlightAyah }: VirtualAyahListProps<T>) {
-  const virtualizer = useVirtualizer({
-    count: ayahs.length,
-    getScrollElement: () => document.documentElement,
-    estimateSize: () => ESTIMATED_AYAH_HEIGHT,
-    overscan: VIRTUAL_OVERSCAN,
-  });
-
-  // Scroll to highlighted ayah
-  useEffect(() => {
-    if (!highlightAyah) return;
-    const idx = ayahs.findIndex((a) => a.ayahNumber === highlightAyah);
-    if (idx >= 0) {
-      virtualizer.scrollToIndex(idx, { align: "center", behavior: "smooth" });
-    }
-  }, [highlightAyah, ayahs, virtualizer]);
-
-  return (
-    <div className="pb-8 relative" style={{ height: virtualizer.getTotalSize() }}>
-      {virtualizer.getVirtualItems().map((virtualRow) => {
-        const ayah = ayahs[virtualRow.index];
-        return (
-          <div
-            key={ayah.ayahNumber}
-            ref={(el) => {
-              virtualizer.measureElement(el);
-              setAyahRef(ayah.ayahNumber, el);
-            }}
-            data-index={virtualRow.index}
-            data-ayah={ayah.ayahNumber}
-            className="absolute left-0 right-0"
-            style={{ transform: `translateY(${virtualRow.start}px)` }}
-          >
-            {renderAyah(ayah)}
-          </div>
-        );
-      })}
-    </div>
+    <Link
+      to="/surah/$surahSlug"
+      params={{ surahSlug: surahSlug(nextSurahId) }}
+      search={{ ayah: undefined }}
+      className="mu-btn primary"
+    >
+      {t.reader.nextSurah}
+      {MuIcons.arrowRight}
+    </Link>
   );
 }

@@ -62,9 +62,6 @@
   --color-text-secondary: #8A8170;
   --color-text-translation: #4A4335;
   --color-border: #E8E8E8;
-  --color-accent: oklch(0.62 0.12 70);
-  --color-word-hover: oklch(0.62 0.12 70 / 0.1);
-  --color-word-hover-text: oklch(0.35 0.08 65);
 
   /* Sayfa cercevesi */
   --frame-color: #b8860b;
@@ -95,9 +92,6 @@
   --color-text-secondary: #7a6e5a;
   --color-text-translation: #5c5040;
   --color-border: #d9d0bc;
-  --color-accent: #8b6914;
-  --color-word-hover: rgba(139, 105, 20, 0.12);
-  --color-word-hover-text: #6b4c00;
 
   /* Sayfa cercevesi */
   --frame-color: #8b6914;
@@ -121,9 +115,6 @@
   --color-text-secondary: #9a9080;
   --color-text-translation: #c4bdb0;
   --color-border: #2a2820;
-  --color-accent: #7aad4a;
-  --color-word-hover: rgba(122, 173, 74, 0.15);
-  --color-word-hover-text: #a4d470;
 
   /* Sayfa cercevesi */
   --frame-color: #7aad4a;
@@ -146,9 +137,6 @@
   --color-text-secondary: #8a9ab0;
   --color-text-translation: #c0ccda;
   --color-border: #1e2e4a;
-  --color-accent: #c8a24e;
-  --color-word-hover: rgba(200, 162, 78, 0.15);
-  --color-word-hover-text: #e0c070;
 
   /* Sayfa cercevesi */
   --frame-color: #c8a24e;
@@ -171,9 +159,6 @@
     --color-text-secondary: #9a9080;
     --color-text-translation: #c4bdb0;
     --color-border: #2a2820;
-    --color-accent: #7aad4a;
-    --color-word-hover: rgba(122, 173, 74, 0.15);
-    --color-word-hover-text: #a4d470;
     --mushaf-bg: #1a1814;
     --mushaf-border: rgba(122, 173, 74, 0.15);
     --mushaf-shadow: rgba(0, 0, 0, 0.3);
