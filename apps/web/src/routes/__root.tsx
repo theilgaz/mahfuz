@@ -524,7 +524,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('loading')` }} />
         <style dangerouslySetInnerHTML={{ __html: `.loading{opacity:0}.loaded{opacity:1;transition:opacity .15s ease}` }} />
       </head>
-      <body className="bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased overflow-x-hidden">
+      <body className="bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased overflow-x-hidden" style={{ overflowX: "hidden" }}>
         <a href="#main-content" className="skip-link">
           {t.a11y?.skipToContent ?? "Skip to content"}
         </a>
