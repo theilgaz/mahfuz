@@ -653,6 +653,39 @@
   background: var(--mu-accent-soft);
 }
 
+/* Alpha bar */
+.mu-alpha-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 0 4px;
+}
+
+.mu-alpha-btn {
+  all: unset;
+  cursor: pointer;
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mu-muted);
+  transition: all 0.15s;
+}
+
+.mu-alpha-btn:hover {
+  color: var(--mu-ink);
+  background: var(--mu-surface);
+}
+
+.mu-alpha-btn.on {
+  color: var(--mu-accent-ink);
+  background: var(--mu-accent-soft);
+}
+
 /* Surah list */
 .mu-slist {
   list-style: none;

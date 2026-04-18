@@ -38,20 +38,39 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
   const readingMode = useSettingsStore((s) => s.readingMode);
   const [tab, setTab] = useState("all");
   const [q, setQ] = useState("");
+  const [alphaFilter, setAlphaFilter] = useState<string | null>(null);
 
   const makkahCount = useMemo(() => surahs.filter((s) => s.revelation === "makkah").length, [surahs]);
   const madinahCount = useMemo(() => surahs.filter((s) => s.revelation === "madinah").length, [surahs]);
+
+  const alphaLetters = useMemo(() => {
+    if (tab !== "alfa") return [];
+    const letters = new Set<string>();
+    for (const s of surahs) {
+      const name = getSurahName(s.id, locale) || s.nameSimple;
+      if (name) letters.add(normalize(name[0]).toUpperCase());
+    }
+    return [...letters].sort((a, b) => a.localeCompare(b, locale));
+  }, [surahs, tab, locale]);
 
   const filtered = useMemo(() => {
     let xs = [...surahs];
     if (tab === "mekki") xs = xs.filter((s) => s.revelation === "makkah");
     else if (tab === "medeni") xs = xs.filter((s) => s.revelation === "madinah");
     else if (tab === "nuzul") xs.sort((a, b) => a.revelationOrder - b.revelationOrder);
-    else if (tab === "alfa") xs.sort((a, b) => {
-      const nameA = getSurahName(a.id, locale) || a.nameSimple;
-      const nameB = getSurahName(b.id, locale) || b.nameSimple;
-      return nameA.localeCompare(nameB, locale);
-    });
+    else if (tab === "alfa") {
+      xs.sort((a, b) => {
+        const nameA = getSurahName(a.id, locale) || a.nameSimple;
+        const nameB = getSurahName(b.id, locale) || b.nameSimple;
+        return nameA.localeCompare(nameB, locale);
+      });
+      if (alphaFilter) {
+        xs = xs.filter((s) => {
+          const name = getSurahName(s.id, locale) || s.nameSimple;
+          return name && normalize(name[0]).toUpperCase() === alphaFilter;
+        });
+      }
+    }
     if (q.trim()) {
       const term = normalize(q);
       xs = xs.filter((s) => {
@@ -67,7 +86,7 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
       });
     }
     return xs;
-  }, [surahs, tab, q, locale]);
+  }, [surahs, tab, q, locale, alphaFilter]);
 
   const tabs = [
     { id: "all", label: t.surahList?.filterAll ?? "Tumu", count: 114 },
@@ -83,7 +102,7 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
         <div className="mu-index-title">
           <h2>{t.surahList?.title ?? "Sure fihristi"}</h2>
           <span className="mu-muted" style={{ fontSize: 13 }}>
-            114 {t.surahList?.surahCount ?? "sure"} - {filtered.length} {t.surahList?.showing ?? "gosteriliyor"}
+            114 {t.surahList?.surahCount ?? "sure"} - {filtered.length} {t.surahList?.showing ?? "gösteriliyor"}
           </span>
         </div>
         <div className="mu-index-search">
@@ -123,13 +142,33 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
           <button
             key={t.id}
             className={`mu-tab ${tab === t.id ? "on" : ""}`}
-            onClick={() => setTab(t.id)}
+            onClick={() => { setTab(t.id); if (t.id !== "alfa") setAlphaFilter(null); }}
           >
             {t.label}
             {t.count != null && <span className="mu-tab-count">{t.count}</span>}
           </button>
         ))}
       </div>
+
+      {tab === "alfa" && alphaLetters.length > 0 && (
+        <div className="mu-alpha-bar">
+          <button
+            className={`mu-alpha-btn ${alphaFilter === null ? "on" : ""}`}
+            onClick={() => setAlphaFilter(null)}
+          >
+            {t.surahList?.filterAll ?? "Tumu"}
+          </button>
+          {alphaLetters.map((letter) => (
+            <button
+              key={letter}
+              className={`mu-alpha-btn ${alphaFilter === letter ? "on" : ""}`}
+              onClick={() => setAlphaFilter(alphaFilter === letter ? null : letter)}
+            >
+              {letter}
+            </button>
+          ))}
+        </div>
+      )}
 
       <ul className="mu-slist">
         {filtered.map((surah) => {
