@@ -205,9 +205,8 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
   return (
     <>
-      <div className="mu-reader" style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
-        {/* Top bar */}
-        <div className="mu-reader-topbar" style={{ flexDirection: "column", gap: 0, padding: "12px 0 0", borderBottom: "none", marginBottom: 24 }}>
+      {/* Top bar - outside grid for sticky */}
+      <div className="mu-reader-topbar" style={{ flexDirection: "column", gap: 0, padding: "12px 0 0", borderBottom: "none" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "0 0 10px" }}>
             {/* Left: back */}
             <Link to="/" className="mu-icon-btn sm" aria-label={t.reader.index} style={{ color: "var(--mu-ink-3)" }}>
@@ -296,6 +295,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
             <div style={{ width: `${progressPct}%`, height: "100%", background: "var(--mu-accent)", borderRadius: 1, transition: "width 0.3s ease" }} />
           </div>
         </div>
+      <div className="mu-reader" style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
         {/* Main content */}
         <div>
           {/* Chapter header */}
