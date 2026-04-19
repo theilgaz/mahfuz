@@ -43,7 +43,7 @@ export function MahfuzLogo({ className, size }: MahfuzLogoProps) {
         </clipPath>
       </defs>
       <g clipPath="url(#ml-ac)">
-        <g transform="translate(101, -15) scale(4.2)">
+        <g transform="translate(103, -90) scale(5.0)">
           <path fill="#fff" d={MEEM_PATH} />
         </g>
       </g>

@@ -42,7 +42,7 @@ export function LogoMeem({ size = 38 }: LogoMeemProps) {
           </clipPath>
         </defs>
         <g clipPath="url(#lm-ac)">
-          <g transform="translate(101, -15) scale(4.2)">
+          <g transform="translate(103, -90) scale(5.0)">
             <path fill="#fff" d={MEEM_PATH} />
           </g>
         </g>
