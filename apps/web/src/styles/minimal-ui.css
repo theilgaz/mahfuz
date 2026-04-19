@@ -161,12 +161,7 @@
 .mu-brand-mark {
   display: inline-grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1.5px solid var(--mu-accent);
-  border-radius: 50%;
   color: var(--mu-accent);
-  background: var(--mu-bg-card);
 }
 
 .mu-brand-wordmark {
