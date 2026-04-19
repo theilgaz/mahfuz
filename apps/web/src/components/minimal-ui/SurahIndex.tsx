@@ -87,11 +87,11 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
   }, [surahs, tab, q, locale, alphaFilter]);
 
   const tabs = [
-    { id: "all", label: t.surahList?.filterAll ?? "Tumu", count: 114 },
-    { id: "mekki", label: t.surahList?.filterMakki ?? "Mekki", count: makkahCount },
-    { id: "medeni", label: t.surahList?.filterMadani ?? "Medeni", count: madinahCount },
-    { id: "alfa", label: t.surahList?.filterAlpha ?? "Alfabetik", count: null },
-    { id: "nuzul", label: t.surahList?.filterNuzul ?? "Nuzul", count: null },
+    { id: "all", label: t.surahList?.filterAll ?? "Tumu", count: 114, icon: null },
+    { id: "mekki", label: t.surahList?.filterMakki ?? "Mekki", count: makkahCount, icon: "/images/kabe-tab.png" },
+    { id: "medeni", label: t.surahList?.filterMadani ?? "Medeni", count: madinahCount, icon: "/images/nebevi-tab.png" },
+    { id: "alfa", label: t.surahList?.filterAlpha ?? "Alfabetik", count: null, icon: null },
+    { id: "nuzul", label: t.surahList?.filterNuzul ?? "Nuzul", count: null, icon: null },
   ];
 
   return (
@@ -142,6 +142,7 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
             className={`mu-tab ${tab === t.id ? "on" : ""}`}
             onClick={() => { setTab(t.id); if (t.id !== "alfa") setAlphaFilter(null); }}
           >
+            {t.icon && <img src={t.icon} alt="" aria-hidden="true" style={{ width: 16, height: 16, objectFit: "contain" }} />}
             {t.label}
             {t.count != null && <span className="mu-tab-count">{t.count}</span>}
           </button>

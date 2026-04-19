@@ -100,10 +100,10 @@ export function SurahList({ surahs }: SurahListProps) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [juzOpen]);
 
-  const filterChips: Array<{ key: typeof surahListFilter; label: string }> = [
+  const filterChips: Array<{ key: typeof surahListFilter; label: string; icon?: string }> = [
     { key: "all", label: t.surahList.filterAll },
-    { key: "makkah", label: t.surahList.filterMakki },
-    { key: "madinah", label: t.surahList.filterMadani },
+    { key: "makkah", label: t.surahList.filterMakki, icon: "/images/kaaba.png" },
+    { key: "madinah", label: t.surahList.filterMadani, icon: "/images/nabawi.png" },
     { key: "nuzul", label: t.surahList.filterNuzul },
   ];
 
@@ -126,12 +126,15 @@ export function SurahList({ surahs }: SurahListProps) {
           <button
             key={chip.key}
             onClick={() => setSurahListFilter(chip.key)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               surahListFilter === chip.key
                 ? "bg-[var(--color-accent)] text-white"
                 : "border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             }`}
           >
+            {chip.icon && (
+              <img src={chip.icon} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
+            )}
             {chip.label}
           </button>
         ))}
