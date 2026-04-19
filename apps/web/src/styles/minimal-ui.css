@@ -859,13 +859,19 @@
 }
 
 .mu-reader-topbar {
-  grid-column: 1 / -1;
+  position: sticky;
+  top: 69px;
+  z-index: 30;
+  background: var(--mu-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 0;
+  padding: 20px 32px;
   border-bottom: 1px solid var(--mu-line);
-  margin-bottom: 32px;
+  max-width: 1320px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .mu-topbar-play {
@@ -1143,10 +1149,10 @@
 /* Reader side panel */
 .mu-rside {
   position: sticky;
-  top: 96px;
+  top: 140px;
   align-self: start;
   height: fit-content;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 150px);
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 0 40px;
@@ -2883,6 +2889,11 @@
     gap: 0;
   }
 
+  .mu-reader-topbar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
   .mu-rside {
     display: none;
   }
@@ -2926,6 +2937,7 @@
   .mu-mobile-search-btn { display: inline-grid; }
   .mu-topbar-inner { padding: 8px 12px; gap: 8px; }
   .mu-topright { margin-left: auto; }
+  .mu-reader-topbar { padding-left: 12px; padding-right: 12px; top: 89px; }
 }
 
 /* ── Subtle paper texture (light themes only) ──────── */
