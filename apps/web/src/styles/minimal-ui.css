@@ -64,7 +64,6 @@
   --mu-line-2: #C2B085;
 }
 
-[data-theme="night"],
 [data-theme="dark"] {
   --mu-bg: #14110C;
   --mu-bg-soft: #1B1712;
@@ -105,10 +104,6 @@
 :root,
 [data-theme="light"],
 [data-theme="dark"],
-[data-theme="sea"],
-[data-theme="quran"],
-[data-theme="night"],
-[data-theme="tezhip"],
 [data-theme="sepia"] {
   --color-bg: var(--mu-bg);
   --color-surface: var(--mu-bg-soft);
@@ -1016,7 +1011,7 @@
 }
 
 .mu-verse:hover {
-  background: color-mix(in oklab, var(--mu-accent-soft), transparent 70%);
+  background: none;
 }
 
 .mu-verse.active .mu-v-ar {
@@ -2937,7 +2932,7 @@
 
 /* ── Subtle paper texture (light themes only) ──────── */
 
-.mu-app:not([data-theme="night"]) {
+.mu-app:not([data-theme="dark"]) {
   background-image:
     radial-gradient(1200px 600px at 100% -200px, rgba(180,140,70,0.08), transparent 60%),
     radial-gradient(900px 500px at -200px 40%, rgba(180,140,70,0.06), transparent 60%);

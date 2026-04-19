@@ -6,10 +6,9 @@ export const es: PartialMessages = {
     close: "Cerrar",
     theme: "Tema",
     themes: {
-      sea: "Mar",
-      night: "Noche",
-      quran: "Corán",
-      tezhip: "Dorado",
+      light: "Claro",
+      sepia: "Sepia",
+      dark: "Oscuro",
     },
     readingMode: "Modo de Lectura",
     modeMushaf: "Mushaf",

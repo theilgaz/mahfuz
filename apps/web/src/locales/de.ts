@@ -6,10 +6,9 @@ export const de: PartialMessages = {
     close: "Schließen",
     theme: "Design",
     themes: {
-      sea: "Meer",
-      night: "Nacht",
-      quran: "Koran",
-      tezhip: "Vergoldet",
+      light: "Hell",
+      sepia: "Sepia",
+      dark: "Dunkel",
     },
     readingMode: "Lesemodus",
     mushafPage: "Mushaf-Seite",

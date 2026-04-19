@@ -6,9 +6,15 @@
 
 # Mahfuz / محفوظ
 
-Read, listen, learn, and memorize the Quran — together.
+Read, listen, learn, and memorize the Quran. Together.
 
 **[mahfuz.ilg.az](https://mahfuz.ilg.az)**
+
+<br>
+
+<img src="apps/web/public/images/screenshot.png" width="720" alt="Mahfuz screenshot">
+
+<img src="apps/web/public/images/screenshot-mobile.png" width="240" alt="Mahfuz mobile">
 
 <br>
 
@@ -28,8 +34,8 @@ Whether you are reading for the first time or working on your hifz, Mahfuz gives
 
 - **Surah view** with verse-by-verse translations, word-by-word breakdown, and tajweed coloring
 - **Mushaf page view** (604 pages) for traditional reading with keyboard and swipe navigation
-- **10+ Turkish translations** including Diyanet, Omer Celik, Omer Nasuhi Bilmen, and Ali Fikri Yavuz
-- **Two text styles** — Uthmani (Medina mushaf script) and simplified Arabic
+- **6 Turkish translations** including Diyanet, Elmalili, Omer Celik, Omer Nasuhi Bilmen, and Ali Fikri Yavuz, plus 18 more across 19 languages
+- **Two text styles**: Uthmani (Medina mushaf script) and simplified Arabic
 - **Bookmarks** and reading position tracking across sessions
 
 ### Listen
@@ -40,35 +46,38 @@ Whether you are reading for the first time or working on your hifz, Mahfuz gives
 
 ### Learn
 
-- **Alifba** — learn the Arabic alphabet: letter forms, pronunciation, and finger tracing
-- **Qaida** — 10-step structured reading curriculum from letters to tajweed
-- **Tajweed rules** — 16 interactive rules with examples (Madd, Idgham, Ikhfa, Izhar, Qalqala, and more)
-- **Verse analysis** — side-by-side translations, morphology, themes, similar verses, and contextual explanations
+- **Alifba**: learn the 28 Arabic letters with forms, pronunciation, and finger tracing
+- **Qaida**: 14-stage structured reading curriculum from letters to tajweed
+- **Tajweed rules**: 17 interactive rules with examples (Madd, Idgham, Ikhfa, Izhar, Qalqala, and more)
+- **Verse analysis**: side-by-side translations, morphology, themes, similar verses, and contextual explanations
 
 ### Play
 
-Five Quran games to test your knowledge:
+Seven Quran games to test your knowledge:
 
-- **Fill in the blank** — complete the missing word in a verse
-- **Verse chain** — connect verses in the correct order
-- **Surah guess** — identify the surah from a verse
-- **Word meaning** — match Arabic words to their meanings
-- **Hexagon** — form words from scattered letters
+- **Fill in the blank**: complete the missing word in a verse
+- **Verse chain**: connect verses in the correct order
+- **Surah guess**: identify the surah from a verse
+- **Word meaning**: match Arabic words to their meanings
+- **Hexagon**: form words from scattered letters
+- **Word prediction**: guess the next word
+- **Verse 2048**: merge matching verse tiles
 
 Plus seven Alifba mini-games for letter recognition and memory. Global leaderboards and achievements.
 
 ### Together
 
-- **Khatm groups** — create or join a group to complete the Quran together, track each member's progress
+- **Khatm groups**: create or join a group to complete the Quran together, track each member's progress
 - **Personal notes** on verses
-- **Hifz tracker** — mark memorized verses and see your progress per surah
+- **Hifz tracker**: mark memorized verses and see your progress per surah
 
 ### Everything else
 
-- **3 themes** — Papyrus (warm), Sea (cool), Night (dark)
-- **7 languages** — Turkish, English, Spanish, French, Arabic, German, Dutch
-- **Offline support** — PWA with Service Worker caching
-- **Auth** — email, Google, and Apple sign-in
+- **3 themes**: Light, Sepia (warm), Dark, with 4 color palettes and 7 accent colors
+- **19 languages** for translations, UI in Turkish, English, Spanish, French, Arabic, German, Dutch
+- **55 reciters** including Mishari Rashid al-Afasy, Al-Husary, Al-Banna, and more
+- **Offline support**: PWA with Service Worker caching
+- **Auth**: email, Google, and Apple sign-in
 
 ## Getting Started
 
@@ -123,20 +132,39 @@ mahfuz-app/
 
 | Translation | Author |
 |-------------|--------|
-| Diyanet Isleri Baskanligi Meali | Diyanet Isleri Baskanligi |
-| Omer Celik Meali | Prof. Dr. Omer Celik |
-| Omer Nasuhi Bilmen Meali | Omer Nasuhi Bilmen |
+| Diyanet İşleri Başkanlığı Meali | Diyanet İşleri Başkanlığı |
+| Elmalılı Yeni Meali | Elmalılı Hamdi Yazır (Sadeleştirilmiş) |
+| Ömer Çelik Meali | Prof. Dr. Ömer Çelik |
+| Ömer Nasuhi Bilmen Meali | Ömer Nasuhi Bilmen |
 | Ali Fikri Yavuz Meali | Ali Fikri Yavuz |
+| Muhammed Esed Meali | Muhammed Esed |
+
+### Translations via [Açık Kuran API](https://acikkuran.com)
+
+| Translation | Author |
+|-------------|--------|
+| Hayat Kitabı Kur'an | Mustafa İslamoğlu |
+| Mesaj: Kuran Çevirisi | Edip Yüksel |
+| Kur'an-ı Kerim Meali | Yaşar Nuri Öztürk |
+| Kur'an Meal-Tefsir | Mehmet Okuyan |
+| Süleymaniye Vakfı Meali | Süleymaniye Vakfı |
+| Yeni Anlayışın Işığında | Bayraktar Bayraklı |
+| Kur'an Çözümü | Ahmed Hulusi |
+| Kur'an Mesajı | Muhammed Esed |
+| Kur'an-ı Kerim ve Yüce Meali | Süleyman Ateş |
+| Kur'an-ı Kerim ve Meali | Suat Yıldırım |
+| Kur'an-ı Kerim ve Türkçe Anlamı | Ali Bulaç |
 
 ### Data Sources
 
-- **[Tanzil.net](https://tanzil.net)** — Quran verse texts in Uthmani and Simple scripts. CC BY 3.0.
-- **[Quran.com API](https://quran.com)** — Word-by-word data, transliteration, and translations.
-- **[Kuran Meali Ebook Olusturucu](https://github.com/alialparslan/Kuran-Meali-Ebook-Olusturucu)** by alialparslan — Ali Fikri Yavuz and Omer Nasuhi Bilmen translations.
+- **[Tanzil.net](https://tanzil.net)** - Quran verse texts in Uthmani and Simple scripts. CC BY 3.0.
+- **[Quran.com API](https://quran.com)** - Word-by-word data, transliteration, and translations.
+- **[Açık Kuran API](https://acikkuran.com)** - Additional Turkish translations and root word analysis.
+- **[Kuran Meali Ebook Oluşturucu](https://github.com/alialparslan/Kuran-Meali-Ebook-Olusturucu)** by alialparslan - Ali Fikri Yavuz and Ömer Nasuhi Bilmen translations.
 
 ### Fonts
 
-- **[KFGQPC Uthmani Hafs](https://fonts.qurancomplex.gov.sa)** — King Fahd Glorious Quran Printing Complex.
+- **[KFGQPC Uthmani Hafs](https://fonts.qurancomplex.gov.sa)** - King Fahd Glorious Quran Printing Complex.
 - **[Scheherazade New](https://fonts.google.com/specimen/Scheherazade+New)** and **[Noto Naskh Arabic](https://fonts.google.com/noto/specimen/Noto+Naskh+Arabic)** from Google Fonts.
 
 ## Contributing

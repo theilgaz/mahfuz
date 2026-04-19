@@ -50,10 +50,17 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "KFGQPCUthmanicScriptHAFS";
+  src: url("/fonts/KFGQPCUthmanicScriptHAFS.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Tema: Deniz (varsayılan) ──────────────────────── */
 
 :root,
-[data-theme="sea"],
 [data-theme="light"] {
   --color-bg: #ffffff;
   --color-surface: #f5f5f5;
@@ -82,31 +89,8 @@
   --line-height-translation: 1.7;
 }
 
-/* ── Tema: Kur'an (sicak okuma temasi) ────────────── */
-
-[data-theme="quran"] {
-  --color-bg: #f5efe0;
-  --color-surface: #ece4d0;
-  --color-text-primary: #2c2416;
-  --color-text-secondary: #7a6e5a;
-  --color-text-translation: #5c5040;
-  --color-border: #d9d0bc;
-
-  /* Sayfa cercevesi */
-  --frame-color: #8b6914;
-  --frame-opacity: 0.15;
-  --frame-corner-opacity: 0.2;
-
-  /* Mushaf kagit */
-  --mushaf-bg: #f7f0de;
-  --mushaf-border: rgba(139, 105, 20, 0.18);
-  --mushaf-shadow: rgba(80, 60, 20, 0.1);
-  --mushaf-inner-shadow: rgba(80, 60, 20, 0.04);
-}
-
 /* ── Tema: Gece ──────────────────────────────────────── */
 
-[data-theme="night"],
 [data-theme="dark"] {
   --color-bg: #0f0e0c;
   --color-surface: #1a1814;
@@ -125,28 +109,6 @@
   --mushaf-border: rgba(122, 173, 74, 0.15);
   --mushaf-shadow: rgba(0, 0, 0, 0.3);
   --mushaf-inner-shadow: rgba(0, 0, 0, 0.15);
-}
-
-/* ── Tema: Tezhip (تذهيب - lacivert & altin) ─────────── */
-
-[data-theme="tezhip"] {
-  --color-bg: #0a1628;
-  --color-surface: #111e38;
-  --color-text-primary: #f0e8d8;
-  --color-text-secondary: #8a9ab0;
-  --color-text-translation: #c0ccda;
-  --color-border: #1e2e4a;
-
-  /* Sayfa cercevesi */
-  --frame-color: #c8a24e;
-  --frame-opacity: 0.7;
-  --frame-corner-opacity: 0.9;
-
-  /* Mushaf kagit */
-  --mushaf-bg: #141e34;
-  --mushaf-border: rgba(200, 162, 78, 0.25);
-  --mushaf-shadow: rgba(0, 0, 0, 0.4);
-  --mushaf-inner-shadow: rgba(0, 0, 0, 0.2);
 }
 
 /* Sistem karanlık modu -> tema secilmediyse gece temasi */
@@ -202,7 +164,7 @@
 /* ── Tecvid karanlık tema ────────────────────────────── */
 
 /* Night + sistem karanlık → her zaman dark tecvid */
-:is([data-theme="night"], [data-theme="dark"], [data-theme="tezhip"], :root:not([data-theme])) {
+:is([data-theme="dark"], :root:not([data-theme])) {
   & .tajweed-madda_normal { color: #5ab0e0; }
   & .tajweed-madda_permissible { color: #7ac4e8; }
   & .tajweed-madda_necessary { color: #3a8fc0; }
@@ -536,4 +498,55 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
 
 ::view-transition-new(root) {
   animation: vt-fade-in 120ms ease-in;
+}
+
+/* ── Mushaf Stil Cerceceleri ────────────────────────── */
+
+[data-mushaf-style="medine"] {
+  --frame-primary: #b8860b;
+  --frame-secondary: #c8a24e;
+  --frame-border: rgba(184, 134, 11, 0.3);
+  --frame-ornament: rgba(184, 134, 11, 0.12);
+  --frame-line: rgba(184, 134, 11, 0.08);
+}
+
+[data-mushaf-style="beirut"] {
+  --frame-primary: #2a5a3a;
+  --frame-secondary: #8b2020;
+  --frame-border: rgba(42, 90, 58, 0.3);
+  --frame-ornament: rgba(42, 90, 58, 0.12);
+  --frame-line: rgba(42, 90, 58, 0.08);
+}
+
+[data-mushaf-style="turkish"] {
+  --frame-primary: #8b2020;
+  --frame-secondary: #b8860b;
+  --frame-border: rgba(139, 32, 32, 0.2);
+  --frame-ornament: rgba(139, 32, 32, 0.10);
+  --frame-line: rgba(139, 32, 32, 0.06);
+}
+
+/* Dark tema varyantlari */
+[data-theme="dark"] [data-mushaf-style="medine"] {
+  --frame-primary: #d4a24e;
+  --frame-secondary: #e8c06a;
+  --frame-border: rgba(212, 162, 78, 0.25);
+  --frame-ornament: rgba(212, 162, 78, 0.10);
+  --frame-line: rgba(212, 162, 78, 0.06);
+}
+
+[data-theme="dark"] [data-mushaf-style="beirut"] {
+  --frame-primary: #4a9a6a;
+  --frame-secondary: #c05050;
+  --frame-border: rgba(74, 154, 106, 0.25);
+  --frame-ornament: rgba(74, 154, 106, 0.10);
+  --frame-line: rgba(74, 154, 106, 0.06);
+}
+
+[data-theme="dark"] [data-mushaf-style="turkish"] {
+  --frame-primary: #c05050;
+  --frame-secondary: #d4a24e;
+  --frame-border: rgba(192, 80, 80, 0.20);
+  --frame-ornament: rgba(192, 80, 80, 0.08);
+  --frame-line: rgba(192, 80, 80, 0.05);
 }
