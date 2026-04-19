@@ -6,7 +6,7 @@
 
 # Mahfuz / محفوظ
 
-A minimal, distraction-free Quran companion for the web.
+Read, listen, learn, and memorize the Quran — together.
 
 **[mahfuz.ilg.az](https://mahfuz.ilg.az)**
 
@@ -16,20 +16,59 @@ A minimal, distraction-free Quran companion for the web.
 
 ---
 
-## About
+## What is Mahfuz?
 
-Mahfuz is a Quran companion designed around simplicity. No clutter, no ads. Just the text and the tools you need to read, listen, and search.
+Mahfuz started as a simple Quran reader and grew into a full learning companion. No ads, no distractions. It is open source and free to use.
 
-- **Two reading modes.** Verse list for focused reading and a traditional Mushaf page view.
-- **Audio playback.** Verse or surah-level playback with reciter selection and adjustable speed.
-- **Full-text search.** Search across Arabic text and translations with diacritics stripping.
-- **Bookmarks.** Save verses and access them from the home page.
-- **Reading tracker.** Remembers last position and shows a continue-reading card.
-- **3 themes.** Papyrus, Sea, and Night.
-- **Tajweed coloring.** Optional color-coded tajweed rules on Uthmani text.
-- **Two text styles.** Uthmani (Medina mushaf) and Basic (simple script).
-- **7 languages.** Turkish, English, Spanish, French, Arabic, German, and Dutch interface with auto-detection.
-- **Offline first.** PWA with Service Worker caching.
+Whether you are reading for the first time or working on your hifz, Mahfuz gives you the tools without getting in the way.
+
+## Features
+
+### Read
+
+- **Surah view** with verse-by-verse translations, word-by-word breakdown, and tajweed coloring
+- **Mushaf page view** (604 pages) for traditional reading with keyboard and swipe navigation
+- **10+ Turkish translations** including Diyanet, Omer Celik, Omer Nasuhi Bilmen, and Ali Fikri Yavuz
+- **Two text styles** — Uthmani (Medina mushaf script) and simplified Arabic
+- **Bookmarks** and reading position tracking across sessions
+
+### Listen
+
+- Verse-level and surah-level audio playback with word-by-word highlighting
+- Multiple reciters with adjustable speed and volume
+- Continuous playback across verses
+
+### Learn
+
+- **Alifba** — learn the Arabic alphabet: letter forms, pronunciation, and finger tracing
+- **Qaida** — 10-step structured reading curriculum from letters to tajweed
+- **Tajweed rules** — 16 interactive rules with examples (Madd, Idgham, Ikhfa, Izhar, Qalqala, and more)
+- **Verse analysis** — side-by-side translations, morphology, themes, similar verses, and contextual explanations
+
+### Play
+
+Five Quran games to test your knowledge:
+
+- **Fill in the blank** — complete the missing word in a verse
+- **Verse chain** — connect verses in the correct order
+- **Surah guess** — identify the surah from a verse
+- **Word meaning** — match Arabic words to their meanings
+- **Hexagon** — form words from scattered letters
+
+Plus seven Alifba mini-games for letter recognition and memory. Global leaderboards and achievements.
+
+### Together
+
+- **Khatm groups** — create or join a group to complete the Quran together, track each member's progress
+- **Personal notes** on verses
+- **Hifz tracker** — mark memorized verses and see your progress per surah
+
+### Everything else
+
+- **3 themes** — Papyrus (warm), Sea (cool), Night (dark)
+- **7 languages** — Turkish, English, Spanish, French, Arabic, German, Dutch
+- **Offline support** — PWA with Service Worker caching
+- **Auth** — email, Google, and Apple sign-in
 
 ## Getting Started
 
@@ -43,128 +82,68 @@ npx pnpm@9 dev
 
 Dev server runs at `http://localhost:3001`.
 
-### Available Scripts
-
-| Command | Description |
+| Command | What it does |
 |---------|-------------|
-| `npx pnpm@9 dev` | Start development server |
-| `npx pnpm@9 build` | Production build (all packages) |
-| `npx pnpm@9 lint` | Run ESLint |
-| `npx pnpm@9 typecheck` | TypeScript type checking |
-| `npx pnpm@9 format` | Format with Prettier |
+| `npx pnpm@9 dev` | Start dev server |
+| `npx pnpm@9 build` | Production build |
+| `npx pnpm@9 lint` | ESLint |
+| `npx pnpm@9 typecheck` | TypeScript checking |
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | React 19 + TanStack Start (SSR) |
-| Routing | TanStack Router (file-based) |
-| Data | TanStack Query |
+| | |
+|---|---|
+| Framework | React 19, TanStack Start (SSR), TanStack Router |
 | Styling | Tailwind CSS v4 |
-| Build | Vite 7 + Turborepo |
-| State | Zustand (5 focused stores) |
-| Database | Drizzle ORM + LibSQL |
-| Auth | Better Auth v1.5 |
-| Deploy | Dokploy (Docker, Node.js SSR) |
-| Package manager | pnpm 9 |
+| State | Zustand |
+| Data | TanStack Query, Drizzle ORM, LibSQL / Turso |
+| Auth | Better Auth (email + Google + Apple) |
+| Build | Vite 7, Turborepo, pnpm |
+| Deploy | Docker (node:22-alpine), Dokploy |
 
 ## Project Structure
 
 ```
 mahfuz-app/
 ├── apps/
-│   └── web/                      Main web application
-│       ├── server.mjs            Node.js SSR server
-│       ├── Dockerfile            Multi-stage Docker build
-│       ├── drizzle/              Database migrations
-│       └── src/
-│           ├── components/       UI components (22 files)
-│           │   ├── reader/       AyahBlock, MushafPage, SurahView, AudioBar...
-│           │   ├── habit/        HabitDashboard, StreakCard, WeeklyChart
-│           │   └── icons/        MahfuzLogo
-│           ├── hooks/            Custom hooks (5 files)
-│           ├── locales/          i18n strings (tr, en, es, fr, ar, de, nl)
-│           ├── lib/              Utilities (13 files)
-│           ├── routes/           File-based routes (12 files)
-│           ├── stores/           Zustand stores (5 files)
-│           └── db/               Drizzle schema
+│   ├── web/                 Main web app (React + TanStack Start)
+│   └── mobile/              Expo mobile app (planned)
 ├── packages/
-│   ├── api/                      Quran.com API client with IndexedDB cache
-│   ├── audio-engine/             Playback engine with word-level sync
-│   ├── db/                       Dexie IndexedDB schemas and Drizzle ORM
-│   ├── gamification/             Badge and achievement system
-│   ├── memorization/             SM-2 spaced repetition algorithm
-│   ├── sdk/                      Public SDK (planned)
-│   └── shared/                   Types, constants, curriculum data
-└── tooling/                      Shared ESLint, TypeScript, Tailwind configs
-```
-
-### Routes
-
-| Route | Description |
-|-------|-------------|
-| `/` | Home — continue reading, bookmarks, surah list |
-| `/surah/$surahSlug` | Surah reader (verse list with translations) |
-| `/page/$pageNumber` | Mushaf page view |
-| `/juz/$juzId` | Juz reader (redirects to first page) |
-| `/search` | Full-text search |
-| `/bookmarks` | Saved verses |
-| `/auth/login` | Login / register |
-| `/auth/callback` | OAuth callback |
-
-### Stores
-
-| Store | Purpose |
-|-------|---------|
-| `settings` | Theme, reading mode, font sizes, translation, reciter, text style |
-| `reading` | Last reading position, history |
-| `bookmarks` | Saved verses with timestamps |
-| `audio` | AudioEngine ref, playback state |
-| `locale` | Current UI language |
-
-## Architecture
-
-### Data Flow
-
-```
-Quran API (api.quran.com)
-    ↓
-Service Worker (stale-while-revalidate)
-    ↓
-TanStack Query (in-memory, 24h gcTime)
-    ↓
-React Components (Zustand for UI state)
-    ↓
-Server DB (LibSQL via Drizzle ORM)
+│   ├── shared/              Types, constants, curriculum data
+│   ├── audio-engine/        Playback with word-level sync
+│   ├── api/                 Quran.com API client
+│   ├── gamification/        Badge and achievement system
+│   └── memorization/        SM-2 spaced repetition
+└── tooling/                 Shared ESLint, TypeScript, Tailwind configs
 ```
 
 ## Credits
 
 ### Translations
 
-| Translation | Author | Source |
-|-------------|--------|--------|
-| Diyanet İşleri Başkanlığı Meali | Diyanet İşleri Başkanlığı | [quran.com](https://quran.com) API |
-| Ömer Çelik Meali | Prof. Dr. Ömer Çelik | [kuranvemeali.com](https://www.kuranvemeali.com) |
-| Ömer Nasuhi Bilmen Meali | Ömer Nasuhi Bilmen | [kuranayetleri.net](https://kuranayetleri.net) |
-| Ali Fikri Yavuz Meali | Ali Fikri Yavuz | [kuranayetleri.net](https://kuranayetleri.net) |
+| Translation | Author |
+|-------------|--------|
+| Diyanet Isleri Baskanligi Meali | Diyanet Isleri Baskanligi |
+| Omer Celik Meali | Prof. Dr. Omer Celik |
+| Omer Nasuhi Bilmen Meali | Omer Nasuhi Bilmen |
+| Ali Fikri Yavuz Meali | Ali Fikri Yavuz |
 
 ### Data Sources
 
-- **[Tanzil.net](https://tanzil.net).** Quran verse texts in Uthmani and Simple scripts. Licensed under Creative Commons BY 3.0.
-- **[Quran.com API](https://quran.com).** Word-by-word data, transliteration, and Diyanet translation.
-- **[Kuran Meali Ebook Oluşturucu](https://github.com/alialparslan/Kuran-Meali-Ebook-Olusturucu)** by alialparslan. Ali Fikri Yavuz and Ömer Nasuhi Bilmen translations in JSON format.
+- **[Tanzil.net](https://tanzil.net)** — Quran verse texts in Uthmani and Simple scripts. CC BY 3.0.
+- **[Quran.com API](https://quran.com)** — Word-by-word data, transliteration, and translations.
+- **[Kuran Meali Ebook Olusturucu](https://github.com/alialparslan/Kuran-Meali-Ebook-Olusturucu)** by alialparslan — Ali Fikri Yavuz and Omer Nasuhi Bilmen translations.
 
 ### Fonts
 
-- **[KFGQPC Uthmani Hafs](https://fonts.qurancomplex.gov.sa).** King Fahd Glorious Quran Printing Complex.
-- **[Google Fonts](https://fonts.google.com).** Scheherazade New, Noto Naskh Arabic.
+- **[KFGQPC Uthmani Hafs](https://fonts.qurancomplex.gov.sa)** — King Fahd Glorious Quran Printing Complex.
+- **[Scheherazade New](https://fonts.google.com/specimen/Scheherazade+New)** and **[Noto Naskh Arabic](https://fonts.google.com/noto/specimen/Noto+Naskh+Arabic)** from Google Fonts.
 
 ## Contributing
 
-Contributions are welcome and encouraged. Whether you work with React, mobile development, or are passionate about building tools for the Quran, there is a place for you here.
+Contributions are welcome. Whether you work with React, care about accessibility, or want to improve translations, there is room for you here.
 
-Start by opening an issue to discuss your idea, then send a pull request.
+Open an issue first so we can talk about it, then send a pull request.
 
 ## License
 
