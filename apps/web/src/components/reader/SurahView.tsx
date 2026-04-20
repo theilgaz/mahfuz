@@ -33,6 +33,7 @@ interface SurahViewProps {
 }
 
 export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
+  const navigate = useNavigate();
   const showTranslation = useSettingsStore((s) => s.showTranslation);
   const readingMode = useSettingsStore((s) => s.readingMode);
   const setReadingMode = useSettingsStore((s) => s.setReadingMode);
@@ -66,6 +67,9 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
   const firstPage = data?.ayahs[0]?.pageNumber ?? 0;
   useReadingTracker(firstPage);
+
+  const isSurahBookmarked = useBookmarksStore((s) => s.bookmarks.some((b) => b.surahId === surahId && b.ayahNumber === 1));
+  const toggleSurahBookmark = useBookmarksStore((s) => s.toggleBookmark);
 
   // Active verse tracking
   const [activeAyah, setActiveAyah] = useState(1);
@@ -275,9 +279,26 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
                   </svg>
                   {t.settings.modeWbw}
                 </button>
+                <button
+                  className="mu-mode-seg-btn"
+                  onClick={() => navigate({ to: "/page/$pageNumber", params: { pageNumber: String(firstPage || 1) }, search: { ayah: undefined } })}
+                >
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="2" width="14" height="16" rx="2" />
+                    <line x1="7" y1="6" x2="13" y2="6" />
+                    <line x1="7" y1="9" x2="13" y2="9" />
+                    <line x1="7" y1="12" x2="11" y2="12" />
+                  </svg>
+                  Mushaf
+                </button>
               </div>
-              <button className="mu-icon-btn sm" aria-label={t.reader.bookmark} style={{ color: "var(--mu-ink-3)" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <button
+                className="mu-icon-btn sm"
+                aria-label={t.reader.bookmark}
+                style={{ color: isSurahBookmarked ? "var(--mu-accent)" : "var(--mu-ink-3)" }}
+                onClick={() => toggleSurahBookmark({ surahId, ayahNumber: 1, pageNumber: firstPage || 1 })}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill={isSurahBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M7 4h10v17l-5-3.5L7 21z" />
                 </svg>
               </button>
@@ -379,15 +400,22 @@ function VerseActions({ surahId, ayahNumber, pageNumber }: { surahId: number; ay
   const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surahId, ayahNumber));
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
   const playSurah = useAudioStore((s) => s.playSurah);
+  const currentChapterId = useAudioStore((s) => s.chapterId);
+  const engine = useAudioStore((s) => s.engine);
   const reciterSlug = useSettingsStore((s) => s.reciterSlug);
 
   const handlePlay = useCallback(async () => {
+    const verseKey = `${surahId}:${ayahNumber}`;
+    if (currentChapterId === surahId && engine) {
+      engine.playByKey(verseKey);
+      return;
+    }
     const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
     const audioData = await fetchChapterAudio(reciterId, surahId);
     if (audioData) {
-      playSurah(surahId, SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`, audioData, `${surahId}:${ayahNumber}`);
+      playSurah(surahId, SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`, audioData, verseKey);
     }
-  }, [surahId, ayahNumber, reciterSlug, playSurah]);
+  }, [surahId, ayahNumber, currentChapterId, engine, reciterSlug, playSurah]);
 
   return (
     <div className="mu-v-side">
@@ -524,7 +552,13 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
               <li key={b.ayahNumber}>
                 <button onClick={() => scrollToAyah(b.ayahNumber)}>
                   <span className="mu-rside-toc-num">{b.ayahNumber}</span>
-                  <span className="mu-rside-toc-text">Ayet {b.ayahNumber}</span>
+                  <span className="mu-rside-toc-text">
+                    {(() => {
+                      const ayah = ayahList.find((a) => a.ayahNumber === b.ayahNumber);
+                      const tr = ayah?.translation;
+                      return tr ? tr.slice(0, 60) + (tr.length > 60 ? "..." : "") : `Ayet ${b.ayahNumber}`;
+                    })()}
+                  </span>
                 </button>
               </li>
             ))}

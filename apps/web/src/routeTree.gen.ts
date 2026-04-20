@@ -13,6 +13,7 @@ import { Route as TajweedRouteImport } from './routes/tajweed'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReciteRouteImport } from './routes/recite'
+import { Route as PromoRouteImport } from './routes/promo'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as NotesRouteImport } from './routes/notes'
@@ -28,6 +29,7 @@ import { Route as KhatmIndexRouteImport } from './routes/khatm/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as AlifbaIndexRouteImport } from './routes/alifba/index'
 import { Route as SurahSurahSlugRouteImport } from './routes/surah/$surahSlug'
+import { Route as QaidaPlacementRouteImport } from './routes/qaida/placement'
 import { Route as PagePageNumberRouteImport } from './routes/page/$pageNumber'
 import { Route as KhatmGroupIdRouteImport } from './routes/khatm/$groupId'
 import { Route as JuzJuzIdRouteImport } from './routes/juz/$juzId'
@@ -84,6 +86,11 @@ const SearchRoute = SearchRouteImport.update({
 const ReciteRoute = ReciteRouteImport.update({
   id: '/recite',
   path: '/recite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PromoRoute = PromoRouteImport.update({
+  id: '/promo',
+  path: '/promo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -159,6 +166,11 @@ const AlifbaIndexRoute = AlifbaIndexRouteImport.update({
 const SurahSurahSlugRoute = SurahSurahSlugRouteImport.update({
   id: '/surah/$surahSlug',
   path: '/surah/$surahSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QaidaPlacementRoute = QaidaPlacementRouteImport.update({
+  id: '/qaida/placement',
+  path: '/qaida/placement',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PagePageNumberRoute = PagePageNumberRouteImport.update({
@@ -358,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
+  '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
@@ -379,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
+  '/qaida/placement': typeof QaidaPlacementRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
@@ -415,6 +429,7 @@ export interface FileRoutesByTo {
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
+  '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
@@ -435,6 +450,7 @@ export interface FileRoutesByTo {
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
+  '/qaida/placement': typeof QaidaPlacementRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba': typeof AlifbaIndexRoute
   '/games': typeof GamesIndexRoute
@@ -473,6 +489,7 @@ export interface FileRoutesById {
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
+  '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/stats': typeof StatsRoute
@@ -494,6 +511,7 @@ export interface FileRoutesById {
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
+  '/qaida/placement': typeof QaidaPlacementRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
@@ -533,6 +551,7 @@ export interface FileRouteTypes {
     | '/notes'
     | '/premium'
     | '/profile'
+    | '/promo'
     | '/recite'
     | '/search'
     | '/stats'
@@ -554,6 +573,7 @@ export interface FileRouteTypes {
     | '/juz/$juzId'
     | '/khatm/$groupId'
     | '/page/$pageNumber'
+    | '/qaida/placement'
     | '/surah/$surahSlug'
     | '/alifba/'
     | '/games/'
@@ -590,6 +610,7 @@ export interface FileRouteTypes {
     | '/notes'
     | '/premium'
     | '/profile'
+    | '/promo'
     | '/recite'
     | '/search'
     | '/stats'
@@ -610,6 +631,7 @@ export interface FileRouteTypes {
     | '/juz/$juzId'
     | '/khatm/$groupId'
     | '/page/$pageNumber'
+    | '/qaida/placement'
     | '/surah/$surahSlug'
     | '/alifba'
     | '/games'
@@ -647,6 +669,7 @@ export interface FileRouteTypes {
     | '/notes'
     | '/premium'
     | '/profile'
+    | '/promo'
     | '/recite'
     | '/search'
     | '/stats'
@@ -668,6 +691,7 @@ export interface FileRouteTypes {
     | '/juz/$juzId'
     | '/khatm/$groupId'
     | '/page/$pageNumber'
+    | '/qaida/placement'
     | '/surah/$surahSlug'
     | '/alifba/'
     | '/games/'
@@ -706,6 +730,7 @@ export interface RootRouteChildren {
   NotesRoute: typeof NotesRoute
   PremiumRoute: typeof PremiumRoute
   ProfileRoute: typeof ProfileRoute
+  PromoRoute: typeof PromoRoute
   ReciteRoute: typeof ReciteRoute
   SearchRoute: typeof SearchRoute
   StatsRoute: typeof StatsRoute
@@ -720,6 +745,7 @@ export interface RootRouteChildren {
   JuzJuzIdRoute: typeof JuzJuzIdRoute
   KhatmGroupIdRoute: typeof KhatmGroupIdRoute
   PagePageNumberRoute: typeof PagePageNumberRoute
+  QaidaPlacementRoute: typeof QaidaPlacementRoute
   SurahSurahSlugRoute: typeof SurahSurahSlugRoute
   AlifbaIndexRoute: typeof AlifbaIndexRoute
   KhatmIndexRoute: typeof KhatmIndexRoute
@@ -767,6 +793,13 @@ declare module '@tanstack/react-router' {
       path: '/recite'
       fullPath: '/recite'
       preLoaderRoute: typeof ReciteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/promo': {
+      id: '/promo'
+      path: '/promo'
+      fullPath: '/promo'
+      preLoaderRoute: typeof PromoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -872,6 +905,13 @@ declare module '@tanstack/react-router' {
       path: '/surah/$surahSlug'
       fullPath: '/surah/$surahSlug'
       preLoaderRoute: typeof SurahSurahSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qaida/placement': {
+      id: '/qaida/placement'
+      path: '/qaida/placement'
+      fullPath: '/qaida/placement'
+      preLoaderRoute: typeof QaidaPlacementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/page/$pageNumber': {
@@ -1214,6 +1254,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotesRoute: NotesRoute,
   PremiumRoute: PremiumRoute,
   ProfileRoute: ProfileRoute,
+  PromoRoute: PromoRoute,
   ReciteRoute: ReciteRoute,
   SearchRoute: SearchRoute,
   StatsRoute: StatsRoute,
@@ -1228,6 +1269,7 @@ const rootRouteChildren: RootRouteChildren = {
   JuzJuzIdRoute: JuzJuzIdRoute,
   KhatmGroupIdRoute: KhatmGroupIdRoute,
   PagePageNumberRoute: PagePageNumberRoute,
+  QaidaPlacementRoute: QaidaPlacementRoute,
   SurahSurahSlugRoute: SurahSurahSlugRoute,
   AlifbaIndexRoute: AlifbaIndexRoute,
   KhatmIndexRoute: KhatmIndexRoute,

@@ -64,14 +64,17 @@ export function applyAccentToDOM(id: AccentColorId, isDark: boolean) {
     document.getElementById("main-content"),
   ].filter(Boolean) as HTMLElement[];
 
-  if (id === "default") {
+  // Fallback if persisted value no longer exists
+  const safeId = id in ACCENT_COLORS ? id : "default";
+
+  if (safeId === "default") {
     for (const el of targets) {
       el.style.removeProperty("--mu-accent");
       el.style.removeProperty("--mu-accent-soft");
       el.style.removeProperty("--mu-accent-ink");
     }
   } else {
-    const vals = isDark ? ACCENT_COLORS[id].dark : ACCENT_COLORS[id].light;
+    const vals = isDark ? ACCENT_COLORS[safeId].dark : ACCENT_COLORS[safeId].light;
     for (const el of targets) {
       el.style.setProperty("--mu-accent", vals.accent);
       el.style.setProperty("--mu-accent-soft", vals.soft);
@@ -214,7 +217,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     }),
     {
       name: "mahfuz-core-settings",
-      version: 5,
+      version: 6,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
@@ -253,6 +256,12 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         if (version < 5) {
           // v4 -> v5: mushaf mode removed
           if (persisted.readingMode === "mushaf") persisted.readingMode = "verse";
+        }
+        if (version < 6) {
+          // v5 -> v6: olive accent removed (default is now olive), yellow removed
+          if (persisted.accentColor === "olive" || persisted.accentColor === "yellow") {
+            persisted.accentColor = "default";
+          }
         }
         return persisted as any;
       },

@@ -9,5 +9,8 @@ public/translations/
 *.db
 *.db-journal
 
+# PDF mushaf page images (large, generated from PDF)
+public/mushaf-pages/
+
 # WBW script generated data (large, regeneratable)
 scripts/data/

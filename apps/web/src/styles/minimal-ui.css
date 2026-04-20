@@ -2776,6 +2776,33 @@
   display: none;
 }
 
+/* Mushaf pager — hide scrollbars, smooth snapping */
+.mushaf-pager {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+.mushaf-pager::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mushaf zoom */
+.mushaf-zoom-container {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+  touch-action: none;
+}
+
+/* Hint arrow fade-in + gentle bounce */
+.mushaf-hint-fade-in {
+  animation: mushafHintIn 1.5s ease 2s both;
+}
+@keyframes mushafHintIn {
+  0% { opacity: 0; transform: translateY(-4px); }
+  50% { opacity: 1; transform: translateY(2px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 .mu-mobile-strip-item {
   all: unset;
   cursor: pointer;

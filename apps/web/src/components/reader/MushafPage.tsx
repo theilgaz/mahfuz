@@ -1,105 +1,36 @@
 /**
- * Mushaf sayfası — fiziksel Kur'an sayfası gibi akan metin.
- * Satır verisi mevcutsa gerçek Mushaf satır düzeni kullanılır.
+ * Mushaf sayfasi -- mushaf goruntuleri + mealler.
  */
 
-import { useShallow } from "zustand/react/shallow";
-import { useSettingsStore, COLOR_PALETTES } from "~/stores/settings.store";
 import { useReadingStore } from "~/stores/reading.store";
-import { useBookmarksStore } from "~/stores/bookmarks.store";
-import { useAudioStore } from "~/stores/audio.store";
-import { usePageData, useTajweed, useImlaei, useMushafLines, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
-import type { MushafPageLines } from "~/hooks/useQuranQuery";
-import { useQuery } from "@tanstack/react-query";
-import { cleanImlaei } from "~/lib/strip-diacritics";
-import { parseTajweed } from "~/lib/tajweed-parser";
-import { splitWords } from "~/lib/split-words";
-import { SurahHeader } from "./SurahHeader";
-import { MushafLineView } from "./MushafLineView";
-import { getSurahName } from "~/lib/surah-names-i18n";
-import { useLocaleStore } from "~/stores/locale.store";
+import { usePageData, translationSourcesQueryOptions } from "~/hooks/useQuranQuery";
+import { useSettingsStore } from "~/stores/settings.store";
+import { useShallow } from "zustand/react/shallow";
 import { MushafSkeleton } from "./MushafSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
-import { useEffect, useState, useCallback, useRef, useMemo, type ReactNode } from "react";
-import { AyahActionMenu } from "./AyahActionMenu";
-import { VerseEndMarker } from "~/components/quran/VerseEndMarker";
-import { SajdahMarker } from "~/components/quran/SajdahMarker";
-import { MushafFrame } from "~/components/quran/MushafFrame";
-import { PageMedallion } from "~/components/quran/PageMedallion";
-import { useTranslation } from "~/hooks/useTranslation";
+import { useEffect, useMemo } from "react";
+import { useLocaleStore } from "~/stores/locale.store";
+import { useQuery } from "@tanstack/react-query";
+import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
+import { getSurahDescription } from "~/lib/surah-descriptions";
 
 interface MushafPageProps {
   pageNumber: number;
-  /** "surahId:ayahNumber" formatında highlight edilecek ayet */
   highlightAyah?: string;
+  /** Render only translations (image handled by route) */
+  translationsOnly?: boolean;
 }
 
-export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
-  const { t } = useTranslation();
-  const { showTranslation, showTajweed, translationSlugs, arabicFontSize, textStyle, mushafSizeMode } = useSettingsStore(
+export function MushafPage({ pageNumber, highlightAyah, translationsOnly }: MushafPageProps) {
+  const savePosition = useReadingStore((s) => s.savePosition);
+  const { translationSlugs, translationFontSize } = useSettingsStore(
     useShallow((s) => ({
-      showTranslation: s.showTranslation,
-      showTajweed: s.showTajweed,
       translationSlugs: s.translationSlugs,
-      arabicFontSize: s.arabicFontSize,
-      textStyle: s.textStyle,
-      mushafSizeMode: s.mushafSizeMode,
+      translationFontSize: s.translationFontSize,
     }))
   );
-  // Fill modunda büyük font boyutu — auto-scale her satırı container genişliğine getirir
-  const effectiveFontSize = mushafSizeMode === "fill" ? 3.5 : arabicFontSize;
-  const useBasic = textStyle === "basic";
-  const effectiveTajweed = showTajweed && !useBasic;
-  const savePosition = useReadingStore((s) => s.savePosition);
   const locale = useLocaleStore((s) => s.locale);
   const { data: pageData } = usePageData(pageNumber, translationSlugs);
-
-  // Mushaf satır verisi (gerçek satır düzeni)
-  const { data: lineData } = useMushafLines(pageNumber, true);
-
-  // Sayfadaki benzersiz sure ID'leri
-  const surahIds = useMemo(
-    () => [...new Set(pageData?.surahGroups.map((g) => g.surah.id) ?? [])],
-    [pageData],
-  );
-
-  // Her sure için tecvid verisini yükle (max 2-3 sure/sayfa)
-  const tj0 = useTajweed(surahIds[0] ?? 1, effectiveTajweed && surahIds.length > 0);
-  const tj1 = useTajweed(surahIds[1] ?? 1, effectiveTajweed && surahIds.length > 1);
-  const tj2 = useTajweed(surahIds[2] ?? 1, effectiveTajweed && surahIds.length > 2);
-
-  // Her sure için imlâî verisini yükle
-  const im0 = useImlaei(surahIds[0] ?? 1, useBasic && surahIds.length > 0);
-  const im1 = useImlaei(surahIds[1] ?? 1, useBasic && surahIds.length > 1);
-  const im2 = useImlaei(surahIds[2] ?? 1, useBasic && surahIds.length > 2);
-
-  // Tüm tecvid verilerini birleştir: verseKey → html
-  const tajweedMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    if (tj0.data) Object.assign(map, tj0.data);
-    if (tj1.data) Object.assign(map, tj1.data);
-    if (tj2.data) Object.assign(map, tj2.data);
-    return map;
-  }, [tj0.data, tj1.data, tj2.data]);
-
-  // Tüm imlâî verilerini birleştir: verseKey → text
-  const imlaeiMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    if (im0.data) Object.assign(map, im0.data);
-    if (im1.data) Object.assign(map, im1.data);
-    if (im2.data) Object.assign(map, im2.data);
-    return map;
-  }, [im0.data, im1.data, im2.data]);
-
-  // Çoklu meal adları: slug → kısa ad
-  const { data: translationSourceList } = useQuery({ ...translationSourcesQueryOptions(), enabled: translationSlugs.length > 1 });
-  const translationNames = useMemo(() => {
-    const map: Record<string, string> = {};
-    if (translationSourceList) {
-      for (const s of translationSourceList) map[s.slug] = s.name;
-    }
-    return map;
-  }, [translationSourceList]);
 
   useReadingTracker(pageNumber);
 
@@ -114,398 +45,105 @@ export function MushafPage({ pageNumber, highlightAyah }: MushafPageProps) {
     }
   }, [pageNumber, pageData, savePosition]);
 
-  // Verse end marker click state for lineData branch
-  const [lineMenuOpen, setLineMenuOpen] = useState(false);
-  const [lineMenuAnchor, setLineMenuAnchor] = useState<DOMRect | null>(null);
-  const [lineMenuVerse, setLineMenuVerse] = useState<{ surahId: number; ayahNumber: number; textUthmani: string; translation: string | null } | null>(null);
-
-  // Flat verse list (sequential, matching end marker order in lineData)
-  const verseList = useMemo(() => {
-    if (!pageData) return [];
-    return pageData.surahGroups.flatMap((g) =>
-      g.ayahs.map((a) => ({ surahId: a.surahId, ayahNumber: a.ayahNumber, textUthmani: a.textUthmani, translation: a.translation }))
-    );
-  }, [pageData]);
-
-  const handleLineVerseClick = useCallback((verseIndex: number, rect: DOMRect) => {
-    const verse = verseList[verseIndex];
-    if (!verse) return;
-    setLineMenuVerse(verse);
-    setLineMenuAnchor(rect);
-    setLineMenuOpen(true);
-  }, [verseList]);
+  // Multi-translation names
+  const { data: translationSourceList } = useQuery({ ...translationSourcesQueryOptions(), enabled: translationSlugs.length > 1 });
+  const translationNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (translationSourceList) {
+      for (const s of translationSourceList) map[s.slug] = s.name;
+    }
+    return map;
+  }, [translationSourceList]);
 
   if (!pageData) {
     return <MushafSkeleton />;
   }
 
-  // lineData branch için sure geçiş satırlarını hesapla
-  const surahTransitions = useMemo((): { lineIndex: number; group: typeof pageData.surahGroups[0] }[] => {
-    if (!lineData || !pageData) return [];
-    // Sayfanın ilk grubundan sonraki isStart=true grupların geçiş satırını bul
-    const transitions: { lineIndex: number; group: typeof pageData.surahGroups[0] }[] = [];
-    const groups = pageData.surahGroups;
-    if (groups.length <= 1) return transitions;
-
-    // Satırları tarayıp ayet numarasının büyükten 1'e döndüğü yeri bul
-    // Önceki surenin son ayet-sonu işaretinin satırını takip et
-    let prevVerseNum: number | null = null;
-    let lastEndMarkerLine = 0;
-    let transitionGroupIdx = 1; // ilk geçiş için groups[1]
-
-    for (let li = 0; li < lineData.lines.length; li++) {
-      const line = lineData.lines[li];
-      for (const word of line.words) {
-        if (word.c === "e") {
-          // Arapça rakamları sayıya çevir
-          const num = parseInt(
-            word.t.replace(/[٠١٢٣٤٥٦٧٨٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))),
-            10,
-          );
-          if (!isNaN(num)) {
-            if (prevVerseNum !== null && num === 1 && prevVerseNum > 1) {
-              // Sure geçişi: başlık, önceki surenin son ayetinin bittiği satırdan sonra
-              const group = groups[transitionGroupIdx];
-              if (group?.isStart) {
-                transitions.push({ lineIndex: lastEndMarkerLine + 1, group });
-                transitionGroupIdx++;
-              }
-            }
-            lastEndMarkerLine = li;
-            prevVerseNum = num;
-          }
-        }
-      }
-    }
-    return transitions;
-  }, [lineData, pageData]);
-
   return (
-    <MushafFrame>
-      {/* Sayfa numarası madalyonu */}
-      <PageMedallion pageNumber={pageNumber} />
-      {/* Mushaf metin */}
-      <div className="pb-4">
-        {lineData ? (
-          <>
-            {/* Gerçek Mushaf satır düzeni — sure geçişlerini satır noktasına enjekte et */}
-            {(() => {
-              const firstGroup = pageData.surahGroups[0];
-              const segments: ReactNode[] = [];
-              let prevLineIdx = 0;
-              let verseOffset = 0;
-
-              // Count end markers in a set of lines
-              const countEndMarkers = (lines: MushafPageLines["lines"]) =>
-                lines.reduce((n, line) => n + line.words.filter((w) => w.c === "e").length, 0);
-
-              // Sayfanın ilk grubu isStart ise üste başlık göster
-              if (firstGroup?.isStart) {
-                segments.push(
-                  <SurahHeader
-                    key={`sh-first-${firstGroup.surah.id}`}
-                    surahId={firstGroup.surah.id}
-                    nameArabic={firstGroup.surah.nameArabic}
-                    nameSimple={firstGroup.surah.nameSimple}
-                    nameTranslation={firstGroup.surah.nameTranslation}
-                    showBismillah={firstGroup.surah.bismillahPre ?? false}
-                    compact
-                  />
-                );
-              }
-
-              for (const { lineIndex, group } of surahTransitions) {
-                // Geçişten önceki satırlar
-                const segmentLines = lineData.lines.slice(prevLineIdx, lineIndex);
-                const beforeLines: MushafPageLines = { lines: segmentLines };
-                if (beforeLines.lines.length > 0) {
-                  segments.push(
-                    <MushafLineView key={`mlv-${prevLineIdx}`} lineData={beforeLines} arabicFontSize={effectiveFontSize} onVerseEndClick={handleLineVerseClick} verseIndexOffset={verseOffset} />
-                  );
-                  verseOffset += countEndMarkers(segmentLines);
-                }
-                // Sure ayraç başlığı — compact
-                segments.push(
-                  <SurahHeader
-                    key={`sh-${group.surah.id}`}
-                    surahId={group.surah.id}
-                    nameArabic={group.surah.nameArabic}
-                    nameSimple={group.surah.nameSimple}
-                    nameTranslation={group.surah.nameTranslation}
-                    showBismillah={group.surah.bismillahPre ?? false}
-                    compact
-                  />
-                );
-                prevLineIdx = lineIndex;
-              }
-
-              // Kalan satırlar
-              const remainingLines: MushafPageLines = { lines: lineData.lines.slice(prevLineIdx) };
-              if (remainingLines.lines.length > 0) {
-                segments.push(
-                  <MushafLineView key={`mlv-${prevLineIdx}-end`} lineData={remainingLines} arabicFontSize={effectiveFontSize} onVerseEndClick={handleLineVerseClick} verseIndexOffset={verseOffset} />
-                );
-              }
-
-              return segments;
-            })()}
-            {/* Meal bloğu */}
-            {showTranslation &&
-              pageData.surahGroups.map((group) => (
-                <MushafTranslations
-                  key={`tr-${group.surah.id}`}
-                  ayahs={group.ayahs}
-                  translationNames={translationNames}
-                  surahName={getSurahName(group.surah.id, locale) || group.surah.nameSimple}
-                  surahNameArabic={group.surah.nameArabic}
-                  isMultiSurah={pageData.surahGroups.length > 1}
-                />
-              ))}
-          </>
-        ) : (
-          /* Fallback: akan metin (satır verisi yüklenemezse) */
-          pageData.surahGroups.map((group) => (
-            <div key={group.surah.id}>
-              {group.isStart && (
-                <SurahHeader
-                  surahId={group.surah.id}
-                  nameArabic={group.surah.nameArabic}
-                  nameSimple={group.surah.nameSimple}
-                  nameTranslation={group.surah.nameTranslation}
-                  showBismillah={group.surah.bismillahPre}
-                />
-              )}
-
-              {/* Akan Arapça metin bloğu */}
-              <div
-                className="leading-[2.8] py-2"
-                dir="rtl"
-                style={{
-                  fontFamily: "var(--font-arabic)",
-                  fontSize: `${effectiveFontSize}rem`,
-                  textAlign: "justify",
-                  textAlignLast: "center",
-                }}
-              >
-                {group.ayahs.map((ayah) => {
-                  const vk = `${ayah.surahId}:${ayah.ayahNumber}`;
-                  return (
-                    <MushafVerse
-                      key={vk}
-                      surahId={ayah.surahId}
-                      ayahNumber={ayah.ayahNumber}
-                      textUthmani={useBasic ? cleanImlaei(imlaeiMap[vk] ?? ayah.textUthmani) : ayah.textUthmani}
-                      textTajweed={effectiveTajweed ? tajweedMap[vk] : undefined}
-                      translation={ayah.translation}
-                      pageNumber={pageNumber}
-                      highlight={highlightAyah === vk}
-                      sajdah={ayah.sajdah}
-                    />
-                  );
-                })}
-              </div>
-
-              {showTranslation && (
-                <MushafTranslations
-                  ayahs={group.ayahs}
-                  translationNames={translationNames}
-                  surahName={getSurahName(group.surah.id, locale) || group.surah.nameSimple}
-                  surahNameArabic={group.surah.nameArabic}
-                  isMultiSurah={pageData.surahGroups.length > 1}
-                />
-              )}
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Ayet menüsü — lineData branch (MushafLineView) */}
-      {lineMenuVerse && (
-        <AyahActionMenu
-          open={lineMenuOpen}
-          onClose={() => setLineMenuOpen(false)}
-          textUthmani={lineMenuVerse.textUthmani}
-          translation={lineMenuVerse.translation}
-          surahId={lineMenuVerse.surahId}
-          ayahNumber={lineMenuVerse.ayahNumber}
-          pageNumber={pageNumber}
-          anchorRect={lineMenuAnchor}
+    <div className="mx-auto px-1.5 sm:px-3 pb-16" style={{ maxWidth: "min(100%, 600px)" }}>
+      {pageData.surahGroups.map((group) => (
+        <MushafTranslations
+          key={`tr-${group.surah.id}`}
+          surah={group.surah}
+          ayahs={group.ayahs}
+          translationNames={translationNames}
+          surahName={getSurahName(group.surah.id, locale) || group.surah.nameSimple}
+          surahMeaning={getSurahMeaning(group.surah.id, locale)}
+          surahDesc={getSurahDescription(group.surah.id, locale)}
+          isStart={group.isStart}
+          isMultiSurah={pageData.surahGroups.length > 1}
+          translationFontSize={translationFontSize}
+          translationSlugs={translationSlugs}
+          locale={locale}
         />
-      )}
-    </MushafFrame>
+      ))}
+    </div>
   );
 }
 
-// ── Inline ayet (akan metin içinde) ─────────────────────
+// -- Meal listesi --
 
-interface MushafVerseProps {
-  surahId: number;
-  ayahNumber: number;
-  textUthmani: string;
-  textTajweed?: string;
-  translation: string | null;
-  pageNumber: number;
-  highlight?: boolean;
-  sajdah?: boolean;
-}
-
-function MushafVerse({ surahId, ayahNumber, textUthmani, textTajweed, translation, pageNumber, highlight, sajdah }: MushafVerseProps) {
-  const { t } = useTranslation();
-  const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surahId, ayahNumber));
-  const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
-  const colorizeWords = useSettingsStore((s) => s.colorizeWords);
-  const colorPaletteId = useSettingsStore((s) => s.colorPaletteId);
-  const wordColors = colorizeWords ? COLOR_PALETTES[colorPaletteId].colors : null;
-  const verseRef = useRef<HTMLSpanElement>(null);
-  const [flash, setFlash] = useState(highlight);
-
-  // Audio word tracking
-  const verseKey = `${surahId}:${ayahNumber}`;
-  const isPlaying = useAudioStore((s) =>
-    s.playbackState === "playing" && s.currentVerseKey === verseKey,
-  );
-  const wordPosition = useAudioStore((s) =>
-    s.currentVerseKey === verseKey ? s.wordPosition : null,
-  );
-
-  useEffect(() => {
-    if (highlight && verseRef.current) {
-      verseRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-      setFlash(true);
-      const timer = setTimeout(() => setFlash(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [highlight]);
-
-  // Auto-scroll to currently playing verse
-  useEffect(() => {
-    if (isPlaying && verseRef.current) {
-      verseRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [isPlaying]);
-
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
-
-  const handleBadgeClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    setMenuAnchor(rect);
-    setMenuOpen(true);
-  }, []);
-
-  const handleBookmarkClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    toggleBookmark({ surahId, ayahNumber, pageNumber });
-  }, [toggleBookmark, surahId, ayahNumber, pageNumber]);
-
-  return (
-    <>
-      {/* Ayet metni — tecvid aktifse renkli, değilse kelime hover */}
-      <span
-        ref={verseRef}
-        className={`transition-colors duration-1000 ${flash ? "bg-[var(--color-accent)]/15 rounded" : ""}`}
-      >
-        {textTajweed && !colorizeWords
-          ? parseTajweed(textTajweed, true)
-          : splitWords(textUthmani).map((word, i) => {
-              const isActive = wordPosition === i + 1;
-              const wc = wordColors && !isActive ? wordColors[i % wordColors.length] : undefined;
-              return (
-                <span
-                  key={i}
-                  className={`inline rounded-sm px-[0.06em] transition-colors duration-150 cursor-default ${
-                    isActive
-                      ? "word-audio-active"
-                      : "hover:text-[var(--color-word-hover-text)]"
-                  }`}
-                  style={wc ? { color: wc } : undefined}
-                >
-                  {word}{" "}
-                </span>
-              );
-            })}
-      </span>
-      {/* Ayet numarası — dekoratif daire */}
-      <VerseEndMarker ayahNumber={ayahNumber} onClick={handleBadgeClick} variant="inline" />
-      {sajdah && <SajdahMarker />}
-      {/* Yer imi göstergesi */}
-      {isBookmarked && (
-        <button
-          onClick={handleBookmarkClick}
-          className="inline-flex items-center justify-center w-4 h-4 text-[var(--color-accent)] align-middle -mr-1"
-          aria-label={t.reader.removeBookmark}
-        >
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="1">
-            <path d="M4 2h8a1 1 0 011 1v11.5l-4.5-3-4.5 3V3a1 1 0 011-1z" />
-          </svg>
-        </button>
-      )}
-
-      {/* Eylem menüsü */}
-      <AyahActionMenu
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        textUthmani={textUthmani}
-        translation={translation}
-        surahId={surahId}
-        ayahNumber={ayahNumber}
-        pageNumber={pageNumber}
-        anchorRect={menuAnchor}
-      />
-    </>
-  );
-}
-
-// ── Meal listesi (akan metnin altında) ──────────────────
-
-function MushafTranslations({ ayahs, translationNames, surahName, surahNameArabic, isMultiSurah }: {
+function MushafTranslations({ surah, ayahs, translationNames, surahName, surahMeaning, surahDesc, isStart, isMultiSurah, translationFontSize, translationSlugs, locale }: {
+  surah: { id: number; nameArabic: string; nameSimple: string; revelation: string; ayahCount: number; revelationOrder: number };
   ayahs: Array<{ surahId: number; ayahNumber: number; translations: Record<string, string> }>;
   translationNames: Record<string, string>;
   surahName: string;
-  surahNameArabic: string;
+  surahMeaning: string;
+  surahDesc?: string;
+  isStart: boolean;
   isMultiSurah: boolean;
+  translationFontSize: number;
+  translationSlugs: string[];
+  locale: string;
 }) {
-  const translationFontSize = useSettingsStore((s) => s.translationFontSize);
-  const translationSlugs = useSettingsStore((s) => s.translationSlugs);
   const multiMode = translationSlugs.length > 1;
-
   const withTranslation = ayahs.filter((a) => Object.keys(a.translations).length > 0);
   if (withTranslation.length === 0) return null;
 
-  const surahLabel = isMultiSurah && (
-    <div className="flex items-center gap-2 mb-2">
-      <span className="text-xs font-semibold text-[var(--color-accent)]">
+  const typeLabel = surah.revelation === "makkah" ? "Mekki sure" : "Medeni sure";
+
+  // Surah header when surah starts on this page
+  const surahHeader = isStart && (
+    <div className="text-center py-4 border-b border-[var(--color-border)] mb-3">
+      <p className="text-[var(--color-text-secondary)] text-[10px] font-mono uppercase tracking-widest mb-1">
+        {typeLabel} · {surah.ayahCount} ayet · Nuzul {surah.revelationOrder}
+      </p>
+      <p className="text-base font-semibold text-[var(--color-text-primary)]">
         {surahName}
-      </span>
-      <span
-        className="text-sm text-[var(--color-accent)] opacity-60"
-        dir="rtl"
-        style={{ fontFamily: "var(--font-arabic)" }}
-      >
-        {surahNameArabic}
+      </p>
+      {surahMeaning && (
+        <p className="text-sm italic text-[var(--color-accent)]">{surahMeaning}</p>
+      )}
+      {surahDesc && (
+        <p className="text-xs text-[var(--color-text-secondary)] mt-2 leading-relaxed max-w-[56ch] mx-auto">
+          {surahDesc}
+        </p>
+      )}
+    </div>
+  );
+
+  // Multi-surah separator (when surah doesn't start on this page)
+  const surahLabel = !isStart && isMultiSurah && (
+    <div className="flex items-center gap-2 mb-2">
+      <span className="text-xs font-semibold text-[var(--color-accent)]">{surahName}</span>
+      <span className="text-sm text-[var(--color-accent)] opacity-60" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
+        {surah.nameArabic}
       </span>
     </div>
   );
 
-  // Tekli meal
   if (!multiMode) {
     const slug = translationSlugs[0];
     return (
-      <div className="mt-4 pt-4 border-t border-[var(--color-border)] space-y-2">
+      <div className="mt-3 pt-3 border-t border-[var(--color-border)] space-y-2">
+        {surahHeader}
         {surahLabel}
         {withTranslation.map((ayah) => {
           const text = ayah.translations[slug];
           if (!text) return null;
           return (
-            <p
-              key={`${ayah.surahId}:${ayah.ayahNumber}`}
-              className="text-[var(--color-text-translation)] leading-[1.7]"
-              style={{ fontSize: `${translationFontSize}rem` }}
-            >
-              <span className="text-[var(--color-text-secondary)] text-xs mr-1 font-medium">
-                {ayah.ayahNumber}.
-              </span>
+            <p key={`${ayah.surahId}:${ayah.ayahNumber}`} className="text-[var(--color-text-translation)] leading-[1.7]" style={{ fontSize: `${translationFontSize}rem` }}>
+              <span className="text-[var(--color-text-secondary)] text-xs mr-1 font-medium">{ayah.ayahNumber}.</span>
               {text}
             </p>
           );
@@ -514,14 +152,12 @@ function MushafTranslations({ ayahs, translationNames, surahName, surahNameArabi
     );
   }
 
-  // Çoklu meal
   return (
-    <div className="mt-4 pt-4 border-t border-[var(--color-border)] space-y-4">
+    <div className="mt-3 pt-3 border-t border-[var(--color-border)] space-y-4">
+      {surahHeader}
       {surahLabel}
       {translationSlugs.map((slug) => {
-        const verses = withTranslation
-          .map((a) => ({ ...a, text: a.translations[slug] }))
-          .filter((a) => a.text);
+        const verses = withTranslation.map((a) => ({ ...a, text: a.translations[slug] })).filter((a) => a.text);
         if (verses.length === 0) return null;
         return (
           <div key={slug}>
@@ -530,14 +166,8 @@ function MushafTranslations({ ayahs, translationNames, surahName, surahNameArabi
             </p>
             <div className="space-y-1">
               {verses.map((ayah) => (
-                <p
-                  key={`${ayah.surahId}:${ayah.ayahNumber}:${slug}`}
-                  className="text-[var(--color-text-translation)] leading-[1.7]"
-                  style={{ fontSize: `${translationFontSize}rem` }}
-                >
-                  <span className="text-[var(--color-text-secondary)] text-xs mr-1 font-medium">
-                    {ayah.ayahNumber}.
-                  </span>
+                <p key={`${ayah.surahId}:${ayah.ayahNumber}:${slug}`} className="text-[var(--color-text-translation)] leading-[1.7]" style={{ fontSize: `${translationFontSize}rem` }}>
+                  <span className="text-[var(--color-text-secondary)] text-xs mr-1 font-medium">{ayah.ayahNumber}.</span>
                   {ayah.text}
                 </p>
               ))}

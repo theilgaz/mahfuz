@@ -191,6 +191,12 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
               locale={locale}
               t={t}
               onModeChange={handleModeChange}
+              currentPath={currentPath}
+              onMushafClick={() => {
+                const pageNum = context?.pageNumber ?? 1;
+                onClose();
+                navigate({ to: "/page/$pageNumber", params: { pageNumber: String(pageNum) }, search: { ayah: undefined } });
+              }}
             />
           ) : (
             <GeneralTab
@@ -217,13 +223,15 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
 
 // ── Tab 1: Okuma ─────────────────────────────────────────
 
-function ReadingTab({ store, reciterList, translationList, locale, t, onModeChange }: {
+function ReadingTab({ store, reciterList, translationList, locale, t, onModeChange, currentPath, onMushafClick }: {
   store: ReturnType<typeof useSettingsStore>;
   reciterList: any;
   translationList: any;
   locale: string;
   t: any;
   onModeChange: (mode: ReadingMode) => void;
+  currentPath: string;
+  onMushafClick: () => void;
 }) {
   const LANG_ORDER = ["tr", "en", "es", "fr", "ar", "de", "nl"];
   const langOrder = useMemo(() => [locale, ...LANG_ORDER.filter((l) => l !== locale)], [locale]);
@@ -370,7 +378,7 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
             { value: "verse" as ReadingMode, label: t.settings.modeVerse, icon: VerseIcon, desc: t.settings.verseList },
             { value: "wbw" as ReadingMode, label: t.settings.modeWbw, icon: WbwIcon, desc: t.settings.wordByWord },
           ] as const).map(({ value, label, icon: Icon, desc }) => {
-            const active = store.readingMode === value;
+            const active = store.readingMode === value && !currentPath.startsWith("/page/");
             return (
               <button
                 key={value}
@@ -387,6 +395,18 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
               </button>
             );
           })}
+          <button
+            onClick={onMushafClick}
+            className={`mu-rmode-btn${currentPath.startsWith("/page/") ? " on" : ""}`}
+          >
+            <span className="mu-rmode-icon">
+              <MushafIcon size={20} active={currentPath.startsWith("/page/")} />
+            </span>
+            <span className="mu-rmode-text">
+              <span className="mu-rmode-label">Mushaf</span>
+              <span className="mu-rmode-desc">Sayfa gorunumu</span>
+            </span>
+          </button>
         </div>
 
         {/* Mod bazli secenekler */}
