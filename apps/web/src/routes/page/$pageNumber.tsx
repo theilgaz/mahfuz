@@ -258,17 +258,17 @@ function PageRoute() {
     verticalRef.current?.scrollTo({ top: 0, behavior: "instant" });
   }, [page, resetZoom]);
 
-  // Center horizontal scroll on the current page panel
+  // Center horizontal scroll on the current page panel (RTL layout)
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const centerIndex = hasPrev ? 1 : 0;
+    const centerIndex = hasNext ? 1 : 0;
     const centerPanel = el.children[centerIndex] as HTMLElement | undefined;
     if (centerPanel) {
-      el.scrollTo({ left: centerPanel.offsetLeft - el.offsetLeft, behavior: "instant" });
+      centerPanel.scrollIntoView({ inline: "center", behavior: "instant" as ScrollBehavior });
     }
     isNavigating.current = false;
-  }, [page, hasPrev]);
+  }, [page, hasNext]);
 
   // Handle horizontal scroll-snap settle
   useEffect(() => {
@@ -283,21 +283,25 @@ function PageRoute() {
       if (!elRef) return;
 
       const panelWidth = elRef.offsetWidth;
-      const scrollLeft = elRef.scrollLeft;
 
-      const centerIndex = hasPrev ? 1 : 0;
+      // In RTL, use scrollIntoView-based detection via panel visibility
+      const centerIndex = hasNext ? 1 : 0;
       const centerPanel = elRef.children[centerIndex] as HTMLElement | undefined;
       if (!centerPanel) return;
 
-      const centerLeft = centerPanel.offsetLeft - elRef.offsetLeft;
-      const diff = scrollLeft - centerLeft;
+      // Check which panel is most visible by comparing bounding rects
+      const containerRect = elRef.getBoundingClientRect();
+      const centerRect = centerPanel.getBoundingClientRect();
+      const diff = centerRect.left - containerRect.left;
 
       if (Math.abs(diff) > panelWidth * 0.25) {
         isNavigating.current = true;
-        if (diff < 0 && hasPrev) {
-          goTo(page - 1);
-        } else if (diff > 0 && hasNext) {
+        if (diff > 0 && hasNext) {
+          // Content moved right = swiped right-to-left (RTL forward) = next page
           goTo(page + 1);
+        } else if (diff < 0 && hasPrev) {
+          // Content moved left = swiped left-to-right (RTL backward) = prev page
+          goTo(page - 1);
         } else {
           isNavigating.current = false;
         }
@@ -354,7 +358,7 @@ function PageRoute() {
       }
       if (e.key === "ArrowLeft") goTo(page + 1);
       if (e.key === "ArrowRight") goTo(page - 1);
-      if (e.key === "ArrowDown" && showTranslation) {
+      if (e.key === "ArrowDown") {
         verticalRef.current?.scrollTo({ top: verticalRef.current.clientHeight, behavior: "smooth" });
       }
       if (e.key === "ArrowUp") {
@@ -363,7 +367,7 @@ function PageRoute() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [page, goTo, showTranslation]);
+  }, [page, goTo]);
 
   const mushafHeight = `calc(100dvh - ${TOP_BAR_H}px)`;
 
@@ -419,16 +423,17 @@ function PageRoute() {
       >
         {/* Section 1: Mushaf — full viewport height */}
         <div className="snap-start snap-always relative" style={{ height: mushafHeight }}>
-          {/* Horizontal scroll-snap for page navigation */}
+          {/* Horizontal scroll-snap for page navigation (RTL: next page on left, prev on right) */}
           <div
             ref={scrollRef}
+            dir="rtl"
             className={`mushaf-pager flex snap-x snap-mandatory h-full ${zoomed ? "overflow-hidden" : "overflow-x-auto cursor-grab active:cursor-grabbing"}`}
           >
-            {/* Previous page (ghost) */}
-            {hasPrev && (
+            {/* Next page ghost (left side in RTL = first in DOM) */}
+            {hasNext && (
               <div className="w-full shrink-0 snap-center flex items-center justify-center" style={{ height: mushafHeight }}>
                 <img
-                  src={`/mushaf-pages/${page - 1}.webp`}
+                  src={`/mushaf-pages/${page + 1}.webp`}
                   alt=""
                   className="max-w-full max-h-full object-contain select-none opacity-40"
                   draggable={false}
@@ -440,7 +445,7 @@ function PageRoute() {
             <div className="w-full shrink-0 snap-center flex items-center justify-center overflow-hidden" style={{ height: mushafHeight }}>
               <div
                 ref={zoomRef}
-                className="max-w-full max-h-full mushaf-zoom-container"
+                className="flex items-center justify-center h-full mushaf-zoom-container"
               >
                 <img
                   src={`/mushaf-pages/${page}.webp`}
@@ -451,11 +456,11 @@ function PageRoute() {
               </div>
             </div>
 
-            {/* Next page (ghost) */}
-            {hasNext && (
+            {/* Previous page ghost (right side in RTL = last in DOM) */}
+            {hasPrev && (
               <div className="w-full shrink-0 snap-center flex items-center justify-center" style={{ height: mushafHeight }}>
                 <img
-                  src={`/mushaf-pages/${page + 1}.webp`}
+                  src={`/mushaf-pages/${page - 1}.webp`}
                   alt=""
                   className="max-w-full max-h-full object-contain select-none opacity-40"
                   draggable={false}
@@ -465,7 +470,7 @@ function PageRoute() {
           </div>
 
           {/* Pull-up hint for translations */}
-          {showTranslation && section === "mushaf" && (
+          {section === "mushaf" && (
             <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none mushaf-hint-fade-in">
               <div className="flex flex-col items-center gap-0.5 text-[var(--color-text-secondary)] opacity-60">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -478,21 +483,21 @@ function PageRoute() {
         </div>
 
         {/* Section 2: Translations */}
-        {showTranslation && (
-          <div className="snap-start" style={{ minHeight: mushafHeight }}>
+        <div className="snap-start snap-always flex flex-col" style={{ height: mushafHeight }}>
             {/* Back-to-mushaf handle */}
             <button
               onClick={() => verticalRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
-              className="sticky top-0 z-10 w-full flex justify-center py-2 bg-[var(--color-bg)] border-b border-[var(--color-border)]"
+              className="shrink-0 w-full flex justify-center py-2 bg-[var(--color-bg)] border-b border-[var(--color-border)]"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
                 <polyline points="18 15 12 9 6 15" />
               </svg>
             </button>
 
-            <MushafPage pageNumber={page} highlightAyah={ayah} translationsOnly />
-          </div>
-        )}
+            <div className="flex-1 overflow-y-auto">
+              <MushafPage pageNumber={page} highlightAyah={ayah} translationsOnly />
+            </div>
+        </div>
       </div>
 
       <PageJumpDialog open={jumpOpen} onClose={() => setJumpOpen(false)} currentPage={page} />

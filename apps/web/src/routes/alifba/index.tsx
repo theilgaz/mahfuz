@@ -136,7 +136,7 @@ function NextStepsSection() {
 
       <div className="space-y-2">
         <Link
-          to="/qaida"
+          to="/alifba"
           className="flex items-center gap-3 px-4 py-3.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 hover:bg-[var(--color-accent)]/5 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0 text-[var(--color-accent)]">
