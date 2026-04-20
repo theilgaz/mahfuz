@@ -117,7 +117,7 @@ function HubPage() {
           }
         />
         <HubCard
-          to="/qaida"
+          to="/alifba"
           title={t.hub.qaida}
           description={t.hub.qaidaDesc}
           icon={

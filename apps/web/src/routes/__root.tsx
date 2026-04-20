@@ -201,9 +201,6 @@ function AppHeader() {
     : path.startsWith("/changelog") ? t.changelog.banner
     : isAlifbaGame ? t.alifba.games
     : isAlifbaSubRoute ? t.hub.alifba
-    : path === "/qaida" || path === "/qaida/" ? t.hub.qaida
-    : path.startsWith("/qaida/lesson/") ? t.hub.qaida
-    : path.startsWith("/qaida/exam/") ? t.hub.qaidaExamTitle
     : isGameSubRoute ? null // handled by breadcrumb
     : path === "/games" || path === "/games/" ? t.gamesHub.title
     : null;
@@ -254,10 +251,6 @@ function AppHeader() {
             <BreadcrumbNav items={[{ label: t.hub.alifba, to: "/alifba" }, { label: t.alifba.games }]} />
           ) : isAlifbaSubRoute ? (
             <BreadcrumbNav items={[{ label: t.hub.alifba, to: "/alifba" }, { label: title ?? "" }]} />
-          ) : path.startsWith("/qaida/lesson/") ? (
-            <BreadcrumbNav items={[{ label: t.hub.qaida, to: "/qaida" }, { label: title ?? "" }]} />
-          ) : path.startsWith("/qaida/exam/") ? (
-            <BreadcrumbNav items={[{ label: t.hub.qaida, to: "/qaida" }, { label: title ?? "" }]} />
           ) : path.startsWith("/khatm/") && path !== "/khatm" && path !== "/khatm/" ? (
             <BreadcrumbNav items={[{ label: t.khatm.title, to: "/khatm" }, { label: title ?? "" }]} />
           ) : path.startsWith("/analyse/") ? (

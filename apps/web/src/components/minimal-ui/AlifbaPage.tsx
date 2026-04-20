@@ -1,203 +1,234 @@
 /**
- * Alifba page -- hero with stats, letter card, 7-column grid, lessons.
- * Minimal UI editorial design.
+ * Alifba page -- encouraging, approachable Quran reading journey.
+ * Timeline with concrete Mim-based examples per step.
  */
 
-import { useState, useMemo, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "~/hooks/useTranslation";
-import { ARABIC_LETTERS } from "~/lib/kids-constants";
-import { playLetterAudio, type LetterAudioHandle } from "~/lib/letter-audio";
-import { useAlifbaStore, computeAlifbaStats } from "~/stores/alifba.store";
-import { useShallow } from "zustand/react/shallow";
-import { MuIcons } from "./icons";
+import { useQaidaStore } from "~/stores/qaida.store";
+import {
+  STEPS,
+  useStepStatuses,
+  getLessonLinkForStep,
+  type StepStatus,
+} from "~/lib/qaida-roadmap";
 
-const ALIFBA_LETTERS = [
-  { ar: "ا", name: "Elif", tr: "Alef", sound: "/a/", ex: "أَب - baba" },
-  { ar: "ب", name: "Be", tr: "Ba", sound: "/b/", ex: "بَيْت - ev" },
-  { ar: "ت", name: "Te", tr: "Ta", sound: "/t/", ex: "تَمْر - hurma" },
-  { ar: "ث", name: "Se", tr: "Tha", sound: "/θ/", ex: "ثَلَاث - üç" },
-  { ar: "ج", name: "Cim", tr: "Jim", sound: "/ʤ/", ex: "جَبَل - dağ" },
-  { ar: "ح", name: "Ha", tr: "Ha", sound: "/ħ/", ex: "حَجَر - taş" },
-  { ar: "خ", name: "Hı", tr: "Kha", sound: "/x/", ex: "خُبْز - ekmek" },
-  { ar: "د", name: "Dal", tr: "Dal", sound: "/d/", ex: "دَار - ev" },
-  { ar: "ذ", name: "Zel", tr: "Dhal", sound: "/ð/", ex: "ذَهَب - altın" },
-  { ar: "ر", name: "Ra", tr: "Ra", sound: "/r/", ex: "رَبّ - Rab" },
-  { ar: "ز", name: "Ze", tr: "Zay", sound: "/z/", ex: "زَيْت - yağ" },
-  { ar: "س", name: "Sin", tr: "Sin", sound: "/s/", ex: "سَلَام - selam" },
-  { ar: "ش", name: "Şin", tr: "Shin", sound: "/ʃ/", ex: "شَمْس - güneş" },
-  { ar: "ص", name: "Sad", tr: "Sad", sound: "/sˤ/", ex: "صَبْر - sabır" },
-  { ar: "ض", name: "Dad", tr: "Dad", sound: "/dˤ/", ex: "ضَوْء - ışık" },
-  { ar: "ط", name: "Tı", tr: "Ta", sound: "/tˤ/", ex: "طَرِيق - yol" },
-  { ar: "ظ", name: "Zı", tr: "Za", sound: "/ðˤ/", ex: "ظِلّ - gölge" },
-  { ar: "ع", name: "Ayin", tr: "Ayn", sound: "/ʕ/", ex: "عَيْن - göz" },
-  { ar: "غ", name: "Gayin", tr: "Ghayn", sound: "/ɣ/", ex: "غَيْم - bulut" },
-  { ar: "ف", name: "Fe", tr: "Fa", sound: "/f/", ex: "فَجْر - şafak" },
-  { ar: "ق", name: "Kaf", tr: "Qaf", sound: "/q/", ex: "قَلَم - kalem" },
-  { ar: "ك", name: "Kef", tr: "Kaf", sound: "/k/", ex: "كِتَاب - kitap" },
-  { ar: "ل", name: "Lam", tr: "Lam", sound: "/l/", ex: "لَيْل - gece" },
-  { ar: "م", name: "Mim", tr: "Mim", sound: "/m/", ex: "مَاء - su" },
-  { ar: "ن", name: "Nun", tr: "Nun", sound: "/n/", ex: "نُور - ışık" },
-  { ar: "ه", name: "He", tr: "Ha", sound: "/h/", ex: "هُدَى - hidayet" },
-  { ar: "و", name: "Vav", tr: "Waw", sound: "/w/", ex: "وَرْد - gül" },
-  { ar: "ي", name: "Ye", tr: "Ya", sound: "/j/", ex: "يَد - el" },
+/* ── Step examples (Mim-based) ─────────────────────── */
+
+/** Each word pair: [arabic, latin]. Alternating colors applied per word. */
+export const STEP_EXAMPLES: Record<number, { words: [string, string][]; desc: string }> = {
+  1:  { words: [["ا","elif"], ["ب","be"], ["ت","te"], ["م","mim"]],
+       desc: "28 Arapça harfi tek tek tanıyorsun." },
+  2:  { words: [["مَ","me"], ["مِ","mi"], ["مُ","mu"]],
+       desc: "Harflere hareke koyarak seslendir: fetha (üstün), kesra (esre), damme (ötre)." },
+  3:  { words: [["مَكْ","mek"], ["رَبْ","rab"]],
+       desc: "Sükun (cezim) ile harfi sessiz bırakmayı öğrenirsin." },
+  4:  { words: [["كِتَابًا","kitaben"], ["عِلْمٍ","ilmin"]],
+       desc: "Tenvin (nunlama): kelimenin sonuna -en, -in, -un sesi ekler." },
+  5:  { words: [["رَبَّ","rabbe"], ["اللَّه","Allah"]],
+       desc: "Şedde (teşdid): harfi iki kez okur gibi vurgularsın." },
+  6:  { words: [["قَالَ","kale"], ["يَقُولُ","yekulu"]],
+       desc: "Med harfleri (elif, vav, ye) ile sesi uzatırsın." },
+  7:  { words: [["بِسْمِ","bismi"]],
+       desc: "Harflerin başa, ortaya ve sona göre birleşen formlarını öğrenirsin." },
+  8:  { words: [["اللّٰهِ","Allahi"], ["الرَّحْمٰنِ","er-Rahmani"]],
+       desc: "Öğrendiklerini birleştirip kısa kelimeler okursun." },
+  9:  { words: [["اَلْفَاتِحَة","el-Fatiha"]],
+       desc: "Kur'an'ın ilk suresini baştan sona kendin okursun." },
+  10: { words: [["تَجْوِيد","tecvid"]],
+       desc: "Harfleri doğru mahrecinden, kurallarına göre güzel okursun." },
+};
+
+/* ── Motivational quotes ───────────────────────────── */
+
+const QUOTES = [
+  {
+    words: [
+      ["\u062E\u064E\u064A\u0652\u0631\u064F\u0643\u064F\u0645\u0652", "hayrukum"],
+      ["\u0645\u064E\u0646\u0652", "men"],
+      ["\u062A\u064E\u0639\u064E\u0644\u0651\u064E\u0645\u064E", "tealleme"],
+      ["\u0627\u0644\u0652\u0642\u064F\u0631\u0652\u0622\u0646\u064E", "el-Kur'\u00E2ne"],
+      ["\u0648\u064E\u0639\u064E\u0644\u0651\u064E\u0645\u064E\u0647\u064F", "ve allemeh\u00FC"],
+    ] as [string, string][],
+    tr: "Sizin en hay\u0131rl\u0131n\u0131z, Kur'an'\u0131 \u00F6\u011Frenen ve \u00F6\u011Fretendir.",
+    ravi: "Hz. Osman b. Affan (r.a.)",
+    kaynak: "Buhari",
+    senet: "Fez\u00E2il\u00FCl-Kur'\u00E2n, 21",
+  },
+  {
+    words: [
+      ["\u0648\u064E\u0627\u0644\u0651\u064E\u0630\u0650\u064A", "vellezi"],
+      ["\u064A\u064E\u0642\u0652\u0631\u064E\u0623\u064F", "yakre\u00FC"],
+      ["\u0627\u0644\u0652\u0642\u064F\u0631\u0652\u0622\u0646\u064E", "el-Kur'\u00E2ne"],
+      ["\u0648\u064E\u064A\u064E\u062A\u064E\u062A\u064E\u0639\u0652\u062A\u064E\u0639\u064F", "ve yetetea'teu"],
+      ["\u0641\u0650\u064A\u0647\u0650", "f\u00EEhi"],
+      ["\u0648\u064E\u0647\u064F\u0648\u064E", "ve h\u00FCve"],
+      ["\u0639\u064E\u0644\u064E\u064A\u0652\u0647\u0650", "aleyhi"],
+      ["\u0634\u064E\u0627\u0642\u0651\u064C", "\u015F\u00E2kkun"],
+      ["\u0644\u064E\u0647\u064F", "leh\u00FC"],
+      ["\u0623\u064E\u062C\u0652\u0631\u064E\u0627\u0646\u0650", "ecr\u00E2ni"],
+    ] as [string, string][],
+    tr: "Kur'an'\u0131 zorlanarak okuyan\u0131n iki ecri vard\u0131r.",
+    ravi: "Hz. Ai\u015Fe (r.anha)",
+    kaynak: "M\u00FCslim",
+    senet: "M\u00FCs\u00E2fir\u00EEn, 244",
+  },
 ];
 
-const LESSONS = [
-  { n: "01", t: "Tek harfler", s: "Elif'ten Ye'ye 28 harf", p: 100 },
-  { n: "02", t: "Harekeler", s: "Fetha, kesra, damme", p: 60 },
-  { n: "03", t: "Med harfleri", s: "Uzatmalar ve sükün", p: 25 },
-  { n: "04", t: "İlk kelimeler", s: "Okuma pratiği", p: 0 },
-];
+/* ── Timeline Step ─────────────────────────────────── */
+
+function TimelineStep({
+  step,
+  status,
+  isActive,
+  isLast,
+  completedLessons,
+}: {
+  step: typeof STEPS[number];
+  status: StepStatus;
+  isActive: boolean;
+  isLast: boolean;
+  completedLessons: Set<string>;
+}) {
+  const { t } = useTranslation();
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  const lessonLink = getLessonLinkForStep(step.id, completedLessons);
+  const titleText = (t.hub as unknown as Record<string, string>)?.[step.titleKey] ?? step.titleKey;
+  const example = STEP_EXAMPLES[step.id];
+
+  const stepLink = step.id === 1
+    ? "/alifba/letters"
+    : step.id === 10
+    ? "/tajweed"
+    : `/alifba/step/${step.id}`;
+
+  useEffect(() => {
+    if (isActive && rowRef.current) {
+      rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isActive]);
+
+  const inner = (
+    <div
+      ref={rowRef}
+      className={[
+        "mu-tl-step",
+        status,
+        isActive ? "active" : "",
+      ].join(" ")}
+    >
+      {/* Timeline dot + line */}
+      <div className="mu-tl-track">
+        <div className={`mu-tl-dot ${status}`}>
+          {status === "completed" ? (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <span>{step.id}</span>
+          )}
+        </div>
+        {!isLast && <div className={`mu-tl-line ${status === "completed" ? "done" : ""}`} />}
+      </div>
+
+      {/* Content */}
+      <div className="mu-tl-content">
+        <p className="mu-tl-title">{titleText}</p>
+        {example && (
+          <>
+            <p className="mu-tl-hint">{example.desc}</p>
+            <div className="mu-tl-words" dir="rtl">
+              {example.words.map(([ar, lat], wi) => (
+                <div key={wi} className={`mu-tl-word ${wi % 2 === 0 ? "a" : "b"}`}>
+                  <span className="mu-tl-word-ar">{ar}</span>
+                  <span className="mu-tl-word-lat">{lat}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  if (status === "locked" || !stepLink) return inner;
+  return <Link to={stepLink as string} style={{ textDecoration: "none", color: "inherit" }}>{inner}</Link>;
+}
+
+/* ── Quote Card ────────────────────────────────────── */
+
+function QuoteCard({ quote }: { quote: typeof QUOTES[number] }) {
+  return (
+    <blockquote className="mu-tl-quote">
+      <div className="mu-tl-quote-wbw" dir="rtl">
+        {quote.words.map(([ar, lat], i) => (
+          <div key={i} className="mu-tl-quote-word">
+            <span className="mu-tl-quote-word-ar">{ar}</span>
+            <span className="mu-tl-quote-word-lat">{lat}</span>
+          </div>
+        ))}
+      </div>
+      <p className="mu-tl-quote-tr">{quote.tr}</p>
+      <footer className="mu-tl-quote-src">
+        <span className="mu-tl-quote-label">Ravi:</span> {quote.ravi}
+        <br />
+        <span className="mu-tl-quote-label">Kaynak:</span> {quote.kaynak}, {quote.senet}
+      </footer>
+    </blockquote>
+  );
+}
+
+/* ── Main Page ──────────────────────────────────────── */
 
 export function AlifbaPage() {
   const { t } = useTranslation();
-  const [active, setActive] = useState(ALIFBA_LETTERS[23]); // Mim
-  const [playing, setPlaying] = useState(false);
-  const audioRef = useRef<LetterAudioHandle | null>(null);
+  const statuses = useStepStatuses();
+  const lessonProgress = useQaidaStore((s) => s.lessonProgress);
+  const completedLessons = useMemo(() => new Set(Object.keys(lessonProgress)), [lessonProgress]);
 
-  // Get progress from store
-  const { progress: letterProgress, streak, examHistory, gameHighScores, totalDays, lastStudyDate } = useAlifbaStore(
-    useShallow((s) => ({
-      progress: s.progress,
-      streak: s.streak,
-      examHistory: s.examHistory,
-      gameHighScores: s.gameHighScores,
-      totalDays: s.totalDays,
-      lastStudyDate: s.lastStudyDate,
-    })),
-  );
-  const stats = useMemo(
-    () => computeAlifbaStats({ progress: letterProgress, streak, examHistory, gameHighScores, totalDays, lastStudyDate }),
-    [letterProgress, streak, examHistory, gameHighScores, totalDays, lastStudyDate],
-  );
-  const progress = stats.seen || 6;
+  const activeIdx = statuses.findIndex((s) => s === "available");
 
   return (
-    <div className="mu-alifba">
+    <div className="mu-roadmap">
       {/* Hero */}
-      <section className="mu-alifba-hero">
-        <div>
-          <p className="mu-eyebrow">
-            <span className="mu-eb-line" />
-            {t.hub?.alifba ?? "Elifba"} - 28 harf
-          </p>
-          <h1 className="mu-display">
-            Harfi tanı,<span className="mu-display-accent"> sesi ezberle.</span>
-          </h1>
-          <p className="mu-lede">
-            Arap alfabesi -- yazılışı, adı, sesi ve ilk kelimelerle. Her harf için kısa bir işitme pratiği ve tekrar kartı.
-          </p>
-          <div className="mu-alifba-stats">
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <span className="mu-astat-n">
-                {progress}<span style={{ fontSize: 18, color: "var(--mu-muted)", marginLeft: 2 }}>/28</span>
-              </span>
-              <span className="mu-astat-l">öğrenilen harf</span>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <span className="mu-astat-n">{stats.mastered || 0}</span>
-              <span className="mu-astat-l">ders tamamla</span>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <span className="mu-astat-n">--</span>
-              <span className="mu-astat-l">günlük seri</span>
-            </div>
-          </div>
-        </div>
+      <div className="mu-tl-hero">
+        <h1 className="mu-roadmap-title">
+          {t.hub?.roadmapTitle ?? "Kur'an Okuma Yolculuğun"}
+        </h1>
+        <p className="mu-tl-hero-sub">
+          10 kısa adımda, sıfırdan Fatiha okumaya.
+          {" "}Her adım bir öncekinin üstüne biner.
+          {" "}Düşündüğünden çok daha kolay.
+        </p>
+      </div>
 
-        {/* Active letter card */}
-        <div className="mu-alifba-card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "var(--mu-ff-mono)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
-            <span className="mu-muted">Bugünün harfi</span>
-            <span style={{ background: "var(--mu-accent-soft)", color: "var(--mu-accent-ink)", padding: "3px 10px", borderRadius: 999, fontSize: 11, letterSpacing: "0.05em", fontFamily: "var(--mu-ff-mono)" }}>
-              {active.sound}
-            </span>
-          </div>
-          <div className="mu-alifba-glyph" dir="rtl">{active.ar}</div>
-          <div className="mu-alifba-name">
-            <span>{active.name}</span>
-            <span className="mu-muted">- {active.tr}</span>
-          </div>
-          <p style={{ fontFamily: "var(--mu-ff-ar)", fontSize: 28, direction: "rtl", color: "var(--mu-ink-2)", margin: "20px 0 4px", lineHeight: 1 }} dir="rtl">
-            {active.ex.split(" - ")[0]}
-          </p>
-          <p style={{ fontSize: 14, color: "var(--mu-muted)", margin: "0 0 24px" }}>
-            {active.ex.split(" - ")[1]}
-          </p>
-          <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-            <button
-              className={`mu-btn primary ${playing ? "on" : ""}`}
-              onClick={() => {
-                if (playing) return;
-                const letter = ARABIC_LETTERS.find((l) => l.arabic === active.ar);
-                if (!letter) return;
-                setPlaying(true);
-                audioRef.current = playLetterAudio(letter.arabic, letter.id, () => setPlaying(false));
-              }}
-            >
-              {playing ? MuIcons.pause : MuIcons.play} Telaffuzu duy
-            </button>
-            <button className="mu-btn ghost">
-              {MuIcons.mic} Tekrar et
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* First quote - motivation before starting */}
+      <QuoteCard quote={QUOTES[0]} />
 
-      {/* 28-letter grid */}
-      <section style={{ paddingTop: 24, borderTop: "1px solid var(--mu-line)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 24, paddingTop: 24 }}>
-          <h2 className="mu-h2" style={{ margin: 0 }}>28 harf</h2>
-          <p className="mu-muted">Harfe tıklayarak kartı değiştir.</p>
-        </div>
-        <div className="mu-alifba-grid" dir="rtl">
-          {ALIFBA_LETTERS.map((l, i) => {
-            const done = i < progress;
-            const isActive = l.ar === active.ar;
-            return (
-              <button
-                key={l.ar}
-                className={`mu-alif-tile ${done ? "done " : ""}${isActive ? "on" : ""}`}
-                onClick={() => setActive(l)}
-              >
-                <span className="mu-alif-tile-n">{String(i + 1).padStart(2, "0")}</span>
-                <span className="mu-alif-tile-ar" dir="rtl">{l.ar}</span>
-                <span className="mu-alif-tile-name">{l.name}</span>
-                {done && (
-                  <span className="mu-alif-tile-check">{MuIcons.check}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      {/* Timeline */}
+      <div className="mu-tl-path">
+        {STEPS.map((step, i) => (
+          <TimelineStep
+            key={step.id}
+            step={step}
+            status={statuses[i]}
+            isActive={i === activeIdx}
+            isLast={i === STEPS.length - 1}
+            completedLessons={completedLessons}
+          />
+        ))}
+      </div>
 
-      {/* Lessons */}
-      <section style={{ paddingTop: 24, borderTop: "1px solid var(--mu-line)" }}>
-        <h2 className="mu-h2">Dersler</h2>
-        <div className="mu-lesson-row">
-          {LESSONS.map((l) => (
-            <article key={l.n} className="mu-lesson">
-              <span className="mu-lesson-n">{l.n}</span>
-              <h3>{l.t}</h3>
-              <p className="mu-muted" style={{ fontSize: 13, margin: "0 0 16px" }}>{l.s}</p>
-              <div className="mu-lesson-bar">
-                <span style={{ width: `${l.p}%` }} />
-              </div>
-              <div className="mu-lesson-foot">
-                <span className="mu-muted">{l.p}% tamamlandı</span>
-                {l.p === 0 ? (
-                  <span style={{ color: "var(--mu-muted)" }}>{MuIcons.lock}</span>
-                ) : (
-                  <span className="mu-lesson-go">
-                    {l.p === 100 ? "Tekrar et" : "Devam et"} {MuIcons.arrowRight}
-                  </span>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      {/* Second quote - encouragement for those who struggle */}
+      <QuoteCard quote={QUOTES[1]} />
+
+      {/* Closing encouragement */}
+      <p className="mu-tl-closing">
+        Burada olman bile büyük bir adım.
+        Kur'an'ı öğrenmeye niyet eden, yolun yarısını geçmiştir.
+      </p>
     </div>
   );
 }

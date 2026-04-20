@@ -18,7 +18,7 @@ function ProfilePageWrapper() {
   const { session } = Route.useRouteContext();
   const user = session!.user;
 
-  return <AccountPage user={user} />;
+  return <AccountPage user={{ id: user.id, name: user.name, email: user.email, image: user.image ?? null }} />;
 }
 
 // Legacy ProfilePage kept below for reference
