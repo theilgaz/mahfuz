@@ -550,3 +550,34 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
   --frame-ornament: rgba(192, 80, 80, 0.08);
   --frame-line: rgba(192, 80, 80, 0.05);
 }
+
+/* ── Mushaf page slider ─────────────────────────────── */
+
+.mushaf-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  outline: none;
+}
+
+.mushaf-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.mushaf-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  border: none;
+}

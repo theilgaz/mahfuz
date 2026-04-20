@@ -60,7 +60,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
           <LogoMeem size={36} />
           <span className="mu-brand-wordmark">
             <span className="mu-brand-latin">Mahfuz</span>
-            <span className="mu-brand-ar">{"\u0645\u062D\u0641\u0648\u0638"}</span>
           </span>
         </Link>
 

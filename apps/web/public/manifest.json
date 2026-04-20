@@ -4,8 +4,8 @@
   "description": "Kuran-ı Kerim okuma, dinleme ve hıfz uygulaması",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e0eae6",
-  "theme_color": "#0d7377",
+  "background_color": "#ffffff",
+  "theme_color": "#3e8343",
   "orientation": "portrait-primary",
   "icons": [
     {
