@@ -1,15 +1,23 @@
 /**
- * Discover page -- verse of the day, curated collections, topic themes.
- * Minimal UI editorial design.
+ * Discover page — hybrid layout:
+ *   1. Today card (hero) — daily verse, centered
+ *   2. Streak strip — progress bar + week grid
+ *   3. Action rows — Öğren / Oyna / Ezberle / Topluluk
+ *   4. Collections — 2x2 card grid
+ *   5. Topics — 2-col dot list
  */
 
-import { Link } from "@tanstack/react-router";
+import { Link, useRouteContext } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { useSurahs, useDailyVerse } from "~/hooks/useQuranQuery";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { surahSlug } from "~/lib/surah-slugs";
+import { useHifzStore, computeHifzStats } from "~/stores/hifz.store";
+import { useQuery } from "@tanstack/react-query";
+import { streakQueryOptions, weeklySummaryQueryOptions } from "~/hooks/useHabitQuery";
 
-/** Decode HTML entities like &quot; &amp; etc. */
+/** Decode HTML entities */
 function decodeEntities(text: string): string {
   if (!text || !text.includes("&")) return text;
   const el = typeof document !== "undefined" ? document.createElement("textarea") : null;
@@ -17,7 +25,6 @@ function decodeEntities(text: string): string {
   el.innerHTML = text;
   return el.value;
 }
-import { MuIcons } from "./icons";
 
 const COLLECTIONS = [
   { title: "Sabah & akşam", sub: "Günü açan ve kapatan sureler", items: [1, 36, 55, 67, 112, 113, 114] },
@@ -27,142 +34,77 @@ const COLLECTIONS = [
 ];
 
 const THEMES = [
-  { t: "Tevhid", n: "İnanç" },
-  { t: "Sabır", n: "Ahlak" },
-  { t: "Şükür", n: "Ahlak" },
-  { t: "Yaratılış", n: "Evren" },
-  { t: "Adalet", n: "Toplum" },
-  { t: "İlim", n: "Toplum" },
-  { t: "Ahiret", n: "İnanç" },
-  { t: "Dua", n: "İbadet" },
-  { t: "Rızık", n: "Hayat" },
+  { t: "Tevhid" }, { t: "Sabır" }, { t: "Şükür" },
+  { t: "Yaratılış" }, { t: "Adalet" }, { t: "İlim" },
+  { t: "Ahiret" }, { t: "Dua" }, { t: "Rızık" },
 ];
+
+const ACTIONS = [
+  { key: "Learn", to: "/alifba" },
+  { key: "Play", to: "/games" },
+  { key: "Memorize", to: "/hifz" },
+  { key: "Community", to: "/khatm" },
+] as const;
 
 export function DiscoverPage() {
   const { t, locale } = useTranslation();
   const { data: surahs } = useSurahs();
   const { data: dailyVerse } = useDailyVerse(locale);
+  const hub = t.hub as unknown as Record<string, string>;
 
   return (
     <div className="mu-discover">
-      {/* Hero */}
-      <section style={{ padding: "24px 0 40px", maxWidth: 900 }}>
-        <p className="mu-eyebrow">
-          <span className="mu-eb-line" />
-          {t.hub?.title ?? "Keşfet"}
-        </p>
-        <h1 className="mu-display" style={{ fontSize: "clamp(40px, 5.5vw, 68px)" }}>
-          Bir niyet seç,<span className="mu-display-accent"> sure sana gelsin.</span>
-        </h1>
-        <p className="mu-lede">
-          Konuya, uzunluğa veya güne göre okuma önerileri. Her gün yeni bir öneri.
-        </p>
-      </section>
+      {/* 1. Today card */}
+      <TodayCard dailyVerse={dailyVerse} locale={locale} hub={hub} />
 
-      {/* Today's verse */}
-      <section>
-        <div className="mu-today-card">
-          <div style={{ position: "relative" }}>
-            <p className="mu-eyebrow">Bugünün ayeti</p>
-            {dailyVerse ? (
-              <>
-                <p className="mu-today-ar" dir="rtl">
-                  {dailyVerse.verse.textUthmani}
-                </p>
-                {dailyVerse.translation && (
-                  <p className="mu-today-tr">
-                    {decodeEntities(dailyVerse.translation.text)}
-                  </p>
-                )}
-                {dailyVerse.surah && (
-                  <p className="mu-today-ref" style={{ fontFamily: "var(--mu-ff-mono)", fontSize: 12, color: "var(--mu-muted)", margin: "0 0 24px" }}>
-                    {getSurahName(dailyVerse.surah.id, locale)} - {dailyVerse.verse.ayahNumber}
-                  </p>
-                )}
-                {dailyVerse.surah && (
-                  <Link
-                    to="/surah/$surahSlug"
-                    params={{ surahSlug: surahSlug(dailyVerse.surah.id) }}
-                    search={{ ayah: dailyVerse.verse.ayahNumber }}
-                    className="mu-btn ghost"
-                  >
-                    Sureyi aç {MuIcons.arrowRight}
-                  </Link>
-                )}
-              </>
-            ) : (
-              <>
-                <p className="mu-today-ar" dir="rtl">
-                  وَمَن يَتَوَكَّلْ عَلَى ٱللَّهِ فَهُوَ حَسْبُهُۥ
-                </p>
-                <p className="mu-today-tr">
-                  Kim Allah'a tevekkül ederse, O ona yeter.
-                </p>
-                <p style={{ fontFamily: "var(--mu-ff-mono)", fontSize: 12, color: "var(--mu-muted)", margin: "0 0 24px" }}>
-                  Et-Talak - ayet 3
-                </p>
-                <Link
-                  to="/surah/$surahSlug"
-                  params={{ surahSlug: surahSlug(65) }}
-                  className="mu-btn ghost"
-                >
-                  Sureyi aç {MuIcons.arrowRight}
-                </Link>
-              </>
-            )}
-          </div>
-          <div style={{ color: "var(--mu-accent)", position: "relative", opacity: 0.9 }} aria-hidden="true">
-            <svg viewBox="0 0 200 200" width="180" height="180" fill="none" stroke="currentColor" strokeWidth="0.6">
-              <circle cx="100" cy="100" r="90" opacity="0.25" />
-              <circle cx="100" cy="100" r="70" opacity="0.35" />
-              <circle cx="100" cy="100" r="50" opacity="0.5" />
-              <path d="M100 15 L115 50 L155 55 L125 85 L135 125 L100 105 L65 125 L75 85 L45 55 L85 50 Z" opacity="0.5" />
-              <circle cx="100" cy="100" r="6" fill="currentColor" opacity="0.6" />
-            </svg>
-          </div>
+      {/* 2. Streak */}
+      <StreakStrip hub={hub} />
+
+      {/* 3. Actions */}
+      <section className="mu-disc-section">
+        <p className="mu-eyebrow" style={{ marginBottom: 20 }}>
+          {hub.journeyTitle ?? "Yolculuğun"}
+        </p>
+        <div className="mu-actions">
+          {ACTIONS.map((a) => {
+            const titleKey = `feat${a.key}` as string;
+            const descKey = `${titleKey}Desc` as string;
+            return (
+              <Link key={a.key} to={a.to} className="mu-action-row">
+                <div>
+                  <div className="mu-action-name">{hub[titleKey] ?? a.key}</div>
+                  <div className="mu-action-desc">{hub[descKey] ?? ""}</div>
+                </div>
+                <span className="mu-action-arrow" aria-hidden="true">{"\u2192"}</span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      {/* Collections */}
-      <section>
-        <h2 className="mu-h2">Derlemeler</h2>
+      {/* 4. Collections */}
+      <section className="mu-disc-section">
+        <h2 className="mu-disc-section-title">{hub.curatedTitle ?? "Derlemeler"}</h2>
         <div className="mu-coll-grid">
           {COLLECTIONS.map((c) => (
-            <article key={c.title} className="mu-coll">
-              <header className="mu-coll-head">
-                <h3>{c.title}</h3>
-                <p className="mu-muted" style={{ fontSize: 13, margin: 0 }}>{c.sub}</p>
-              </header>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            <article key={c.title} className="mu-coll-card">
+              <h3>{c.title}</h3>
+              <p className="mu-coll-sub">{c.sub}</p>
+              <ul>
                 {c.items.map((n) => {
                   const s = surahs.find((x) => x.id === n);
                   if (!s) return null;
                   return (
-                    <li key={n} style={{ borderBottom: "1px solid color-mix(in oklab, var(--mu-line), transparent 40%)" }}>
+                    <li key={n}>
                       <Link
                         to="/surah/$surahSlug"
                         params={{ surahSlug: surahSlug(n) }}
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "40px 1fr auto",
-                          gap: 12,
-                          alignItems: "baseline",
-                          padding: "10px 4px",
-                          width: "100%",
-                          textDecoration: "none",
-                          color: "inherit",
-                          transition: "padding 0.15s",
-                        }}
+                        search={{ ayah: undefined }}
+                        className="mu-coll-item"
                       >
-                        <span style={{ fontFamily: "var(--mu-ff-mono)", fontSize: 11, color: "var(--mu-muted)" }}>
-                          {String(n).padStart(3, "0")}
-                        </span>
-                        <span style={{ fontFamily: "var(--mu-ff-display)", fontSize: 17, color: "var(--mu-ink)" }}>
-                          {getSurahName(n, locale) || s.nameSimple}
-                        </span>
-                        <span style={{ fontFamily: "var(--mu-ff-ar)", fontSize: 20, color: "var(--mu-ink-3)", direction: "rtl" }} dir="rtl">
-                          {s.nameArabic}
-                        </span>
+                        <span className="mu-ci-num">{String(n).padStart(3, "0")}</span>
+                        <span className="mu-ci-name">{getSurahName(n, locale) || s.nameSimple}</span>
+                        <span className="mu-ci-ar" dir="rtl">{s.nameArabic}</span>
                       </Link>
                     </li>
                   );
@@ -173,21 +115,150 @@ export function DiscoverPage() {
         </div>
       </section>
 
-      {/* Themes */}
-      <section>
-        <h2 className="mu-h2">Konular</h2>
-        <div className="mu-theme-grid">
+      {/* 5. Topics */}
+      <section className="mu-disc-section">
+        <h2 className="mu-disc-section-title">{hub.topicsTitle ?? "Konular"}</h2>
+        <div className="mu-topic-grid">
           {THEMES.map((theme) => (
-            <button key={theme.t} className="mu-theme-tile">
-              <span className="mu-theme-n">{theme.n}</span>
-              <span className="mu-theme-t">{theme.t}</span>
-              <span style={{ gridColumn: 2, gridRow: "1 / -1", alignSelf: "end", color: "var(--mu-muted)", transition: "color 0.15s, transform 0.15s" }}>
-                {MuIcons.arrowRight}
-              </span>
-            </button>
+            <Link
+              key={theme.t}
+              to="/search"
+              search={{ q: theme.t }}
+              className="mu-topic-item"
+            >
+              <span className="mu-topic-dot" aria-hidden="true" />
+              <span className="mu-topic-name">{theme.t}</span>
+            </Link>
           ))}
         </div>
       </section>
     </div>
+  );
+}
+
+/* ── Today card ── */
+function TodayCard({
+  dailyVerse,
+  locale,
+  hub,
+}: {
+  dailyVerse: ReturnType<typeof useDailyVerse>["data"];
+  locale: string;
+  hub: Record<string, string>;
+}) {
+  const fallback = {
+    text: "وَمَن يَتَوَكَّلْ عَلَى ٱللَّهِ فَهُوَ حَسْبُهُۥ",
+    tr: "Kim Allah'a tevekkül ederse, O ona yeter.",
+    ref: "Et-Talak \u00b7 ayet 3",
+    surahId: 65,
+    ayahNumber: 3,
+  };
+
+  const v = dailyVerse
+    ? {
+        text: dailyVerse.verse.textUthmani,
+        tr: dailyVerse.translation ? decodeEntities(dailyVerse.translation.text) : null,
+        ref: dailyVerse.surah
+          ? `${getSurahName(dailyVerse.surah.id, locale)} \u00b7 ayet ${dailyVerse.verse.ayahNumber}`
+          : null,
+        surahId: dailyVerse.surah?.id ?? 1,
+        ayahNumber: dailyVerse.verse.ayahNumber,
+      }
+    : fallback;
+
+  return (
+    <section className="mu-today">
+      <p className="mu-today-label">{hub.todayVerse ?? "Bugünün ayeti"}</p>
+      <p className="mu-today-ar" dir="rtl" lang="ar">{v.text}</p>
+      {v.tr && <p className="mu-today-tr">{v.tr}</p>}
+      {v.ref && <p className="mu-today-ref">{v.ref}</p>}
+      <Link
+        to="/surah/$surahSlug"
+        params={{ surahSlug: surahSlug(v.surahId) }}
+        search={{ ayah: v.ayahNumber }}
+        className="mu-today-cta"
+      >
+        {hub.openSurah ?? "Sureyi aç"}
+        <span className="mu-today-cta-arrow" aria-hidden="true">{"\u2192"}</span>
+      </Link>
+    </section>
+  );
+}
+
+/* ── Streak strip ── */
+function StreakStrip({ hub }: { hub: Record<string, string> }) {
+  const { session } = useRouteContext({ from: "__root__" });
+  const userId = session?.user?.id;
+
+  const { data: streak } = useQuery({
+    ...streakQueryOptions(userId ?? ""),
+    enabled: !!userId,
+  });
+
+  const { data: weekly } = useQuery({
+    ...weeklySummaryQueryOptions(userId ?? ""),
+    enabled: !!userId,
+  });
+
+  const current = streak?.currentStreak ?? 0;
+  const weekDays = (hub.weekDays ?? "Pzt,Sal,Çar,Per,Cum,Cmt,Paz").split(",");
+
+  // Build week state from weekly summary (array of 7 days, oldest first)
+  const today = new Date().getDay(); // 0=Sun
+  const todayIdx = today === 0 ? 6 : today - 1; // 0=Mon
+
+  const dayStates = useMemo(() => {
+    return weekDays.map((_, i) => {
+      if (i === todayIdx) return "now" as const;
+      if (weekly && weekly[i]) {
+        return weekly[i].pagesRead > 0 ? "done" as const : "idle" as const;
+      }
+      // Fallback: mark past days based on streak count
+      if (i < todayIdx && current > 0 && todayIdx - i <= current) return "done" as const;
+      return "idle" as const;
+    });
+  }, [todayIdx, current, weekly, weekDays]);
+
+  const isEmpty = current === 0;
+
+  return (
+    <section className="mu-disc-section">
+      <div className="mu-streak-header">
+        <p className="mu-eyebrow">{hub.streakLabel ?? "Serin"}</p>
+        {!isEmpty && (
+          <div>
+            <span className="mu-streak-num">{current}</span>
+            <span className="mu-streak-unit">{hub.streakDayUnit ?? "gün"}</span>
+          </div>
+        )}
+      </div>
+
+      {isEmpty ? (
+        <div className="mu-streak-empty">
+          <div className="mu-streak-empty-num">0</div>
+          <div className="mu-streak-empty-text">
+            {hub.streakEmpty ?? "Bugün ilk okumanı yap, serin başlasın."}
+          </div>
+        </div>
+      ) : (
+        <div className="mu-progress-bar">
+          <div
+            className="mu-progress-fill"
+            style={{ width: `${Math.min(100, (current / 30) * 100)}%` }}
+          />
+        </div>
+      )}
+
+      <div className="mu-week-row">
+        {weekDays.map((day, i) => (
+          <div
+            key={day}
+            className={`mu-week-day${dayStates[i] === "done" ? " done" : ""}${dayStates[i] === "now" ? " now" : ""}`}
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

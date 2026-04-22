@@ -15,6 +15,9 @@ import { LatinRootSearch } from "~/components/LatinRootSearch";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    q: typeof search.q === "string" ? search.q : undefined,
+  }),
 });
 
 // ── App-ici aranabilir sayfalar ──────────────────────────
@@ -108,8 +111,9 @@ function matchAppPages(q: string, pageLabels: Record<string, string>): AppPage[]
 
 function SearchPage() {
   const { t, locale } = useTranslation();
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const { q: initialQuery } = Route.useSearch();
+  const [query, setQuery] = useState(initialQuery ?? "");
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery ?? "");
   const translationSlugs = useSettingsStore((s) => s.translationSlugs);
   const translationSlug = translationSlugs[0];
   const navigate = useNavigate();
