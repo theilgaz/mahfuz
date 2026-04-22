@@ -254,6 +254,10 @@ export const tr = {
       notStarted: "sure başlanmadı",
       hint: "Surelere dokunarak ayet detayını açın. Tek ayet, aralık veya tamamını seçebilirsiniz.",
     },
+    studied: "Çalıştıklarım",
+    studiedEdit: "Düzenle",
+    studiedDone: "Tamam",
+    studiedEmpty: "Çalıştığın sureleri ekle, oyunlarda hızlıca seç",
   },
 
   bookmarks: {
@@ -731,8 +735,8 @@ export const tr = {
     minSurahHint: "En az {count} sure seç",
     showDetails: "Detay",
     hideDetails: "Gizle",
-    manageHifz: "Ezberlerimi Duzenle",
-    presetWorked: "Calistiklarim",
+    manageHifz: "Ezberlerimi Düzenle",
+    presetWorked: "Çalıştıklarım",
   },
   gamesHub: {
     title: "Oyunlar",
