@@ -214,6 +214,28 @@ function generateFormToLetter(count: number): ExamQuestion[] {
   });
 }
 
+/** Bagli form goster -> harf adini sec */
+function generateFormToName(count: number): ExamQuestion[] {
+  const letters = shuffle(ARABIC_LETTERS).slice(0, count);
+  return letters.map((l) => {
+    const nc = NON_CONNECTORS.has(l.arabic);
+    const availableForms = nc ? ["final" as const] : (["initial", "medial", "final"] as const);
+    const formType = availableForms[Math.floor(Math.random() * availableForms.length)];
+    const forms = getLetterForms(l.arabic);
+    const distractors = getSimilarDistractors(l.id, 3);
+    return {
+      id: nextId(),
+      type: "mcq" as const,
+      prompt: "Bu harf hangisi?",
+      arabicDisplay: forms[formType],
+      options: shuffle([
+        { text: l.name, isCorrect: true },
+        ...distractors.map((d) => ({ text: d.name, isCorrect: false })),
+      ]),
+    };
+  });
+}
+
 /** Harekeli harf goster -> hareke adini sec */
 function generateHarekeIdentify(count: number): ExamQuestion[] {
   const pool = shuffle(buildHarekePool()).slice(0, count);
@@ -356,6 +378,7 @@ const GENERATORS: Record<GeneratorId, (count: number) => ExamQuestion[]> = {
   "name-to-arabic": generateNameToArabic,
   "audio-to-letter": generateAudioToLetter,
   "form-to-letter": generateFormToLetter,
+  "form-to-name": generateFormToName,
   "hareke-identify": generateHarekeIdentify,
   "hareke-read": generateHarekeRead,
   "sukun-find": generateSukunFind,

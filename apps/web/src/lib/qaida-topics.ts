@@ -8,6 +8,7 @@ export type GeneratorId =
   | "name-to-arabic"
   | "audio-to-letter"
   | "form-to-letter"
+  | "form-to-name"
   | "hareke-identify"
   | "hareke-read"
   | "sukun-find"
@@ -129,7 +130,7 @@ export const QAIDA_TOPICS: QaidaTopic[] = [
     examConfig: {
       questionCount: 10,
       passThreshold: 0.8,
-      generators: ["form-to-letter", "arabic-to-name"],
+      generators: ["form-to-letter", "form-to-name"],
     },
   },
   {
