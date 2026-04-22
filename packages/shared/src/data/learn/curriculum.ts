@@ -103,6 +103,18 @@ export const CURRICULUM: Stage[] = [
             ],
             sevapPointReward: 5,
           },
+          {
+            id: "s1-l2-e5",
+            type: "matching",
+            promptKey: "exercises.matchPairs",
+            pairs: [
+              { left: "ب", right: "Be" },
+              { left: "ت", right: "Te" },
+              { left: "ث", right: "Se" },
+            ],
+            options: [],
+            sevapPointReward: 10,
+          },
         ],
         conceptIds: ["letter-2", "letter-3", "letter-4"],
         sevapPointOnComplete: 20,
@@ -156,6 +168,18 @@ export const CURRICULUM: Stage[] = [
               { text: "Ğayn", isCorrect: false },
             ],
             sevapPointReward: 5,
+          },
+          {
+            id: "s1-l3-e4",
+            type: "matching",
+            promptKey: "exercises.matchPairs",
+            pairs: [
+              { left: "ج", right: "Cim" },
+              { left: "ح", right: "Ha" },
+              { left: "خ", right: "Hı" },
+            ],
+            options: [],
+            sevapPointReward: 10,
           },
         ],
         conceptIds: ["letter-5", "letter-6", "letter-7"],
@@ -405,6 +429,29 @@ export const CURRICULUM: Stage[] = [
             ],
             sevapPointReward: 5,
           },
+          {
+            id: "s1-l9-e3",
+            type: "matching",
+            promptKey: "exercises.matchPairs",
+            pairs: [
+              { left: "ب", right: "Be" },
+              { left: "ج", right: "Cim" },
+              { left: "د", right: "Dal" },
+              { left: "ر", right: "Ra" },
+            ],
+            options: [],
+            sevapPointReward: 10,
+          },
+          {
+            id: "s1-l9-e4",
+            type: "letter_order",
+            promptKey: "exercises.orderLetters",
+            arabicDisplay: "ا ب ت ث",
+            letters: ["ث", "ا", "ت", "ب"],
+            targetWord: "ابتث",
+            options: [],
+            sevapPointReward: 10,
+          },
         ],
         conceptIds: ["letter-25", "letter-26", "letter-27", "letter-28"],
         sevapPointOnComplete: 20,
@@ -524,6 +571,16 @@ export const CURRICULUM: Stage[] = [
             ],
             sevapPointReward: 5,
           },
+          {
+            id: "s2-l4-e2",
+            type: "word_build",
+            promptKey: "exercises.buildWord",
+            arabicDisplay: "كِتَاب",
+            letters: ["ك", "ت", "ا", "ب"],
+            targetWord: "كتاب",
+            options: [],
+            sevapPointReward: 10,
+          },
         ],
         conceptIds: ["word-forms"],
         sevapPointOnComplete: 20,
@@ -550,6 +607,16 @@ export const CURRICULUM: Stage[] = [
               { text: "6", isCorrect: false },
             ],
             sevapPointReward: 5,
+          },
+          {
+            id: "s2-l5-e2",
+            type: "word_build",
+            promptKey: "exercises.buildWord",
+            arabicDisplay: "نُور",
+            letters: ["ن", "و", "ر"],
+            targetWord: "نور",
+            options: [],
+            sevapPointReward: 10,
           },
         ],
         conceptIds: ["word-reading-basic"],
@@ -600,6 +667,21 @@ export const CURRICULUM: Stage[] = [
               { text: "ti", isCorrect: false },
               { text: "tu", isCorrect: false },
               { text: "se", isCorrect: false },
+            ],
+            sevapPointReward: 5,
+          },
+          {
+            id: "s3-l1-e3",
+            type: "fill_blank",
+            promptKey: "exercises.fillMissing",
+            contextDisplay: "بـ|ـ",
+            blankPosition: 1,
+            arabicDisplay: "بَ",
+            options: [
+              { text: "\u064E (fetha)", isCorrect: true },
+              { text: "\u0650 (kesra)", isCorrect: false },
+              { text: "\u064F (damme)", isCorrect: false },
+              { text: "\u0652 (sukun)", isCorrect: false },
             ],
             sevapPointReward: 5,
           },
@@ -899,6 +981,7 @@ export const CURRICULUM: Stage[] = [
           { id: "s6-l4-e1", type: "word_read", promptKey: "exercises.readWord", arabicDisplay: "قَالَ", options: [{ text: "kāle", isCorrect: true }, { text: "kale", isCorrect: false }, { text: "kūle", isCorrect: false }, { text: "kīle", isCorrect: false }], sevapPointReward: 5 },
           { id: "s6-l4-e2", type: "word_read", promptKey: "exercises.readWord", arabicDisplay: "يَقُولُ", options: [{ text: "yekūlu", isCorrect: true }, { text: "yekulu", isCorrect: false }, { text: "yekāle", isCorrect: false }, { text: "yekīlu", isCorrect: false }], sevapPointReward: 5 },
           { id: "s6-l4-e3", type: "harakat_read", promptKey: "exercises.whichMedType", arabicDisplay: "نُور", options: [{ text: "Med Vav (ū)", isCorrect: true }, { text: "Med Elif (ā)", isCorrect: false }, { text: "Med Ya (ī)", isCorrect: false }, { text: "Med yok", isCorrect: false }], sevapPointReward: 5 },
+          { id: "s6-l4-e4", type: "matching", promptKey: "exercises.matchPairs", pairs: [{ left: "قَالَ", right: "Med Elif (ā)" }, { left: "يَقُولُ", right: "Med Vav (ū)" }, { left: "قِيلَ", right: "Med Ya (ī)" }], options: [], sevapPointReward: 10 },
         ],
         conceptIds: ["med-combined"],
         sevapPointOnComplete: 20,
@@ -1172,6 +1255,7 @@ export const CURRICULUM: Stage[] = [
         exercises: [
           { id: "s11-l1-e1", type: "word_read", promptKey: "exercises.readWord", arabicDisplay: "بِسْمِ", options: [{ text: "bismi", isCorrect: true }, { text: "besmi", isCorrect: false }, { text: "busmi", isCorrect: false }, { text: "bisim", isCorrect: false }], sevapPointReward: 5 },
           { id: "s11-l1-e2", type: "word_read", promptKey: "exercises.readWord", arabicDisplay: "الْحَمْدُ", options: [{ text: "el-hamdu", isCorrect: true }, { text: "el-hemdi", isCorrect: false }, { text: "el-humdi", isCorrect: false }, { text: "el-hamdi", isCorrect: false }], sevapPointReward: 5 },
+          { id: "s11-l1-e3", type: "word_build" as const, promptKey: "exercises.buildWord", arabicDisplay: "بِسْمِ", letters: ["م", "س", "ب"], targetWord: "بسم", options: [], sevapPointReward: 10 },
         ],
         conceptIds: ["surah-fatiha"],
         sevapPointOnComplete: 20,
@@ -1187,6 +1271,7 @@ export const CURRICULUM: Stage[] = [
         exercises: [
           { id: "s11-l2-e1", type: "word_read", promptKey: "exercises.readWord", arabicDisplay: "أَحَدٌ", options: [{ text: "ehadun", isCorrect: true }, { text: "ahadin", isCorrect: false }, { text: "uhudun", isCorrect: false }, { text: "ehaden", isCorrect: false }], sevapPointReward: 5 },
           { id: "s11-l2-e2", type: "word_read", promptKey: "exercises.readWord", arabicDisplay: "الصَّمَدُ", options: [{ text: "es-samedu", isCorrect: true }, { text: "el-samedu", isCorrect: false }, { text: "es-simadu", isCorrect: false }, { text: "es-samadu", isCorrect: false }], sevapPointReward: 5 },
+          { id: "s11-l2-e3", type: "matching" as const, promptKey: "exercises.matchPairs", pairs: [{ left: "قُلْ", right: "de ki" }, { left: "اللَّهُ", right: "Allah" }, { left: "أَحَدٌ", right: "bir" }, { left: "الصَّمَدُ", right: "samed" }], options: [], sevapPointReward: 10 },
         ],
         conceptIds: ["surah-ikhlas"],
         sevapPointOnComplete: 20,
@@ -1693,27 +1778,47 @@ function generateWordLessons() {
         data: { arabic: w.arabic, transliteration: w.transliteration, meaning: w.meaning },
       })),
     ],
-    exercises: words.slice(0, 3).map((w, eIdx) => {
-      const wrongs = words
-        .filter((o) => o.transliteration !== w.transliteration)
-        .slice(0, 3)
-        .map((o) => o.transliteration);
-      return {
-        id: `s10-l${i + 1}-e${eIdx + 1}`,
-        type: "word_read" as const,
-        promptKey: "exercises.readWord",
-        arabicDisplay: w.arabic,
-        options: [
-          { text: w.transliteration, isCorrect: true },
-          { text: wrongs[0] || "?", isCorrect: false },
-          { text: wrongs[1] || "?", isCorrect: false },
-          { text: wrongs[2] || "?", isCorrect: false },
-        ],
-        xpReward: 5,
-      };
-    }),
+    exercises: [
+      ...words.slice(0, 3).map((w, eIdx) => {
+        const wrongs = words
+          .filter((o) => o.transliteration !== w.transliteration)
+          .slice(0, 3)
+          .map((o) => o.transliteration);
+        return {
+          id: `s10-l${i + 1}-e${eIdx + 1}`,
+          type: "word_read" as const,
+          promptKey: "exercises.readWord",
+          arabicDisplay: w.arabic,
+          options: [
+            { text: w.transliteration, isCorrect: true },
+            { text: wrongs[0] || "?", isCorrect: false },
+            { text: wrongs[1] || "?", isCorrect: false },
+            { text: wrongs[2] || "?", isCorrect: false },
+          ],
+          sevapPointReward: 5,
+        };
+      }),
+      {
+        id: `s10-l${i + 1}-match`,
+        type: "matching" as const,
+        promptKey: "exercises.matchPairs",
+        pairs: words.slice(0, 4).map((w) => ({ left: w.arabic, right: w.meaning })),
+        options: [],
+        sevapPointReward: 10,
+      },
+      {
+        id: `s10-l${i + 1}-build`,
+        type: "word_build" as const,
+        promptKey: "exercises.buildWord",
+        arabicDisplay: words[0].arabic,
+        letters: [...words[0].arabic.replace(/[\u064B-\u065F\u0670]/g, "")].reverse(),
+        targetWord: words[0].arabic.replace(/[\u064B-\u065F\u0670]/g, ""),
+        options: [],
+        sevapPointReward: 10,
+      },
+    ],
     conceptIds: [`words-group-${i + 1}`],
-    xpOnComplete: 20,
+    sevapPointOnComplete: 20,
   }));
 }
 

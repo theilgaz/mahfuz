@@ -88,6 +88,14 @@ export interface Exercise {
   audioRef?: AudioRef;
   options: ExerciseOption[];
   sevapPointReward: number;
+  // word_build / letter_order
+  letters?: string[];
+  targetWord?: string;
+  // fill_blank
+  contextDisplay?: string;
+  blankPosition?: number;
+  // matching
+  pairs?: MatchingPair[];
 }
 
 export type ExerciseType =
@@ -100,7 +108,8 @@ export type ExerciseType =
   | "word_read"
   | "tajweed_identify"
   | "latin_to_arabic"
-  | "matching";
+  | "matching"
+  | "letter_order";
 
 /** Matching exercise: user pairs items from two columns */
 export interface MatchingPair {
