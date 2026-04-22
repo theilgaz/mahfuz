@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, stat, readdir } from "node:fs/promises";
 import { join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -142,6 +142,17 @@ async function main() {
   }
 
   const clientDir = join(__dirname, "dist", "client");
+
+  // Startup diagnostics
+  try {
+    const clientStat = await stat(clientDir);
+    if (clientStat.isDirectory()) {
+      const entries = await readdir(clientDir);
+      console.log(`[mahfuz-core] Static dir: ${clientDir} (${entries.length} entries: ${entries.slice(0, 8).join(", ")}${entries.length > 8 ? "..." : ""})`);
+    }
+  } catch {
+    console.error(`[mahfuz-core] WARNING: Static dir not found: ${clientDir}`);
+  }
 
   const server = createServer(async (req, res) => {
     try {
