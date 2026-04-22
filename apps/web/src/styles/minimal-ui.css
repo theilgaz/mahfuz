@@ -3746,6 +3746,69 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   color: var(--mu-accent);
 }
 
+/* ── Account grid (5-item navigation boxes) ──────────── */
+
+.mu-account-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .mu-account-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.mu-account-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border: 1px solid var(--mu-line);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+  text-align: center;
+  position: relative;
+}
+
+.mu-account-grid-item:hover {
+  background: var(--mu-bg-card);
+  border-color: var(--mu-accent);
+}
+
+.mu-account-grid-item strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mu-ink);
+  line-height: 1.3;
+}
+
+.mu-account-grid-icon {
+  color: var(--mu-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mu-account-grid-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.mu-account-grid-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--mu-accent);
+  font-family: var(--mu-ff-mono);
+}
+
 /* ── Profile cards ──────────────────────────────────── */
 
 .mu-profile-continue {
@@ -3753,8 +3816,8 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   align-items: center;
   gap: 14px;
   padding: 16px 18px;
-  background: var(--mu-accent-soft);
-  border: 1px solid var(--mu-accent);
+  background: var(--mu-bg-card);
+  border: 1px solid var(--mu-line);
   border-radius: var(--mu-radius);
   text-decoration: none;
   color: inherit;
@@ -3763,7 +3826,8 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 }
 
 .mu-profile-continue:hover {
-  background: oklch(0.90 0.05 70);
+  background: var(--mu-bg-soft);
+  border-color: var(--mu-accent);
 }
 
 .mu-profile-continue-icon {
@@ -3815,6 +3879,19 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.mu-profile-duo {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .mu-profile-duo {
+    grid-template-columns: 1fr;
+  }
 }
 
 .mu-profile-card {

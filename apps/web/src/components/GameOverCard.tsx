@@ -32,7 +32,7 @@ export function GameOverCard({
 
   return (
     <div
-      className="max-w-md mx-auto px-4 pt-8 pb-28 text-center game-bounce-in min-h-dvh flex flex-col items-center justify-center game-bg"
+      className="max-w-3xl mx-auto px-4 pt-8 pb-20 text-center game-bounce-in min-h-dvh flex flex-col items-center justify-center game-bg"
       style={gameBgStyle(theme)}
     >
       {/* Trophy circle */}

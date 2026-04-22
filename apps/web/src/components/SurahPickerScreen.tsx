@@ -6,14 +6,16 @@
 import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { getSurahs } from "~/lib/quran-service";
 import { useSurahSelectionStore } from "~/stores/surahSelection.store";
 import { useHifzStore } from "~/stores/hifz.store";
+import { useStudiedStore } from "~/stores/studied.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import type { VerseFilter } from "~/lib/game-service";
 import type { Difficulty } from "~/lib/game-scoring";
 
-type Mode = "all" | "hifz" | "custom";
+type Mode = "all" | "hifz" | "studied" | "custom";
 
 const PRESETS = [
   { key: "namaz",     labelKey: "presetNamaz",     ids: [1, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114] },
@@ -37,6 +39,8 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
   const memorized = useHifzStore((s) => s.memorized);
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
 
+  const studiedIds = useStudiedStore((s) => s.surahIds);
+
   const memorizedEntries = Object.entries(memorized)
     .filter(([, verses]) => verses.length > 0)
     .map(([id, verses]) => ({ surahId: Number(id), verses }))
@@ -44,8 +48,11 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
 
   const hasHifz = memorizedEntries.length > 0;
 
+  const hasStudied = studiedIds.length > 0;
+
   const [mode, setMode] = useState<Mode>(() => {
     if (hasHifz) return "hifz";
+    if (hasStudied) return "studied";
     return savedIds.length > 0 ? "custom" : "all";
   });
   const [selected, setSelected] = useState<Set<number>>(new Set(savedIds));
@@ -89,6 +96,8 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
         verseNums: e.verses,
       }));
       onStart(surahIds, verseFilter, difficulty);
+    } else if (mode === "studied") {
+      onStart(studiedIds, undefined, difficulty);
     } else {
       const ids = [...selected];
       saveIds(ids);
@@ -98,22 +107,22 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
 
   const hifzTotalVerses = memorizedEntries.reduce((s, e) => s + e.verses.length, 0);
 
-  const MIN_CUSTOM_SURAHS = 10;
-
   const startButtonLabel = difficultyOnly
     ? t.surahPicker.startAll
     : mode === "all"
     ? t.surahPicker.startAll
     : mode === "hifz"
     ? t.surahPicker.testMyHifz.replace("{count}", String(hifzTotalVerses))
-    : selected.size >= MIN_CUSTOM_SURAHS
+    : mode === "studied"
+    ? t.surahPicker.startWithSurahs.replace("{count}", String(studiedIds.length))
+    : selected.size > 0
     ? t.surahPicker.startWithSurahs.replace("{count}", String(selected.size))
-    : t.surahPicker.minSurahHint.replace("{count}", String(MIN_CUSTOM_SURAHS));
+    : t.surahPicker.modeCustomHint;
 
-  const startDisabled = !difficultyOnly && mode === "custom" && selected.size < MIN_CUSTOM_SURAHS;
+  const startDisabled = !difficultyOnly && ((mode === "custom" && selected.size === 0) || (mode === "studied" && studiedIds.length === 0));
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 pb-28">
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
       {/* Oyun görseli */}
       {gameImg && (
         <div className="flex justify-center mb-4">
@@ -127,7 +136,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
 
       {/* Zorluk seçimi */}
       <div className="mb-5">
-        <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden">
+        <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
           {(["easy", "medium", "hard", "hafiz"] as const).map((d) => {
             const active = difficulty === d;
             const label = t.gameScoring[d === "easy" ? "diffEasy" : d === "medium" ? "diffMedium" : d === "hard" ? "diffHard" : "diffHafiz"];
@@ -136,7 +145,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
               <button
                 key={d}
                 onClick={() => setDifficulty(d)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-all ${
                   active
                     ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
                     : "text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)]/5"
@@ -155,7 +164,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
         {/* Tüm Kuran */}
         <button
           onClick={() => setMode("all")}
-          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded border transition-all text-left ${
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-lg border transition-all text-left ${
             mode === "all"
               ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
               : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
@@ -169,61 +178,95 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
         </button>
 
         {/* Ezberim */}
-        {hasHifz && (
-          <div className={`rounded border transition-all overflow-hidden ${
-            mode === "hifz"
+        <div className={`rounded-lg border transition-all overflow-hidden ${
+          mode === "hifz"
+            ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
+            : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
+        }`}>
+          <button
+            onClick={() => {
+              if (!hasHifz) return;
+              if (mode === "hifz") {
+                setHifzExpanded((v) => !v);
+              } else {
+                setMode("hifz");
+              }
+            }}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 text-left ${!hasHifz ? "opacity-60" : ""}`}
+            disabled={!hasHifz}
+          >
+            <RadioDot active={mode === "hifz"} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.surahPicker.modeHifz}</p>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                {hasHifz
+                  ? `${memorizedEntries.length} ${t.surahPicker.modeHifzSurahs} · ${hifzTotalVerses} ${t.surahPicker.modeHifzVerses}`
+                  : t.surahPicker.noMemorized}
+              </p>
+            </div>
+            {hasHifz && mode === "hifz" && (
+              <svg className={`w-4 h-4 text-[var(--color-text-secondary)] transition-transform ${hifzExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            )}
+          </button>
+
+          {/* Hifz detay listesi */}
+          {mode === "hifz" && hasHifz && hifzExpanded && (
+            <div className="border-t border-[var(--color-border)]">
+              {memorizedEntries.map(({ surahId, verses }, i) => {
+                const surah = surahMap.get(surahId);
+                return (
+                  <div
+                    key={surahId}
+                    className={`flex items-center gap-2 px-4 py-1.5 ${i > 0 ? "border-t border-[var(--color-border)]/50" : ""}`}
+                  >
+                    <span className="text-[10px] text-[var(--color-text-secondary)] w-6 shrink-0 tabular-nums">{surahId}</span>
+                    <span className="text-xs text-[var(--color-text-primary)] flex-1 truncate">{surah?.nameSimple ?? `Sure ${surahId}`}</span>
+                    <span className="text-xs text-[var(--color-text-secondary)]" style={{ fontFamily: "var(--font-arabic)" }} dir="rtl">{surah?.nameArabic}</span>
+                    <span className="text-[10px] text-[var(--color-accent)] font-medium tabular-nums shrink-0 w-12 text-right">{verses.length} ayet</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Hifz yonetim linki */}
+          <div className="border-t border-[var(--color-border)] px-4 py-2">
+            <Link
+              to="/hifz"
+              className="text-xs text-[var(--color-accent)] hover:underline"
+            >
+              {t.surahPicker.manageHifz}
+            </Link>
+          </div>
+        </div>
+
+        {/* Çalıştıklarım */}
+        <button
+          onClick={() => { if (studiedIds.length > 0) setMode("studied"); }}
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-lg border transition-all text-left ${
+            mode === "studied"
               ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
               : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
-          }`}>
-            <button
-              onClick={() => {
-                if (mode === "hifz") {
-                  setHifzExpanded((v) => !v);
-                } else {
-                  setMode("hifz");
-                }
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
-            >
-              <RadioDot active={mode === "hifz"} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.surahPicker.modeHifz}</p>
-                <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-                  {memorizedEntries.length} {t.surahPicker.modeHifzSurahs} · {hifzTotalVerses} {t.surahPicker.modeHifzVerses}
-                </p>
-              </div>
-              {mode === "hifz" && (
-                <svg className={`w-4 h-4 text-[var(--color-text-secondary)] transition-transform ${hifzExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              )}
-            </button>
-
-            {mode === "hifz" && hifzExpanded && (
-              <div className="border-t border-[var(--color-border)]">
-                {memorizedEntries.map(({ surahId, verses }, i) => {
-                  const surah = surahMap.get(surahId);
-                  return (
-                    <div
-                      key={surahId}
-                      className={`flex items-center gap-2 px-4 py-1.5 ${i > 0 ? "border-t border-[var(--color-border)]/50" : ""}`}
-                    >
-                      <span className="text-[10px] text-[var(--color-text-secondary)] w-6 shrink-0 tabular-nums">{surahId}</span>
-                      <span className="text-xs text-[var(--color-text-primary)] flex-1 truncate">{surah?.nameSimple ?? `Sure ${surahId}`}</span>
-                      <span className="text-xs text-[var(--color-text-secondary)]" style={{ fontFamily: "var(--font-arabic)" }} dir="rtl">{surah?.nameArabic}</span>
-                      <span className="text-[10px] text-[var(--color-accent)] font-medium tabular-nums shrink-0 w-12 text-right">{verses.length} ayet</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+          } ${studiedIds.length === 0 ? "opacity-60" : ""}`}
+          disabled={studiedIds.length === 0}
+        >
+          <RadioDot active={mode === "studied"} />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.surahPicker.presetWorked}</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+              {studiedIds.length > 0
+                ? `${studiedIds.length} sure`
+                : t.profile.studiedEmpty}
+            </p>
           </div>
-        )}
+        </button>
 
         {/* Özel Seçim */}
         <button
           onClick={() => setMode("custom")}
-          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded border transition-all text-left ${
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-lg border transition-all text-left ${
             mode === "custom"
               ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
               : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30"
@@ -234,9 +277,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
             <p className="text-sm font-medium text-[var(--color-text-primary)]">{t.surahPicker.modeCustom}</p>
             <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
               {selected.size > 0
-                ? selected.size < MIN_CUSTOM_SURAHS
-                  ? t.surahPicker.selectedCount.replace("{count}", String(selected.size)) + ` (min ${MIN_CUSTOM_SURAHS})`
-                  : t.surahPicker.selectedCount.replace("{count}", String(selected.size))
+                ? t.surahPicker.selectedCount.replace("{count}", String(selected.size))
                 : t.surahPicker.modeCustomHint}
             </p>
           </div>
@@ -296,7 +337,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
             </div>
 
             {/* Sure listesi */}
-            <div className="rounded border border-[var(--color-border)] overflow-hidden overflow-y-auto max-h-[50vh]">
+            <div className="rounded-lg border border-[var(--color-border)] overflow-hidden overflow-y-auto max-h-[50vh]">
               {isLoading ? (
                 <p className="text-center text-xs text-[var(--color-text-secondary)] py-6">{t.surahPicker.loading}</p>
               ) : (

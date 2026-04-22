@@ -256,6 +256,10 @@ export const en: Messages = {
       notStarted: "surahs not started",
       hint: "Tap a surah to open verse details. You can select individual verses, ranges, or all.",
     },
+    studied: "Recently Studied",
+    studiedEdit: "Edit",
+    studiedDone: "Done",
+    studiedEmpty: "Add the surahs you are working on for quick game selection",
   },
 
   bookmarks: {
