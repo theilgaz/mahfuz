@@ -2,7 +2,7 @@
 
 <br>
 
-<img src="apps/web/public/icons/icon-192.svg" width="80" alt="Mahfuz">
+<img src="apps/web/public/icons/icon-192.png" width="80" alt="Mahfuz">
 
 # Mahfuz / محفوظ
 
