@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { useSurahs, surahsQueryOptions, dailyVerseQueryOptions } from "~/hooks/useQuranQuery";
 import { useReadingStore } from "~/stores/reading.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { surahSlug } from "~/lib/surah-slugs";
 import { MuIcons } from "~/components/minimal-ui/icons";
+import { LogoMeem } from "~/components/minimal-ui/LogoMeem";
 import { ACCENT_COLORS, type AccentColorId } from "~/stores/settings.store";
 
 export const Route = createFileRoute("/promo")({
@@ -35,10 +37,10 @@ const FATIHA_TOC = [
   "Rahman ve Rahim Allah'ın ismiyle...",
   "Hamd, alemlerin Rabbi Allah'a mahsustur.",
   "O, Rahman ve Rahim'dir.",
-  "O, hesap ve ceza gununun tek sahibidir.",
+  "O, hesap ve ceza gününün tek sahibidir.",
   "Rabbimiz! Sadece sana kulluk eder ve sadece senden yardım...",
-  "Bizi dosdogru yola eristir;",
-  "Kendilerine nimet verdiklerinin yoluna. Gazaba ugrayanların ...",
+  "Bizi dosdoğru yola eriştir;",
+  "Kendilerine nimet verdiklerinin yoluna. Gazaba uğrayanların ...",
 ];
 
 const SLICES = [
@@ -138,6 +140,22 @@ function PromoContent({ slice }: { slice: typeof SLICES[number] }) {
 
   const mode = slice.id === "dark" ? "dark" : "light";
 
+  const [verbIndex, setVerbIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setVerbIndex((i) => (i + 1) % PROMO_VERBS.length);
+        setVisible(true);
+      }, 300);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentVerb = PROMO_VERBS[verbIndex];
+
   return (
     <div style={{
       maxWidth: "var(--mu-maxw, 1200px)",
@@ -154,6 +172,21 @@ function PromoContent({ slice }: { slice: typeof SLICES[number] }) {
       }}>
         {/* Left - Hero */}
         <div>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            margin: "0 0 16px",
+          }}>
+            <LogoMeem size={32} />
+            <span style={{
+              fontFamily: "var(--mu-ff-display)",
+              fontSize: 18,
+              fontWeight: 500,
+              color: slice.ink,
+            }}>Mahfuz</span>
+          </div>
+
           <p style={{
             display: "flex",
             alignItems: "center",
@@ -177,19 +210,18 @@ function PromoContent({ slice }: { slice: typeof SLICES[number] }) {
             margin: 0,
             color: slice.ink,
           }}>
-            <span>Korunduğu gibi</span>
-            {PROMO_VERBS.map((verb) => (
-              <span
-                key={verb.id}
-                style={{
-                  display: "block",
-                  fontStyle: "italic",
-                  color: ACCENT_COLORS[verb.id][mode].accent,
-                }}
-              >
-                {verb.label}
-              </span>
-            ))}
+            <span style={{ display: "block" }}>Korunduğu gibi,</span>
+            <span
+              style={{
+                display: "block",
+                fontStyle: "italic",
+                color: ACCENT_COLORS[currentVerb.id][mode].accent,
+                opacity: visible ? 1 : 0,
+                transition: "opacity 300ms ease-in-out",
+              }}
+            >
+              şimdi {currentVerb.label}
+            </span>
           </h1>
 
           <p style={{
@@ -198,7 +230,7 @@ function PromoContent({ slice }: { slice: typeof SLICES[number] }) {
             color: slice.ink3,
             margin: "20px 0 24px",
           }}>
-            {t.home?.heroDesc ?? "Kur'an yolculuğuna başla."}
+            Modern çağda, minimal ve konforlu bir Kur'an deneyimi.
           </p>
 
           <div>
@@ -297,7 +329,7 @@ function FatihaDemo({ slice }: { slice: typeof SLICES[number] }) {
                 letterSpacing: "0.1em", textTransform: "uppercase",
                 color: slice.muted, margin: "0 0 18px",
               }}>
-                Mekki sure - 7 ayet - nuzul 5
+                Mekki sure - 7 ayet - nüzul 5
               </p>
               <p style={{
                 fontFamily: "var(--mu-ff-ar)", fontSize: 48,
@@ -310,14 +342,14 @@ function FatihaDemo({ slice }: { slice: typeof SLICES[number] }) {
               <p style={{
                 fontFamily: "var(--mu-ff-display)", fontSize: 22,
                 fontStyle: "italic", color: slice.accent, margin: "0 0 24px",
-              }}>Acilis</p>
+              }}>Açılış</p>
               <p style={{
                 fontFamily: "var(--mu-ff-display)", fontSize: 15,
                 fontStyle: "italic", color: slice.ink3, lineHeight: 1.6,
                 maxWidth: 480, margin: "0 auto",
               }}>
-                Kur'an-i Kerim'in ilk suresi. Namazin her rekatinda okunan, 'Acilis' anlamina
-                gelen yedi ayetlik bu sure, kulun Rabbiyle konusmasinin ozudur.
+                Kur'an-ı Kerim'in ilk suresi. Namazın her rekatında okunan, 'Açılış' anlamına
+                gelen yedi ayetlik bu sure, kulun Rabbiyle konuşmasının özüdür.
               </p>
             </div>
 
@@ -367,7 +399,7 @@ function FatihaDemo({ slice }: { slice: typeof SLICES[number] }) {
               fontFamily: "var(--mu-ff-mono)", fontSize: 11,
               letterSpacing: "0.1em", textTransform: "uppercase",
               color: slice.muted, margin: "0 0 14px",
-            }}>Icindekiler</p>
+            }}>İçindekiler</p>
 
             {FATIHA_TOC.map((text, i) => (
               <div key={i} style={{
@@ -398,7 +430,7 @@ function FatihaDemo({ slice }: { slice: typeof SLICES[number] }) {
                 fontFamily: "var(--mu-ff-mono)", fontSize: 11,
                 letterSpacing: "0.1em", textTransform: "uppercase",
                 color: slice.muted, margin: "0 0 12px",
-              }}>Yazi Tipi</p>
+              }}>Yazı Tipi</p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ color: slice.muted, fontSize: 16 }}>-</span>
                 <span style={{
@@ -418,12 +450,12 @@ function FatihaDemo({ slice }: { slice: typeof SLICES[number] }) {
                 fontFamily: "var(--mu-ff-mono)", fontSize: 11,
                 letterSpacing: "0.1em", textTransform: "uppercase",
                 color: slice.muted, margin: "0 0 10px",
-              }}>Imler</p>
+              }}>İmler</p>
               <p style={{
                 fontFamily: "var(--mu-ff-display)", fontSize: 13,
                 color: slice.muted, lineHeight: 1.5, margin: 0,
               }}>
-                Ayet yanindaki isaretciyle yer imi ekleyin.
+                Ayet yanındaki işaretçiyle yer imi ekleyin.
               </p>
             </div>
           </div>
