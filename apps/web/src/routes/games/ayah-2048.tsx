@@ -372,13 +372,29 @@ function GameScreen({
   // Swipe
   const swipeHandlers = useSwipe(handleMove);
 
-  // Save score and show game over screen
+  // Save score when won (in case user leaves without continuing)
+  const [winScoreSaved, setWinScoreSaved] = useState(false);
+  useEffect(() => {
+    if (gameState.won && !winScoreSaved) {
+      setWinScoreSaved(true);
+      submitScore({
+        data: {
+          gameId: "ayet-2048",
+          score: gameState.score,
+          difficulty: mode.id,
+        },
+      }).catch(() => {});
+    }
+  }, [gameState.won, winScoreSaved, gameState.score, mode.id]);
+
+  // Show game over screen when no moves left
   useEffect(() => {
     if (gameState.over && !scoreSaved) {
       setScoreSaved(true);
       const highestLevel = gameState.tiles.reduce((max, t) => Math.max(max, t.value), 0);
       const highestSurah = getSurahForLevel(sequence, highestLevel) ?? null;
 
+      // If win score was already saved, just save the updated score (might be higher after continuing)
       submitScore({
         data: {
           gameId: "ayet-2048",
@@ -413,6 +429,7 @@ function GameScreen({
     setGameState(createGame(gridSize, SPAWN_VALUES));
     setKeepPlaying(false);
     setScoreSaved(false);
+    setWinScoreSaved(false);
     setNewlyDiscovered(null);
   };
 

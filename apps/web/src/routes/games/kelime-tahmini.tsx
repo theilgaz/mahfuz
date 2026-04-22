@@ -402,10 +402,10 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
           saveDaily({ day, guesses: newGuesses, finished: true, won: isCorrect });
         }
 
-        // Submit score for leaderboard (free play only)
-        if (mode === "free" && isCorrect) {
-          const score = (MAX_GUESSES - newGuesses.length + 1) * 10;
-          submitScore({ data: { gameId: "kelime-tahmini", score, correctCount: 1, wrongCount: newGuesses.length - 1, bestStreak: 1 } }).catch(() => {});
+        // Submit score for leaderboard
+        const score = isCorrect ? (MAX_GUESSES - newGuesses.length + 1) * 10 : 0;
+        if (score > 0) {
+          submitScore({ data: { gameId: "kelime-tahmini", score, correctCount: isCorrect ? 1 : 0, wrongCount: newGuesses.length - (isCorrect ? 1 : 0) } }).catch(() => {});
         }
       }, letterCount * 300 + 400); // wait for flip animation
     } else if (mode === "daily") {
