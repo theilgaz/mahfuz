@@ -9,6 +9,9 @@ import { resolveLearnKey } from "~/lib/qaida-helpers";
 import { useTranslation } from "~/hooks/useTranslation";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
 import { LetterTapExercise } from "./LetterTapExercise";
+import { WordBuildExercise } from "./WordBuildExercise";
+import { MatchingExercise } from "./MatchingExercise";
+import { FillBlankExercise } from "./FillBlankExercise";
 
 /** Harf secme alistirmasi mi? */
 const TAP_PROMPTS: Record<string, "sukun" | "shadda"> = {
@@ -110,12 +113,33 @@ export function ExerciseRunner({ exercises, onComplete }: ExerciseRunnerProps) {
         </span>
       </div>
 
-      {/* Tap exercise or multiple choice */}
+      {/* Exercise type dispatch */}
       {tapType && exercise.arabicDisplay ? (
         <LetterTapExercise
           key={current}
           arabicDisplay={exercise.arabicDisplay}
           targetType={tapType}
+          prompt={prompt}
+          onComplete={handleTapComplete}
+        />
+      ) : (exercise.type === "word_build" || exercise.type === "letter_order") && exercise.letters?.length ? (
+        <WordBuildExercise
+          key={current}
+          exercise={exercise}
+          prompt={prompt}
+          onComplete={handleTapComplete}
+        />
+      ) : exercise.type === "matching" && exercise.pairs?.length ? (
+        <MatchingExercise
+          key={current}
+          exercise={exercise}
+          prompt={prompt}
+          onComplete={handleTapComplete}
+        />
+      ) : exercise.type === "fill_blank" && exercise.contextDisplay ? (
+        <FillBlankExercise
+          key={current}
+          exercise={exercise}
           prompt={prompt}
           onComplete={handleTapComplete}
         />
