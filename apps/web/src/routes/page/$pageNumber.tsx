@@ -5,7 +5,7 @@
  * Yatay swipe (+ web'de mouse drag) ile sayfa gecisi (RTL).
  */
 
-import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link, notFound } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useRef, useState } from "react";
 import { MushafPage } from "~/components/reader/MushafPage";
@@ -25,9 +25,16 @@ export const Route = createFileRoute("/page/$pageNumber")({
   validateSearch: (search: Record<string, unknown>) => ({
     ayah: (search.ayah as string) || undefined,
   }),
-  loader: ({ params, context }) => {
+  loader: async ({ params, context }) => {
     const pageNumber = parseInt(params.pageNumber, 10);
-    return context.queryClient.ensureQueryData(pageDataQueryOptions(pageNumber));
+    if (isNaN(pageNumber) || pageNumber < 1 || pageNumber > TOTAL_PAGES) {
+      throw notFound();
+    }
+    const data = await context.queryClient.ensureQueryData(pageDataQueryOptions(pageNumber));
+    if (!data) {
+      throw notFound();
+    }
+    return data;
   },
   component: PageRoute,
   errorComponent: RouteErrorFallback,
