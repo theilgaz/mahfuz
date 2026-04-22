@@ -19,7 +19,11 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 COPY . .
 ENV DEPLOY_TARGET=docker
-RUN pnpm turbo build --filter=@mahfuz/web
+RUN pnpm turbo build --filter=@mahfuz/web \
+    && echo "Build output:" \
+    && ls -la apps/web/dist/ \
+    && ls apps/web/dist/client/ | head -20 \
+    && echo "mushaf-pages: $(ls apps/web/dist/client/mushaf-pages/ | wc -l) files"
 
 # ── Stage 4: Runner ────────────────────────────────────
 FROM base AS runner
@@ -40,8 +44,9 @@ COPY --from=build /app/tooling/eslint/package.json tooling/eslint/
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
 
-# Built app artifacts
-COPY --from=build /app/apps/web/dist apps/web/dist
+# Built app artifacts — client + server
+COPY --from=build /app/apps/web/dist/server apps/web/dist/server
+COPY --from=build /app/apps/web/dist/client apps/web/dist/client
 COPY --from=build /app/apps/web/drizzle apps/web/drizzle
 COPY --from=build /app/apps/web/drizzle.config.ts apps/web/drizzle.config.ts
 COPY --from=build /app/apps/web/server.mjs apps/web/server.mjs
