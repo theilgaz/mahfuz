@@ -931,6 +931,12 @@
   flex-shrink: 0;
 }
 
+@media (max-width: 640px) {
+  .mu-mode-seg-label {
+    display: none;
+  }
+}
+
 @keyframes mu-spin {
   to { transform: rotate(360deg); }
 }
@@ -4681,6 +4687,134 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   display: none;
 }
 
+.mu-reader--mushaf {
+  padding: 0 0 48px !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+  max-width: 100%;
+}
+
+/* ── Ornamental Mushaf View ─────────────────────────── */
+
+.mu-omv {
+  max-width: 880px;
+  margin: 0 auto;
+  background: var(--mu-bg, #fbf8f2);
+  color: var(--mu-ink, #14261c);
+  border: 1px solid var(--mu-line, #e7e2d6);
+}
+
+/* Swiss-grid surah header */
+.mu-omv-sh {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 48px;
+  padding: 44px 40px 32px;
+  border-bottom: 1px solid var(--mu-line, #e7e2d6);
+  background: var(--mu-bg, #fbf8f2);
+}
+
+.mu-omv-sh-meta {
+  font-family: var(--mu-ff-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mu-muted, #8a9288);
+  text-transform: uppercase;
+  line-height: 1.8;
+}
+
+.mu-omv-sh-center {
+  text-align: center;
+}
+
+.mu-omv-sh-ar {
+  font-family: 'Scheherazade New', var(--mu-ff-ar), serif;
+  font-size: 56px;
+  color: var(--mu-ink, #14261c);
+  line-height: 1;
+}
+
+.mu-omv-sh-meaning {
+  font-family: var(--mu-ff-display, 'Cormorant Garamond', serif);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--mu-gold, #b8912f);
+  margin-top: 10px;
+  letter-spacing: 0.02em;
+}
+
+/* Body: bismillah + flowing text */
+.mu-omv-body {
+  padding: 8px 44px 56px;
+}
+
+.mu-omv-bismillah {
+  font-family: 'Scheherazade New', var(--mu-ff-ar), serif;
+  font-size: 44px;
+  text-align: center;
+  line-height: 1.9;
+  color: var(--mu-ink, #14261c);
+  padding: 36px 0 12px;
+}
+
+/* Continuous flowing ayah text */
+.mu-omv-text {
+  font-family: 'Scheherazade New', var(--mu-ff-ar), serif;
+  font-size: 40px;
+  line-height: 2.25;
+  text-align: justify;
+  text-align-last: center;
+  word-spacing: 0.05em;
+  padding-top: 12px;
+  color: var(--mu-ink, #14261c);
+}
+
+.mu-omv-ayah {
+  cursor: default;
+  border-radius: 4px;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.mu-omv-ayah:hover {
+  background: rgba(63, 122, 78, 0.08);
+  box-shadow: 0 0 0 2px rgba(63, 122, 78, 0.08);
+}
+
+/* Flower-badge ayah marker */
+.mu-omv-flower-wrap {
+  white-space: nowrap;
+}
+
+.mu-omv-flower {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0 0.25em;
+  filter: drop-shadow(0 1px 2px rgba(20, 40, 30, 0.18));
+}
+
+/* Responsive: tighter padding on mobile */
+@media (max-width: 640px) {
+  .mu-omv-sh {
+    gap: 16px;
+    padding: 28px 20px 20px;
+  }
+  .mu-omv-sh-ar {
+    font-size: 40px;
+  }
+  .mu-omv-body {
+    padding: 8px 20px 40px;
+  }
+  .mu-omv-bismillah {
+    font-size: 32px;
+  }
+  .mu-omv-text {
+    font-size: 28px;
+  }
+}
+
 /* Mushaf pager — hide scrollbars, smooth snapping */
 .mushaf-pager {
   scrollbar-width: none;
@@ -4868,12 +5002,12 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   .mu-brand-ar { display: none; }
   .mu-brand-latin { font-size: 18px; }
   .mu-mobile-strip { display: flex; }
+  /* Hide nav strip when surah reader topbar is present */
+  body:has(.mu-reader-topbar) .mu-mobile-strip { display: none; }
   .mu-mobile-search-btn { display: inline-grid; }
   .mu-topbar-inner { padding: 8px 12px; gap: 8px; }
   .mu-topright { margin-left: auto; }
-  .mu-reader-topbar { padding-left: 12px; padding-right: 12px; top: 89px; }
-  .mu-mode-seg-label { display: none; }
-  .mu-mode-seg-btn { padding: 6px 8px; }
+  .mu-reader-topbar { padding-left: 12px; padding-right: 12px; top: 49px; }
 
   .mu-sb-podium { gap: 8px; }
   .mu-sb-podium-slot { padding: 14px 8px; }

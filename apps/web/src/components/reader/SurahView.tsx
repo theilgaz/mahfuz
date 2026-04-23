@@ -26,6 +26,7 @@ import { MuIcons } from "~/components/minimal-ui/icons";
 import { useAudioStore } from "~/stores/audio.store";
 import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
+import { OrnamentalMushafView } from "./OrnamentalMushafView";
 
 interface SurahViewProps {
   surahId: number;
@@ -43,6 +44,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const useBasic = textStyle === "basic";
   const isWbw = readingMode === "wbw";
   const isVerse = readingMode === "verse";
+  const isMushaf = readingMode === "mushaf";
   const effectiveTajweed = showTajweed && !useBasic && !isWbw;
   const { t, locale } = useTranslation();
   const savePosition = useReadingStore((s) => s.savePosition);
@@ -211,7 +213,8 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     <>
       {/* Top bar - outside grid for sticky */}
       <div className="mu-reader-topbar" style={{ flexDirection: "column", gap: 0, padding: "12px 0 0", borderBottom: "none" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "0 0 10px" }}>
+          {/* Row 1: back + name + (mushaf: mode seg | other: bookmark/share) */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "0 0 6px" }}>
             {/* Left: back */}
             <Link to="/" className="mu-icon-btn sm" aria-label={t.reader.index} style={{ color: "var(--mu-ink-3)" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -219,167 +222,168 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
               </svg>
             </Link>
 
-            {/* Center: surah name + progress */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <button
-                  onClick={handleTopbarPlay}
-                  disabled={audioLoading}
-                  className="mu-topbar-play"
-                  aria-label={isPlaying ? "Pause" : "Play"}
-                >
-                  {audioLoading ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="mu-spin">
-                      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
-                    </svg>
-                  ) : isPlaying ? (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <rect x="6" y="4" width="4" height="16" rx="1" />
-                      <rect x="14" y="4" width="4" height="16" rx="1" />
-                    </svg>
-                  ) : (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  )}
-                </button>
-                <span style={{ fontFamily: "var(--mu-ff-display)", fontSize: 16, fontWeight: 500, color: "var(--mu-ink)", whiteSpace: "nowrap" }}>
-                  {surahName}
-                </span>
-              </div>
+            {/* Center: play + surah name + counter */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0, justifyContent: "center" }}>
+              <button
+                onClick={handleTopbarPlay}
+                disabled={audioLoading}
+                className="mu-topbar-play"
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {audioLoading ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="mu-spin">
+                    <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                  </svg>
+                ) : isPlaying ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" rx="1" />
+                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
+              </button>
+              <span style={{ fontFamily: "var(--mu-ff-display)", fontSize: 16, fontWeight: 500, color: "var(--mu-ink)", whiteSpace: "nowrap" }}>
+                {surahName}
+              </span>
               <span style={{ fontFamily: "var(--mu-ff-mono)", fontSize: 10, letterSpacing: "0.08em", color: "var(--mu-muted)", textTransform: "uppercase" }}>
                 {activeAyah} / {surah.ayahCount}
               </span>
             </div>
 
-            {/* Right: reading mode + bookmark + share */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {/* Reading mode segmented control */}
-              <div className="mu-mode-seg">
+            {/* Right: mushaf mode = inline mode seg, other = bookmark + share */}
+            {isMushaf ? (
+              <ModeSegment readingMode={readingMode} setReadingMode={setReadingMode} t={t} />
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <button
-                  className={`mu-mode-seg-btn${readingMode === "verse" ? " on" : ""}`}
-                  onClick={() => setReadingMode("verse")}
+                  className="mu-icon-btn sm"
+                  aria-label={t.reader.bookmark}
+                  style={{ color: isSurahBookmarked ? "var(--mu-accent)" : "var(--mu-ink-3)" }}
+                  onClick={() => toggleSurahBookmark({ surahId, ayahNumber: 1, pageNumber: firstPage || 1 })}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="12" x2="16" y2="12" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill={isSurahBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M7 4h10v17l-5-3.5L7 21z" />
                   </svg>
-                  <span className="mu-mode-seg-label">{t.settings.modeVerse}</span>
                 </button>
-                <button
-                  className={`mu-mode-seg-btn${readingMode === "wbw" ? " on" : ""}`}
-                  onClick={() => setReadingMode("wbw")}
-                >
-                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="3" width="7" height="7" rx="1.5" />
-                    <rect x="11" y="3" width="7" height="7" rx="1.5" />
-                    <rect x="2" y="12" width="7" height="5" rx="1.5" />
-                    <rect x="11" y="12" width="7" height="5" rx="1.5" />
+                <button className="mu-icon-btn sm" aria-label="Share" style={{ color: "var(--mu-ink-3)" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+                    <polyline points="16 6 12 2 8 6" />
+                    <line x1="12" y1="2" x2="12" y2="15" />
                   </svg>
-                  <span className="mu-mode-seg-label">{t.settings.modeWbw}</span>
-                </button>
-                <button
-                  className="mu-mode-seg-btn"
-                  onClick={() => navigate({ to: "/page/$pageNumber", params: { pageNumber: String(firstPage || 1) }, search: { ayah: undefined } })}
-                >
-                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="2" width="14" height="16" rx="2" />
-                    <line x1="7" y1="6" x2="13" y2="6" />
-                    <line x1="7" y1="9" x2="13" y2="9" />
-                    <line x1="7" y1="12" x2="11" y2="12" />
-                  </svg>
-                  <span className="mu-mode-seg-label">Mushaf</span>
                 </button>
               </div>
-              <button
-                className="mu-icon-btn sm"
-                aria-label={t.reader.bookmark}
-                style={{ color: isSurahBookmarked ? "var(--mu-accent)" : "var(--mu-ink-3)" }}
-                onClick={() => toggleSurahBookmark({ surahId, ayahNumber: 1, pageNumber: firstPage || 1 })}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={isSurahBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M7 4h10v17l-5-3.5L7 21z" />
-                </svg>
-              </button>
-              <button className="mu-icon-btn sm" aria-label="Share" style={{ color: "var(--mu-ink-3)" }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
-                  <polyline points="16 6 12 2 8 6" />
-                  <line x1="12" y1="2" x2="12" y2="15" />
-                </svg>
-              </button>
-            </div>
+            )}
           </div>
+
+          {/* Row 2: reading mode switcher (only for non-mushaf modes) */}
+          {!isMushaf && (
+            <div style={{ display: "flex", justifyContent: "center", padding: "0 0 8px" }}>
+              <ModeSegment readingMode={readingMode} setReadingMode={setReadingMode} t={t} />
+            </div>
+          )}
+
           {/* Progress bar */}
           <div style={{ width: "100%", height: 2, background: "var(--mu-line)", borderRadius: 1 }}>
             <div style={{ width: `${progressPct}%`, height: "100%", background: "var(--mu-accent)", borderRadius: 1, transition: "width 0.3s ease" }} />
           </div>
         </div>
-      <div className="mu-reader" style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
+      <div className={`mu-reader${isMushaf ? " mu-reader--mushaf" : ""}`} style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
         {/* Main content */}
         <div>
-          {/* Chapter header */}
-          <header className="mu-chap-head">
-            <p className="mu-chap-eyebrow">
-              {typeLabel} · {surah.ayahCount} ayet · Nuzul {surah.revelationOrder}
-            </p>
-            <div className="mu-chap-ar" dir="rtl">
-              سُورَةُ {surah.nameArabic}
-            </div>
-            <h1 className="mu-chap-title">
-              <span className="mu-chap-name">{surahName}</span>
-              {surahMeaning && <span className="mu-chap-tr">{surahMeaning}</span>}
-            </h1>
-            <div style={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
-              <Ornament size={22} />
-            </div>
-            {surahDesc && (
-              <p className="mu-chap-intro">{surahDesc}</p>
-            )}
-          </header>
-
-          {/* Bismillah */}
-          {surah.bismillahPre && (
-            <p className="mu-bismillah" dir="rtl">
-              بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
-            </p>
-          )}
-
-          {/* Verses */}
-          <div>
-            {ayahList.map((ayah) => (
-              <div
-                key={ayah.ayahNumber}
-                ref={(el) => setAyahRef(ayah.ayahNumber, el)}
-                data-ayah={ayah.ayahNumber}
-                className={`mu-verse${activeAyah === ayah.ayahNumber ? " active" : ""}`}
-              >
-                <VerseActions
-                  surahId={surahId}
-                  ayahNumber={ayah.ayahNumber}
-                  pageNumber={ayah.pageNumber}
-                />
-                <div>
-                  {renderAyah(ayah)}
+          {isMushaf ? (
+            <>
+              <OrnamentalMushafView
+                surahId={surahId}
+                nameArabic={surah.nameArabic}
+                nameSimple={surahName}
+                nameMeaning={surahMeaning}
+                ayahCount={surah.ayahCount}
+                revelation={surah.revelation}
+                bismillahPre={surah.bismillahPre}
+                ayahs={ayahList}
+              />
+              <footer className="mu-chap-foot">
+                <Ornament size={22} />
+                <p className="mu-chap-end">{t.reader.endOfSurah}</p>
+                <div className="mu-chap-nav">
+                  <Link to="/" className="mu-btn ghost">
+                    {t.reader.backToIndex}
+                  </Link>
+                  {surahId < 114 && (
+                    <NextSurahButton currentSurahId={surahId} />
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              </footer>
+            </>
+          ) : (
+            <>
+              {/* Chapter header */}
+              <header className="mu-chap-head">
+                <p className="mu-chap-eyebrow">
+                  {typeLabel} · {surah.ayahCount} ayet · Nuzul {surah.revelationOrder}
+                </p>
+                <div className="mu-chap-ar" dir="rtl">
+                  سُورَةُ {surah.nameArabic}
+                </div>
+                <h1 className="mu-chap-title">
+                  <span className="mu-chap-name">{surahName}</span>
+                  {surahMeaning && <span className="mu-chap-tr">{surahMeaning}</span>}
+                </h1>
+                <div style={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
+                  <Ornament size={22} />
+                </div>
+                {surahDesc && (
+                  <p className="mu-chap-intro">{surahDesc}</p>
+                )}
+              </header>
 
-          {/* Footer */}
-          <footer className="mu-chap-foot">
-            <Ornament size={22} />
-            <p className="mu-chap-end">{t.reader.endOfSurah}</p>
-            <div className="mu-chap-nav">
-              <Link to="/" className="mu-btn ghost">
-                {t.reader.backToIndex}
-              </Link>
-              {surahId < 114 && (
-                <NextSurahButton currentSurahId={surahId} />
+              {/* Bismillah */}
+              {surah.bismillahPre && (
+                <p className="mu-bismillah" dir="rtl">
+                  بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
+                </p>
               )}
-            </div>
-          </footer>
+
+              {/* Verses */}
+              <div>
+                {ayahList.map((ayah) => (
+                  <div
+                    key={ayah.ayahNumber}
+                    ref={(el) => setAyahRef(ayah.ayahNumber, el)}
+                    data-ayah={ayah.ayahNumber}
+                    className={`mu-verse${activeAyah === ayah.ayahNumber ? " active" : ""}`}
+                  >
+                    <VerseActions
+                      surahId={surahId}
+                      ayahNumber={ayah.ayahNumber}
+                      pageNumber={ayah.pageNumber}
+                    />
+                    <div>
+                      {renderAyah(ayah)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <footer className="mu-chap-foot">
+                <Ornament size={22} />
+                <p className="mu-chap-end">{t.reader.endOfSurah}</p>
+                <div className="mu-chap-nav">
+                  <Link to="/" className="mu-btn ghost">
+                    {t.reader.backToIndex}
+                  </Link>
+                  {surahId < 114 && (
+                    <NextSurahButton currentSurahId={surahId} />
+                  )}
+                </div>
+              </footer>
+            </>
+          )}
         </div>
 
         {/* Right sidebar */}
@@ -391,6 +395,53 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
         />
       </div>
     </>
+  );
+}
+
+// -- Mode segment (shared between mushaf inline and non-mushaf row 2) --
+
+function ModeSegment({ readingMode, setReadingMode, t }: { readingMode: string; setReadingMode: (m: "verse" | "wbw" | "mushaf") => void; t: ReturnType<typeof useTranslation>["t"] }) {
+  return (
+    <div className="mu-mode-seg">
+      <button
+        className={`mu-mode-seg-btn${readingMode === "verse" ? " on" : ""}`}
+        onClick={() => setReadingMode("verse")}
+        aria-label={t.settings.modeVerse}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="16" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+        <span className="mu-mode-seg-label">{t.settings.modeVerse}</span>
+      </button>
+      <button
+        className={`mu-mode-seg-btn${readingMode === "wbw" ? " on" : ""}`}
+        onClick={() => setReadingMode("wbw")}
+        aria-label={t.settings.modeWbw}
+      >
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="3" width="7" height="7" rx="1.5" />
+          <rect x="11" y="3" width="7" height="7" rx="1.5" />
+          <rect x="2" y="12" width="7" height="5" rx="1.5" />
+          <rect x="11" y="12" width="7" height="5" rx="1.5" />
+        </svg>
+        <span className="mu-mode-seg-label">{t.settings.modeWbw}</span>
+      </button>
+      <button
+        className={`mu-mode-seg-btn${readingMode === "mushaf" ? " on" : ""}`}
+        onClick={() => setReadingMode("mushaf")}
+        aria-label="Mushaf"
+      >
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="2" width="14" height="16" rx="2" />
+          <line x1="7" y1="6" x2="13" y2="6" />
+          <line x1="7" y1="9" x2="13" y2="9" />
+          <line x1="7" y1="12" x2="11" y2="12" />
+        </svg>
+        <span className="mu-mode-seg-label">Mushaf</span>
+      </button>
+    </div>
   );
 }
 

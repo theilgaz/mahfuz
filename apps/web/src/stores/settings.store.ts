@@ -5,7 +5,7 @@ import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 export type Theme = "light" | "sepia" | "dark";
 export type TextStyle = "uthmani" | "basic";
 export type WbwDisplay = "off" | "hover" | "on"; // geriye uyumluluk
-export type ReadingMode = "verse" | "wbw";
+export type ReadingMode = "verse" | "wbw" | "mushaf";
 export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
 export type MushafSizeMode = "standard" | "fill";

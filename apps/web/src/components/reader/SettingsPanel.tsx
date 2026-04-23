@@ -404,7 +404,7 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
             </span>
             <span className="mu-rmode-text">
               <span className="mu-rmode-label">Mushaf</span>
-              <span className="mu-rmode-desc">Sayfa gorunumu</span>
+              <span className="mu-rmode-desc">Sayfa görünümü</span>
             </span>
           </button>
         </div>
