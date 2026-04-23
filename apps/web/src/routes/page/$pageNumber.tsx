@@ -453,6 +453,7 @@ function PageRoute() {
               <div
                 ref={zoomRef}
                 className="flex items-center justify-center h-full mushaf-zoom-container"
+                style={zoomed ? { touchAction: "none" } : undefined}
               >
                 <img
                   src={`/mushaf-pages/${page}.webp`}

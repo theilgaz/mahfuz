@@ -4695,7 +4695,7 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 .mushaf-zoom-container {
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
-  touch-action: none;
+  touch-action: manipulation;
 }
 
 /* Hint arrow fade-in + gentle bounce */
