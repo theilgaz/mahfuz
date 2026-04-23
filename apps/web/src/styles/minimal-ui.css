@@ -4872,6 +4872,8 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   .mu-topbar-inner { padding: 8px 12px; gap: 8px; }
   .mu-topright { margin-left: auto; }
   .mu-reader-topbar { padding-left: 12px; padding-right: 12px; top: 89px; }
+  .mu-mode-seg-label { display: none; }
+  .mu-mode-seg-btn { padding: 6px 8px; }
 
   .mu-sb-podium { gap: 8px; }
   .mu-sb-podium-slot { padding: 14px 8px; }

@@ -265,7 +265,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
                     <line x1="3" y1="12" x2="16" y2="12" />
                     <line x1="3" y1="18" x2="21" y2="18" />
                   </svg>
-                  {t.settings.modeVerse}
+                  <span className="mu-mode-seg-label">{t.settings.modeVerse}</span>
                 </button>
                 <button
                   className={`mu-mode-seg-btn${readingMode === "wbw" ? " on" : ""}`}
@@ -277,7 +277,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
                     <rect x="2" y="12" width="7" height="5" rx="1.5" />
                     <rect x="11" y="12" width="7" height="5" rx="1.5" />
                   </svg>
-                  {t.settings.modeWbw}
+                  <span className="mu-mode-seg-label">{t.settings.modeWbw}</span>
                 </button>
                 <button
                   className="mu-mode-seg-btn"
@@ -289,7 +289,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
                     <line x1="7" y1="9" x2="13" y2="9" />
                     <line x1="7" y1="12" x2="11" y2="12" />
                   </svg>
-                  Mushaf
+                  <span className="mu-mode-seg-label">Mushaf</span>
                 </button>
               </div>
               <button
