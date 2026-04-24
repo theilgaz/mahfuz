@@ -45,27 +45,35 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+type Card =
+  | { kind: "emoji"; pairIdx: number; emoji: string; meaning: string }
+  | { kind: "arabic"; pairIdx: number; arabic: string };
+
 interface RoundData {
   items: PickedItem[];
-  shuffledArabic: { arabic: string; idx: number }[];
+  cards: Card[];
 }
 
 function generateRound(usedIndices: Set<number>): RoundData {
   const items = pickRandomItems(PAIRS_PER_ROUND, usedIndices);
-  const shuffledArabic = shuffle(
-    items.map((picked, idx) => ({ arabic: picked.item.arabic, idx })),
-  );
-  return { items, shuffledArabic };
+  const emojiCards: Card[] = items.map((picked, idx) => ({
+    kind: "emoji",
+    pairIdx: idx,
+    emoji: picked.item.emoji,
+    meaning: "",
+  }));
+  const arabicCards: Card[] = items.map((picked, idx) => ({
+    kind: "arabic",
+    pairIdx: idx,
+    arabic: picked.item.arabic,
+  }));
+  const cards = shuffle([...emojiCards, ...arabicCards]);
+  return { items, cards };
 }
 
-type Selection =
-  | { type: "emoji"; idx: number }
-  | { type: "arabic"; idx: number }
-  | null;
-
 type MatchFeedback = {
-  emojiIdx: number;
-  arabicIdx: number;
+  cardA: number;
+  cardB: number;
   correct: boolean;
 };
 
@@ -125,8 +133,8 @@ function EmojiMatchPage() {
 
   const [usedGlobalIndices, setUsedGlobalIndices] = useState<Set<number>>(new Set());
   const [roundData, setRoundData] = useState<RoundData>(() => generateRound(new Set()));
-  const [matched, setMatched] = useState<Set<number>>(new Set());
-  const [selection, setSelection] = useState<Selection>(null);
+  const [matchedPairs, setMatchedPairs] = useState<Set<number>>(new Set());
+  const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<MatchFeedback | null>(null);
 
   const submittedRef = useRef(false);
@@ -153,66 +161,63 @@ function EmojiMatchPage() {
     return () => clearTimeout(id);
   }, [feedback]);
 
-  const allMatched = matched.size === PAIRS_PER_ROUND;
+  const allMatched = matchedPairs.size === PAIRS_PER_ROUND;
 
-  const handleTapEmoji = useCallback(
-    (idx: number) => {
-      if (matched.has(idx) || timer.isExpired || allMatched) return;
+  const handleTapCard = useCallback(
+    (cardIdx: number) => {
+      const card = roundData.cards[cardIdx];
+      if (matchedPairs.has(card.pairIdx) || timer.isExpired || allMatched) return;
       if (feedback) return;
 
-      if (selection?.type === "arabic") {
-        tryMatch(idx, selection.idx);
-      } else {
-        setSelection({ type: "emoji", idx });
+      if (selectedCardIdx === null) {
+        setSelectedCardIdx(cardIdx);
         matchStart.current = Date.now();
+        return;
       }
-    },
-    [selection, matched, timer.isExpired, allMatched, feedback], // eslint-disable-line react-hooks/exhaustive-deps
-  );
 
-  const handleTapArabic = useCallback(
-    (idx: number) => {
-      if (matched.has(idx) || timer.isExpired || allMatched) return;
-      if (feedback) return;
+      if (selectedCardIdx === cardIdx) {
+        setSelectedCardIdx(null);
+        return;
+      }
 
-      if (selection?.type === "emoji") {
-        tryMatch(selection.idx, idx);
-      } else {
-        setSelection({ type: "arabic", idx });
+      const prevCard = roundData.cards[selectedCardIdx];
+
+      // Must select one emoji and one arabic - same kind is just re-select
+      if (prevCard.kind === card.kind) {
+        setSelectedCardIdx(cardIdx);
         matchStart.current = Date.now();
+        return;
       }
+
+      // Try match
+      const isCorrect = prevCard.pairIdx === card.pairIdx;
+
+      if (isCorrect) {
+        const answerTime = Date.now() - matchStart.current;
+        const newStreak = streak + 1;
+        const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
+        const timeBonus = calcTimeBonusMs(answerTime);
+        if (timeBonus > 0) timer.addTime(timeBonus);
+        setScore((s) => s + pts);
+        setStreak(newStreak);
+        setBestStreak((b) => Math.max(b, newStreak));
+        setCorrectCount((c) => c + 1);
+        setLastDelta(pts);
+        setMatchedPairs((prev) => new Set(prev).add(card.pairIdx));
+      } else {
+        const penalty = calcWrongPenalty(difficulty);
+        timer.penalizeTime(WRONG_TIME_PENALTY_MS);
+        setScore((s) => Math.max(0, s - penalty));
+        setStreak(0);
+        setWrongCount((c) => c + 1);
+        setLastDelta(-penalty);
+      }
+
+      setFeedback({ cardA: selectedCardIdx, cardB: cardIdx, correct: isCorrect });
+      setSelectedCardIdx(null);
     },
-    [selection, matched, timer.isExpired, allMatched, feedback], // eslint-disable-line react-hooks/exhaustive-deps
+    [selectedCardIdx, matchedPairs, timer.isExpired, allMatched, feedback, roundData.cards, streak, difficulty], // eslint-disable-line react-hooks/exhaustive-deps
   );
-
-  const tryMatch = (emojiIdx: number, arabicIdx: number) => {
-    const arabicEntry = roundData.shuffledArabic[arabicIdx];
-    const isCorrect = arabicEntry.idx === emojiIdx;
-
-    if (isCorrect) {
-      const answerTime = Date.now() - matchStart.current;
-      const newStreak = streak + 1;
-      const pts = calcCorrectPoints(difficulty, answerTime, newStreak);
-      const timeBonus = calcTimeBonusMs(answerTime);
-      if (timeBonus > 0) timer.addTime(timeBonus);
-      setScore((s) => s + pts);
-      setStreak(newStreak);
-      setBestStreak((b) => Math.max(b, newStreak));
-      setCorrectCount((c) => c + 1);
-      setLastDelta(pts);
-      setMatched((prev) => new Set(prev).add(emojiIdx));
-    } else {
-      const penalty = calcWrongPenalty(difficulty);
-      timer.penalizeTime(WRONG_TIME_PENALTY_MS);
-      setScore((s) => Math.max(0, s - penalty));
-      setStreak(0);
-      setWrongCount((c) => c + 1);
-      setLastDelta(-penalty);
-    }
-
-    setFeedback({ emojiIdx, arabicIdx, correct: isCorrect });
-    setSelection(null);
-  };
 
   const nextRound = () => {
     if (timer.isExpired) { endGame(); return; }
@@ -224,8 +229,8 @@ function EmojiMatchPage() {
     setUsedGlobalIndices(newUsed);
 
     setRoundData(generateRound(newUsed));
-    setMatched(new Set());
-    setSelection(null);
+    setMatchedPairs(new Set());
+    setSelectedCardIdx(null);
     setFeedback(null);
     setLastDelta(null);
     setRound((r) => r + 1);
@@ -273,8 +278,8 @@ function EmojiMatchPage() {
     matchStart.current = Date.now();
     timerStartedRef.current = false;
     setRoundData(generateRound(fresh));
-    setMatched(new Set());
-    setSelection(null);
+    setMatchedPairs(new Set());
+    setSelectedCardIdx(null);
     setFeedback(null);
     setScreen("game");
     timer.reset();
@@ -311,7 +316,7 @@ function EmojiMatchPage() {
     );
   }
 
-  const pairsLeft = PAIRS_PER_ROUND - matched.size;
+  const pairsLeft = PAIRS_PER_ROUND - matchedPairs.size;
 
   return (
     <div
@@ -337,68 +342,53 @@ function EmojiMatchPage() {
           </span>
         </p>
 
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          {/* Emoji column */}
-          <div className="flex flex-col gap-2">
-            {roundData.items.map((picked, idx) => {
-              const isMatched = matched.has(idx);
-              const isFeedback = feedback?.emojiIdx === idx;
-              const isSelected = selection?.type === "emoji" && selection.idx === idx;
-              const { style: cardStyle, extraClass } = resolveCardStyle(
-                isMatched,
-                isFeedback ? feedback!.correct : null,
-                isSelected,
-              );
+        <div className="grid grid-cols-3 gap-2 mb-5">
+          {roundData.cards.map((card, cardIdx) => {
+            const isMatched = matchedPairs.has(card.pairIdx);
+            const isFeedback = feedback?.cardA === cardIdx || feedback?.cardB === cardIdx;
+            const isSelected = selectedCardIdx === cardIdx;
+            const { style: cardStyle, extraClass } = resolveCardStyle(
+              isMatched,
+              isFeedback ? feedback!.correct : null,
+              isSelected,
+            );
 
+            if (card.kind === "emoji") {
               return (
                 <button
-                  key={idx}
-                  onClick={() => handleTapEmoji(idx)}
+                  key={cardIdx}
+                  onClick={() => handleTapCard(cardIdx)}
                   disabled={isMatched}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-xl border transition-all ${extraClass}`}
+                  className={`flex flex-col items-center justify-center gap-1 px-2 py-3 rounded-xl border transition-all ${extraClass}`}
                   style={cardStyle}
                 >
-                  <span className="text-2xl">{picked.item.emoji}</span>
-                  <span className="text-xs text-[var(--color-text-secondary)] truncate">
-                    {getEmojiMeaning(picked.item, locale)}
+                  <span className="text-2xl">{card.emoji}</span>
+                  <span className="text-[10px] text-[var(--color-text-secondary)] truncate max-w-full">
+                    {getEmojiMeaning(roundData.items[card.pairIdx].item, locale)}
                   </span>
                 </button>
               );
-            })}
-          </div>
+            }
 
-          {/* Arabic column */}
-          <div className="flex flex-col gap-2">
-            {roundData.shuffledArabic.map((entry, idx) => {
-              const isMatched = matched.has(entry.idx);
-              const isFeedback = feedback?.arabicIdx === idx;
-              const isSelected = selection?.type === "arabic" && selection.idx === idx;
-              const { style: cardStyle, extraClass } = resolveCardStyle(
-                isMatched,
-                isFeedback ? feedback!.correct : null,
-                isSelected,
-              );
-
-              return (
-                <button
-                  key={idx}
-                  onClick={() => handleTapArabic(idx)}
-                  disabled={isMatched}
-                  className={`flex items-center justify-center px-3 py-3 rounded-xl border transition-all ${extraClass}`}
-                  style={cardStyle}
+            return (
+              <button
+                key={cardIdx}
+                onClick={() => handleTapCard(cardIdx)}
+                disabled={isMatched}
+                className={`flex items-center justify-center px-2 py-3 rounded-xl border transition-all ${extraClass}`}
+                style={cardStyle}
+              >
+                <span
+                  className="text-lg font-bold text-[var(--color-text-primary)]"
+                  dir="rtl"
+                  lang="ar"
+                  style={{ fontFamily: "var(--font-arabic)" }}
                 >
-                  <span
-                    className="text-xl font-bold text-[var(--color-text-primary)]"
-                    dir="rtl"
-                    lang="ar"
-                    style={{ fontFamily: "var(--font-arabic)" }}
-                  >
-                    {entry.arabic}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  {card.arabic}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {feedback?.correct && (

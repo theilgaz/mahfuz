@@ -892,7 +892,7 @@ export const en: Messages = {
   emojiMatchGame: {
     title: "Emoji Match",
     subtitle: "Match the emoji with the correct Arabic word",
-    tapEmoji: "Tap an emoji, then tap the matching Arabic word",
+    tapEmoji: "Find the matching pair and tap both",
     matched: "Matched!",
     wrong: "Wrong match",
     roundComplete: "Round complete!",

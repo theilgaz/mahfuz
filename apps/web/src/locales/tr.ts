@@ -897,7 +897,7 @@ export const tr = {
   emojiMatchGame: {
     title: "Emoji Eşleştirme",
     subtitle: "Emojiyi doğru Arapça kelimeyle eşle",
-    tapEmoji: "Önce emojiyi, sonra Arapça kelimeyi seç",
+    tapEmoji: "Eşleşen çifti bul ve ikisine de dokun",
     matched: "Eşleştirildi!",
     wrong: "Yanlış eşleşme",
     roundComplete: "Tur tamamlandı!",
