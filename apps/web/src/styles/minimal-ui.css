@@ -1020,6 +1020,14 @@
   background: none;
 }
 
+.mu-flash {
+  animation: mu-flash-bg 3s ease-out;
+}
+@keyframes mu-flash-bg {
+  0%   { background: color-mix(in srgb, var(--mu-accent) 12%, transparent); }
+  100% { background: transparent; }
+}
+
 .mu-verse.active .mu-v-ar {
   color: var(--mu-ink);
 }
@@ -1145,10 +1153,10 @@
 /* Reader side panel */
 .mu-rside {
   position: sticky;
-  top: 140px;
+  top: 200px;
   align-self: start;
   height: fit-content;
-  max-height: calc(100vh - 150px);
+  max-height: calc(100vh - 210px);
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 0 40px;

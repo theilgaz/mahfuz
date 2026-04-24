@@ -16,7 +16,7 @@ import { AyahBlock } from "./AyahBlock";
 import { SurahSkeleton } from "./SurahSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
 import { useEffect, useRef, useCallback, useMemo, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { surahSlug } from "~/lib/surah-slugs";
 import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
 import { getSurahDescription } from "~/lib/surah-descriptions";
@@ -34,7 +34,6 @@ interface SurahViewProps {
 }
 
 export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
-  const navigate = useNavigate();
   const { showTranslation, readingMode, setReadingMode, showTajweed, translationSlugs, textStyle, arabicFontSize } = useSettingsStore(
     useShallow((s) => ({
       showTranslation: s.showTranslation,
@@ -116,12 +115,18 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
       { rootMargin: "-50% 0px -50% 0px", threshold: 0 },
     );
 
-    for (const el of ayahRefs.current.values()) {
-      observer.observe(el);
-    }
+    // Defer observation to next frame so callback refs are set after render
+    const rafId = requestAnimationFrame(() => {
+      for (const el of ayahRefs.current.values()) {
+        observer.observe(el);
+      }
+    });
 
-    return () => observer.disconnect();
-  }, [surahId, data, savePosition]);
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
+  }, [surahId, data, readingMode, savePosition]);
 
   // Scroll to highlighted ayah
   useEffect(() => {
@@ -130,7 +135,10 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     id = requestAnimationFrame(() => {
       id = requestAnimationFrame(() => {
         const el = ayahRefs.current.get(highlightAyah);
-        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("mu-flash");
+        setTimeout(() => el.classList.remove("mu-flash"), 3000);
       });
     });
     return () => cancelAnimationFrame(id);
@@ -543,7 +551,10 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
 
   const scrollToAyah = useCallback((ayahNumber: number) => {
     const el = ayahRefs.current?.get(ayahNumber);
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.add("mu-flash");
+    setTimeout(() => el.classList.remove("mu-flash"), 3000);
   }, [ayahRefs]);
 
   // Show max ~8 TOC items for short surahs, every Nth for long ones
@@ -563,8 +574,11 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
       <div className="mu-rside-block">
         <h3 className="mu-rside-label">{t.reader.toc}</h3>
         <ul className="mu-rside-toc">
-          {tocItems.map((ayah) => (
-            <li key={ayah.ayahNumber} className={activeAyah === ayah.ayahNumber ? "on" : ""}>
+          {tocItems.map((ayah, i) => {
+            const next = tocItems[i + 1]?.ayahNumber ?? Infinity;
+            const isActive = activeAyah >= ayah.ayahNumber && activeAyah < next;
+            return (
+            <li key={ayah.ayahNumber} className={isActive ? "on" : ""}>
               <button onClick={() => scrollToAyah(ayah.ayahNumber)}>
                 <span className="mu-rside-toc-num">
                   {String(ayah.ayahNumber).padStart(2, "0")}
@@ -576,7 +590,8 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
                 </span>
               </button>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </div>
 
