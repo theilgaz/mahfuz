@@ -22,6 +22,7 @@ interface OrnamentalMushafViewProps {
   revelation: string;
   bismillahPre: boolean;
   ayahs: AyahData[];
+  onAyahRef?: (ayahNumber: number, el: HTMLSpanElement | null) => void;
 }
 
 const BISMILLAH = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
@@ -35,6 +36,7 @@ export const OrnamentalMushafView = memo(function OrnamentalMushafView({
   revelation,
   bismillahPre,
   ayahs,
+  onAyahRef,
 }: OrnamentalMushafViewProps) {
   const showBismillah = bismillahPre && surahId !== 9;
   const juz = ayahs[0]?.juzNumber;
@@ -58,7 +60,11 @@ export const OrnamentalMushafView = memo(function OrnamentalMushafView({
 
         <div className="mu-omv-text">
           {ayahs.map((ayah) => (
-            <span key={ayah.ayahNumber}>
+            <span
+              key={ayah.ayahNumber}
+              ref={onAyahRef ? (el) => onAyahRef(ayah.ayahNumber, el) : undefined}
+              data-ayah={ayah.ayahNumber}
+            >
               <span className="mu-omv-ayah" data-ayah-number={ayah.ayahNumber}>
                 {ayah.textUthmani}
               </span>

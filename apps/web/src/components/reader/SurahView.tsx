@@ -79,8 +79,8 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
   // Active verse tracking
   const [activeAyah, setActiveAyah] = useState(1);
-  const ayahRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-  const setAyahRef = useCallback((ayahNumber: number, el: HTMLDivElement | null) => {
+  const ayahRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const setAyahRef = useCallback((ayahNumber: number, el: HTMLElement | null) => {
     if (el) ayahRefs.current.set(ayahNumber, el);
     else ayahRefs.current.delete(ayahNumber);
   }, []);
@@ -313,6 +313,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
                 revelation={surah.revelation}
                 bismillahPre={surah.bismillahPre}
                 ayahs={ayahList}
+                onAyahRef={setAyahRef}
               />
               <footer className="mu-chap-foot">
                 <Ornament size={22} />
@@ -521,7 +522,7 @@ interface SurahSidebarProps {
   ayahList: Array<{ ayahNumber: number; translation: string | null }>;
   activeAyah: number;
   surahId: number;
-  ayahRefs: React.RefObject<Map<number, HTMLDivElement>>;
+  ayahRefs: React.RefObject<Map<number, HTMLElement>>;
 }
 
 const FONT_PRESETS = [

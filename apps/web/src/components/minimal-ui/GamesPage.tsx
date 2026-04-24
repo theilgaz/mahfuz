@@ -71,6 +71,16 @@ const GAMES = [
     xp: 100,
     path: "/games/ayah-2048",
   },
+  {
+    id: "emoji-match",
+    t: "Emoji Eşleştirme",
+    tag: "Bulmaca",
+    s: "Emojiyi doğru Arapça kelimeyle eşleştir.",
+    d: "kolay" as const,
+    time: "3 dk",
+    xp: 50,
+    path: "/games/emoji-match",
+  },
 ];
 
 const DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];

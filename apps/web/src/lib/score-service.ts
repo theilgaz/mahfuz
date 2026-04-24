@@ -14,22 +14,22 @@ import { checkAndGrantAchievements } from "./achievement-service";
 // ── Oyun isimleri (UI için) ────────────────────────────────
 
 export const GAME_TITLES: Record<string, string> = {
-  "fill-blank": "Kelime Doldurma",
-  "surah-guess": "Sure Tanıma",
-  "word-meaning": "Kelime Anlamı",
+  "fill-blank": "Ayet Tamamla",
+  "surah-guess": "Sûre Bul",
+  "word-meaning": "Kelime Hazinesi",
   "verse-chain": "Ayet Zinciri",
-  "hexagon": "Kelime Oluşturma",
+  "hexagon": "Hexagon Harf",
   "kelime-tahmini": "Kelime Tahmini",
   "ayet-2048": "Ayet 2048",
-  "emoji-match": "Emoji Eslestirme",
+  "emoji-match": "Emoji Eşleştirme",
 };
 
 const GAME_TITLES_EN: Record<string, string> = {
-  "fill-blank": "Fill the Blank",
-  "surah-guess": "Surah Recognition",
-  "word-meaning": "Word Meaning",
+  "fill-blank": "Complete the Verse",
+  "surah-guess": "Find the Surah",
+  "word-meaning": "Word Treasury",
   "verse-chain": "Verse Chain",
-  "hexagon": "Word Construction",
+  "hexagon": "Hexagon Letters",
   "kelime-tahmini": "Word Guess",
   "ayet-2048": "Ayah 2048",
   "emoji-match": "Emoji Match",

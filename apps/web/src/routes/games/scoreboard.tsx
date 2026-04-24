@@ -93,7 +93,7 @@ function ScoreboardPage() {
           Zirvedekiler
         </h1>
         <p className="mu-lede" style={{ fontSize: 16, marginBottom: 0 }}>
-          En yuksek skorlara ulasan oyuncular.
+          En yüksek skorlara ulaşan oyuncular.
         </p>
       </div>
 
@@ -192,7 +192,7 @@ function ScoreboardPage() {
       {board && board.length === 0 && (
         <div style={{ textAlign: "center", padding: "48px 0" }}>
           <p className="mu-muted" style={{ fontSize: 15 }}>
-            {t.gamesHub?.noScores ?? "Henuz skor yok. Bir oyun oynayarak ilk sen ol!"}
+            {t.gamesHub?.noScores ?? "Henüz skor yok. Bir oyun oynayarak ilk sen ol!"}
           </p>
           <Link to="/games" className="mu-btn primary" style={{ marginTop: 16, display: "inline-flex" }}>
             Oyunlara Git
@@ -203,7 +203,7 @@ function ScoreboardPage() {
       {/* My stats (if logged in) */}
       {userId && myStats && myStats.length > 0 && (
         <section style={{ paddingTop: 32, marginTop: 32, borderTop: "1px solid var(--mu-line)" }}>
-          <h2 className="mu-h2" style={{ fontSize: 24 }}>Senin Skorlarin</h2>
+          <h2 className="mu-h2" style={{ fontSize: 24 }}>Senin Skorların</h2>
           <div className="mu-sb-mystats">
             <div className="mu-sb-stat-card">
               <span className="mu-sb-stat-value">{myTotalScore}</span>
@@ -215,7 +215,7 @@ function ScoreboardPage() {
             </div>
             <div className="mu-sb-stat-card">
               <span className="mu-sb-stat-value">{myStats.length}</span>
-              <span className="mu-sb-stat-label">Oyun Cesidi</span>
+              <span className="mu-sb-stat-label">Oyun Çeşidi</span>
             </div>
           </div>
           <div style={{ marginTop: 16 }}>
