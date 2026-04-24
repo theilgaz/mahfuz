@@ -1,6 +1,6 @@
 /**
- * Eslestirme Alistirmasi
- * Sol sutundan (Arapca) bir oge sec, sag sutundan (Latin/anlam) esini sec.
+ * Eşleştirme Alıştırması
+ * Sol sütundan (Arapça) bir öğe seç, sağ sütundan (Latin/anlam) eşini seç.
  */
 
 import { useState, useMemo, useCallback } from "react";

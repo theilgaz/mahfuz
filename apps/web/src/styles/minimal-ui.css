@@ -3723,6 +3723,33 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 
 /* ── Scoreboard ─────────────────────────────────────── */
 
+.mu-sb-periods {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.mu-sb-period {
+  font-family: var(--mu-ff-ui);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--mu-line);
+  background: none;
+  color: var(--mu-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mu-sb-period:hover {
+  color: var(--mu-ink);
+  border-color: var(--mu-ink);
+}
+.mu-sb-period.active {
+  background: var(--mu-accent);
+  color: #fff;
+  border-color: var(--mu-accent);
+}
+
 .mu-sb-tabs {
   display: flex;
   gap: 4px;

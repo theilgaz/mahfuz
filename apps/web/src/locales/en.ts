@@ -763,6 +763,7 @@ export const en: Messages = {
   gamesHub: {
     title: "Games",
     scoreboard: "Scoreboard",
+    seeAll: "See All",
     points: "{total} pts",
     tabMine: "Mine",
     tabGlobal: "Global",
@@ -772,6 +773,9 @@ export const en: Messages = {
     noGamesPlayed: "You haven't played any games yet",
     noScores: "No scores recorded yet",
     noScoresForGame: "No scores for this game yet",
+    periodWeek: "This Week",
+    periodMonth: "This Month",
+    periodAll: "All Time",
     addFavorite: "Add to favorites",
     removeFavorite: "Remove from favorites",
     scopeAll: "All Quran",
@@ -828,6 +832,8 @@ export const en: Messages = {
     kelimeTahminiDesc: "Guess the Arabic word from its meaning",
     ayet2048Title: "Ayah 2048",
     ayet2048Desc: "Slide, merge & discover surahs",
+    emojiMatchTitle: "Emoji Match",
+    emojiMatchDesc: "Match the emoji with the correct Arabic word",
     catPuzzle: "Puzzle",
   },
   ayet2048: {
@@ -882,6 +888,16 @@ export const en: Messages = {
     dayNumber: "Day #{day}",
     transliteration: "Pronunciation:",
     nextDaily: "Next word:",
+  },
+  emojiMatchGame: {
+    title: "Emoji Match",
+    subtitle: "Match the emoji with the correct Arabic word",
+    tapEmoji: "Tap an emoji, then tap the matching Arabic word",
+    matched: "Matched!",
+    wrong: "Wrong match",
+    roundComplete: "Round complete!",
+    nextRound: "Next Round -->",
+    pairsLeft: "{count} pairs left",
   },
   tajweedPage: {
     title: "Learn Tajweed",

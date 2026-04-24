@@ -1,6 +1,6 @@
 /**
- * Coktan secmeli alistirma akisi.
- * Sorulari sirayla gosterir, geri bildirim verir, sonunda onComplete cagirir.
+ * Çoktan seçmeli alıştırma akışı.
+ * Soruları sırayla gösterir, geri bildirim verir, sonunda onComplete çağırır.
  */
 
 import { useState, useCallback, useMemo } from "react";
@@ -13,7 +13,7 @@ import { WordBuildExercise } from "./WordBuildExercise";
 import { MatchingExercise } from "./MatchingExercise";
 import { FillBlankExercise } from "./FillBlankExercise";
 
-/** Harf secme alistirmasi mi? */
+/** Harf seçme alıştırması mı? */
 const TAP_PROMPTS: Record<string, "sukun" | "shadda"> = {
   "exercises.findSukun": "sukun",
   "exercises.countSukun": "sukun",
@@ -30,7 +30,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** Tum alistirmalar icin secenekleri bir kez karistir */
+/** Tüm alıştırmalar için seçenekleri bir kez karıştır */
 function shuffleAllOptions(exercises: Exercise[]): ExerciseOption[][] {
   return exercises.map((ex) => shuffle(ex.options));
 }

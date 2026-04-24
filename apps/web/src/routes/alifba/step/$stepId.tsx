@@ -1,6 +1,6 @@
 /**
- * Adim detay sayfasi -- /alifba/step/:stepId
- * Her adimin derslerini, icerik bloklarini ve alistirmalarini gosterir.
+ * Adım detay sayfası -- /alifba/step/:stepId
+ * Her adımın derslerini, içerik bloklarını ve alıştırmalarını gösterir.
  */
 
 import { useState, useMemo, useCallback } from "react";

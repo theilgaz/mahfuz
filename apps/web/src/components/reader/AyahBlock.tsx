@@ -204,7 +204,7 @@ export const AyahBlock = memo(function AyahBlock({
       onTouchEnd={cancelLongPress}
       onTouchMove={cancelLongPress}
     >
-      {/* Arapca metin -- WBW / tecvid / normal */}
+      {/* Arapça metin -- WBW / tecvid / normal */}
       {isWbwLayout ? (
         /* Kelime kelime mod — kartlar */
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-3 py-2" dir="rtl">

@@ -33,14 +33,14 @@ export const STEPS: StepDef[] = [
 
 export type StepStatus = "completed" | "available" | "locked";
 
-/** Adim icin dinamik ders linki hesapla */
+/** Adım için dinamik ders linki hesapla */
 export function getLessonLinkForStep(stepId: number, completedLessons: Set<string>): string | null {
   if (stepId === 1 || stepId === 10) return null;
   const lessonId = getFirstIncompleteLessonForStep(stepId, completedLessons);
   return lessonId ? `/alifba/lesson/${lessonId}` : null;
 }
 
-/** Adim icin ders ilerleme sayisi */
+/** Adım için ders ilerleme sayısı */
 export function getStepLessonProgress(stepId: number, completedLessons: Set<string>): { done: number; total: number } | null {
   if (stepId === 1 || stepId === 10) return null;
   const stage = getStageForStep(stepId);

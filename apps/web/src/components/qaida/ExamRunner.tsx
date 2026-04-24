@@ -1,6 +1,6 @@
 /**
- * Sinav runner -- konu sinavlari ve seviye testi icin.
- * ExerciseRunner'dan farki: gecme/kalma sonuc ekrani, farkli soru tipleri (audio-mcq, tap).
+ * Sınav runner -- konu sınavları ve seviye testi için.
+ * ExerciseRunner'dan farkı: geçme/kalma sonuç ekranı, farklı soru tipleri (audio-mcq, tap).
  */
 
 import { useState, useCallback, useEffect, useRef } from "react";

@@ -370,6 +370,7 @@ const GAME_ROUTE_TO_ID: Record<string, string> = {
   "/games/hexagon": "hexagon-harf",
   "/games/kelime-tahmini": "kelime-tahmini",
   "/games/ayah-2048": "ayet-2048",
+  "/games/emoji-match": "emoji-eslestirme",
 };
 
 function GameFavoriteStar({ path }: { path: string }) {

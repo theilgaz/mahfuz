@@ -1,8 +1,8 @@
 /**
- * Mushaf sayfasi route'u -- /page/1 ... /page/604
+ * Mushaf sayfası route'u -- /page/1 ... /page/604
  *
- * Mobil: Mushaf ekrani kaplar, yukari swipe = mealler, asagi swipe = mushaf.
- * Yatay swipe (+ web'de mouse drag) ile sayfa gecisi (RTL).
+ * Mobil: Mushaf ekranı kaplar, yukarı swipe = mealler, aşağı swipe = mushaf.
+ * Yatay swipe (+ web'de mouse drag) ile sayfa geçişi (RTL).
  */
 
 import { createFileRoute, useRouter, Link, notFound } from "@tanstack/react-router";

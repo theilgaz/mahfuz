@@ -176,7 +176,7 @@ export const QAIDA_TOPICS: QaidaTopic[] = [
   },
 ];
 
-/** Topic'i order numarasina gore bul (1-based, eski stepId ile uyumlu) */
+/** Topic'i order numarasına göre bul (1-based, eski stepId ile uyumlu) */
 export function getTopicByOrder(order: number): QaidaTopic | undefined {
   return QAIDA_TOPICS.find((t) => t.order === order);
 }

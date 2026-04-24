@@ -1,6 +1,6 @@
 /**
- * Kelime Olusturma -- ayetteki eksik kelimeyi karistirilan harflerden siraya
- * tiklayarak tamamla. Sunucu tabanli, sonsuz tekrar, zorluk + timer.
+ * Kelime Oluşturma -- ayetteki eksik kelimeyi karıştırılan harflerden sıraya
+ * tıklayarak tamamla. Sunucu tabanlı, sonsuz tekrar, zorluk + timer.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -534,6 +534,7 @@ function WordConstructionPage() {
     return (
       <SurahPickerScreen
         gameImg={THEME.img}
+        gameId="hexagon"
         onStart={(ids, vf, diff) => {
           setSurahIds(ids);
           setVerseFilter(vf);

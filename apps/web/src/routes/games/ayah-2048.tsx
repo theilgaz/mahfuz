@@ -1,6 +1,6 @@
 /**
  * Ayet 2048 -- Quran-themed 2048 puzzle.
- * Three modes: Namaz Sureleri, Sure Sirasi, Nuzul Sirasi.
+ * Three modes: Namaz Sureleri, Sure Sırası, Nüzul Sırası.
  */
 
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -8,6 +8,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { useTranslation } from "~/hooks/useTranslation";
 import { submitScore, GAME_TITLES } from "~/lib/score-service";
+import { GameMiniLeaderboard } from "~/components/GameMiniLeaderboard";
 import { ACHIEVEMENT_MAP } from "~/lib/game-achievements";
 import {
   createGame,
@@ -269,6 +270,9 @@ function MenuScreen({
           <h2 className="text-white font-semibold text-sm mb-2">{tx.howToPlay}</h2>
           <p className="text-white/60 text-sm leading-relaxed">{tx.howToPlayText}</p>
         </div>
+
+        {/* Mini leaderboard */}
+        <GameMiniLeaderboard gameId="ayet-2048" dark />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 /**
  * Ayet Zinciri -- Ayetin devamini bul.
- * Dinamik soru uretimi (DB'den), gercek zincir mekanigi:
- * dogru cevaplarsan ayni surede sonraki ayetle devam eder.
+ * Dinamik soru üretimi (DB'den), gerçek zincir mekaniği:
+ * doğru cevaplarsan aynı surede sonraki ayetle devam eder.
  * Timer-based: sure doldugunda oyun biter.
  */
 
@@ -444,6 +444,7 @@ function VerseChainPage() {
     return (
       <SurahPickerScreen
         gameImg={THEME.img}
+        gameId="verse-chain"
         onStart={(ids, _vf, diff) => {
           setSurahIds(ids);
           setDifficulty(diff ?? "medium");

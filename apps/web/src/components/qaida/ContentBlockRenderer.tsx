@@ -1,6 +1,6 @@
 /**
- * Ders icerik bloklarini renderler.
- * Her blok tipine gore uygun bileseni cagirir.
+ * Ders içerik bloklarını renderler.
+ * Her blok tipine göre uygun bileşeni çağırır.
  */
 
 import type { ContentBlock } from "@mahfuz/shared/types";

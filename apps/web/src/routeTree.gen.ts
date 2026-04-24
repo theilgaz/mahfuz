@@ -38,6 +38,7 @@ import { Route as GamesScoreboardRouteImport } from './routes/games/scoreboard'
 import { Route as GamesKelimeTahminiRouteImport } from './routes/games/kelime-tahmini'
 import { Route as GamesHexagonRouteImport } from './routes/games/hexagon'
 import { Route as GamesFillBlankRouteImport } from './routes/games/fill-blank'
+import { Route as GamesEmojiMatchRouteImport } from './routes/games/emoji-match'
 import { Route as GamesAyah2048RouteImport } from './routes/games/ayah-2048'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
@@ -212,6 +213,11 @@ const GamesHexagonRoute = GamesHexagonRouteImport.update({
 const GamesFillBlankRoute = GamesFillBlankRouteImport.update({
   id: '/fill-blank',
   path: '/fill-blank',
+  getParentRoute: () => GamesRoute,
+} as any)
+const GamesEmojiMatchRoute = GamesEmojiMatchRouteImport.update({
+  id: '/emoji-match',
+  path: '/emoji-match',
   getParentRoute: () => GamesRoute,
 } as any)
 const GamesAyah2048Route = GamesAyah2048RouteImport.update({
@@ -390,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/games/ayah-2048': typeof GamesAyah2048Route
+  '/games/emoji-match': typeof GamesEmojiMatchRoute
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
   '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
@@ -448,6 +455,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/games/ayah-2048': typeof GamesAyah2048Route
+  '/games/emoji-match': typeof GamesEmojiMatchRoute
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
   '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
@@ -510,6 +518,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/games/ayah-2048': typeof GamesAyah2048Route
+  '/games/emoji-match': typeof GamesEmojiMatchRoute
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
   '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
@@ -573,6 +582,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/games/ayah-2048'
+    | '/games/emoji-match'
     | '/games/fill-blank'
     | '/games/hexagon'
     | '/games/kelime-tahmini'
@@ -631,6 +641,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/games/ayah-2048'
+    | '/games/emoji-match'
     | '/games/fill-blank'
     | '/games/hexagon'
     | '/games/kelime-tahmini'
@@ -692,6 +703,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/games/ayah-2048'
+    | '/games/emoji-match'
     | '/games/fill-blank'
     | '/games/hexagon'
     | '/games/kelime-tahmini'
@@ -978,6 +990,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesFillBlankRouteImport
       parentRoute: typeof GamesRoute
     }
+    '/games/emoji-match': {
+      id: '/games/emoji-match'
+      path: '/emoji-match'
+      fullPath: '/games/emoji-match'
+      preLoaderRoute: typeof GamesEmojiMatchRouteImport
+      parentRoute: typeof GamesRoute
+    }
     '/games/ayah-2048': {
       id: '/games/ayah-2048'
       path: '/ayah-2048'
@@ -1193,6 +1212,7 @@ declare module '@tanstack/react-router' {
 
 interface GamesRouteChildren {
   GamesAyah2048Route: typeof GamesAyah2048Route
+  GamesEmojiMatchRoute: typeof GamesEmojiMatchRoute
   GamesFillBlankRoute: typeof GamesFillBlankRoute
   GamesHexagonRoute: typeof GamesHexagonRoute
   GamesKelimeTahminiRoute: typeof GamesKelimeTahminiRoute
@@ -1205,6 +1225,7 @@ interface GamesRouteChildren {
 
 const GamesRouteChildren: GamesRouteChildren = {
   GamesAyah2048Route: GamesAyah2048Route,
+  GamesEmojiMatchRoute: GamesEmojiMatchRoute,
   GamesFillBlankRoute: GamesFillBlankRoute,
   GamesHexagonRoute: GamesHexagonRoute,
   GamesKelimeTahminiRoute: GamesKelimeTahminiRoute,

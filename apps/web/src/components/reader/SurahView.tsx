@@ -1,5 +1,5 @@
 /**
- * Sure gorünümü (liste modu) — tüm ayetleri sırayla gosterir.
+ * Sure görünümü (liste modu) -- tüm ayetleri sırayla gösterir.
  * Redesigned layout: top bar, chapter header, verse blocks with side actions,
  * right sidebar (TOC + font control + bookmarks), footer with nav.
  */

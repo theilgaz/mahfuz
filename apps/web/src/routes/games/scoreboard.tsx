@@ -1,5 +1,6 @@
 /**
  * Skor Tablosu -- global + oyun bazli liderlik tablolari.
+ * Haftalik, aylik, tum zamanlar filtreleriyle.
  * Minimal UI editorial design.
  */
 
@@ -12,8 +13,11 @@ import {
   getMyScoreStats,
   GAME_TITLES,
   GAME_IDS,
+  LEADERBOARD_PERIODS,
   type LeaderboardEntry,
+  type LeaderboardPeriod,
 } from "~/lib/score-service";
+import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/games/scoreboard")({
   component: ScoreboardPage,
@@ -25,21 +29,29 @@ export const Route = createFileRoute("/games/scoreboard")({
 function ScoreboardPage() {
   const { session } = useRouteContext({ from: "__root__" });
   const { game } = Route.useSearch();
+  const { t } = useTranslation();
   const userId = session?.user?.id;
 
   const [activeTab, setActiveTab] = useState<"global" | string>(
     game && GAME_IDS.includes(game) ? game : "global",
   );
+  const [period, setPeriod] = useState<LeaderboardPeriod>("all");
+
+  const periodLabels: Record<LeaderboardPeriod, string> = {
+    week: t.gamesHub.periodWeek,
+    month: t.gamesHub.periodMonth,
+    all: t.gamesHub.periodAll,
+  };
 
   const { data: globalBoard } = useQuery({
-    queryKey: ["global-leaderboard"],
-    queryFn: () => getGlobalLeaderboard(),
+    queryKey: ["global-leaderboard", period],
+    queryFn: () => getGlobalLeaderboard({ data: { period } }),
     staleTime: 60_000,
   });
 
   const { data: gameBoard } = useQuery({
-    queryKey: ["game-leaderboard", activeTab],
-    queryFn: () => getGameLeaderboard({ data: { gameId: activeTab } }),
+    queryKey: ["game-leaderboard", activeTab, period],
+    queryFn: () => getGameLeaderboard({ data: { gameId: activeTab, period } }),
     enabled: activeTab !== "global",
     staleTime: 60_000,
   });
@@ -68,14 +80,14 @@ function ScoreboardPage() {
         style={{ fontSize: 13, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-        Oyunlar
+        {t.gamesHub?.title ?? "Oyunlar"}
       </Link>
 
       {/* Header */}
       <div style={{ paddingTop: 24, paddingBottom: 32 }}>
         <p className="mu-eyebrow">
           <span className="mu-eb-line" />
-          Skor Tablosu
+          {t.gamesHub?.scoreboard ?? "Skor Tablosu"}
         </p>
         <h1 className="mu-display" style={{ fontSize: "clamp(32px, 5vw, 52px)", marginBottom: 8 }}>
           Zirvedekiler
@@ -85,13 +97,26 @@ function ScoreboardPage() {
         </p>
       </div>
 
+      {/* Period selector */}
+      <div className="mu-sb-periods">
+        {LEADERBOARD_PERIODS.map((p) => (
+          <button
+            key={p}
+            className={`mu-sb-period ${period === p ? "active" : ""}`}
+            onClick={() => setPeriod(p)}
+          >
+            {periodLabels[p]}
+          </button>
+        ))}
+      </div>
+
       {/* Tabs: Global + per-game */}
       <div className="mu-sb-tabs">
         <button
           className={`mu-sb-tab ${activeTab === "global" ? "active" : ""}`}
           onClick={() => setActiveTab("global")}
         >
-          Genel
+          {t.gamesHub?.tabGlobal ?? "Genel"}
         </button>
         {GAME_IDS.map((id) => (
           <button
@@ -167,7 +192,7 @@ function ScoreboardPage() {
       {board && board.length === 0 && (
         <div style={{ textAlign: "center", padding: "48px 0" }}>
           <p className="mu-muted" style={{ fontSize: 15 }}>
-            Henuz skor yok. Bir oyun oynayarak ilk sen ol!
+            {t.gamesHub?.noScores ?? "Henuz skor yok. Bir oyun oynayarak ilk sen ol!"}
           </p>
           <Link to="/games" className="mu-btn primary" style={{ marginTop: 16, display: "inline-flex" }}>
             Oyunlara Git

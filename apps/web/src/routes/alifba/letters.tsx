@@ -1,6 +1,6 @@
 /**
- * Harf indeks sayfasi -- /alifba/letters
- * 28 Arap\u00E7a harfi minimal-ui stilinde gosterir.
+ * Harf indeks sayfası -- /alifba/letters
+ * 28 Arapça harfi minimal-ui stilinde gösterir.
  */
 
 import { createFileRoute, Link } from "@tanstack/react-router";

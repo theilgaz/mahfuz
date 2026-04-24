@@ -15,7 +15,9 @@ import {
   getMyScoreStats,
   GAME_TITLES,
   GAME_IDS,
+  LEADERBOARD_PERIODS,
   type LeaderboardEntry,
+  type LeaderboardPeriod,
   type MyGameStat,
   getUserAchievements,
 } from "~/lib/score-service";
@@ -58,6 +60,7 @@ const GAME_IMGS: Record<string, string> = {
   "elifba-kelime-bul":    "/images/games/mahfuz-word-find.webp",
   "kelime-tahmini":       "/images/games/mahfuz-kelime-tahmini.webp",
   "ayet-2048":            "/images/games/mahfuz-ayet-2048.webp",
+  "emoji-eslestirme":     "/images/games/mahfuz-emoji-match.webp",
 };
 
 const GAME_COLORS: Record<string, { bg: string; glow: string }> = {
@@ -69,6 +72,7 @@ const GAME_COLORS: Record<string, { bg: string; glow: string }> = {
   "sure-tanima":          { bg: "#B8C9B0", glow: "#5C7A55" },
   "kelime-tahmini":       { bg: "#1A3D2B", glow: "#4A9B6A" },
   "ayet-2048":            { bg: "#1A1A2E", glow: "#E94560" },
+  "emoji-eslestirme":     { bg: "#2A1B0E", glow: "#F5A623" },
   "elifba-sesli-quiz":    { bg: "#1B2B4A", glow: "#4A7BB5" },
   "elifba-form-quiz":     { bg: "#C49B6B", glow: "#8B6B3A" },
   "elifba-karisik-sinav": { bg: "#2D6B5A", glow: "#4A9B7B" },
@@ -87,6 +91,7 @@ function makeGames(t: T): Game[] {
     { id: "hexagon-harf", img: GAME_IMGS["hexagon-harf"], title: t.gamesHub.hexagonTitle, description: t.gamesHub.hexagonDesc, category: t.gamesHub.catWord, link: "/games/hexagon", surahScoped: true },
     { id: "kelime-tahmini", img: GAME_IMGS["kelime-tahmini"], title: t.gamesHub.kelimeTahminiTitle, description: t.gamesHub.kelimeTahminiDesc, category: t.gamesHub.catPuzzle, link: "/games/kelime-tahmini" },
     { id: "ayet-2048", img: GAME_IMGS["ayet-2048"], title: t.gamesHub.ayet2048Title, description: t.gamesHub.ayet2048Desc, category: t.gamesHub.catPuzzle, link: "/games/ayah-2048" },
+    { id: "emoji-eslestirme", img: GAME_IMGS["emoji-eslestirme"], title: t.gamesHub.emojiMatchTitle, description: t.gamesHub.emojiMatchDesc, category: t.gamesHub.catPuzzle, link: "/games/emoji-match" },
   ];
   return games.map((g) => ({ ...g, colors: GAME_COLORS[g.id] }));
 }
@@ -470,10 +475,10 @@ function GameTabBar({ selectedId, onSelect }: { selectedId: string; onSelect: (i
 }
 
 /** Single game leaderboard loaded by selected tab */
-function TabbedGameLeaderboard({ gameId, userId, t }: { gameId: string; userId?: string; t: T }) {
+function TabbedGameLeaderboard({ gameId, userId, period, t }: { gameId: string; userId?: string; period: LeaderboardPeriod; t: T }) {
   const { data: board } = useQuery<LeaderboardEntry[]>({
-    queryKey: ["game-leaderboard", gameId],
-    queryFn: () => getGameLeaderboard({ data: { gameId } }),
+    queryKey: ["game-leaderboard", gameId, period],
+    queryFn: () => getGameLeaderboard({ data: { gameId, period } }),
     staleTime: 60_000,
   });
 
@@ -485,6 +490,14 @@ function TabbedGameLeaderboard({ gameId, userId, t }: { gameId: string; userId?:
 }
 
 function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
+  const [period, setPeriod] = useState<LeaderboardPeriod>("all");
+
+  const periodLabels: Record<LeaderboardPeriod, string> = {
+    week: t.gamesHub.periodWeek,
+    month: t.gamesHub.periodMonth,
+    all: t.gamesHub.periodAll,
+  };
+
   const { data: myStats } = useQuery<MyGameStat[]>({
     queryKey: ["my-score-stats"],
     queryFn: () => getMyScoreStats(),
@@ -492,8 +505,8 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
     enabled: !!userId,
   });
   const { data: globalBoard } = useQuery<LeaderboardEntry[]>({
-    queryKey: ["global-leaderboard"],
-    queryFn: () => getGlobalLeaderboard(),
+    queryKey: ["global-leaderboard", period],
+    queryFn: () => getGlobalLeaderboard({ data: { period } }),
     staleTime: 60_000,
   });
 
@@ -508,6 +521,23 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
 
   return (
     <div className="space-y-5">
+      {/* Period selector */}
+      <div className="flex gap-2">
+        {LEADERBOARD_PERIODS.map((p) => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+              period === p
+                ? "bg-[var(--color-accent)] text-white"
+                : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
+            }`}
+          >
+            {periodLabels[p]}
+          </button>
+        ))}
+      </div>
+
       {/* 1. Hero Card */}
       {userId && myStats?.length ? (
         <HeroCard myStats={myStats} globalBoard={globalBoard ?? []} userId={userId} t={t} />
@@ -543,7 +573,7 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
           <GameTabBar selectedId={selectedGameId} onSelect={setSelectedGameId} />
         </div>
         <div className="px-4 py-3">
-          <TabbedGameLeaderboard key={selectedGameId} gameId={selectedGameId} userId={userId} t={t} />
+          <TabbedGameLeaderboard gameId={selectedGameId} userId={userId} period={period} t={t} />
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 /**
- * Sure listesi + yuzen cuz butonu.
- * Liste (varsayilan) ve grid gorunumu arasi gecis.
+ * Sure listesi + yüzen cüz butonu.
+ * Liste (varsayılan) ve grid görünümü arası geçiş.
  */
 
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
@@ -14,7 +14,7 @@ import { surahSlug } from "~/lib/surah-slugs";
 
 const ALL_JUZ = Array.from({ length: TOTAL_JUZ }, (_, i) => i + 1);
 
-/** Nuzul'a gore cami gorseli: Mekki -> Kaaba, Medeni -> Nabawi */
+/** Nüzul'a göre cami görseli: Mekki -> Kaaba, Medeni -> Nabawi */
 const MOSQUE_SRC: Record<string, string> = {
   makkah: "/images/kaaba.png",
   madinah: "/images/nabawi.png",
@@ -120,7 +120,7 @@ export function SurahList({ surahs }: SurahListProps) {
 
   return (
     <div className="relative">
-      {/* Filtre + gorunum toggle */}
+      {/* Filtre + görünüm toggle */}
       <div className="flex items-center gap-2 mb-3">
         {filterChips.map((chip) => (
           <button
@@ -162,7 +162,7 @@ export function SurahList({ surahs }: SurahListProps) {
         </div>
       </div>
 
-      {/* Liste gorunumu */}
+      {/* Liste görünümü */}
       {viewMode === "list" ? (
         <div>
           {filteredSurahs.map((surah) => {
@@ -198,7 +198,7 @@ export function SurahList({ surahs }: SurahListProps) {
                     </span>
                   </div>
 
-                  {/* Arapca isim + nuzul cami gorseli */}
+                  {/* Arapça isim + nüzul cami görseli */}
                   <span
                     className="relative shrink-0 flex items-center justify-center overflow-hidden rounded h-14 pl-2"
                     dir="rtl"
@@ -224,7 +224,7 @@ export function SurahList({ surahs }: SurahListProps) {
           })}
         </div>
       ) : (
-        /* Grid gorunumu */
+        /* Grid görünümü */
         <div className="grid grid-cols-3 md:grid-cols-4 border-l border-t border-[var(--color-border)]">
           {filteredSurahs.map((surah) => {
             const isLast = surah.id === lastSurahId;
@@ -363,7 +363,7 @@ export function SurahList({ surahs }: SurahListProps) {
           </div>
         )}
 
-        {/* Cuz butonu */}
+        {/* Cüz butonu */}
         <button
           onClick={() => { setJuzOpen(!juzOpen); if (juzOpen) setActiveCollection(null); }}
           className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-colors ${

@@ -1,7 +1,7 @@
 /**
- * Sure Tanima -- ayet metni gorunce sureyi tahmin et.
- * 2 dakika sayac (zorluk carpanina gore erime hizi degisir).
- * Sik sayisi zorluga gore: Kolay 3, Orta 4, Zor 5, Hafiz 6.
+ * Sure Tanıma -- ayet metni görünce sureyi tahmin et.
+ * 2 dakika sayaç (zorluk çarpanına göre erime hızı değişir).
+ * Şık sayısı zorluğa göre: Kolay 3, Orta 4, Zor 5, Hafız 6.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -309,6 +309,7 @@ function SurahGuessGame() {
     return (
       <SurahPickerScreen
         gameImg={THEME.img}
+        gameId="surah-guess"
         onStart={(ids, _vf, diff) => {
           setSurahIds(ids);
           setDifficulty(diff ?? "medium");

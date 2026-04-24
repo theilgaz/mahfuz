@@ -1,7 +1,7 @@
 /**
  * Hafiza Oyunu — /alifba/games/memory
- * 8 ciftten olusan (16 kart) eslestirme oyunu.
- * Cocuklara yonelik renkli tasarim.
+ * 8 çiftten oluşan (16 kart) eşleştirme oyunu.
+ * Çocuklara yönelik renkli tasarım.
  */
 
 import { useState, useCallback, useEffect, useRef } from "react";

@@ -8,7 +8,7 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import { db, gameScores, userAchievements } from "~/db";
 import { user } from "~/db";
 import { auth } from "~/lib/auth";
-import { eq, sql, desc, and } from "drizzle-orm";
+import { eq, sql, desc, and, gte } from "drizzle-orm";
 import { checkAndGrantAchievements } from "./achievement-service";
 
 // ── Oyun isimleri (UI için) ────────────────────────────────
@@ -18,9 +18,10 @@ export const GAME_TITLES: Record<string, string> = {
   "surah-guess": "Sure Tanıma",
   "word-meaning": "Kelime Anlamı",
   "verse-chain": "Ayet Zinciri",
-  "hexagon": "Kelime Dizme",
+  "hexagon": "Kelime Oluşturma",
   "kelime-tahmini": "Kelime Tahmini",
   "ayet-2048": "Ayet 2048",
+  "emoji-match": "Emoji Eslestirme",
 };
 
 const GAME_TITLES_EN: Record<string, string> = {
@@ -31,6 +32,7 @@ const GAME_TITLES_EN: Record<string, string> = {
   "hexagon": "Word Construction",
   "kelime-tahmini": "Word Guess",
   "ayet-2048": "Ayah 2048",
+  "emoji-match": "Emoji Match",
 };
 
 /** Returns game title for the given locale. Falls back to Turkish. */
@@ -100,6 +102,19 @@ export const submitScore = createServerFn({ method: "POST" })
     return { saved: true, isNewHighScore, newAchievements };
   });
 
+// ── Zaman Dilimleri ───────────────────────────────────────
+
+export type LeaderboardPeriod = "week" | "month" | "all";
+
+export const LEADERBOARD_PERIODS: LeaderboardPeriod[] = ["week", "month", "all"];
+
+function periodCutoff(period: LeaderboardPeriod): number | null {
+  if (period === "all") return null;
+  const now = Date.now();
+  if (period === "week") return now - 7 * 24 * 60 * 60 * 1000;
+  return now - 30 * 24 * 60 * 60 * 1000; // month
+}
+
 // ── Oyun Liderlik Tablosu ──────────────────────────────────
 
 export interface LeaderboardEntry {
@@ -111,8 +126,12 @@ export interface LeaderboardEntry {
 }
 
 export const getGameLeaderboard = createServerFn({ method: "GET" })
-  .inputValidator((input: { gameId: string }) => input)
+  .inputValidator((input: { gameId: string; period?: LeaderboardPeriod }) => input)
   .handler(async ({ data }): Promise<LeaderboardEntry[]> => {
+    const cutoff = periodCutoff(data.period ?? "all");
+    const conditions = [eq(gameScores.gameId, data.gameId)];
+    if (cutoff) conditions.push(gte(gameScores.createdAt, cutoff));
+
     const rows = await db
       .select({
         userId: gameScores.userId,
@@ -122,7 +141,7 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
       })
       .from(gameScores)
       .innerJoin(user, eq(gameScores.userId, user.id))
-      .where(eq(gameScores.gameId, data.gameId))
+      .where(and(...conditions))
       .groupBy(gameScores.userId)
       .orderBy(desc(sql`MAX(${gameScores.score})`))
       .limit(10);
@@ -133,8 +152,11 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
 // ── Global Liderlik (toplam skor) ──────────────────────────
 
 export const getGlobalLeaderboard = createServerFn({ method: "GET" })
-  .handler(async (): Promise<LeaderboardEntry[]> => {
-    // Her kullanıcının her oyundaki en iyisi → toplam
+  .inputValidator((input: { period?: LeaderboardPeriod }) => input)
+  .handler(async ({ data }): Promise<LeaderboardEntry[]> => {
+    const cutoff = periodCutoff(data.period ?? "all");
+    const whereClause = cutoff ? sql`WHERE created_at >= ${cutoff}` : sql``;
+
     const rows = await db.all(sql`
       SELECT
         sub.user_id  AS userId,
@@ -144,6 +166,7 @@ export const getGlobalLeaderboard = createServerFn({ method: "GET" })
       FROM (
         SELECT user_id, game_id, MAX(score) AS best
         FROM game_scores
+        ${whereClause}
         GROUP BY user_id, game_id
       ) sub
       JOIN user u ON sub.user_id = u.id

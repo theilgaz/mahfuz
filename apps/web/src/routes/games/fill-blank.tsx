@@ -1,7 +1,7 @@
 /**
  * Kelime Doldurma -- ayetteki eksik kelimeyi bul.
- * 2 dakika sayac (zorluk carpanina gore erime hizi degisir).
- * Sik sayisi zorluga gore: Kolay 3, Orta 4, Zor 5, Hafiz 6.
+ * 2 dakika sayaç (zorluk çarpanına göre erime hızı değişir).
+ * Şık sayısı zorluğa göre: Kolay 3, Orta 4, Zor 5, Hafız 6.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -439,6 +439,7 @@ function FillBlankGame() {
     return (
       <SurahPickerScreen
         gameImg={THEME.img}
+        gameId="fill-blank"
         onStart={(ids, vf, diff) => {
           setSurahIds(ids);
           setVerseFilter(vf);

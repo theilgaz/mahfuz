@@ -765,6 +765,7 @@ export const tr = {
   gamesHub: {
     title: "Oyunlar",
     scoreboard: "Skor Tablosu",
+    seeAll: "Tümünü Gör",
     points: "{total} puan",
     tabMine: "Benim",
     tabGlobal: "Global",
@@ -774,6 +775,9 @@ export const tr = {
     noGamesPlayed: "Henüz oyun oynamadın",
     noScores: "Henüz kayıtlı skor yok",
     noScoresForGame: "Bu oyun için henüz skor yok",
+    periodWeek: "Bu Hafta",
+    periodMonth: "Bu Ay",
+    periodAll: "Tüm Zamanlar",
     addFavorite: "Favorilere ekle",
     removeFavorite: "Favorilerden çıkar",
     scopeAll: "Tüm Kuran",
@@ -833,6 +837,8 @@ export const tr = {
     kelimeTahminiDesc: "Anlamdan Arapça kelimeyi tahmin et",
     ayet2048Title: "Ayet 2048",
     ayet2048Desc: "Sureleri kaydır, birleştir, keşfet",
+    emojiMatchTitle: "Emoji Eşleştirme",
+    emojiMatchDesc: "Emojiyi doğru Arapça kelimeyle eşleştir",
     catPuzzle: "Bulmaca",
   },
   ayet2048: {
@@ -887,6 +893,16 @@ export const tr = {
     dayNumber: "Gün #{day}",
     transliteration: "Okunuşu:",
     nextDaily: "Sonraki kelime:",
+  },
+  emojiMatchGame: {
+    title: "Emoji Eşleştirme",
+    subtitle: "Emojiyi doğru Arapça kelimeyle eşle",
+    tapEmoji: "Önce emojiyi, sonra Arapça kelimeyi seç",
+    matched: "Eşleştirildi!",
+    wrong: "Yanlış eşleşme",
+    roundComplete: "Tur tamamlandı!",
+    nextRound: "Sonraki Tur -->",
+    pairsLeft: "{count} çift kaldı",
   },
   tajweedPage: {
     title: "Tecvid Öğren",

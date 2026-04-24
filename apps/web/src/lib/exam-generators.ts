@@ -1,6 +1,6 @@
 /**
- * Sinav soru uretecleri.
- * Her generator pure function: havuzdan rastgele sorular uretir.
+ * Sınav soru üreteçleri.
+ * Her generator pure function: havuzdan rastgele sorular üretir.
  */
 
 import { ARABIC_ALPHABET } from "@mahfuz/shared/data/learn/alphabet";

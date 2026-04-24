@@ -1,6 +1,6 @@
 /**
- * Bosluk Doldurma Alistirmasi
- * Arapca metin gosterilir, eksik kisim icin seceneklerden biri secilir.
+ * Boşluk Doldurma Alıştırması
+ * Arapça metin gösterilir, eksik kısım için seçeneklerden biri seçilir.
  */
 
 import { useState, useMemo } from "react";

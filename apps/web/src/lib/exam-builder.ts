@@ -1,6 +1,6 @@
 /**
- * Sinav olusturucu.
- * ExamConfig'e gore generator'lardan soru toplar.
+ * Sınav oluşturucu.
+ * ExamConfig'e göre generator'lardan soru toplar.
  */
 
 import { shuffle } from "~/lib/kids-constants";
@@ -8,8 +8,8 @@ import { QAIDA_TOPICS, type ExamConfig } from "./qaida-topics";
 import { getGenerator, type ExamQuestion } from "./exam-generators";
 
 /**
- * Konu sinavi olusturur.
- * Her generator'dan esit sayida soru alir, karistirir.
+ * Konu sınavı oluşturur.
+ * Her generator'dan eşit sayıda soru alır, karıştırır.
  */
 export function buildExam(config: ExamConfig): ExamQuestion[] {
   const { questionCount, generators } = config;
@@ -23,18 +23,18 @@ export function buildExam(config: ExamConfig): ExamQuestion[] {
     questions.push(...gen(perGenerator));
   }
 
-  // Toplam soru sayisina kes ve karistir
+  // Toplam soru sayısına kes ve karıştır
   return shuffle(questions).slice(0, questionCount);
 }
 
 /**
- * Seviye testi olusturur.
+ * Seviye testi oluşturur.
  * Her topic'ten 3 soru, topic sirasi korunur (kolay -> zor).
  * Toplam: 10 topic x 3 = 30 soru.
  */
 export function buildPlacementExam(): { questions: ExamQuestion[]; topicBoundaries: number[] } {
   const questions: ExamQuestion[] = [];
-  const topicBoundaries: number[] = []; // her topic'in baslangic indeksi
+  const topicBoundaries: number[] = []; // her topic'in başlangıç indeksi
 
   for (const topic of QAIDA_TOPICS) {
     topicBoundaries.push(questions.length);

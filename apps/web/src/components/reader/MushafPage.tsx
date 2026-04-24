@@ -1,5 +1,5 @@
 /**
- * Mushaf sayfasi -- mushaf goruntuleri + mealler.
+ * Mushaf sayfası -- mushaf görüntüleri + mealler.
  */
 
 import { useReadingStore } from "~/stores/reading.store";

@@ -1,6 +1,6 @@
 /**
- * Kelime Olusturma Alistirmasi
- * Karisik harflere tiklayarak kelimeyi dogru siraya diz.
+ * Kelime Oluşturma Alıştırması
+ * Karışık harflere tıklayarak kelimeyi doğru sıraya diz.
  */
 
 import { useState, useCallback, useMemo, useRef } from "react";

@@ -12,6 +12,7 @@ import { useSurahSelectionStore } from "~/stores/surahSelection.store";
 import { useHifzStore } from "~/stores/hifz.store";
 import { useStudiedStore } from "~/stores/studied.store";
 import { useTranslation } from "~/hooks/useTranslation";
+import { GameMiniLeaderboard } from "~/components/GameMiniLeaderboard";
 import type { VerseFilter } from "~/lib/game-service";
 import type { Difficulty } from "~/lib/game-scoring";
 
@@ -29,10 +30,12 @@ interface Props {
   gameImg?: string;
   /** When true, hides surah selection and only shows difficulty. */
   difficultyOnly?: boolean;
+  /** Game ID for showing mini leaderboard (e.g. "fill-blank"). */
+  gameId?: string;
   onStart: (surahIds: number[], verseFilter?: VerseFilter, difficulty?: Difficulty) => void;
 }
 
-export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
+export function SurahPickerScreen({ gameImg, difficultyOnly, gameId, onStart }: Props) {
   const { t } = useTranslation();
   const savedIds = useSurahSelectionStore((s) => s.selectedSurahIds);
   const saveIds = useSurahSelectionStore((s) => s.setSelectedSurahIds);
@@ -373,7 +376,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
         )}
       </div>}
 
-      {/* Baslat butonu */}
+      {/* Başlat butonu */}
       <button
         onClick={handleStart}
         disabled={startDisabled}
@@ -381,6 +384,9 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, onStart }: Props) {
       >
         {startButtonLabel}
       </button>
+
+      {/* Mini leaderboard */}
+      {gameId && <GameMiniLeaderboard gameId={gameId} />}
     </div>
   );
 }

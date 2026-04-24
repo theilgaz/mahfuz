@@ -1,6 +1,6 @@
 /**
- * Adim sinavi -- /alifba/exam/:stepId
- * QAIDA_TOPICS exam config'inden soru uretir, ExamRunner ile gosterir.
+ * Adım sınavı -- /alifba/exam/:stepId
+ * QAIDA_TOPICS exam config'inden soru üretir, ExamRunner ile gösterir.
  */
 
 import { useMemo, useCallback } from "react";

@@ -79,8 +79,8 @@ export function GamesPageMinimal() {
   const { t } = useTranslation();
   const { session } = useRouteContext({ from: "__root__" });
   const { data: leaderboard } = useQuery({
-    queryKey: ["global-leaderboard"],
-    queryFn: () => getGlobalLeaderboard(),
+    queryKey: ["global-leaderboard", "all"],
+    queryFn: () => getGlobalLeaderboard({ data: {} }),
     staleTime: 60_000,
   });
   const [cat, setCat] = useState("all");

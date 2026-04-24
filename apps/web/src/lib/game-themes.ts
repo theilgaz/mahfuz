@@ -44,6 +44,11 @@ export const GAME_THEMES: Record<string, GameTheme> = {
     bg: "#1A1A2E", primary: "#E94560", secondary: "#533483", surface: "#16213E",
     glow: "rgba(233,69,96,0.3)", img: "/images/games/mahfuz-ayet-2048.webp", isDark: true,
   },
+  // Emoji Eslestirme - warm amber/sunset (playful emoji aesthetic)
+  "emoji-match": {
+    bg: "#2A1B0E", primary: "#F5A623", secondary: "#D4782F", surface: "#3A2515",
+    glow: "rgba(245,166,35,0.3)", img: "/images/games/mahfuz-emoji-match.webp", isDark: true,
+  },
 };
 
 /**
@@ -115,6 +120,13 @@ const GAME_PATTERNS: Record<string, { pattern: string; size: string; opacity: st
       linear-gradient(90deg, rgba(83,52,131,0.08) 1px, transparent 1px)`,
     size: "80px 80px",
     opacity: "0.7",
+  },
+  // Matching grid (card pairs)
+  "emoji-match": {
+    pattern: `linear-gradient(rgba(245,166,35,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,166,35,0.08) 1px, transparent 1px)`,
+    size: "64px 64px",
+    opacity: "0.5",
   },
 };
 

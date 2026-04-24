@@ -21,7 +21,7 @@ interface AudioState {
   isMuted: boolean;
   repeatMode: RepeatMode;
 
-  // Aktif sure bilgisi
+  // Aktif sure bilgisi (chapter)
   chapterId: number | null;
   chapterName: string | null;
   verseKeys: string[];

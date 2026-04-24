@@ -1,7 +1,7 @@
 /**
  * Kelime Tahmini -- Quran Wordle.
- * Turkce anlam ipucu verilir, gizli Arapca kelimeyi 6 denemede tahmin et.
- * Gunluk mod (tarih seed) + serbest mod.
+ * Türkçe anlam ipucu verilir, gizli Arapça kelimeyi 6 denemede tahmin et.
+ * Günlük mod (tarih seed) + serbest mod.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -11,6 +11,7 @@ import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { WORD_PAIRS, getLocalizedPair } from "~/lib/word-pairs";
 import { useTranslation } from "~/hooks/useTranslation";
 import { submitScore } from "~/lib/score-service";
+import { GameMiniLeaderboard } from "~/components/GameMiniLeaderboard";
 
 const THEME = GAME_THEMES["kelime-tahmini"];
 const P = THEME.primary;
@@ -217,6 +218,9 @@ function MenuScreen({ t, onSelectMode }: { t: any; onSelectMode: (m: "daily" | "
           {t.kelimeTahmini.nextWord}
         </p>
       </button>
+
+      {/* Mini leaderboard */}
+      <GameMiniLeaderboard gameId="kelime-tahmini" />
 
       {/* Stats */}
       {stats.played > 0 && (

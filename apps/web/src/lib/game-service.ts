@@ -97,8 +97,8 @@ export const getRandomVerseForGame = createServerFn({ method: "POST" })
   });
 
 /**
- * Kelime Olusturma -- ayetten rastgele kelime sec, harflere ayir.
- * Zorluga gore kelime uzunlugu: easy 3-4, medium 4-6, hard 5-8, hafiz 6+.
+ * Kelime Oluşturma -- ayetten rastgele kelime seç, harflere ayır.
+ * Zorluğa göre kelime uzunluğu: easy 3-4, medium 4-6, hard 5-8, hafız 6+.
  */
 export const getWordConstructionQuestion = createServerFn({ method: "POST" })
   .inputValidator(
@@ -144,7 +144,7 @@ export const getWordConstructionQuestion = createServerFn({ method: "POST" })
 
     const whereClause = and(...conditions);
 
-    // Arapca harfleri (harekelerle birlikte) ayir
+    // Arapça harfleri (harekelerle birlikte) ayır
     const splitArabicLetters = (word: string): string[] => {
       const re = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*/g;
       return Array.from(word.matchAll(re), (m) => m[0]);

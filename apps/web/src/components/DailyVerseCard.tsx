@@ -1,5 +1,5 @@
 /**
- * Gunun Ayeti karti -- mu-today-card stilinde, editorial tasarim.
+ * Günün Ayeti kartı -- mu-today-card stilinde, editorial tasarım.
  */
 
 import { Link } from "@tanstack/react-router";

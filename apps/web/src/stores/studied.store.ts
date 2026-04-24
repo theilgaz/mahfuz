@@ -1,7 +1,7 @@
 /**
- * Calistiklarim store'u -- kullanicinin aktif olarak calistigi sureler.
- * Okuma gecmisi ve yer imlerinden otomatik beslenir,
- * kullanici manuel olarak ekleyip cikarabilir.
+ * Çalıştıklarım store'u -- kullanıcının aktif olarak çalıştığı sureler.
+ * Okuma geçmişi ve yer imlerinden otomatik beslenir,
+ * kullanıcı manuel olarak ekleyip çıkarabilir.
  */
 
 import { create } from "zustand";

@@ -1,7 +1,7 @@
 /**
- * Harf secme alistirmasi.
- * Arapca kelimeyi harflere ayirir, kullanici hedef harekeli harflere dokunur.
- * "Sukünlü harfleri bul", "Şeddeli harfleri bul" gibi sorular icin.
+ * Harf seçme alıştırması.
+ * Arapça kelimeyi harflere ayırır, kullanıcı hedef harekeli harflere dokunur.
+ * "Sukünlü harfleri bul", "Şeddeli harfleri bul" gibi sorular için.
  */
 
 import { useState, useCallback } from "react";
@@ -19,12 +19,12 @@ interface LetterGroup {
   full: string;        // base + diacritics
 }
 
-/** Arapca metni harf + hareke gruplarina ayir */
+/** Arapça metni harf + hareke gruplarına ayır */
 function parseArabicLetters(text: string): LetterGroup[] {
   const groups: LetterGroup[] = [];
   for (const char of text) {
     if (DIACRITIC_RE.test(char)) {
-      // Onceki gruba hareke ekle
+      // Önceki gruba hareke ekle
       if (groups.length > 0) {
         groups[groups.length - 1].diacritics += char;
         groups[groups.length - 1].full += char;
@@ -54,7 +54,7 @@ export function LetterTapExercise({ arabicDisplay, targetType, prompt, onComplet
   const letters = parseArabicLetters(arabicDisplay);
   const targetChar = getTargetChar(targetType);
 
-  // Dogru cevaplar: hedef harekeyi iceren harflerin index'leri
+  // Doğru cevaplar: hedef harekeyi içeren harflerin index'leri
   const correctIndices = new Set(
     letters
       .map((g, i) => (g.diacritics.includes(targetChar) ? i : -1))
@@ -159,7 +159,7 @@ export function LetterTapExercise({ arabicDisplay, targetType, prompt, onComplet
         </div>
       )}
 
-      {/* Gonder butonu */}
+      {/* Gönder butonu */}
       {!submitted && (
         <button
           onClick={handleSubmit}
