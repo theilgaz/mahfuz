@@ -17,13 +17,19 @@ import {
 
 export const Route = createFileRoute("/games/scoreboard")({
   component: ScoreboardPage,
+  validateSearch: (search: Record<string, unknown>): { game?: string } => ({
+    game: typeof search.game === "string" ? search.game : undefined,
+  }),
 });
 
 function ScoreboardPage() {
   const { session } = useRouteContext({ from: "__root__" });
+  const { game } = Route.useSearch();
   const userId = session?.user?.id;
 
-  const [activeTab, setActiveTab] = useState<"global" | string>("global");
+  const [activeTab, setActiveTab] = useState<"global" | string>(
+    game && GAME_IDS.includes(game) ? game : "global",
+  );
 
   const { data: globalBoard } = useQuery({
     queryKey: ["global-leaderboard"],

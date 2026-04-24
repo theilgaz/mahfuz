@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_VERSION = "20260330";
+const CACHE_VERSION = "20260424";
 const CACHE_NAME = `mahfuz-${CACHE_VERSION}`;
 const STATIC_ASSETS = ["/", "/manifest.json"];
 const MAX_CACHE_ITEMS = 500;
@@ -47,49 +47,59 @@ self.addEventListener("fetch", (event) => {
   // Skip non-GET requests
   if (request.method !== "GET") return;
 
-  // Skip external requests
-  if (url.origin !== self.location.origin) return;
-
-  // Immutable content — cache-first (fonts, quran data, translations, mushaf, tajweed, imlaei)
-  if (
-    url.pathname.startsWith("/fonts/") ||
-    url.pathname.startsWith("/quran/") ||
-    url.pathname.startsWith("/translations/") ||
-    url.pathname.startsWith("/mushaf-lines/") ||
-    url.pathname.startsWith("/tajweed/") ||
-    url.pathname.startsWith("/imlaei/") ||
-    url.pathname.startsWith("/models/")
-  ) {
+  // Cache-first helper — returns cached response or fetches, caches, and returns
+  function respondCacheFirst(req) {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) =>
-        cache.match(request).then(
+        cache.match(req).then(
           (cached) =>
             cached ||
-            fetch(request).then((response) => {
-              cache.put(request, response.clone());
+            fetch(req).then((response) => {
+              if (response.ok) cache.put(req, response.clone());
               trimCacheThrottled(CACHE_NAME, MAX_CACHE_ITEMS);
               return response;
             }),
         ),
       ),
     );
+  }
+
+  // QCF fonts from CDN — cache-first (cross-origin, immutable)
+  if (url.origin === "https://verses.quran.foundation" && url.pathname.endsWith(".woff2")) {
+    respondCacheFirst(request);
+    return;
+  }
+
+  // Google Fonts — cache-first (cross-origin)
+  if (url.origin === "https://fonts.googleapis.com" || url.origin === "https://fonts.gstatic.com") {
+    respondCacheFirst(request);
+    return;
+  }
+
+  // Skip other external requests
+  if (url.origin !== self.location.origin) return;
+
+  // Immutable content — cache-first (fonts, quran data, translations, mushaf, tajweed, imlaei, images)
+  // Keep in sync with server.mjs IMMUTABLE_PREFIXES
+  if (
+    url.pathname.startsWith("/fonts/") ||
+    url.pathname.startsWith("/quran/") ||
+    url.pathname.startsWith("/translations/") ||
+    url.pathname.startsWith("/mushaf-lines/") ||
+    url.pathname.startsWith("/mushaf-pages/") ||
+    url.pathname.startsWith("/mushaf-images/") ||
+    url.pathname.startsWith("/qcf-words/") ||
+    url.pathname.startsWith("/tajweed/") ||
+    url.pathname.startsWith("/imlaei/") ||
+    url.pathname.startsWith("/models/")
+  ) {
+    respondCacheFirst(request);
     return;
   }
 
   // JS/CSS assets (hashed filenames) — cache-first
   if (url.pathname.startsWith("/assets/")) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then((cache) =>
-        cache.match(request).then(
-          (cached) =>
-            cached ||
-            fetch(request).then((response) => {
-              cache.put(request, response.clone());
-              return response;
-            }),
-        ),
-      ),
-    );
+    respondCacheFirst(request);
     return;
   }
 

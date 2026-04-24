@@ -748,6 +748,9 @@ function GameOverScreen({
           >
             {tx.newGame}
           </button>
+          <Link to="/games/scoreboard" search={{ game: "ayet-2048" }} className="text-sm text-white/50 hover:text-white/70 font-medium">
+            {t.gamesHub?.scoreboard ?? "Skor Tablosu"}
+          </Link>
           <Link to="/games" className="text-sm text-white/40 hover:text-white/60 font-medium">
             {t.gameScoring?.backToGames ?? "Back to Games"}
           </Link>

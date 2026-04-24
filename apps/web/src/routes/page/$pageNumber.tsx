@@ -442,6 +442,8 @@ function PageRoute() {
                 <img
                   src={`/mushaf-pages/${page + 1}.webp`}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   className="max-w-full max-h-full object-contain select-none opacity-40"
                   draggable={false}
                 />
@@ -458,6 +460,8 @@ function PageRoute() {
                 <img
                   src={`/mushaf-pages/${page}.webp`}
                   alt={`Mushaf page ${page}`}
+                  fetchPriority="high"
+                  decoding="async"
                   className="max-w-full max-h-full object-contain select-none"
                   draggable={false}
                 />
@@ -470,6 +474,8 @@ function PageRoute() {
                 <img
                   src={`/mushaf-pages/${page - 1}.webp`}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   className="max-w-full max-h-full object-contain select-none opacity-40"
                   draggable={false}
                 />

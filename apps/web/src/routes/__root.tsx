@@ -79,6 +79,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { rel: "manifest", href: "/manifest.json" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://verses.quran.foundation", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Amiri:ital,wght@0,400;0,700;1,400&family=Amiri+Quran&display=swap" },
       { rel: "preload", href: "/fonts/KFGQPCUthmanicScriptHAFS.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "preload", href: "/fonts/ScheherazadeNew-Regular.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },

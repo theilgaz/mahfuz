@@ -35,12 +35,17 @@ interface SurahViewProps {
 
 export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const navigate = useNavigate();
-  const showTranslation = useSettingsStore((s) => s.showTranslation);
-  const readingMode = useSettingsStore((s) => s.readingMode);
-  const setReadingMode = useSettingsStore((s) => s.setReadingMode);
-  const showTajweed = useSettingsStore((s) => s.showTajweed);
-  const translationSlugs = useSettingsStore(useShallow((s) => s.translationSlugs));
-  const textStyle = useSettingsStore((s) => s.textStyle);
+  const { showTranslation, readingMode, setReadingMode, showTajweed, translationSlugs, textStyle, arabicFontSize } = useSettingsStore(
+    useShallow((s) => ({
+      showTranslation: s.showTranslation,
+      readingMode: s.readingMode,
+      setReadingMode: s.setReadingMode,
+      showTajweed: s.showTajweed,
+      translationSlugs: s.translationSlugs,
+      textStyle: s.textStyle,
+      arabicFontSize: s.arabicFontSize,
+    }))
+  );
   const useBasic = textStyle === "basic";
   const isWbw = readingMode === "wbw";
   const isVerse = readingMode === "verse";
@@ -48,7 +53,6 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const effectiveTajweed = showTajweed && !useBasic && !isWbw;
   const { t, locale } = useTranslation();
   const savePosition = useReadingStore((s) => s.savePosition);
-  const arabicFontSize = useSettingsStore((s) => s.arabicFontSize);
 
   const { data } = useQuery({
     ...surahDataQueryOptions(surahId, translationSlugs),
@@ -180,10 +184,14 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const surahDesc = getSurahDescription(surahId, locale);
   const typeLabel = surah.revelation === "makkah" ? "Mekki sure" : "Medeni sure";
 
-  const audioPlaybackState = useAudioStore((s) => s.playbackState);
-  const audioChapterId = useAudioStore((s) => s.chapterId);
-  const playSurahFn = useAudioStore((s) => s.playSurah);
-  const togglePlayPause = useAudioStore((s) => s.togglePlayPause);
+  const { audioPlaybackState, audioChapterId, playSurahFn, togglePlayPause } = useAudioStore(
+    useShallow((s) => ({
+      audioPlaybackState: s.playbackState,
+      audioChapterId: s.chapterId,
+      playSurahFn: s.playSurah,
+      togglePlayPause: s.togglePlayPause,
+    }))
+  );
   const reciterSlug = useSettingsStore((s) => s.reciterSlug);
 
   const isThisSurahPlaying = audioChapterId === surahId && (audioPlaybackState === "playing" || audioPlaybackState === "paused");
@@ -450,9 +458,9 @@ function ModeSegment({ readingMode, setReadingMode, t }: { readingMode: string; 
 function VerseActions({ surahId, ayahNumber, pageNumber }: { surahId: number; ayahNumber: number; pageNumber: number }) {
   const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surahId, ayahNumber));
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark);
-  const playSurah = useAudioStore((s) => s.playSurah);
-  const currentChapterId = useAudioStore((s) => s.chapterId);
-  const engine = useAudioStore((s) => s.engine);
+  const { playSurah, currentChapterId, engine } = useAudioStore(
+    useShallow((s) => ({ playSurah: s.playSurah, currentChapterId: s.chapterId, engine: s.engine }))
+  );
   const reciterSlug = useSettingsStore((s) => s.reciterSlug);
 
   const handlePlay = useCallback(async () => {

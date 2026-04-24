@@ -2,6 +2,10 @@ import { createServer } from "node:http";
 import { readFile, stat, readdir } from "node:fs/promises";
 import { join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gzip as gzipCb } from "node:zlib";
+import { promisify } from "node:util";
+
+const gzip = promisify(gzipCb);
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const PORT = parseInt(process.env.PORT || "3001", 10);
@@ -27,6 +31,51 @@ const MIME_TYPES = {
   ".webmanifest": "application/manifest+json",
 };
 
+// Content types eligible for gzip compression
+const COMPRESSIBLE = new Set([
+  "text/html", "application/javascript", "text/css",
+  "application/json", "image/svg+xml", "application/xml",
+  "text/plain", "application/manifest+json",
+]);
+
+// Paths with immutable content — cache for 1 year
+// Keep in sync with sw.js immutable path checks
+const IMMUTABLE_PREFIXES = [
+  "/assets/",
+  "/fonts/",
+  "/quran/",
+  "/translations/",
+  "/mushaf-lines/",
+  "/mushaf-pages/",
+  "/mushaf-images/",
+  "/tajweed/",
+  "/imlaei/",
+  "/models/",
+  "/qcf-words/",
+];
+
+function getCacheControl(pathname) {
+  if (IMMUTABLE_PREFIXES.some((p) => pathname.startsWith(p))) {
+    return "public, max-age=31536000, immutable";
+  }
+  return "public, max-age=3600";
+}
+
+async function compressAndSend(req, res, statusCode, headers, body) {
+  const contentType = headers["Content-Type"] || "";
+  const acceptEncoding = req.headers["accept-encoding"] || "";
+  const shouldCompress = COMPRESSIBLE.has(contentType) && body.length > 1024 && acceptEncoding.includes("gzip");
+
+  if (shouldCompress) {
+    const compressed = await gzip(body);
+    res.writeHead(statusCode, { ...headers, "Content-Encoding": "gzip", "Content-Length": compressed.length, "Vary": "Accept-Encoding" });
+    res.end(compressed);
+  } else {
+    res.writeHead(statusCode, { ...headers, "Content-Length": body.length });
+    res.end(body);
+  }
+}
+
 async function tryServeStatic(req, res, basePath) {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const filePath = join(basePath, decodeURIComponent(url.pathname));
@@ -40,18 +89,9 @@ async function tryServeStatic(req, res, basePath) {
     const ext = extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || "application/octet-stream";
     const data = await readFile(filePath);
+    const cacheControl = getCacheControl(url.pathname);
 
-    const cacheControl =
-      url.pathname.startsWith("/assets/")
-        ? "public, max-age=31536000, immutable"
-        : "public, max-age=3600";
-
-    res.writeHead(200, {
-      "Content-Type": contentType,
-      "Content-Length": data.length,
-      "Cache-Control": cacheControl,
-    });
-    res.end(data);
+    await compressAndSend(req, res, 200, { "Content-Type": contentType, "Cache-Control": cacheControl }, data);
     return true;
   } catch {
     return false;
@@ -80,7 +120,7 @@ function toWebRequest(req) {
   return new Request(url.href, init);
 }
 
-async function sendWebResponse(res, webResponse) {
+async function sendWebResponse(req, res, webResponse) {
   const headers = {};
   webResponse.headers.forEach((value, key) => {
     if (headers[key]) {
@@ -92,21 +132,27 @@ async function sendWebResponse(res, webResponse) {
     }
   });
 
-  res.writeHead(webResponse.status, headers);
-
-  if (webResponse.body) {
-    const reader = webResponse.body.getReader();
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        res.write(value);
-      }
-    } finally {
-      reader.releaseLock();
-    }
+  if (!webResponse.body) {
+    res.writeHead(webResponse.status, headers);
+    res.end();
+    return;
   }
-  res.end();
+
+  // Buffer the response body
+  const chunks = [];
+  const reader = webResponse.body.getReader();
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const body = Buffer.concat(chunks);
+
+  await compressAndSend(req, res, webResponse.status, headers, body);
 }
 
 async function main() {
@@ -160,7 +206,7 @@ async function main() {
 
       const webRequest = toWebRequest(req);
       const webResponse = await handler(webRequest);
-      await sendWebResponse(res, webResponse);
+      await sendWebResponse(req, res, webResponse);
     } catch (err) {
       console.error("[mahfuz-core] Request error:", err);
       if (!res.headersSent) {
