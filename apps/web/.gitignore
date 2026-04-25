@@ -14,3 +14,9 @@ public/translations/
 
 # WBW script generated data (large, regeneratable)
 scripts/data/
+
+# Mushaf upscale tooling (external binary)
+scripts/tools/
+
+# Mushaf 1x backup (regeneratable from source PDF)
+public/mushaf-pages-1x/
