@@ -66,6 +66,17 @@ export function DiscoverPage() {
           {hub.journeyTitle ?? "Yolculuğun"}
         </p>
         <div className="mu-actions">
+          <Link
+            to="/page/$pageNumber"
+            params={{ pageNumber: "1" }}
+            className="mu-action-row"
+          >
+            <div>
+              <div className="mu-action-name">{hub.featMushaf ?? "Matbu Mushaf Deneyimi"}</div>
+              <div className="mu-action-desc">{hub.featMushafDesc ?? "Sayfa sayfa mushaf üzerinden oku"}</div>
+            </div>
+            <span className="mu-action-arrow" aria-hidden="true">{"\u2192"}</span>
+          </Link>
           {ACTIONS.map((a) => {
             const titleKey = `feat${a.key}` as string;
             const descKey = `${titleKey}Desc` as string;
