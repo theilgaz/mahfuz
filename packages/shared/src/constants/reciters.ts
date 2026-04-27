@@ -16,6 +16,7 @@ export interface CuratedReciter {
  */
 export const CURATED_RECITERS: CuratedReciter[] = [
   // ── Featured ──
+  { id: 97, name: "Yasser Ad-Dossari", country: "Suudi Arabistan", style: "Murattal", featured: true },
   { id: 7, name: "Mishari Rashid al-Afasy", country: "Kuveyt", style: "Murattal", featured: true },
   { id: 6, name: "Mahmoud Khalil Al-Husary", country: "Mısır", style: "Murattal", featured: true },
   { id: 129, name: "Mahmood Ali Al-Banna", country: "Mısır", style: "Murattal", featured: true },
@@ -72,7 +73,6 @@ export const CURATED_RECITERS: CuratedReciter[] = [
   { id: 18, name: "Salah Bukhatir", country: "BAE", style: "Murattal", featured: false },
   { id: 35, name: "Saleh Al-Taleb", country: "Suudi Arabistan", style: "Murattal", featured: false },
   { id: 15, name: "Saud Ath-Thubaity", country: "Suudi Arabistan", style: "Murattal", featured: false },
-  { id: 97, name: "Yasser Ad-Dossari", country: "Suudi Arabistan", style: "Murattal", featured: false },
 ];
 
 /** Featured reciters only */

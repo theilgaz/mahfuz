@@ -22,12 +22,21 @@ const db = drizzle(client);
 // Featured kâriler — QDC ID'leri ile
 const RECITERS_DATA = [
   {
+    slug: "yasser-ad-dossari",
+    name: "Yasser Ad-Dossari",
+    country: "Suudi Arabistan",
+    style: "murattal",
+    audioBaseUrl: "https://verses.quran.com/Yasser_Ad-Dussary_128kbps/mp3",
+    isDefault: true,
+    qurancomId: 97,
+  },
+  {
     slug: "mishary-rashid-alafasy",
     name: "Mishari Rashid al-Afasy",
     country: "Kuveyt",
     style: "murattal",
     audioBaseUrl: "https://verses.quran.com/Alafasy/mp3",
-    isDefault: true,
+    isDefault: false,
     qurancomId: 7,
   },
   {
