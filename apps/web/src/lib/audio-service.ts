@@ -27,6 +27,7 @@ export const SLUG_TO_QDC_ID: Record<string, number> = {
   "saud-ash-shuraim": 10,
   "minshawi-murattal": 9,
   "minshawi-mujawwad": 8,
+  "yasser-ad-dossari": 97,
 };
 
 interface QDCVerseTiming {
