@@ -63,9 +63,9 @@ const GAMES = [
   },
   {
     id: "ayah-2048",
-    t: "Ayet 2048",
+    t: "Quranic 2048",
     tag: "Bulmaca",
-    s: "Numaraları birleştirerek 2048'e ulaş.",
+    s: "Aynı sureleri birleştirerek Tegabun'a (64) ulaş.",
     d: "zor" as const,
     time: "4 dk",
     xp: 100,

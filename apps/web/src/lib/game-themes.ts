@@ -39,7 +39,7 @@ export const GAME_THEMES: Record<string, GameTheme> = {
     bg: "#1A2118", primary: "#6B9E5B", secondary: "#4A7A3E", surface: "#232E20",
     glow: "rgba(107,158,91,0.3)", img: "/images/games/mahfuz-kelime-tahmini.webp", isDark: true,
   },
-  // Ayet 2048 - deep navy/crimson (arcade energy)
+  // Quranic 2048 - deep navy/crimson (arcade energy)
   "ayet-2048": {
     bg: "#1A1A2E", primary: "#E94560", secondary: "#533483", surface: "#16213E",
     glow: "rgba(233,69,96,0.3)", img: "/images/games/mahfuz-ayet-2048.webp", isDark: true,

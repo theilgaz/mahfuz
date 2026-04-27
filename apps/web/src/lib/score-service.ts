@@ -5,11 +5,13 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { db, gameScores, userAchievements } from "~/db";
+import { db, gameScores, userAchievements, seasonChampions, seasonParticipants, seasons } from "~/db";
 import { user } from "~/db";
 import { auth } from "~/lib/auth";
-import { eq, sql, desc, and, gte } from "drizzle-orm";
+import { eq, sql, desc, and, gte, lt } from "drizzle-orm";
 import { checkAndGrantAchievements } from "./achievement-service";
+import { computeLeague, seasonKeyFor, seasonRange, type League } from "./league";
+import { ensureSeasonsClosed } from "./season-service";
 
 // ── Oyun isimleri (UI için) ────────────────────────────────
 
@@ -20,7 +22,7 @@ export const GAME_TITLES: Record<string, string> = {
   "verse-chain": "Ayet Zinciri",
   "hexagon": "Hexagon Harf",
   "kelime-tahmini": "Kelime Tahmini",
-  "ayet-2048": "Ayet 2048",
+  "ayet-2048": "Quranic 2048",
   "emoji-match": "Emoji Eşleştirme",
 };
 
@@ -31,7 +33,7 @@ const GAME_TITLES_EN: Record<string, string> = {
   "verse-chain": "Verse Chain",
   "hexagon": "Hexagon Letters",
   "kelime-tahmini": "Word Guess",
-  "ayet-2048": "Ayah 2048",
+  "ayet-2048": "Quranic 2048",
   "emoji-match": "Emoji Match",
 };
 
@@ -104,15 +106,28 @@ export const submitScore = createServerFn({ method: "POST" })
 
 // ── Zaman Dilimleri ───────────────────────────────────────
 
-export type LeaderboardPeriod = "week" | "month" | "all";
+/**
+ * "all"     → tüm zamanlar (toplam emek, SUM)
+ * "season"  → bu sezon (içinde bulunulan ay, MAX)
+ * "week"    → son 7 gün (MAX)
+ */
+export type LeaderboardPeriod = "week" | "season" | "all";
 
-export const LEADERBOARD_PERIODS: LeaderboardPeriod[] = ["week", "month", "all"];
+export const LEADERBOARD_PERIODS: LeaderboardPeriod[] = ["week", "season", "all"];
 
-function periodCutoff(period: LeaderboardPeriod): number | null {
-  if (period === "all") return null;
-  const now = Date.now();
-  if (period === "week") return now - 7 * 24 * 60 * 60 * 1000;
-  return now - 30 * 24 * 60 * 60 * 1000; // month
+interface PeriodWindow {
+  startedAt: number | null;
+  endedAt: number | null;
+  /** "all" sezonluk dışı tüm zamanlar = SUM, diğerleri = MAX */
+  agg: "sum" | "max";
+}
+
+function periodWindow(period: LeaderboardPeriod, now: number = Date.now()): PeriodWindow {
+  if (period === "all") return { startedAt: null, endedAt: null, agg: "sum" };
+  if (period === "week") return { startedAt: now - 7 * 24 * 60 * 60 * 1000, endedAt: null, agg: "max" };
+  // season — içinde bulunulan ay
+  const range = seasonRange(seasonKeyFor(new Date(now)));
+  return { startedAt: range.startedAt, endedAt: range.endedAt, agg: "max" };
 }
 
 // ── Oyun Liderlik Tablosu ──────────────────────────────────
@@ -122,20 +137,34 @@ export interface LeaderboardEntry {
   userId: string;
   userName: string;
   userImage: string | null;
+  /** Periyoda göre asıl sıralama puanı — all=SUM, week/season=MAX */
   bestScore: number;
+  /** Per-game tablolar için: tüm zaman SUM (paralel kolon, sıralama dışı) */
+  totalScore?: number;
+  league: League;
 }
 
 export const getGameLeaderboard = createServerFn({ method: "GET" })
   .inputValidator((input: { gameId: string; period?: LeaderboardPeriod }) => input)
   .handler(async ({ data }): Promise<LeaderboardEntry[]> => {
-    const cutoff = periodCutoff(data.period ?? "all");
+    await ensureSeasonsClosed();
+    const period = data.period ?? "all";
+    const win = periodWindow(period);
     const conditions = [eq(gameScores.gameId, data.gameId)];
-    if (cutoff) conditions.push(gte(gameScores.createdAt, cutoff));
+    if (win.startedAt != null) conditions.push(gte(gameScores.createdAt, win.startedAt));
+    if (win.endedAt != null) conditions.push(lt(gameScores.createdAt, win.endedAt));
+
+    const aggExpr = win.agg === "sum"
+      ? sql<number>`SUM(${gameScores.score})`
+      : sql<number>`MAX(${gameScores.score})`;
+    // Tie-breaker: aynı skora ilk ulaşan
+    const tiebreakExpr = sql<number>`MIN(${gameScores.createdAt})`;
 
     const rows = await db
       .select({
         userId: gameScores.userId,
-        bestScore: sql<number>`MAX(${gameScores.score})`.as("best_score"),
+        score: aggExpr.as("agg_score"),
+        achievedAt: tiebreakExpr.as("achieved_at"),
         userName: user.name,
         userImage: user.image,
       })
@@ -143,39 +172,124 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
       .innerJoin(user, eq(gameScores.userId, user.id))
       .where(and(...conditions))
       .groupBy(gameScores.userId)
-      .orderBy(desc(sql`MAX(${gameScores.score})`))
-      .limit(10);
+      .orderBy(sql`agg_score DESC, achieved_at ASC`)
+      .limit(50);
 
-    return rows.map((r, i) => ({ ...r, rank: i + 1, userImage: r.userImage ?? null }));
+    // Per-game UI'da MAX + SUM iki kolon istendiği için, tüm zaman SUM'ı paralel hesapla
+    const userIds = rows.map((r) => r.userId);
+    const totals = userIds.length > 0
+      ? await db
+        .select({
+          userId: gameScores.userId,
+          totalScore: sql<number>`SUM(${gameScores.score})`.as("total_score"),
+        })
+        .from(gameScores)
+        .where(and(eq(gameScores.gameId, data.gameId), sql`${gameScores.userId} IN (${sql.join(userIds.map((id) => sql`${id}`), sql`, `)})`))
+        .groupBy(gameScores.userId)
+      : [];
+    const totalsMap = new Map(totals.map((t) => [t.userId, t.totalScore ?? 0]));
+
+    // Lig hesabı için kullanıcının lifetime SUM'ı (oyun ayrımı yok)
+    const lifetime = userIds.length > 0
+      ? await db
+        .select({
+          userId: gameScores.userId,
+          total: sql<number>`SUM(${gameScores.score})`.as("total"),
+        })
+        .from(gameScores)
+        .where(sql`${gameScores.userId} IN (${sql.join(userIds.map((id) => sql`${id}`), sql`, `)})`)
+        .groupBy(gameScores.userId)
+      : [];
+    const lifetimeMap = new Map(lifetime.map((l) => [l.userId, l.total ?? 0]));
+
+    return rows.map((r, i) => ({
+      rank: i + 1,
+      userId: r.userId,
+      userName: r.userName,
+      userImage: r.userImage ?? null,
+      bestScore: r.score,
+      totalScore: totalsMap.get(r.userId) ?? 0,
+      league: computeLeague(lifetimeMap.get(r.userId) ?? 0),
+    }));
   });
 
-// ── Global Liderlik (toplam skor) ──────────────────────────
+// ── Global Liderlik ────────────────────────────────────────
 
 export const getGlobalLeaderboard = createServerFn({ method: "GET" })
   .inputValidator((input: { period?: LeaderboardPeriod }) => input)
   .handler(async ({ data }): Promise<LeaderboardEntry[]> => {
-    const cutoff = periodCutoff(data.period ?? "all");
-    const whereClause = cutoff ? sql`WHERE created_at >= ${cutoff}` : sql``;
+    await ensureSeasonsClosed();
+    const period = data.period ?? "all";
+    const win = periodWindow(period);
+    const conditions = [];
+    if (win.startedAt != null) conditions.push(gte(gameScores.createdAt, win.startedAt));
+    if (win.endedAt != null) conditions.push(lt(gameScores.createdAt, win.endedAt));
 
-    const rows = await db.all(sql`
-      SELECT
-        sub.user_id  AS userId,
-        u.name       AS userName,
-        u.image      AS userImage,
-        SUM(sub.best) AS bestScore
-      FROM (
-        SELECT user_id, game_id, MAX(score) AS best
-        FROM game_scores
-        ${whereClause}
-        GROUP BY user_id, game_id
-      ) sub
-      JOIN user u ON sub.user_id = u.id
-      GROUP BY sub.user_id
-      ORDER BY bestScore DESC
-      LIMIT 50
-    `) as { userId: string; userName: string; userImage: string | null; bestScore: number }[];
+    if (win.agg === "sum") {
+      // Tüm zamanlar — kullanıcının tüm oyunlardaki SUM'ı
+      const rows = await db
+        .select({
+          userId: gameScores.userId,
+          score: sql<number>`SUM(${gameScores.score})`.as("agg_score"),
+          achievedAt: sql<number>`MIN(${gameScores.createdAt})`.as("achieved_at"),
+          userName: user.name,
+          userImage: user.image,
+        })
+        .from(gameScores)
+        .innerJoin(user, eq(gameScores.userId, user.id))
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .groupBy(gameScores.userId)
+        .orderBy(sql`agg_score DESC, achieved_at ASC`)
+        .limit(50);
 
-    return rows.map((r, i) => ({ ...r, rank: i + 1, userImage: r.userImage ?? null }));
+      return rows.map((r, i) => ({
+        rank: i + 1,
+        userId: r.userId,
+        userName: r.userName,
+        userImage: r.userImage ?? null,
+        bestScore: r.score,
+        league: computeLeague(r.score),
+      }));
+    }
+
+    // week/season — kullanıcının pencere içindeki MAX skoru (oyun ayrımı yok)
+    const rows = await db
+      .select({
+        userId: gameScores.userId,
+        score: sql<number>`MAX(${gameScores.score})`.as("agg_score"),
+        achievedAt: sql<number>`MIN(${gameScores.createdAt})`.as("achieved_at"),
+        userName: user.name,
+        userImage: user.image,
+      })
+      .from(gameScores)
+      .innerJoin(user, eq(gameScores.userId, user.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .groupBy(gameScores.userId)
+      .orderBy(sql`agg_score DESC, achieved_at ASC`)
+      .limit(50);
+
+    // Lig hesabı: lifetime SUM'a göre (sezon liderinin kendi ligini de doğru göstermek için)
+    const userIds = rows.map((r) => r.userId);
+    const lifetime = userIds.length > 0
+      ? await db
+        .select({
+          userId: gameScores.userId,
+          total: sql<number>`SUM(${gameScores.score})`.as("total"),
+        })
+        .from(gameScores)
+        .where(sql`${gameScores.userId} IN (${sql.join(userIds.map((id) => sql`${id}`), sql`, `)})`)
+        .groupBy(gameScores.userId)
+      : [];
+    const lifetimeMap = new Map(lifetime.map((l) => [l.userId, l.total ?? 0]));
+
+    return rows.map((r, i) => ({
+      rank: i + 1,
+      userId: r.userId,
+      userName: r.userName,
+      userImage: r.userImage ?? null,
+      bestScore: r.score,
+      league: computeLeague(lifetimeMap.get(r.userId) ?? 0),
+    }));
   });
 
 // ── Kişisel İstatistikler ──────────────────────────────────
@@ -183,6 +297,7 @@ export const getGlobalLeaderboard = createServerFn({ method: "GET" })
 export interface MyGameStat {
   gameId: string;
   bestScore: number;
+  totalScore: number;
   totalPlays: number;
 }
 
@@ -195,15 +310,107 @@ export const getMyScoreStats = createServerFn({ method: "GET" })
       .select({
         gameId: gameScores.gameId,
         bestScore: sql<number>`MAX(${gameScores.score})`.as("best_score"),
+        totalScore: sql<number>`SUM(${gameScores.score})`.as("total_score"),
         totalPlays: sql<number>`COUNT(*)`.as("total_plays"),
       })
       .from(gameScores)
       .where(eq(gameScores.userId, session.user.id))
       .groupBy(gameScores.gameId)
-      .orderBy(desc(sql`MAX(${gameScores.score})`));
+      .orderBy(desc(sql`SUM(${gameScores.score})`));
 
     return rows;
   });
+
+// ── Lig Durumu ─────────────────────────────────────────────
+
+export interface MyLeagueStatus {
+  totalScore: number;
+  league: League;
+}
+
+export const getMyLeagueStatus = createServerFn({ method: "GET" })
+  .handler(async (): Promise<MyLeagueStatus | null> => {
+    const session = await auth.api.getSession({ headers: getRequestHeaders() });
+    if (!session?.user?.id) return null;
+
+    const [row] = await db
+      .select({ total: sql<number>`COALESCE(SUM(${gameScores.score}), 0)` })
+      .from(gameScores)
+      .where(eq(gameScores.userId, session.user.id));
+
+    const totalScore = row?.total ?? 0;
+    return { totalScore, league: computeLeague(totalScore) };
+  });
+
+// ── Kupa & Kokart ──────────────────────────────────────────
+
+export interface ChampionTrophy {
+  seasonKey: string;
+  seasonName: string;
+  scope: string;
+  rank: number;
+  league: League;
+  score: number;
+}
+
+export interface ParticipationRosette {
+  seasonKey: string;
+  seasonName: string;
+  rank: number;
+  league: League;
+  score: number;
+}
+
+export interface MyTrophies {
+  champions: ChampionTrophy[];
+  rosettes: ParticipationRosette[];
+}
+
+export const getMyTrophies = createServerFn({ method: "GET" })
+  .handler(async (): Promise<MyTrophies> => {
+    const session = await auth.api.getSession({ headers: getRequestHeaders() });
+    if (!session?.user?.id) return { champions: [], rosettes: [] };
+    return getTrophiesForUser(session.user.id);
+  });
+
+export const getTrophiesByUserId = createServerFn({ method: "GET" })
+  .inputValidator((input: { userId: string }) => input)
+  .handler(async ({ data }): Promise<MyTrophies> => getTrophiesForUser(data.userId));
+
+async function getTrophiesForUser(userId: string): Promise<MyTrophies> {
+  await ensureSeasonsClosed();
+  const champions = await db
+    .select({
+      seasonKey: seasonChampions.seasonKey,
+      seasonName: seasons.name,
+      scope: seasonChampions.scope,
+      rank: seasonChampions.rank,
+      league: seasonChampions.league,
+      score: seasonChampions.score,
+    })
+    .from(seasonChampions)
+    .innerJoin(seasons, eq(seasonChampions.seasonKey, seasons.key))
+    .where(eq(seasonChampions.userId, userId))
+    .orderBy(desc(seasons.startedAt));
+
+  const rosettes = await db
+    .select({
+      seasonKey: seasonParticipants.seasonKey,
+      seasonName: seasons.name,
+      rank: seasonParticipants.rank,
+      league: seasonParticipants.league,
+      score: seasonParticipants.score,
+    })
+    .from(seasonParticipants)
+    .innerJoin(seasons, eq(seasonParticipants.seasonKey, seasons.key))
+    .where(eq(seasonParticipants.userId, userId))
+    .orderBy(desc(seasons.startedAt));
+
+  return {
+    champions: champions.map((c) => ({ ...c, league: c.league as League })),
+    rosettes: rosettes.map((r) => ({ ...r, league: r.league as League })),
+  };
+}
 
 // ── Kullanıcı Basarimlari ─────────────────────────────────
 

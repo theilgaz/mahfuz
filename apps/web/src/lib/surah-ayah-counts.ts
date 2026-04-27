@@ -1,6 +1,6 @@
 /**
- * Static surah data for Ayet 2048 game.
- * Three game modes with different surah orderings.
+ * Static surah data for Quranic 2048 game.
+ * Game modes with different surah orderings.
  */
 
 export interface SurahInfo {
@@ -165,6 +165,25 @@ export const SEQ_MUSHAF: number[] = [
   21, 22, 23,
 ];
 
+/**
+ * Asıl/Original mode: surah numbers as classic 2048 powers of two.
+ * Fatiha (1) + Fatiha (1) = Bakara (2)
+ * Bakara (2) + Bakara (2) = Nisa (4)
+ * Nisa (4) + Nisa (4) = Enfal (8)
+ * Enfal (8) + Enfal (8) = Nahl (16)
+ * Nahl (16) + Nahl (16) = Sajda (32)
+ * Sajda (32) + Sajda (32) = Tagabun (64)
+ */
+export const SEQ_ORIGINAL: number[] = [
+  1,  // 0  Al-Fatiha
+  2,  // 1  Al-Baqarah
+  4,  // 2  An-Nisa
+  8,  // 3  Al-Anfal
+  16, // 4  An-Nahl
+  32, // 5  As-Sajdah
+  64, // 6  At-Taghabun  <-- win target
+];
+
 /** Nuzul sirasi: Revelation order (Egyptian standard, first 23) */
 export const SEQ_NUZUL: number[] = [
   96,  // Al-Alaq
@@ -197,9 +216,24 @@ export interface GameMode {
   sequence: number[];
   gridSize: number;
   winTarget: number; // level index to reach for win
+  spawnValues?: number[]; // optional per-mode spawn distribution
 }
 
+/**
+ * Default spawn distribution: mostly level 0, 10% level 1.
+ * (Mirrors classic 2048's 90/10 spawn ratio.)
+ */
+export const SPAWN_VALUES = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+
+/**
+ * Original mode spawn: only Fatiha. No level-1 spawns means every Bakara must
+ * be earned through a merge -- significantly harder than the other modes.
+ */
+export const SPAWN_VALUES_ORIGINAL = [0];
+
 export const GAME_MODES: GameMode[] = [
+  // Asıl: classic 2048 chain on a 4x4. Default mode.
+  { id: "original", sequence: SEQ_ORIGINAL, gridSize: 4, winTarget: 6, spawnValues: SPAWN_VALUES_ORIGINAL },
   { id: "mushaf", sequence: SEQ_MUSHAF, gridSize: 4, winTarget: 11 },
   { id: "nuzul", sequence: SEQ_NUZUL, gridSize: 4, winTarget: 11 },
   { id: "namaz", sequence: SEQ_NAMAZ, gridSize: 5, winTarget: 21 },
@@ -211,6 +245,3 @@ export function getSurahForLevel(sequence: number[], level: number): SurahInfo |
   if (surahId === undefined) return undefined;
   return SURAH_BY_ID.get(surahId);
 }
-
-/** Spawn values: mostly level 0, 10% level 1. */
-export const SPAWN_VALUES = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1];

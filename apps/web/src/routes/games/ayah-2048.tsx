@@ -1,6 +1,7 @@
 /**
- * Ayet 2048 -- Quran-themed 2048 puzzle.
- * Three modes: Namaz Sureleri, Sure Sırası, Nüzul Sırası.
+ * Quranic 2048 -- Quran-themed 2048 puzzle.
+ * Modes: Asıl (classic powers of 2 with post-Tagabun continuation),
+ *        Sure Sırası, Nüzul Sırası, Namaz Sureleri.
  */
 
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -65,7 +66,29 @@ const LEVEL_COLORS: { bg: string; text: string }[] = [
   { bg: "#D4AF37", text: "#1a1400" }, // 22 - GOLD
 ];
 
-function getTileColor(level: number): { bg: string; text: string } {
+// Classic 2048 palette for the original (powers-of-2) mode.
+// Levels 0-6: surah-named tiers Fatiha(1) -> Tagabun(64).
+// Levels 7+: post-Tagabun classic 2048 continuation (128, 256, 512, 1024, 2048, 4096+).
+const ORIGINAL_LEVEL_COLORS: { bg: string; text: string }[] = [
+  { bg: "#EEE4DA", text: "#776E65" }, // 0  Fatiha   (1)
+  { bg: "#EDE0C8", text: "#776E65" }, // 1  Bakara   (2)
+  { bg: "#F2B179", text: "#F9F6F2" }, // 2  Nisa     (4)
+  { bg: "#F59563", text: "#F9F6F2" }, // 3  Enfal    (8)
+  { bg: "#F67C5F", text: "#F9F6F2" }, // 4  Nahl     (16)
+  { bg: "#F65E3B", text: "#F9F6F2" }, // 5  Sajda    (32)
+  { bg: "#EDCF72", text: "#F9F6F2" }, // 6  Tagabun  (64) - winning tile
+  { bg: "#EDCC61", text: "#F9F6F2" }, // 7  classic 128
+  { bg: "#EDC850", text: "#F9F6F2" }, // 8  classic 256
+  { bg: "#EDC53F", text: "#F9F6F2" }, // 9  classic 512
+  { bg: "#EDC22E", text: "#F9F6F2" }, // 10 classic 1024
+  { bg: "#3C3A32", text: "#F9F6F2" }, // 11 classic 2048
+  { bg: "#2C2A22", text: "#F9F6F2" }, // 12+ darker
+];
+
+function getTileColor(level: number, modeId?: string): { bg: string; text: string } {
+  if (modeId === "original") {
+    return ORIGINAL_LEVEL_COLORS[level] ?? ORIGINAL_LEVEL_COLORS[ORIGINAL_LEVEL_COLORS.length - 1];
+  }
   return LEVEL_COLORS[level] ?? LEVEL_COLORS[LEVEL_COLORS.length - 1];
 }
 
@@ -144,11 +167,30 @@ function useSwipe(onSwipe: (dir: Direction) => void) {
 
 interface GameOverData {
   score: number;
+  mergeScore: number;
+  timeBonus: number;
+  durationMs: number | null;
   discoveredCount: number;
   totalSurahs: number;
   highestSurah: SurahInfo | null;
+  highestLevel: number;
   isNewHighScore: boolean;
   newAchievements: string[];
+}
+
+// Time bonus formula: rewards faster wins. Capped at 1 minute floor so absurd
+// values don't appear. ~60000 at 1 min, ~12000 at 5 min, ~6000 at 10 min.
+function computeTimeBonus(durationMs: number): number {
+  if (durationMs <= 0) return 0;
+  const minutes = Math.max(1, durationMs / 60000);
+  return Math.round(60000 / minutes);
+}
+
+function formatDuration(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 function Ayet2048Page() {
@@ -209,6 +251,7 @@ function MenuScreen({
   const discovered = useMemo(() => loadDiscovered(mode.id), [mode.id]);
 
   const modeLabels: Record<string, { name: string; desc: string }> = {
+    original: { name: tx.modeOriginal ?? "Asıl", desc: tx.modeOriginalDesc ?? "" },
     namaz: { name: tx.modeNamaz, desc: tx.modeNamazDesc },
     mushaf: { name: tx.modeMushaf, desc: tx.modeMushafDesc },
     nuzul: { name: tx.modeNuzul, desc: tx.modeNuzulDesc },
@@ -236,7 +279,7 @@ function MenuScreen({
         </button>
 
         {/* Mode selector */}
-        <div className="flex gap-2 rounded-xl p-1" style={{ background: THEME.surface }}>
+        <div className="grid grid-cols-2 gap-2 rounded-xl p-1" style={{ background: THEME.surface }}>
           {GAME_MODES.map((m) => {
             const label = modeLabels[m.id];
             const active = m.id === mode.id;
@@ -244,7 +287,7 @@ function MenuScreen({
               <button
                 key={m.id}
                 onClick={() => onChangeMode(m)}
-                className="flex-1 py-2 px-1 rounded-lg text-center transition-all text-xs font-medium"
+                className="py-2 px-2 rounded-lg text-center transition-all text-xs font-medium"
                 style={{
                   background: active ? THEME.primary : "transparent",
                   color: active ? "#fff" : "rgba(255,255,255,0.5)",
@@ -254,6 +297,11 @@ function MenuScreen({
               </button>
             );
           })}
+        </div>
+
+        {/* Active mode description */}
+        <div className="-mt-3 text-white/50 text-xs px-1">
+          {modeLabels[mode.id]?.desc}
         </div>
 
         {/* Start */}
@@ -293,11 +341,34 @@ function GameScreen({
   const tx = t.ayet2048;
   const { gridSize, winTarget, sequence } = mode;
 
+  const spawnValues = mode.spawnValues ?? SPAWN_VALUES;
   const [gameState, setGameState] = useState<GameState>(() =>
-    createGame(gridSize, SPAWN_VALUES),
+    createGame(gridSize, spawnValues),
   );
   const [discovered, setDiscovered] = useState<Set<number>>(() => loadDiscovered(mode.id));
   const [newlyDiscovered, setNewlyDiscovered] = useState<SurahInfo | null>(null);
+
+  // Timer: only meaningful for "original" mode (where Tagabun = explicit win).
+  const trackTime = mode.id === "original";
+  const [startedAt, setStartedAt] = useState<number>(() => Date.now());
+  const [winDurationMs, setWinDurationMs] = useState<number | null>(null);
+  const [nowTick, setNowTick] = useState<number>(() => Date.now());
+
+  // Tick once per second while game is active and unwon, to update the displayed timer.
+  useEffect(() => {
+    if (!trackTime) return;
+    if (gameState.over || winDurationMs !== null) return;
+    const id = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [trackTime, gameState.over, winDurationMs]);
+
+  // Capture win timestamp the first time we hit the win condition.
+  useEffect(() => {
+    if (!trackTime) return;
+    if (gameState.won && winDurationMs === null) {
+      setWinDurationMs(Date.now() - startedAt);
+    }
+  }, [trackTime, gameState.won, winDurationMs, startedAt]);
 
   // Mark initial spawned tiles as discovered on mount
   useEffect(() => {
@@ -346,12 +417,12 @@ function GameScreen({
       if (gameState.over) return;
       if (gameState.won && !keepPlaying) return;
 
-      const next = move(gameState, dir, SPAWN_VALUES, winTarget, surahMerge, surahScore);
+      const next = move(gameState, dir, spawnValues, winTarget, surahMerge, surahScore);
       if (next === gameState) return;
       setGameState(next);
       checkDiscoveries(next.tiles);
     },
-    [gameState, keepPlaying, winTarget, checkDiscoveries],
+    [gameState, keepPlaying, winTarget, spawnValues, checkDiscoveries],
   );
 
   // Keyboard
@@ -376,6 +447,9 @@ function GameScreen({
   // Swipe
   const swipeHandlers = useSwipe(handleMove);
 
+  const timeBonus = winDurationMs !== null ? computeTimeBonus(winDurationMs) : 0;
+  const totalScore = gameState.score + timeBonus;
+
   // Save score when won (in case user leaves without continuing)
   const [winScoreSaved, setWinScoreSaved] = useState(false);
   useEffect(() => {
@@ -384,12 +458,13 @@ function GameScreen({
       submitScore({
         data: {
           gameId: "ayet-2048",
-          score: gameState.score,
+          score: totalScore,
           difficulty: mode.id,
+          durationMs: winDurationMs ?? undefined,
         },
       }).catch(() => {});
     }
-  }, [gameState.won, winScoreSaved, gameState.score, mode.id]);
+  }, [gameState.won, winScoreSaved, totalScore, winDurationMs, mode.id]);
 
   // Show game over screen when no moves left
   useEffect(() => {
@@ -402,39 +477,51 @@ function GameScreen({
       submitScore({
         data: {
           gameId: "ayet-2048",
-          score: gameState.score,
+          score: totalScore,
           difficulty: mode.id,
+          durationMs: winDurationMs ?? undefined,
         },
       })
         .then((result) => {
           onGameOver({
-            score: gameState.score,
+            score: totalScore,
+            mergeScore: gameState.score,
+            timeBonus,
+            durationMs: winDurationMs,
             discoveredCount: discovered.size,
             totalSurahs: sequence.length,
             highestSurah,
+            highestLevel,
             isNewHighScore: result?.isNewHighScore ?? false,
             newAchievements: result?.newAchievements ?? [],
           });
         })
         .catch(() => {
           onGameOver({
-            score: gameState.score,
+            score: totalScore,
+            mergeScore: gameState.score,
+            timeBonus,
+            durationMs: winDurationMs,
             discoveredCount: discovered.size,
             totalSurahs: sequence.length,
             highestSurah,
+            highestLevel,
             isNewHighScore: false,
             newAchievements: [],
           });
         });
     }
-  }, [gameState.over, gameState.score, gameState.tiles, scoreSaved, mode.id, sequence, discovered.size, onGameOver]);
+  }, [gameState.over, gameState.score, gameState.tiles, scoreSaved, mode.id, sequence, discovered.size, onGameOver, totalScore, timeBonus, winDurationMs]);
 
   const restart = () => {
-    setGameState(createGame(gridSize, SPAWN_VALUES));
+    setGameState(createGame(gridSize, spawnValues));
     setKeepPlaying(false);
     setScoreSaved(false);
     setWinScoreSaved(false);
     setNewlyDiscovered(null);
+    setStartedAt(Date.now());
+    setWinDurationMs(null);
+    setNowTick(Date.now());
   };
 
   // Fit grid to both width and height so the page never scrolls
@@ -451,10 +538,20 @@ function GameScreen({
     <div className="game-bg" style={{ ...gameBgStyle(THEME, "ayet-2048"), minHeight: 0, height: "calc(100dvh - 44px - 56px)", overflow: "hidden" }} {...swipeHandlers}>
       <div className="mx-auto max-w-md px-4 py-2 flex flex-col gap-2 h-full overflow-hidden">
         {/* Score bar */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-4">
+          {trackTime && (
+            <div className="text-right">
+              <div className="text-white/50 text-xs">{tx.time ?? "Süre"}</div>
+              <div className="text-white font-bold text-lg tabular-nums">
+                {formatDuration(
+                  winDurationMs !== null ? winDurationMs : Math.max(0, nowTick - startedAt),
+                )}
+              </div>
+            </div>
+          )}
           <div className="text-right">
             <div className="text-white/50 text-xs">{tx.score}</div>
-            <div className="text-white font-bold text-lg">{gameState.score}</div>
+            <div className="text-white font-bold text-lg tabular-nums">{totalScore}</div>
           </div>
         </div>
 
@@ -498,6 +595,7 @@ function GameScreen({
                   gap={6}
                   sequence={sequence}
                   locale={locale}
+                  modeId={mode.id}
                 />
               ))}
             </div>
@@ -519,13 +617,32 @@ function GameScreen({
           {/* Win overlay */}
           {gameState.won && !keepPlaying && !gameState.over && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl">
-              <div className="p-4 rounded-2xl text-center mx-4" style={{ background: THEME.surface }}>
-                <div className="text-2xl font-bold text-white mb-2">{tx.win}</div>
-                <div className="text-white/60 text-sm mb-4">
+              <div className="p-4 rounded-2xl text-center mx-4 max-w-xs" style={{ background: THEME.surface }}>
+                <div className="text-2xl font-bold text-white mb-1">{tx.win}</div>
+                <div className="text-white/60 text-sm mb-3">
                   {winSurah
                     ? tx.reachedTarget.replace("{target}", getSurahName(winSurah.id, locale))
                     : ""}
                 </div>
+                {trackTime && winDurationMs !== null && (
+                  <div className="flex justify-center gap-4 mb-3 text-xs">
+                    <div>
+                      <div className="text-white/50">{tx.time ?? "Süre"}</div>
+                      <div className="text-white font-bold tabular-nums">
+                        {formatDuration(winDurationMs)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-white/50">{tx.timeBonus ?? "Bonus"}</div>
+                      <div className="font-bold tabular-nums" style={{ color: THEME.primary }}>
+                        +{timeBonus}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {trackTime && (
+                  <div className="text-[10px] text-white/40 mb-3">{tx.keepClassic}</div>
+                )}
                 <div className="flex gap-3">
                   <button
                     onClick={() => setKeepPlaying(true)}
@@ -565,23 +682,21 @@ function TileView({
   gap,
   sequence,
   locale,
+  modeId,
 }: {
   tile: Tile;
   cellSize: number;
   gap: number;
   sequence: number[];
   locale: string;
+  modeId: string;
 }) {
   const level = tile.value;
-  const { bg, text } = getTileColor(level);
+  const { bg, text } = getTileColor(level, modeId);
   const surah = getSurahForLevel(sequence, level);
 
   const left = tile.col * (cellSize + gap);
   const top = tile.row * (cellSize + gap);
-
-  const numFontSize = cellSize < 60 ? "text-xs" : "text-sm";
-  const nameFontSize = cellSize < 60 ? "text-[8px]" : "text-[10px]";
-  const arabicNameSize = cellSize < 60 ? "text-[10px]" : "text-xs";
 
   const animClass = tile.mergedFrom ? "game-pop" : tile.isNew ? "game-tile-appear" : "";
 
@@ -598,23 +713,113 @@ function TileView({
     >
       <div
         className={`w-full h-full rounded-lg flex flex-col items-center justify-center ${animClass}`}
-        style={{ background: bg, color: text }}
+        style={{
+          background: bg,
+          color: text,
+          boxShadow: modeId === "original" ? "0 1px 2px rgba(0,0,0,0.15)" : undefined,
+        }}
       >
-        {surah && (
-          <>
-            <span
-              className={`leading-none font-semibold ${arabicNameSize}`}
-              style={{ fontFamily: "var(--font-arabic)" }}
-            >
-              {surah.nameArabic}
-            </span>
-            <span className={`leading-none mt-1 opacity-60 ${nameFontSize}`}>
-              {getSurahName(surah.id, locale)}
-            </span>
-          </>
-        )}
+        {modeId === "original" ? (
+          surah
+            ? <OriginalTileContent surah={surah} cellSize={cellSize} locale={locale} />
+            : <ClassicNumericTileContent level={level} cellSize={cellSize} />
+        ) : surah ? (
+          <ColorTileContent surah={surah} cellSize={cellSize} locale={locale} />
+        ) : null}
       </div>
     </div>
+  );
+}
+
+// Classic 2048 layout: big surah number, Arabic name + Latin transliteration below.
+function OriginalTileContent({
+  surah,
+  cellSize,
+  locale,
+}: {
+  surah: SurahInfo;
+  cellSize: number;
+  locale: string;
+}) {
+  // Number scales like classic 2048 (smaller for triple-digit, but our max is 64).
+  const numSize = cellSize < 60 ? 22 : cellSize < 75 ? 28 : 34;
+  const arabicSize = cellSize < 60 ? 9 : 11;
+  const latinSize = cellSize < 60 ? 8 : 9;
+
+  return (
+    <div className="flex flex-col items-center justify-center leading-none gap-0.5">
+      <span
+        className="font-extrabold tabular-nums"
+        style={{ fontSize: numSize, lineHeight: 1 }}
+      >
+        {surah.id}
+      </span>
+      <span
+        className="font-semibold opacity-80"
+        style={{ fontFamily: "var(--font-arabic)", fontSize: arabicSize, lineHeight: 1 }}
+      >
+        {surah.nameArabic}
+      </span>
+      {cellSize >= 70 && (
+        <span
+          className="opacity-60 truncate max-w-full px-1"
+          style={{ fontSize: latinSize, lineHeight: 1 }}
+        >
+          {getSurahName(surah.id, locale)}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// Post-Tagabun classic 2048 continuation: pure numeric tile (128, 256, 512...).
+function ClassicNumericTileContent({
+  level,
+  cellSize,
+}: {
+  level: number;
+  cellSize: number;
+}) {
+  const value = Math.pow(2, level);
+  const digits = String(value).length;
+  // Scale font down for longer numbers, classic 2048 style.
+  const baseSize = cellSize < 60 ? 22 : cellSize < 75 ? 30 : 36;
+  const numSize = digits >= 5 ? baseSize - 10 : digits >= 4 ? baseSize - 6 : baseSize;
+
+  return (
+    <span
+      className="font-extrabold tabular-nums"
+      style={{ fontSize: numSize, lineHeight: 1 }}
+    >
+      {value}
+    </span>
+  );
+}
+
+function ColorTileContent({
+  surah,
+  cellSize,
+  locale,
+}: {
+  surah: SurahInfo;
+  cellSize: number;
+  locale: string;
+}) {
+  const nameFontSize = cellSize < 60 ? "text-[8px]" : "text-[10px]";
+  const arabicNameSize = cellSize < 60 ? "text-[10px]" : "text-xs";
+
+  return (
+    <>
+      <span
+        className={`leading-none font-semibold ${arabicNameSize}`}
+        style={{ fontFamily: "var(--font-arabic)" }}
+      >
+        {surah.nameArabic}
+      </span>
+      <span className={`leading-none mt-1 opacity-60 ${nameFontSize}`}>
+        {getSurahName(surah.id, locale)}
+      </span>
+    </>
   );
 }
 
@@ -662,6 +867,10 @@ function GameOverScreen({
                 {getSurahName(data.highestSurah.id, locale)}
               </span>
             </>
+          ) : data.highestLevel > 0 ? (
+            <span className="text-2xl font-extrabold tabular-nums" style={{ color: THEME.primary }}>
+              {Math.pow(2, data.highestLevel)}
+            </span>
           ) : (
             <span className="text-2xl font-bold" style={{ color: THEME.primary }}>
               --
@@ -683,6 +892,27 @@ function GameOverScreen({
         <p className="text-5xl font-extrabold tabular-nums" style={{ color: THEME.primary }}>
           {data.score}
         </p>
+
+        {/* Score breakdown when there is a time bonus */}
+        {data.timeBonus > 0 && (
+          <div className="text-xs text-white/60 -mt-3">
+            {data.mergeScore} + <span style={{ color: THEME.primary }}>{data.timeBonus}</span>
+          </div>
+        )}
+
+        {/* Time + bonus row (only when timed mode produced a win) */}
+        {data.durationMs !== null && (
+          <div className="flex justify-center gap-3 w-full">
+            <div className="flex-1 flex flex-col items-center py-3 rounded-xl" style={{ background: THEME.surface }}>
+              <span className="text-xl font-extrabold tabular-nums text-white">{formatDuration(data.durationMs)}</span>
+              <span className="text-[10px] text-white/50 mt-0.5">{tx.time ?? "Süre"}</span>
+            </div>
+            <div className="flex-1 flex flex-col items-center py-3 rounded-xl" style={{ background: THEME.surface }}>
+              <span className="text-xl font-extrabold tabular-nums" style={{ color: THEME.primary }}>+{data.timeBonus}</span>
+              <span className="text-[10px] text-white/50 mt-0.5">{tx.timeBonus ?? "Bonus"}</span>
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="flex justify-center gap-3 w-full">
@@ -797,7 +1027,7 @@ function CollectionScreen({ mode, onBack }: { mode: GameMode; onBack: () => void
                 key={surahId}
                 className="p-2 rounded-xl text-center"
                 style={{
-                  background: found ? getTileColor(level).bg : "rgba(255,255,255,0.05)",
+                  background: found ? getTileColor(level, mode.id).bg : "rgba(255,255,255,0.05)",
                   opacity: found ? 1 : 0.4,
                 }}
               >
