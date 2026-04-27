@@ -1582,6 +1582,106 @@
   transform: translateX(3px);
 }
 
+/* ── Featured cards (Elifba + Oyunlar) ── */
+.mu-feat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.mu-feat-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.mu-feat-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 18px;
+  border: 1px solid var(--mu-line);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--mu-accent), transparent 94%);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.mu-feat-card:hover {
+  border-color: var(--mu-accent);
+  background: color-mix(in oklab, var(--mu-accent), transparent 88%);
+  transform: translateY(-1px);
+}
+
+.mu-feat-card:focus-visible {
+  outline: 2px solid var(--mu-accent);
+  outline-offset: 3px;
+}
+
+.mu-feat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--mu-bg);
+  border: 1px solid var(--mu-line);
+  color: var(--mu-accent);
+}
+
+.mu-feat-body { min-width: 0; }
+
+.mu-feat-title {
+  font-family: var(--mu-ff-display);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--mu-ink);
+  letter-spacing: -0.01em;
+}
+
+.mu-feat-desc {
+  font-size: 12px;
+  color: var(--mu-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.mu-feat-arrow {
+  color: var(--mu-muted);
+  font-size: 14px;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.mu-feat-card:hover .mu-feat-arrow {
+  color: var(--mu-accent);
+  transform: translateX(3px);
+}
+
+@media (max-width: 520px) {
+  .mu-feat-grid { grid-template-columns: 1fr; }
+}
+
+.mu-feat-card-compact {
+  grid-template-columns: 36px 1fr auto;
+  gap: 10px;
+  padding: 14px 14px;
+}
+
+.mu-feat-card-compact .mu-feat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.mu-feat-card-compact .mu-feat-title {
+  font-size: 14px;
+  min-width: 0;
+}
+
 /* ── 4. Collection grid (2x2) ── */
 .mu-coll-grid {
   display: grid;
@@ -3434,6 +3534,54 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   width: 100%;
 }
 
+.mu-games-topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0 12px;
+}
+
+.mu-games-scoreboard-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--mu-line);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--mu-accent), transparent 92%);
+  color: var(--mu-ink);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.mu-games-scoreboard-cta:hover {
+  border-color: var(--mu-accent);
+  background: color-mix(in oklab, var(--mu-accent), transparent 84%);
+  transform: translateY(-1px);
+}
+
+.mu-games-scoreboard-cta:focus-visible {
+  outline: 2px solid var(--mu-accent);
+  outline-offset: 3px;
+}
+
+.mu-gscb-icon {
+  display: inline-flex;
+  color: var(--mu-accent);
+}
+
+.mu-gscb-arrow {
+  display: inline-flex;
+  color: var(--mu-muted);
+  transition: color 0.15s, transform 0.15s;
+}
+
+.mu-games-scoreboard-cta:hover .mu-gscb-arrow {
+  color: var(--mu-accent);
+  transform: translateX(2px);
+}
+
 .mu-games-hero {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
@@ -3861,6 +4009,122 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   font-size: 13px;
   color: var(--mu-muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Podium component (mu-podium) ──────────────────────── */
+.mu-podium {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: end;
+  gap: 12px;
+  padding-top: 36px;
+  margin-bottom: 8px;
+}
+
+.mu-podium-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.mu-podium-slot.empty { opacity: 0.4; }
+
+.mu-podium-crown {
+  position: absolute;
+  top: -28px;
+  display: inline-flex;
+}
+
+.mu-podium-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid var(--mu-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mu-bg-soft);
+  overflow: hidden;
+}
+
+.mu-podium-slot.place-1 .mu-podium-avatar {
+  width: 80px;
+  height: 80px;
+}
+
+.mu-podium-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mu-podium-initial {
+  font-family: var(--mu-ff-display);
+  font-size: 24px;
+  color: var(--mu-muted);
+}
+
+.mu-podium-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+}
+
+.mu-podium-name-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.mu-podium-name {
+  font-family: var(--mu-ff-display);
+  font-size: 14px;
+  color: var(--mu-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 9em;
+}
+
+.mu-podium-score {
+  font-family: var(--mu-ff-mono);
+  font-size: 13px;
+  color: var(--mu-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mu-podium-score-suffix {
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+.mu-podium-pillar {
+  width: 100%;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  background: var(--mu-line);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.mu-podium-pillar[data-place="1"] { height: 96px; }
+.mu-podium-pillar[data-place="2"] { height: 70px; }
+.mu-podium-pillar[data-place="3"] { height: 48px; }
+
+.mu-podium-pillar-num {
+  font-family: var(--mu-ff-display);
+  font-size: 20px;
+  font-weight: 600;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
 
 .mu-sb-mystats {
@@ -5044,6 +5308,14 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   .mu-sb-podium-rank { font-size: 22px; }
   .mu-sb-podium-slot.place-1 .mu-sb-podium-rank { font-size: 28px; }
   .mu-sb-podium-name { font-size: 12px; }
+
+  .mu-podium { gap: 6px; padding-top: 28px; }
+  .mu-podium-avatar { width: 52px; height: 52px; }
+  .mu-podium-slot.place-1 .mu-podium-avatar { width: 64px; height: 64px; }
+  .mu-podium-name { font-size: 12px; }
+  .mu-podium-pillar[data-place="1"] { height: 70px; }
+  .mu-podium-pillar[data-place="2"] { height: 50px; }
+  .mu-podium-pillar[data-place="3"] { height: 36px; }
   .mu-sb-mystats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .mu-sb-stat-card { padding: 14px 8px; }
   .mu-sb-stat-value { font-size: 22px; }

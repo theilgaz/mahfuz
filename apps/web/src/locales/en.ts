@@ -200,7 +200,7 @@ export const en: Messages = {
     featPlay: "Play",
     featMemorize: "Memorize",
     featCommunity: "Community",
-    featMushaf: "Printed Mushaf Experience",
+    featMushaf: "Printed Mushaf",
     featLearnDesc: "Start from the basics with Alifba and Tajweed",
     featPlayDesc: "Test your Quran knowledge with games",
     featMemorizeDesc: "Track memorization by surah and verse",

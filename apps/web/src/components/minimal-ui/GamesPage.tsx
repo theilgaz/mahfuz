@@ -8,12 +8,12 @@ import { Link, useRouteContext } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "~/hooks/useTranslation";
 import { MuIcons } from "./icons";
-import { getGlobalLeaderboard } from "~/lib/score-service";
+import { getGlobalLeaderboard, GAME_TITLES } from "~/lib/score-service";
 
 const GAMES = [
   {
     id: "fill-blank",
-    t: "Ayet Tamamla",
+    t: GAME_TITLES["fill-blank"]!,
     tag: "Kur'an",
     s: "Eksik kelimeyi seçerek ayeti doğru tamamla.",
     d: "orta" as const,
@@ -23,7 +23,7 @@ const GAMES = [
   },
   {
     id: "surah-guess",
-    t: "Sûre Bul",
+    t: GAME_TITLES["surah-guess"]!,
     tag: "Sûreler",
     s: "Türkçe anlama bakıp doğru sûreyi seç.",
     d: "orta" as const,
@@ -32,18 +32,8 @@ const GAMES = [
     path: "/games/surah-guess",
   },
   {
-    id: "verse-chain",
-    t: "Ayet Zinciri",
-    tag: "Hifz",
-    s: "Ayetleri doğru sıraya dizerek zinciri tamamla.",
-    d: "zor" as const,
-    time: "6 dk",
-    xp: 120,
-    path: "/games/verse-chain",
-  },
-  {
     id: "word-meaning",
-    t: "Kelime Hazinesi",
+    t: GAME_TITLES["word-meaning"]!,
     tag: "Arapça",
     s: "Kur'an Arapçasında sık geçen kelimeleri öğren.",
     d: "kolay" as const,
@@ -52,8 +42,18 @@ const GAMES = [
     path: "/games/word-meaning",
   },
   {
+    id: "verse-chain",
+    t: GAME_TITLES["verse-chain"]!,
+    tag: "Hifz",
+    s: "Ayetleri doğru sıraya dizerek zinciri tamamla.",
+    d: "zor" as const,
+    time: "6 dk",
+    xp: 120,
+    path: "/games/verse-chain",
+  },
+  {
     id: "hexagon",
-    t: "Hexagon Harf",
+    t: GAME_TITLES["hexagon"]!,
     tag: "Elifba",
     s: "Arap harflerini Latin karşılıklarıyla eşleştir.",
     d: "kolay" as const,
@@ -62,8 +62,18 @@ const GAMES = [
     path: "/games/hexagon",
   },
   {
-    id: "ayah-2048",
-    t: "Quranic 2048",
+    id: "kelime-tahmini",
+    t: GAME_TITLES["kelime-tahmini"]!,
+    tag: "Bulmaca",
+    s: "Türkçe ipucundan gizli Arapça kelimeyi 6 denemede bul.",
+    d: "orta" as const,
+    time: "5 dk",
+    xp: 70,
+    path: "/games/kelime-tahmini",
+  },
+  {
+    id: "ayet-2048",
+    t: GAME_TITLES["ayet-2048"]!,
     tag: "Bulmaca",
     s: "Aynı sureleri birleştirerek Tegabun'a (64) ulaş.",
     d: "zor" as const,
@@ -73,7 +83,7 @@ const GAMES = [
   },
   {
     id: "emoji-match",
-    t: "Emoji Eşleştirme",
+    t: GAME_TITLES["emoji-match"]!,
     tag: "Bulmaca",
     s: "Emojiyi doğru Arapça kelimeyle eşleştir.",
     d: "kolay" as const,
@@ -99,6 +109,15 @@ export function GamesPageMinimal() {
 
   return (
     <div className="mu-games">
+      {/* Top bar with scoreboard CTA */}
+      <div className="mu-games-topbar">
+        <Link to="/games/scoreboard" className="mu-games-scoreboard-cta">
+          <span className="mu-gscb-icon" aria-hidden="true">{MuIcons.games}</span>
+          <span className="mu-gscb-label">Skor Tablosu</span>
+          <span className="mu-gscb-arrow" aria-hidden="true">{MuIcons.arrowRight}</span>
+        </Link>
+      </div>
+
       {/* Hero */}
       <section className="mu-games-hero">
         <div>

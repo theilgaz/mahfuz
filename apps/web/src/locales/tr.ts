@@ -198,7 +198,7 @@ export const tr = {
     featPlay: "Oyna",
     featMemorize: "Ezberle",
     featCommunity: "Topluluk",
-    featMushaf: "Matbu Mushaf Deneyimi",
+    featMushaf: "Matbu Mushaf",
     featLearnDesc: "Elifba ve tecvid ile temelden başla",
     featPlayDesc: "Oyunlarla Kuran bilgini test et",
     featMemorizeDesc: "Sure ve ayet bazlı ezber takibi",

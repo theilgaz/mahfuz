@@ -21,8 +21,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
 
   const navItems = [
     { name: "home", path: "/", icon: MuIcons.home, label: t.nav?.home ?? "Ana Sayfa" },
-    { name: "alifba", path: "/alifba", icon: MuIcons.alif, label: t.hub?.alifba ?? "Elifba" },
-    { name: "games", path: "/games", icon: MuIcons.games, label: t.gamesHub?.title ?? "Oyunlar" },
     { name: "discover", path: "/discover", icon: MuIcons.compass, label: t.hub?.title ?? "Kesfet" },
   ];
 
