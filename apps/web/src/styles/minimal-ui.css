@@ -1006,10 +1006,8 @@
 
 /* Verses */
 .mu-verse {
-  display: grid;
-  grid-template-columns: 68px 1fr;
-  gap: 24px;
-  padding: 28px 0;
+  display: block;
+  padding: 20px 0 28px;
   border-top: 1px solid var(--mu-line);
   cursor: pointer;
   transition: background 0.15s;
@@ -1034,27 +1032,23 @@
 
 .mu-v-side {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 10px;
-  padding-top: 8px;
+  gap: 8px;
+  margin-bottom: 12px;
   color: var(--mu-muted);
 }
 
 .mu-v-num {
   position: relative;
-  width: 36px;
-  height: 36px;
+  min-width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   color: var(--mu-accent);
 }
 
 .mu-v-num span {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
   font-family: var(--mu-ff-mono);
   font-size: 12px;
   color: var(--mu-ink-3);
@@ -1062,9 +1056,9 @@
 
 .mu-v-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 2px;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.15s;
 }
 
