@@ -5,7 +5,7 @@
 import { useState, useCallback } from "react";
 import { useAudioStore } from "~/stores/audio.store";
 import { useSettingsStore } from "~/stores/settings.store";
-import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
+import { fetchChapterAudioForSlug } from "~/lib/audio-service";
 import { useTranslation } from "~/hooks/useTranslation";
 
 interface PlaySurahButtonProps {
@@ -33,8 +33,7 @@ export function PlaySurahButton({ surahId, surahName }: PlaySurahButtonProps) {
 
     setLoading(true);
     try {
-      const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
-      const audioData = await fetchChapterAudio(reciterId, surahId);
+      const audioData = await fetchChapterAudioForSlug(reciterSlug, surahId);
       if (audioData) {
         playSurah(surahId, surahName, audioData);
       }

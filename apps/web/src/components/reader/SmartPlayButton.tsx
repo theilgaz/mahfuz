@@ -8,7 +8,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAudioStore } from "~/stores/audio.store";
 import { useSettingsStore } from "~/stores/settings.store";
-import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
+import { fetchChapterAudioForSlug } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 import { pageDataQueryOptions } from "~/hooks/useQuranQuery";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -45,8 +45,7 @@ function SurahPlayButton({ surahId }: { surahId: number }) {
     }
     setLoading(true);
     try {
-      const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
-      const audioData = await fetchChapterAudio(reciterId, surahId);
+      const audioData = await fetchChapterAudioForSlug(reciterSlug, surahId);
       if (audioData) {
         playSurah(surahId, SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`, audioData);
       }
@@ -104,8 +103,7 @@ function PagePlayButton({ pageNumber }: { pageNumber: number }) {
       setLoadingId(sid);
       setOpen(false);
       try {
-        const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
-        const audioData = await fetchChapterAudio(reciterId, sid);
+        const audioData = await fetchChapterAudioForSlug(reciterSlug, sid);
         if (audioData) {
           playSurah(sid, SURAH_NAMES_TR[sid] ?? `Sure ${sid}`, audioData, verseKey);
         }

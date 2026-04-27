@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import { AudioEngine } from "@mahfuz/audio-engine";
 import { useAudioStore } from "~/stores/audio.store";
 import { useSettingsStore } from "~/stores/settings.store";
-import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
+import { fetchChapterAudioForSlug } from "~/lib/audio-service";
 
 export function AudioProvider() {
   const initEngine = useAudioStore((s) => s.initEngine);
@@ -50,8 +50,7 @@ export function AudioProvider() {
 
     const resumeVerseKey = currentVerseKey ?? undefined;
 
-    const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
-    fetchChapterAudio(reciterId, chapterId).then((audioData) => {
+    fetchChapterAudioForSlug(reciterSlug, chapterId).then((audioData) => {
       if (!audioData) return;
       // Re-check state -- user might have stopped while fetching
       const current = useAudioStore.getState();

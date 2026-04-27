@@ -3,6 +3,10 @@
  *
  * Segment verisi olmayan kâriler için Mishari'nin segment oranları
  * referans alınıp mevcut kârinin ayet süresine ölçeklenir.
+ *
+ * Chapter-only kâriler (QDC API'de olmayan, sadece sure-bazlı mp3 sunan)
+ * `CHAPTER_ONLY_RECITERS` üzerinden yönlendirilir; bu kâriler için
+ * verseTimings boş döner — kelime/ayet senkron yapılmaz, audio baştan sona oynar.
  */
 
 import type { ChapterAudioData } from "@mahfuz/audio-engine";
@@ -12,7 +16,7 @@ const AUDIO_CDN = "https://audio.qurancdn.com/";
 const FALLBACK_RECITER_ID = 7; // Mishari Rashid al-Afasy
 
 /** Slug → QDC reciter ID mapping */
-export const SLUG_TO_QDC_ID: Record<string, number> = {
+const SLUG_TO_QDC_ID: Record<string, number> = {
   "mishary-rashid-alafasy": 7,
   "mahmoud-khalil-al-husary": 6,
   "mahmood-ali-al-banna": 129,
@@ -29,6 +33,18 @@ export const SLUG_TO_QDC_ID: Record<string, number> = {
   "minshawi-mujawwad": 8,
   "yasser-ad-dossari": 97,
 };
+
+/**
+ * Slug → sure-bazlı mp3 base URL.
+ * Pattern: `${baseUrl}/${NNN}.mp3` (3 haneli sure no, 001-114).
+ */
+const CHAPTER_ONLY_RECITERS: Record<string, string> = {
+  "badr-al-turki": "https://download.quranicaudio.com/quran/badr_al_turki/mp3",
+};
+
+export function isChapterOnlyReciter(slug: string): boolean {
+  return slug in CHAPTER_ONLY_RECITERS;
+}
 
 interface QDCVerseTiming {
   verse_key: string;
@@ -146,7 +162,7 @@ async function fillMissingSegments(
  * QDC API'den chapter audio verisini çeker.
  * Segment verisi yoksa Mishari'den orantılı fallback üretir.
  */
-export async function fetchChapterAudio(
+async function fetchChapterAudio(
   reciterId: number,
   chapterId: number,
 ): Promise<ChapterAudioData | null> {
@@ -171,4 +187,34 @@ export async function fetchChapterAudio(
     console.error("[audio-service] Fetch error:", err);
     return null;
   }
+}
+
+/**
+ * Chapter-only kâri için ham mp3 URL üretir, boş verseTimings ile döner.
+ * Audio engine boş timing'i destekliyor (sure baştan sona oynar, ayet senkronu yok).
+ */
+function buildChapterOnlyAudio(
+  baseUrl: string,
+  chapterId: number,
+): ChapterAudioData {
+  const padded = String(chapterId).padStart(3, "0");
+  return {
+    audioUrl: `${baseUrl}/${padded}.mp3`,
+    verseTimings: [],
+  };
+}
+
+/**
+ * Slug üzerinden chapter audio çeker. Chapter-only kârileri otomatik yönlendirir.
+ */
+export async function fetchChapterAudioForSlug(
+  slug: string,
+  chapterId: number,
+): Promise<ChapterAudioData | null> {
+  const chapterOnlyBase = CHAPTER_ONLY_RECITERS[slug];
+  if (chapterOnlyBase) {
+    return buildChapterOnlyAudio(chapterOnlyBase, chapterId);
+  }
+  const reciterId = SLUG_TO_QDC_ID[slug] ?? FALLBACK_RECITER_ID;
+  return fetchChapterAudio(reciterId, chapterId);
 }

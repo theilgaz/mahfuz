@@ -24,7 +24,7 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { Ornament } from "~/components/minimal-ui/Ornament";
 import { MuIcons } from "~/components/minimal-ui/icons";
 import { useAudioStore } from "~/stores/audio.store";
-import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
+import { fetchChapterAudioForSlug } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 import { OrnamentalMushafView } from "./OrnamentalMushafView";
 
@@ -213,8 +213,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     }
     setAudioLoading(true);
     try {
-      const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
-      const audioData = await fetchChapterAudio(reciterId, surahId);
+      const audioData = await fetchChapterAudioForSlug(reciterSlug, surahId);
       if (audioData) {
         playSurahFn(surahId, SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`, audioData);
       }
@@ -478,8 +477,7 @@ function VerseActions({ surahId, ayahNumber, pageNumber }: { surahId: number; ay
       engine.playByKey(verseKey);
       return;
     }
-    const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
-    const audioData = await fetchChapterAudio(reciterId, surahId);
+    const audioData = await fetchChapterAudioForSlug(reciterSlug, surahId);
     if (audioData) {
       playSurah(surahId, SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`, audioData, verseKey);
     }

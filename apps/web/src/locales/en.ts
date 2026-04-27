@@ -33,6 +33,7 @@ export const en: Messages = {
     mealPreview: "In the name of God, the Most Gracious, the Most Merciful",
     arabic: "Arabic",
     reciter: "Reciter",
+    reciterChapterOnly: "Surah",
     resetAll: "Reset All Settings",
     language: "Language",
     searchTranslation: "Search translation...",

@@ -8,7 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useAudioStore } from "~/stores/audio.store";
 import { useSettingsStore } from "~/stores/settings.store";
-import { fetchChapterAudio, SLUG_TO_QDC_ID } from "~/lib/audio-service";
+import { fetchChapterAudioForSlug } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 import { VerseNoteSheet } from "~/components/VerseNoteSheet";
 import { MealComparisonSheet } from "~/components/MealComparisonSheet";
@@ -59,8 +59,7 @@ export function AyahActionMenu({
     }
     setAudioLoading(true);
     try {
-      const reciterId = SLUG_TO_QDC_ID[reciterSlug] ?? 7;
-      const audioData = await fetchChapterAudio(reciterId, surahId);
+      const audioData = await fetchChapterAudioForSlug(reciterSlug, surahId);
       if (audioData) {
         const surahName = SURAH_NAMES_TR[surahId] ?? `Sure ${surahId}`;
         playSurah(surahId, surahName, audioData, verseKey);

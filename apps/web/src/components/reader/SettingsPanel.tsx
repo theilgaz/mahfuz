@@ -250,12 +250,16 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
 
   const reciterOptions = useMemo(() => {
     if (!reciterList?.length) return [];
-    return reciterList.map((r: any) => ({
-      value: r.slug,
-      label: r.nameArabic ? `${r.name} · ${r.nameArabic}` : r.name,
-      searchText: [r.name, r.nameArabic, r.slug].filter(Boolean).join(" "),
-    }));
-  }, [reciterList]);
+    return reciterList.map((r: any) => {
+      const baseLabel = r.nameArabic ? `${r.name} · ${r.nameArabic}` : r.name;
+      const chapterOnly = r.source && r.source !== "qurancom";
+      return {
+        value: r.slug,
+        label: chapterOnly ? `${baseLabel} · ${t.settings.reciterChapterOnly}` : baseLabel,
+        searchText: [r.name, r.nameArabic, r.slug].filter(Boolean).join(" "),
+      };
+    });
+  }, [reciterList, t.settings.reciterChapterOnly]);
 
   const FONT_PRESETS = [
     { id: "small", size: 1.5, label: "S" },

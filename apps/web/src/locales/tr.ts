@@ -31,6 +31,7 @@ export const tr = {
     mealPreview: "Rahmân ve Rahîm olan Allah'ın adıyla",
     arabic: "Arapça",
     reciter: "Kari",
+    reciterChapterOnly: "Sure",
     resetAll: "Tüm Ayarları Sıfırla",
     language: "Dil",
     searchTranslation: "Meal ara...",

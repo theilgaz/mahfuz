@@ -19,8 +19,19 @@ const db = drizzle(client);
 // Her kâri için: https://api.qurancdn.com/api/qdc/audio/reciters/{id}/audio_files?chapter={surahId}
 // Verse audio: verses.quran.com/{reciterFolder}/{surahPadded}{ayahPadded}.mp3
 
+type ReciterSeed = {
+  slug: string;
+  name: string;
+  country: string;
+  style: string;
+  audioBaseUrl: string;
+  isDefault: boolean;
+  qurancomId: number | null;
+  source?: "qurancom" | "self";
+};
+
 // Featured kâriler — QDC ID'leri ile
-const RECITERS_DATA = [
+const RECITERS_DATA: readonly ReciterSeed[] = [
   {
     slug: "yasser-ad-dossari",
     name: "Yasser Ad-Dossari",
@@ -156,7 +167,18 @@ const RECITERS_DATA = [
     audioBaseUrl: "https://verses.quran.com/Minshawy_Mujawwad_192kbps/mp3",
     qurancomId: 8,
   },
-] as const;
+  // ── Chapter-only kâriler (QDC API'de yok — sure-bazlı mp3, ayet senkronu yok) ──
+  {
+    slug: "badr-al-turki",
+    name: "Badr Al-Turki",
+    country: "Suudi Arabistan",
+    style: "murattal",
+    isDefault: false,
+    audioBaseUrl: "https://download.quranicaudio.com/quran/badr_al_turki/mp3",
+    qurancomId: null,
+    source: "self",
+  },
+];
 
 async function main() {
   console.log("Kâriler import ediliyor...\n");
@@ -172,7 +194,7 @@ async function main() {
     audioFormat: "mp3" as const,
     isDefault: r.isDefault,
     isActive: true,
-    source: "qurancom" as const,
+    source: r.source ?? ("qurancom" as const),
     qurancomId: r.qurancomId,
   }));
 
