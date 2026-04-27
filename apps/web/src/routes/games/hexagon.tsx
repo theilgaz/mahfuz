@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getWordConstructionQuestion, type VerseFilter } from "~/lib/game-service";
 import { submitScore } from "~/lib/score-service";
+import type { League } from "~/lib/league";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useGameTimer } from "~/hooks/useGameTimer";
@@ -64,6 +65,7 @@ function GameScreen({
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
+  const [leagueUp, setLeagueUp] = useState<{ from: League; to: League } | null>(null);
   const sessionStart = useRef(Date.now());
   const questionStart = useRef(Date.now());
   const submittedRef = useRef(false);
@@ -197,6 +199,7 @@ function GameScreen({
         .then((r) => {
           if (r?.isNewHighScore) setIsNewHighScore(true);
           if (r?.newAchievements?.length) setNewAchievements(r.newAchievements);
+          if (r?.leagueUp) setLeagueUp(r.leagueUp);
         })
         .catch(() => {});
     }
@@ -226,6 +229,7 @@ function GameScreen({
     setLastDelta(null);
     setIsNewHighScore(false);
     setNewAchievements([]);
+    setLeagueUp(null);
     submittedRef.current = false;
     usedAyahIdsRef.current = [];
     sessionStart.current = Date.now();
@@ -247,6 +251,7 @@ function GameScreen({
         isNewHighScore={isNewHighScore}
         t={t}
         newAchievements={newAchievements}
+        leagueUp={leagueUp}
         onRestart={handleRestart}
         onSetup={onSetup}
       />

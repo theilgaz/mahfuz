@@ -780,6 +780,7 @@ export const tr = {
     noScoresForGame: "Bu oyun için henüz skor yok",
     periodWeek: "Bu Hafta",
     periodMonth: "Bu Ay",
+    periodSeason: "Sezon",
     periodAll: "Tüm Zamanlar",
     addFavorite: "Favorilere ekle",
     removeFavorite: "Favorilerden çıkar",

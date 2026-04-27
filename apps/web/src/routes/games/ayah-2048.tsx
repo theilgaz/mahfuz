@@ -9,6 +9,9 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { useTranslation } from "~/hooks/useTranslation";
 import { submitScore, GAME_TITLES } from "~/lib/score-service";
+import type { League } from "~/lib/league";
+import { LEAGUE_LABELS } from "~/lib/league";
+import { MedalLeague } from "~/components/minimal-ui/LeagueIcons";
 import { GameMiniLeaderboard } from "~/components/GameMiniLeaderboard";
 import { ACHIEVEMENT_MAP } from "~/lib/game-achievements";
 import {
@@ -176,6 +179,7 @@ interface GameOverData {
   highestLevel: number;
   isNewHighScore: boolean;
   newAchievements: string[];
+  leagueUp: { from: League; to: League } | null;
 }
 
 // Time bonus formula: rewards faster wins. Capped at 1 minute floor so absurd
@@ -494,6 +498,7 @@ function GameScreen({
             highestLevel,
             isNewHighScore: result?.isNewHighScore ?? false,
             newAchievements: result?.newAchievements ?? [],
+            leagueUp: result?.leagueUp ?? null,
           });
         })
         .catch(() => {
@@ -508,6 +513,7 @@ function GameScreen({
             highestLevel,
             isNewHighScore: false,
             newAchievements: [],
+            leagueUp: null,
           });
         });
     }
@@ -925,6 +931,22 @@ function GameOverScreen({
             <span className="text-[10px] text-white/50 mt-0.5">{tx.target}</span>
           </div>
         </div>
+
+        {/* League up */}
+        {data.leagueUp && (
+          <div
+            className="w-full px-4 py-3 rounded-xl border flex items-center gap-3 game-pop"
+            style={{ borderColor: `${THEME.primary}40`, background: `linear-gradient(135deg, ${THEME.primary}15, ${THEME.primary}05)` }}
+          >
+            <MedalLeague league={data.leagueUp.to} size={32} />
+            <div className="text-left flex-1">
+              <p className="text-xs font-bold" style={{ color: THEME.primary }}>Lig Atladın!</p>
+              <p className="text-sm text-white">
+                {LEAGUE_LABELS[data.leagueUp.from]} → <strong>{LEAGUE_LABELS[data.leagueUp.to]}</strong>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Achievements */}
         {data.newAchievements.length > 0 && (

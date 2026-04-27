@@ -494,7 +494,7 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
 
   const periodLabels: Record<LeaderboardPeriod, string> = {
     week: t.gamesHub.periodWeek,
-    month: t.gamesHub.periodMonth,
+    season: t.gamesHub.periodSeason,
     all: t.gamesHub.periodAll,
   };
 

@@ -215,6 +215,72 @@ export const userAchievements = sqliteTable("user_achievements", {
   index("user_achievements_user_ach_idx").on(t.userId, t.achievementId),
 ]);
 
+// ── Sezonlar (Lig Sistemi) ───────────────────────────────
+
+/**
+ * Aylık sezonlar. Her ay bir kayıt; ilk istek üzerine lazy oluşturulur
+ * (season-service'da `ensureSeasonsClosed`).
+ *   key:        "2026-04" — UTC ay anahtarı
+ *   name:       "Nisan 2026 - Şevval 1447"
+ *   closedAt:   ay sonunda snapshot alınınca dolar (kapanmamışsa null)
+ */
+export const seasons = sqliteTable("seasons", {
+  key: text("key").primaryKey(),
+  name: text("name").notNull(),
+  startedAt: integer("started_at").notNull(),
+  endedAt: integer("ended_at").notNull(),
+  closedAt: integer("closed_at"),
+});
+
+/**
+ * Sezon şampiyonları — sezon kapanışında hesaplanan top-3 (rank 1/2/3).
+ * scope: "global" veya gameId ("fill-blank" vb.).
+ * score: o sezondaki MAX skor (haftalık/sezonluk = MAX kuralı).
+ * Tie-breaker: aynı skorda en erken `createdAt` olan kazanır
+ * (snapshot mantığı season-service'da uygulanır).
+ */
+export const seasonChampions = sqliteTable("season_champions", {
+  id: text("id").primaryKey(),
+  seasonKey: text("season_key")
+    .notNull()
+    .references(() => seasons.key, { onDelete: "cascade" }),
+  /** "global" | gameId */
+  scope: text("scope").notNull(),
+  rank: integer("rank").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  /** O sezonda kullanıcının lig durumu (kupa rengi için) */
+  league: text("league").notNull(),
+  score: integer("score").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (t) => [
+  index("season_champions_season_idx").on(t.seasonKey),
+  index("season_champions_user_idx").on(t.userId),
+  index("season_champions_scope_idx").on(t.seasonKey, t.scope),
+]);
+
+/**
+ * Sezon top-10 katılımcıları — sadece global scope.
+ * Madalya almayanlar (rank 2-10) için kokart payesi.
+ */
+export const seasonParticipants = sqliteTable("season_participants", {
+  id: text("id").primaryKey(),
+  seasonKey: text("season_key")
+    .notNull()
+    .references(() => seasons.key, { onDelete: "cascade" }),
+  rank: integer("rank").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  league: text("league").notNull(),
+  score: integer("score").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (t) => [
+  index("season_participants_season_idx").on(t.seasonKey),
+  index("season_participants_user_idx").on(t.userId),
+]);
+
 // ── Günlük Meydan Okuma (Daily Challenge) ────────────────
 
 export const dailyChallengeResults = sqliteTable("daily_challenge_results", {

@@ -12,11 +12,14 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
 import { useQuery } from "@tanstack/react-query";
 import { streakQueryOptions, activeHatimQueryOptions, completedHatimsQueryOptions } from "~/hooks/useHabitQuery";
-import { getMyScoreStats } from "~/lib/score-service";
+import { getMyScoreStats, getMyLeagueStatus, getMyTrophies } from "~/lib/score-service";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { getSurahs } from "~/lib/quran-service";
+import { LEAGUE_LABELS, leagueProgress } from "~/lib/league";
+import { LeagueBadge, MedalLeague, RosetteIcon, TrophyIcon } from "./LeagueIcons";
 import { MuIcons } from "./icons";
 import { useMemo, useState } from "react";
+import { GAME_TITLES } from "~/lib/score-service";
 
 interface AccountPageProps {
   user: {
@@ -44,6 +47,16 @@ export function AccountPage({ user }: AccountPageProps) {
     queryFn: () => getMyScoreStats(),
     staleTime: 60_000,
   });
+  const { data: leagueStatus } = useQuery({
+    queryKey: ["my-league"],
+    queryFn: () => getMyLeagueStatus(),
+    staleTime: 60_000,
+  });
+  const { data: trophies } = useQuery({
+    queryKey: ["my-trophies"],
+    queryFn: () => getMyTrophies(),
+    staleTime: 60_000,
+  });
 
   const studiedIds = useStudiedStore((s) => s.surahIds);
   const toggleStudied = useStudiedStore((s) => s.toggleSurah);
@@ -57,8 +70,9 @@ export function AccountPage({ user }: AccountPageProps) {
 
   const initial = user.name?.[0]?.toUpperCase() || "?";
   const hatimProgress = activeHatim ? Math.round((activeHatim.lastPage / 604) * 100) : 0;
-  const totalGameScore = gameStats?.reduce((s, g) => s + g.bestScore, 0) ?? 0;
+  const totalGameScore = gameStats?.reduce((s, g) => s + g.totalScore, 0) ?? 0;
   const totalGamePlays = gameStats?.reduce((s, g) => s + g.totalPlays, 0) ?? 0;
+  const trophyCount = (trophies?.champions.length ?? 0) + (trophies?.rosettes.length ?? 0);
 
   return (
     <div className="mu-home">
@@ -76,8 +90,18 @@ export function AccountPage({ user }: AccountPageProps) {
           <div className="mu-account-avatar">{initial}</div>
         )}
         <div>
-          <h1 className="mu-display" style={{ fontSize: 36 }}>
+          <h1 className="mu-display" style={{ fontSize: 36, display: "inline-flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             {user.name || "Kullanıcı"}
+            {leagueStatus && <LeagueBadge league={leagueStatus.league} size={20} showLabel />}
+            {trophyCount > 0 && (
+              <span
+                title={`${trophyCount} kupa`}
+                style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 16, color: "var(--mu-muted)" }}
+              >
+                <TrophyIcon size={18} />
+                {trophyCount}
+              </span>
+            )}
           </h1>
           <p className="mu-muted" style={{ fontSize: 14, marginTop: 4 }}>{user.email}</p>
         </div>
@@ -184,6 +208,16 @@ export function AccountPage({ user }: AccountPageProps) {
             </div>
           </div>
         </section>
+      )}
+
+      {/* Lig kartı */}
+      {leagueStatus && (
+        <LeagueCard totalScore={leagueStatus.totalScore} league={leagueStatus.league} />
+      )}
+
+      {/* Kupalarım */}
+      {trophies && trophyCount > 0 && (
+        <TrophiesCard trophies={trophies} />
       )}
 
       {/* Navigation grid */}
@@ -479,6 +513,99 @@ function StudiedCard({
               );
             })}
           </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ── Lig karti ────────────────────────────────────── */
+
+function LeagueCard({ totalScore, league }: { totalScore: number; league: import("~/lib/league").League }) {
+  const progress = leagueProgress(totalScore);
+  const pct = Math.round(progress.ratio * 100);
+  return (
+    <section className="mu-profile-card">
+      <div className="mu-profile-card-header">
+        <span className="mu-profile-card-title" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <MedalLeague league={league} size={22} />
+          {LEAGUE_LABELS[league]} Ligi
+        </span>
+        <span className="mu-muted" style={{ fontSize: 12, fontFamily: "var(--mu-ff-mono)" }}>
+          {totalScore.toLocaleString("tr")} puan
+        </span>
+      </div>
+      <div className="mu-profile-progress-bar">
+        <div className="mu-profile-progress-fill" style={{ width: `${pct}%` }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+        {progress.next && progress.toNext != null ? (
+          <span className="mu-muted" style={{ fontSize: 12 }}>
+            {LEAGUE_LABELS[progress.next]} ligine {progress.toNext.toLocaleString("tr")} puan
+          </span>
+        ) : (
+          <span className="mu-muted" style={{ fontSize: 12 }}>En üst ligdesin — devam et!</span>
+        )}
+        <span className="mu-muted" style={{ fontSize: 12 }}>%{pct}</span>
+      </div>
+    </section>
+  );
+}
+
+/* ── Kupalarım karti ──────────────────────────────── */
+
+function TrophiesCard({ trophies }: { trophies: import("~/lib/score-service").MyTrophies }) {
+  return (
+    <section className="mu-profile-card">
+      <div className="mu-profile-card-header">
+        <span className="mu-profile-card-title" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <TrophyIcon size={20} />
+          Kupalarım
+        </span>
+        <span className="mu-muted" style={{ fontSize: 12 }}>
+          {trophies.champions.length + trophies.rosettes.length} ödül
+        </span>
+      </div>
+
+      {trophies.champions.length > 0 && (
+        <div style={{ marginBottom: trophies.rosettes.length > 0 ? 16 : 0 }}>
+          <p className="mu-muted" style={{ fontSize: 12, marginBottom: 8 }}>Şampiyonluklar</p>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+            {trophies.champions.map((c, i) => (
+              <li key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <MedalLeague league={c.league} size={28} />
+                <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                  <span style={{ fontSize: 14, fontWeight: 500 }}>
+                    {c.scope === "global" ? "Genel" : (GAME_TITLES[c.scope] ?? c.scope)} · {c.rank}.
+                  </span>
+                  <span className="mu-muted" style={{ fontSize: 12 }}>{c.seasonName}</span>
+                </div>
+                <span className="mu-muted" style={{ fontSize: 12, fontFamily: "var(--mu-ff-mono)" }}>
+                  {c.score.toLocaleString("tr")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {trophies.rosettes.length > 0 && (
+        <div>
+          <p className="mu-muted" style={{ fontSize: 12, marginBottom: 8 }}>Sezon Katılımı (top 10)</p>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+            {trophies.rosettes.map((r, i) => (
+              <li key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <RosetteIcon league={r.league} size={24} />
+                <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                  <span style={{ fontSize: 14 }}>{r.rank}.</span>
+                  <span className="mu-muted" style={{ fontSize: 12 }}>{r.seasonName}</span>
+                </div>
+                <span className="mu-muted" style={{ fontSize: 12, fontFamily: "var(--mu-ff-mono)" }}>
+                  {r.score.toLocaleString("tr")}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </section>

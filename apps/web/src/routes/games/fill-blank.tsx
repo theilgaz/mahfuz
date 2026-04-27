@@ -61,6 +61,7 @@ function GameScreen({
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
+  const [leagueUp, setLeagueUp] = useState<{ from: import("~/lib/league").League; to: import("~/lib/league").League } | null>(null);
   const sessionStart = useRef(Date.now());
   const questionStart = useRef(Date.now());
   const submittedRef = useRef(false);
@@ -153,7 +154,7 @@ function GameScreen({
     if (!submittedRef.current && score > 0) {
       submittedRef.current = true;
       submitScore({ data: { gameId: "fill-blank", score, durationMs: Date.now() - sessionStart.current, difficulty, correctCount, wrongCount, bestStreak } })
-        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); if (r?.newAchievements?.length) setNewAchievements(r.newAchievements); })
+        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); if (r?.newAchievements?.length) setNewAchievements(r.newAchievements); if (r?.leagueUp) setLeagueUp(r.leagueUp); })
         .catch(() => {});
     }
     setScreen("gameover");
@@ -197,7 +198,7 @@ function GameScreen({
       <GameOverCard
         theme={THEME} score={score} correctCount={correctCount} wrongCount={wrongCount}
         bestStreak={bestStreak} isNewHighScore={isNewHighScore} t={t}
-        newAchievements={newAchievements}
+        newAchievements={newAchievements} leagueUp={leagueUp}
         onRestart={handleRestart} onSetup={onSetup}
       />
     );

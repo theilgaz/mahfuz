@@ -7,6 +7,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
+import type { League } from "~/lib/league";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
@@ -82,6 +83,7 @@ function WordMeaningPage() {
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
+  const [leagueUp, setLeagueUp] = useState<{ from: League; to: League } | null>(null);
   const [question, setQuestion] = useState(() => getRandomQuestion(new Set(), optionCount, locale));
   const [gameState, setGameState] = useState<GameState>("playing");
   const [selected, setSelected] = useState<string | null>(null);
@@ -142,7 +144,7 @@ function WordMeaningPage() {
     if (!submittedRef.current && score > 0) {
       submittedRef.current = true;
       submitScore({ data: { gameId: "word-meaning", score, durationMs: Date.now() - sessionStart.current, difficulty, correctCount, wrongCount, bestStreak } })
-        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); if (r?.newAchievements?.length) setNewAchievements(r.newAchievements); })
+        .then((r) => { if (r?.isNewHighScore) setIsNewHighScore(true); if (r?.newAchievements?.length) setNewAchievements(r.newAchievements); if (r?.leagueUp) setLeagueUp(r.leagueUp); })
         .catch(() => {});
     }
     setScreen("gameover");
@@ -164,7 +166,7 @@ function WordMeaningPage() {
     const fresh = new Set<number>();
     setUsedIndices(fresh); setScore(0); setRound(1); setStreak(0);
     setBestStreak(0); setCorrectCount(0); setWrongCount(0);
-    setLastDelta(null); setIsNewHighScore(false); setNewAchievements([]);
+    setLastDelta(null); setIsNewHighScore(false); setNewAchievements([]); setLeagueUp(null);
     submittedRef.current = false; sessionStart.current = Date.now();
     questionStart.current = Date.now(); timerStartedRef.current = false;
     setQuestion(getRandomQuestion(fresh, optionCount, locale));
@@ -191,7 +193,7 @@ function WordMeaningPage() {
       <GameOverCard
         theme={THEME} score={score} correctCount={correctCount} wrongCount={wrongCount}
         bestStreak={bestStreak} isNewHighScore={isNewHighScore} t={t}
-        newAchievements={newAchievements}
+        newAchievements={newAchievements} leagueUp={leagueUp}
         onRestart={handleRestart} onSetup={() => setScreen("setup")}
       />
     );

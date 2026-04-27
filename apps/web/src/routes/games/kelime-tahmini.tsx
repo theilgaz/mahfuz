@@ -12,6 +12,9 @@ import { WORD_PAIRS, getLocalizedPair } from "~/lib/word-pairs";
 import { useTranslation } from "~/hooks/useTranslation";
 import { submitScore } from "~/lib/score-service";
 import { GameMiniLeaderboard } from "~/components/GameMiniLeaderboard";
+import type { League } from "~/lib/league";
+import { LEAGUE_LABELS } from "~/lib/league";
+import { MedalLeague } from "~/components/minimal-ui/LeagueIcons";
 
 const THEME = GAME_THEMES["kelime-tahmini"];
 const P = THEME.primary;
@@ -310,6 +313,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
   const [shakeRow, setShakeRow] = useState(false);
   const [revealRow, setRevealRow] = useState(-1);
   const [copied, setCopied] = useState(false);
+  const [leagueUp, setLeagueUp] = useState<{ from: League; to: League } | null>(null);
 
   // Keyboard letter statuses
   const keyStatuses = useMemo(() => {
@@ -409,7 +413,9 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
         // Submit score for leaderboard
         const score = isCorrect ? (MAX_GUESSES - newGuesses.length + 1) * 10 : 0;
         if (score > 0) {
-          submitScore({ data: { gameId: "kelime-tahmini", score, correctCount: isCorrect ? 1 : 0, wrongCount: newGuesses.length - (isCorrect ? 1 : 0) } }).catch(() => {});
+          submitScore({ data: { gameId: "kelime-tahmini", score, correctCount: isCorrect ? 1 : 0, wrongCount: newGuesses.length - (isCorrect ? 1 : 0) } })
+            .then((r) => { if (r?.leagueUp) setLeagueUp(r.leagueUp); })
+            .catch(() => {});
         }
       }, letterCount * 300 + 400); // wait for flip animation
     } else if (mode === "daily") {
@@ -542,6 +548,21 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
           <p className="text-xs text-[var(--color-text-secondary)] mb-3">
             {localizedMeaning}
           </p>
+
+          {leagueUp && (
+            <div
+              className="mx-auto max-w-xs mb-3 px-3 py-2 rounded-xl border flex items-center gap-2 game-pop"
+              style={{ borderColor: `${P}40`, background: `linear-gradient(135deg, ${P}15, ${P}05)` }}
+            >
+              <MedalLeague league={leagueUp.to} size={28} />
+              <div className="text-left flex-1">
+                <p className="text-[10px] font-bold" style={{ color: P }}>Lig Atladın!</p>
+                <p className="text-xs text-[var(--color-text-primary)]">
+                  {LEAGUE_LABELS[leagueUp.from]} → <strong>{LEAGUE_LABELS[leagueUp.to]}</strong>
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-2 justify-center">
             <button

@@ -6,6 +6,8 @@ import type { GameTheme } from "~/lib/game-themes";
 import { gameBgStyle } from "~/lib/game-themes";
 import { ACHIEVEMENT_MAP } from "~/lib/game-achievements";
 import { GAME_TITLES } from "~/lib/score-service";
+import { LEAGUE_LABELS, type League } from "~/lib/league";
+import { MedalLeague } from "~/components/minimal-ui/LeagueIcons";
 import { useTranslation } from "~/hooks/useTranslation";
 
 interface GameOverCardProps {
@@ -17,6 +19,7 @@ interface GameOverCardProps {
   isNewHighScore: boolean;
   t: any;
   newAchievements?: string[];
+  leagueUp?: { from: League; to: League } | null;
   onRestart: () => void;
   onSetup?: () => void;
   setupLabel?: string;
@@ -24,7 +27,7 @@ interface GameOverCardProps {
 
 export function GameOverCard({
   theme, score, correctCount, wrongCount, bestStreak,
-  isNewHighScore, t, newAchievements, onRestart, onSetup, setupLabel,
+  isNewHighScore, t, newAchievements, leagueUp, onRestart, onSetup, setupLabel,
 }: GameOverCardProps) {
   const P = theme.primary;
   const total = correctCount + wrongCount;
@@ -69,6 +72,22 @@ export function GameOverCard({
         </div>
         <p className="text-xs text-[var(--color-text-secondary)] mt-1">%{pct}</p>
       </div>
+
+      {/* League up */}
+      {leagueUp && (
+        <div
+          className="mb-4 px-4 py-3 rounded-xl border flex items-center gap-3 game-pop"
+          style={{ borderColor: `${P}40`, background: `linear-gradient(135deg, ${P}15, ${P}05)` }}
+        >
+          <MedalLeague league={leagueUp.to} size={32} />
+          <div className="text-left flex-1">
+            <p className="text-xs font-bold" style={{ color: P }}>Lig Atladın!</p>
+            <p className="text-sm text-[var(--color-text-primary)]">
+              {LEAGUE_LABELS[leagueUp.from]} → <strong>{LEAGUE_LABELS[leagueUp.to]}</strong>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Achievements unlocked */}
       {newAchievements && newAchievements.length > 0 && (

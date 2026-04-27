@@ -7,6 +7,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
+import type { League } from "~/lib/league";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
@@ -130,6 +131,7 @@ function EmojiMatchPage() {
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
+  const [leagueUp, setLeagueUp] = useState<{ from: League; to: League } | null>(null);
 
   const [usedGlobalIndices, setUsedGlobalIndices] = useState<Set<number>>(new Set());
   const [roundData, setRoundData] = useState<RoundData>(() => generateRound(new Set()));
@@ -255,6 +257,7 @@ function EmojiMatchPage() {
         .then((r) => {
           if (r?.isNewHighScore) setIsNewHighScore(true);
           if (r?.newAchievements?.length) setNewAchievements(r.newAchievements);
+          if (r?.leagueUp) setLeagueUp(r.leagueUp);
         })
         .catch(() => {});
     }
@@ -273,6 +276,7 @@ function EmojiMatchPage() {
     setLastDelta(null);
     setIsNewHighScore(false);
     setNewAchievements([]);
+    setLeagueUp(null);
     submittedRef.current = false;
     sessionStart.current = Date.now();
     matchStart.current = Date.now();
@@ -310,6 +314,7 @@ function EmojiMatchPage() {
         isNewHighScore={isNewHighScore}
         t={t}
         newAchievements={newAchievements}
+        leagueUp={leagueUp}
         onRestart={handleRestart}
         onSetup={() => setScreen("setup")}
       />

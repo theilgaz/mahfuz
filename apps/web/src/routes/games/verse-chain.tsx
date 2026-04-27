@@ -8,6 +8,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { submitScore } from "~/lib/score-service";
+import type { League } from "~/lib/league";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -101,6 +102,7 @@ function VerseChainGame({
   const [chainLength, setChainLength] = useState(0);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
+  const [leagueUp, setLeagueUp] = useState<{ from: League; to: League } | null>(null);
 
   // Current options (shuffled)
   const [options, setOptions] = useState<(ChainVerse & { isCorrect: boolean })[]>([]);
@@ -215,6 +217,7 @@ function VerseChainGame({
     setChainLength(0);
     setIsNewHighScore(false);
     setNewAchievements([]);
+    setLeagueUp(null);
     submittedRef.current = false;
     sessionStart.current = Date.now();
     timer.reset();
@@ -239,6 +242,7 @@ function VerseChainGame({
         .then((r) => {
           if (r?.isNewHighScore) setIsNewHighScore(true);
           if (r?.newAchievements?.length) setNewAchievements(r.newAchievements);
+          if (r?.leagueUp) setLeagueUp(r.leagueUp);
         })
         .catch(() => {});
     }
@@ -255,6 +259,7 @@ function VerseChainGame({
         isNewHighScore={isNewHighScore}
         t={t}
         newAchievements={newAchievements}
+        leagueUp={leagueUp}
         onRestart={handleRestart}
         onSetup={onSetup}
       />

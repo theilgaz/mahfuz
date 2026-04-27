@@ -58,10 +58,16 @@ export const submitScore = createServerFn({ method: "POST" })
     bestStreak?: number;
   }) => input)
   .handler(async ({ data }) => {
-    if (data.score <= 0) return { saved: false, isNewHighScore: false, newAchievements: [] as string[] };
+    const empty = {
+      saved: false,
+      isNewHighScore: false,
+      newAchievements: [] as string[],
+      leagueUp: null as null | { from: League; to: League },
+    };
+    if (data.score <= 0) return empty;
 
     const session = await auth.api.getSession({ headers: getRequestHeaders() });
-    if (!session?.user?.id) return { saved: false, isNewHighScore: false, newAchievements: [] as string[] };
+    if (!session?.user?.id) return empty;
 
     const userId = session.user.id;
 
@@ -73,6 +79,16 @@ export const submitScore = createServerFn({ method: "POST" })
 
     const currentBest = existing?.best ?? 0;
     const isNewHighScore = data.score > currentBest;
+
+    // Lig atlama tespiti — insert'ten ÖNCE ve SONRAKİ lifetime SUM'ı karşılaştır
+    const [beforeRow] = await db
+      .select({ total: sql<number>`COALESCE(SUM(${gameScores.score}), 0)` })
+      .from(gameScores)
+      .where(eq(gameScores.userId, userId));
+    const beforeTotal = beforeRow?.total ?? 0;
+    const beforeLeague = computeLeague(beforeTotal);
+    const afterLeague = computeLeague(beforeTotal + data.score);
+    const leagueUp = beforeLeague !== afterLeague ? { from: beforeLeague, to: afterLeague } : null;
 
     await db.insert(gameScores).values({
       id: crypto.randomUUID(),
@@ -101,7 +117,7 @@ export const submitScore = createServerFn({ method: "POST" })
       // Don't fail score submission if achievements fail
     }
 
-    return { saved: true, isNewHighScore, newAchievements };
+    return { saved: true, isNewHighScore, newAchievements, leagueUp };
   });
 
 // ── Zaman Dilimleri ───────────────────────────────────────
@@ -139,8 +155,10 @@ export interface LeaderboardEntry {
   userImage: string | null;
   /** Periyoda göre asıl sıralama puanı — all=SUM, week/season=MAX */
   bestScore: number;
-  /** Per-game tablolar için: tüm zaman SUM (paralel kolon, sıralama dışı) */
-  totalScore?: number;
+  /** Periyot penceresindeki MAX skor (per-game tablolarda paralel kolon) */
+  windowMax?: number;
+  /** Periyot penceresindeki SUM skor (per-game tablolarda paralel kolon) */
+  windowSum?: number;
   league: League;
 }
 
@@ -154,17 +172,13 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
     if (win.startedAt != null) conditions.push(gte(gameScores.createdAt, win.startedAt));
     if (win.endedAt != null) conditions.push(lt(gameScores.createdAt, win.endedAt));
 
-    const aggExpr = win.agg === "sum"
-      ? sql<number>`SUM(${gameScores.score})`
-      : sql<number>`MAX(${gameScores.score})`;
-    // Tie-breaker: aynı skora ilk ulaşan
-    const tiebreakExpr = sql<number>`MIN(${gameScores.createdAt})`;
-
+    // Hem MAX hem SUM'ı her zaman hesapla; sıralama agg'a göre seçilir
     const rows = await db
       .select({
         userId: gameScores.userId,
-        score: aggExpr.as("agg_score"),
-        achievedAt: tiebreakExpr.as("achieved_at"),
+        windowMax: sql<number>`MAX(${gameScores.score})`.as("window_max"),
+        windowSum: sql<number>`SUM(${gameScores.score})`.as("window_sum"),
+        achievedAt: sql<number>`MIN(${gameScores.createdAt})`.as("achieved_at"),
         userName: user.name,
         userImage: user.image,
       })
@@ -172,24 +186,13 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
       .innerJoin(user, eq(gameScores.userId, user.id))
       .where(and(...conditions))
       .groupBy(gameScores.userId)
-      .orderBy(sql`agg_score DESC, achieved_at ASC`)
+      .orderBy(win.agg === "sum"
+        ? sql`window_sum DESC, achieved_at ASC`
+        : sql`window_max DESC, achieved_at ASC`)
       .limit(50);
 
-    // Per-game UI'da MAX + SUM iki kolon istendiği için, tüm zaman SUM'ı paralel hesapla
-    const userIds = rows.map((r) => r.userId);
-    const totals = userIds.length > 0
-      ? await db
-        .select({
-          userId: gameScores.userId,
-          totalScore: sql<number>`SUM(${gameScores.score})`.as("total_score"),
-        })
-        .from(gameScores)
-        .where(and(eq(gameScores.gameId, data.gameId), sql`${gameScores.userId} IN (${sql.join(userIds.map((id) => sql`${id}`), sql`, `)})`))
-        .groupBy(gameScores.userId)
-      : [];
-    const totalsMap = new Map(totals.map((t) => [t.userId, t.totalScore ?? 0]));
-
     // Lig hesabı için kullanıcının lifetime SUM'ı (oyun ayrımı yok)
+    const userIds = rows.map((r) => r.userId);
     const lifetime = userIds.length > 0
       ? await db
         .select({
@@ -207,8 +210,9 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
       userId: r.userId,
       userName: r.userName,
       userImage: r.userImage ?? null,
-      bestScore: r.score,
-      totalScore: totalsMap.get(r.userId) ?? 0,
+      bestScore: win.agg === "sum" ? r.windowSum : r.windowMax,
+      windowMax: r.windowMax,
+      windowSum: r.windowSum,
       league: computeLeague(lifetimeMap.get(r.userId) ?? 0),
     }));
   });

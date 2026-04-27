@@ -778,6 +778,7 @@ export const en: Messages = {
     noScoresForGame: "No scores for this game yet",
     periodWeek: "This Week",
     periodMonth: "This Month",
+    periodSeason: "Season",
     periodAll: "All Time",
     addFavorite: "Add to favorites",
     removeFavorite: "Remove from favorites",
