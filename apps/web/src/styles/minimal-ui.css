@@ -1115,7 +1115,6 @@
   line-height: 1.55;
   color: var(--mu-ink-3);
   margin: 0;
-  max-width: 62ch;
   text-wrap: pretty;
 }
 
