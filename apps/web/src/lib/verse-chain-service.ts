@@ -9,6 +9,7 @@ import { db } from "~/db";
 import { ayahs, surahs } from "~/db/quran-schema";
 import { eq, and, ne, sql } from "drizzle-orm";
 import type { ChainQuestion } from "./verse-chain-data";
+import { splitWords } from "~/lib/split-words";
 
 export type { ChainQuestion };
 
@@ -69,7 +70,7 @@ export const getDynamicChainQuestion = createServerFn({ method: "GET" })
         verseKey: `${nextAyah.surahId}:${nextAyah.ayahNumber}`,
         surahName: nextSurah?.nameSimple ?? "",
         textUthmani: nextAyah.textUthmani,
-        firstWords: nextAyah.textUthmani.split(" ").slice(0, 4).join(" ") + "...",
+        firstWords: splitWords(nextAyah.textUthmani).slice(0, 4).join(" ") + "...",
         isCorrect: true,
       },
       ...await Promise.all(
@@ -82,7 +83,7 @@ export const getDynamicChainQuestion = createServerFn({ method: "GET" })
             verseKey: `${d.surahId}:${d.ayahNumber}`,
             surahName: s?.nameSimple ?? "",
             textUthmani: d.textUthmani,
-            firstWords: d.textUthmani.split(" ").slice(0, 4).join(" ") + "...",
+            firstWords: splitWords(d.textUthmani).slice(0, 4).join(" ") + "...",
             isCorrect: false,
           };
         }),
@@ -95,7 +96,7 @@ export const getDynamicChainQuestion = createServerFn({ method: "GET" })
       [options[i], options[j]] = [options[j], options[i]];
     }
 
-    const lastWord = current.textUthmani.trim().split(/\s+/).pop() ?? "";
+    const lastWord = splitWords(current.textUthmani).at(-1) ?? "";
 
     return {
       currentVerse: {

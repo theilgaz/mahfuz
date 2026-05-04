@@ -6,6 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { db } from "~/db";
 import { ayahs, surahs } from "~/db/quran-schema";
 import { sql, eq, inArray, and, or } from "drizzle-orm";
+import { splitWords } from "~/lib/split-words";
 
 export type VerseFilter = { surahId: number; verseNums: number[] }[];
 
@@ -60,7 +61,7 @@ export const getRandomVerseForGame = createServerFn({ method: "POST" })
 
       if (!ayah) continue;
 
-      const words = ayah.textUthmani.split(/\s+/).filter(Boolean);
+      const words = splitWords(ayah.textUthmani);
       if (words.length < 4) continue;
 
       const [surah] = await db
@@ -144,9 +145,12 @@ export const getWordConstructionQuestion = createServerFn({ method: "POST" })
 
     const whereClause = and(...conditions);
 
-    // Arapça harfleri (harekelerle birlikte) ayır
+    // Arapça harfleri (harekelerle birlikte) ayır.
+    // Leading sınıfı U+06D6-U+06DC secavend aralığını dışlar; secavend
+    // sadece bir önceki harfin diakritiği olarak yakalanır, kendi başına
+    // "harf" olarak sayılmaz (splitWords sonrası NBSP ile ayrılmış olabilir).
     const splitArabicLetters = (word: string): string[] => {
-      const re = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*/g;
+      const re = /[\u0600-\u06D5\u06DD-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*/g;
       return Array.from(word.matchAll(re), (m) => m[0]);
     };
 
@@ -160,7 +164,7 @@ export const getWordConstructionQuestion = createServerFn({ method: "POST" })
 
       if (!ayah) continue;
 
-      const words = ayah.textUthmani.split(/\s+/).filter(Boolean);
+      const words = splitWords(ayah.textUthmani);
       if (words.length < 3) continue;
 
       // Uygun uzunlukta kelime bul

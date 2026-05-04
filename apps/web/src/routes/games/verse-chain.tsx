@@ -19,6 +19,7 @@ import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useLocaleStore } from "~/stores/locale.store";
 import { getVerseChainRounds, type ChainRound, type ChainVerse } from "~/lib/quran-service";
+import { splitWords } from "~/lib/split-words";
 import {
   calcCorrectPoints,
   calcWrongPenalty,
@@ -50,14 +51,14 @@ function shuffle<T>(arr: T[]): T[] {
 
 /** Get first N words of Arabic text */
 function firstWords(text: string, n = 4): string {
-  const words = text.trim().split(/\s+/);
-  if (words.length <= n) return text.trim();
+  const words = splitWords(text);
+  if (words.length <= n) return words.join(" ");
   return words.slice(0, n).join(" ") + "...";
 }
 
 /** Get last word of Arabic text */
 function lastWord(text: string): string {
-  const words = text.trim().split(/\s+/);
+  const words = splitWords(text);
   return words[words.length - 1] ?? "";
 }
 
@@ -287,7 +288,7 @@ function VerseChainGame({
 
   const currentText = currentRound.current.textUthmani;
   const lastW = lastWord(currentText);
-  const bodyWords = currentText.trim().split(/\s+/).slice(0, -1).join(" ");
+  const bodyWords = splitWords(currentText).slice(0, -1).join(" ");
 
   return (
     <div
