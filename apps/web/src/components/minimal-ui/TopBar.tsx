@@ -57,6 +57,7 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
             <span className="mu-tnav-i">{MuIcons.search}</span>
             {t.nav?.search ?? "Ara"}
             <kbd
+              className="mu-tnav-kbd"
               style={{
                 fontFamily: "var(--mu-ff-mono)",
                 fontSize: 11,
