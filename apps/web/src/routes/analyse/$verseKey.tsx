@@ -10,6 +10,7 @@ import { getThemesForSurah, detectVerseThemes } from "~/lib/themes-data";
 import { getVerseContext } from "~/lib/verse-context-data";
 import { MealComparisonSheet } from "~/components/MealComparisonSheet";
 import { useTranslation } from "~/hooks/useTranslation";
+import { splitWords } from "~/lib/split-words";
 
 // ── Route ────────────────────────────────────────────────
 
@@ -455,7 +456,7 @@ function AnalysePage() {
             lang="ar"
             style={{ fontFamily: "var(--font-arabic)" }}
           >
-            {data?.ayah.textUthmani?.split(" ").map((word, i) => (
+            {data?.ayah.textUthmani && splitWords(data.ayah.textUthmani).map((word, i) => (
               <span
                 key={i}
                 className="inline-block mx-1 px-1.5 py-0.5 rounded-lg cursor-pointer hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-accent)] transition-colors"
