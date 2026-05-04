@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -17,7 +16,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
   const { t } = useTranslation();
   const theme = useSettingsStore((s) => s.theme);
   const setTheme = useSettingsStore((s) => s.setTheme);
-  const mobileNavRef = useRef<HTMLElement>(null);
 
   const navItems = [
     { name: "home", path: "/", icon: MuIcons.home, label: t.nav?.home ?? "Ana Sayfa" },
@@ -34,23 +32,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
     setTheme(next);
   };
 
-  // Scroll-hint animation on mobile nav mount
-  useEffect(() => {
-    const el = mobileNavRef.current;
-    if (!el) return;
-    const raf = requestAnimationFrame(() => {
-      if (el.scrollWidth > el.clientWidth) {
-        el.classList.add("mu-scroll-hint");
-      }
-    });
-    const onEnd = () => el.classList.remove("mu-scroll-hint");
-    el.addEventListener("animationend", onEnd);
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener("animationend", onEnd);
-    };
-  }, []);
-
   return (
     <header className="mu-topbar">
       <div className="mu-topbar-inner">
@@ -61,7 +42,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
           </span>
         </Link>
 
-        {/* Desktop nav */}
         <nav className="mu-topnav">
           {navItems.map((item) => (
             <Link
@@ -94,9 +74,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
 
         {/* Right actions */}
         <div className="mu-topright">
-          <button className="mu-icon-btn mu-mobile-search-btn" onClick={onSearch} title="Ara">
-            {MuIcons.search}
-          </button>
           <button className="mu-icon-btn" title="Tema" onClick={cycleTheme}>
             {theme === "dark" ? MuIcons.sun : MuIcons.moon}
           </button>
@@ -123,20 +100,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
           )}
         </div>
       </div>
-
-      {/* Mobile: horizontal scrollable nav strip */}
-      <nav className="mu-mobile-strip" ref={mobileNavRef}>
-        {navItems.map((item) => (
-          <Link
-            key={item.name}
-            to={item.path}
-            className={`mu-mobile-strip-item ${isActive(item.path) ? "on" : ""}`}
-          >
-            <span className="mu-mobile-strip-icon">{item.icon}</span>
-            {item.label}
-          </Link>
-        ))}
-      </nav>
     </header>
   );
 }
