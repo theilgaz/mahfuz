@@ -55,7 +55,7 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
           ))}
           <button className="mu-tnav" onClick={onSearch}>
             <span className="mu-tnav-i">{MuIcons.search}</span>
-            {t.nav?.search ?? "Ara"}
+            <span className="mu-tnav-search-label">{t.nav?.search ?? "Ara"}</span>
             <kbd
               className="mu-tnav-kbd"
               style={{

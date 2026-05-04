@@ -5217,9 +5217,9 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 }
 
 @media (max-width: 768px) {
-  .mu-brand-ar { display: none; }
-  .mu-brand-latin { font-size: 18px; }
-  .mu-tnav-kbd { display: none; }
+  .mu-brand-wordmark { display: none; }
+  .mu-tnav-kbd,
+  .mu-tnav-search-label { display: none; }
   .mu-topbar-inner { padding: 8px 12px; gap: 8px; }
   .mu-topright { margin-left: auto; }
   .mu-reader-topbar { padding-left: 12px; padding-right: 12px; top: 49px; }
