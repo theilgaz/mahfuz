@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm --filter web exec tsc --noEmit)",
+      "Bash(pnpm install *)"
+    ]
+  }
+}
