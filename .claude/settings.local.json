@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(pnpm --filter web exec tsc --noEmit)",
-      "Bash(pnpm install *)"
+      "Bash(pnpm install *)",
+      "Bash(pnpm --filter @mahfuz/api lint)",
+      "Bash(pnpm --filter @mahfuz/shared lint)"
     ]
   }
 }

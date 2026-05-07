@@ -115,9 +115,15 @@ importers:
         specifier: workspace:*
         version: link:../shared
     devDependencies:
+      '@mahfuz/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@mahfuz/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.3(jiti@2.6.1)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -201,9 +207,15 @@ importers:
 
   packages/shared:
     devDependencies:
+      '@mahfuz/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@mahfuz/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.3(jiti@2.6.1)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
