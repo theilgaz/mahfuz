@@ -72,6 +72,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.81.0
         version: 0.81.0(zod@4.3.6)
+      '@mahfuz/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@mahfuz/tailwind-config':
         specifier: workspace:*
         version: link:../../tooling/tailwind
@@ -90,6 +93,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.7.0(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.3(jiti@2.6.1)
       tailwindcss:
         specifier: ^4.0.0
         version: 4.2.1

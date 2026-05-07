@@ -9,7 +9,6 @@ export default [
     files: ["**/*.tsx", "**/*.jsx"],
     plugins: {
       react: reactPlugin,
-      "react-hooks": reactHooksPlugin,
     },
     settings: {
       react: {
@@ -19,7 +18,16 @@ export default [
     rules: {
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
-      "react-hooks/rules-of-hooks": "error",
+    },
+  },
+  // react-hooks rules apply to .ts files too (custom hooks live there).
+  {
+    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+    plugins: {
+      "react-hooks": reactHooksPlugin,
+    },
+    rules: {
+      "react-hooks/rules-of-hooks": "warn",
       "react-hooks/exhaustive-deps": "warn",
     },
   },

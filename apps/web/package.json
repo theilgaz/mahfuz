@@ -42,8 +42,10 @@
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
+    "@mahfuz/eslint-config": "workspace:*",
     "@mahfuz/tailwind-config": "workspace:*",
     "@mahfuz/typescript-config": "workspace:*",
+    "eslint": "^9.0.0",
     "@tailwindcss/vite": "^4.0.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
