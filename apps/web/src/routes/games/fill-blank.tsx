@@ -160,7 +160,7 @@ function GameScreen({
     setScreen("gameover");
   }, [score, difficulty, timer]);
 
-  const nextRound = () => {
+  const nextRound = useCallback(() => {
     if (timer.isExpired) { endGame(); return; }
     timer.start();
     setRound((r) => r + 1);
@@ -168,7 +168,14 @@ function GameScreen({
     setLastDelta(null);
     setGameState("loading");
     setRefreshKey((k) => k + 1);
-  };
+  }, [timer, endGame]);
+
+  const AUTO_ADVANCE_MS = 1000;
+  useEffect(() => {
+    if (gameState !== "correct") return;
+    const id = setTimeout(() => nextRound(), AUTO_ADVANCE_MS);
+    return () => clearTimeout(id);
+  }, [gameState, nextRound]);
 
   const handleRestart = () => {
     setScore(0); setRound(1); setStreak(0); setBestStreak(0);
@@ -418,10 +425,17 @@ function GameScreen({
             <button
               ref={nextBtnRef}
               onClick={nextRound}
-              className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
+              className="relative overflow-hidden shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
-              {t.fillBlankGame.next}
+              {gameState === "correct" && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 origin-left"
+                  style={{ background: "rgba(255,255,255,0.22)", animation: `game-advance-fill ${AUTO_ADVANCE_MS}ms linear forwards` }}
+                />
+              )}
+              <span className="relative">{t.fillBlankGame.next}</span>
             </button>
           </div>
         )}

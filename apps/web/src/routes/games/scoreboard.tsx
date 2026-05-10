@@ -16,8 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getGlobalLeaderboard,
   getGameLeaderboard,
-  getMyScoreStats,
-  getMyTrophies,
   getMyLeagueStatus,
   GAME_TITLES,
   GAME_IDS,
@@ -25,8 +23,8 @@ import {
   type LeaderboardPeriod,
   type LeagueFilter,
 } from "~/lib/score-service";
-import { LEAGUE_LABELS, LEAGUE_ORDER, type League } from "~/lib/league";
-import { LeagueBadge, MedalLeague, RosetteIcon, TrophyIcon } from "~/components/minimal-ui/LeagueIcons";
+import { LEAGUE_LABELS, LEAGUE_ORDER, type League, seasonKeyFor, seasonRange, formatSeasonName } from "~/lib/league";
+import { LeagueBadge, MedalLeague, RosetteIcon } from "~/components/minimal-ui/LeagueIcons";
 import { Podium } from "~/components/minimal-ui/Podium";
 import { useTranslation } from "~/hooks/useTranslation";
 
@@ -50,10 +48,19 @@ function ScoreboardPage() {
   const [leagueFilter, setLeagueFilter] = useState<LeagueFilter | null>(null);
 
   const periodLabels: Record<LeaderboardPeriod, string> = {
-    week: t.gamesHub.periodWeek,
     season: t.gamesHub.periodSeason,
     all: t.gamesHub.periodAll,
   };
+
+  const seasonKey = seasonKeyFor(new Date());
+  const seasonName = formatSeasonName(seasonKey);
+  const { startedAt, endedAt } = seasonRange(seasonKey);
+  const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", timeZone: "UTC" });
+  const fullDateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+  const seasonStartLabel = dateFmt.format(new Date(startedAt));
+  // endedAt is exclusive (next month start), show last day inclusive.
+  const seasonEndLabel = dateFmt.format(new Date(endedAt - 1));
+  const nextSeasonStartLabel = fullDateFmt.format(new Date(endedAt));
 
   const { data: myLeagueStatus } = useQuery({
     queryKey: ["my-league-status"],
@@ -78,20 +85,6 @@ function ScoreboardPage() {
     staleTime: 60_000,
   });
 
-  const { data: myStats } = useQuery({
-    queryKey: ["my-score-stats"],
-    queryFn: () => getMyScoreStats(),
-    enabled: !!userId,
-    staleTime: 60_000,
-  });
-
-  const { data: myTrophies } = useQuery({
-    queryKey: ["my-trophies"],
-    queryFn: () => getMyTrophies(),
-    enabled: !!userId,
-    staleTime: 60_000,
-  });
-
   const board = activeTab === "global" ? globalBoard : gameBoard;
   const top3 = board?.slice(0, 3) ?? [];
   const rest = board?.slice(3) ?? [];
@@ -99,12 +92,6 @@ function ScoreboardPage() {
   const isPerGame = activeTab !== "global";
   const primaryLabel = period === "all" ? "Toplam" : "En İyi";
   const secondaryLabel = period === "all" ? "En İyi" : "Toplam";
-
-  // Kişisel toplamlar
-  const myTotalScore = myStats?.reduce((sum, s) => sum + s.totalScore, 0) ?? 0;
-  const myBestSum = myStats?.reduce((sum, s) => sum + s.bestScore, 0) ?? 0;
-  const myTotalPlays = myStats?.reduce((sum, s) => sum + s.totalPlays, 0) ?? 0;
-  const trophyCount = (myTrophies?.champions.length ?? 0) + (myTrophies?.rosettes.length ?? 0);
 
   return (
     <div className="mu-games">
@@ -145,12 +132,22 @@ function ScoreboardPage() {
         ))}
       </div>
 
-      {/* Period explanation */}
-      <p className="mu-muted" style={{ fontSize: 12, marginTop: 8, marginBottom: 0 }}>
-        {period === "all"
-          ? "Tüm zamanlar = oturum skorlarının toplamı. Her oyun seni ileri taşır."
-          : "Hafta ve sezon = bu pencerede attığın en yüksek tek skor."}
-      </p>
+      {/* Period explanation + season info */}
+      {period === "all" ? (
+        <p className="mu-muted" style={{ fontSize: 12, marginTop: 8, marginBottom: 0 }}>
+          Tüm zamanlar = oturum skorlarının toplamı. Her oyun seni ileri taşır.
+        </p>
+      ) : (
+        <div className="mu-sb-season">
+          <div className="mu-sb-season-name">{seasonName}</div>
+          <p className="mu-sb-season-meta">
+            {seasonStartLabel} – {seasonEndLabel} arası geçerli. Bu pencerede attığın en yüksek tek skor sayılır.
+          </p>
+          <p className="mu-sb-season-next">
+            Yeni sezon {nextSeasonStartLabel} tarihinde başlar.
+          </p>
+        </div>
+      )}
 
       {/* Tabs: Global + per-game */}
       <div className="mu-sb-tabs">
@@ -258,50 +255,6 @@ function ScoreboardPage() {
             Oyunlara Git
           </Link>
         </div>
-      )}
-
-      {/* My stats (if logged in) */}
-      {userId && myStats && myStats.length > 0 && (
-        <section style={{ paddingTop: 32, marginTop: 32, borderTop: "1px solid var(--mu-line)" }}>
-          <h2 className="mu-h2" style={{ fontSize: 24 }}>Senin Skorların</h2>
-          <div className="mu-sb-mystats">
-            <div className="mu-sb-stat-card">
-              <span className="mu-sb-stat-value">{myTotalScore}</span>
-              <span className="mu-sb-stat-label">Toplam Skor</span>
-            </div>
-            <div className="mu-sb-stat-card">
-              <span className="mu-sb-stat-value">{myBestSum}</span>
-              <span className="mu-sb-stat-label">En İyi Skorlar Toplamı</span>
-            </div>
-            <div className="mu-sb-stat-card">
-              <span className="mu-sb-stat-value">{myTotalPlays}</span>
-              <span className="mu-sb-stat-label">Toplam Oyun</span>
-            </div>
-            {trophyCount > 0 && (
-              <Link
-                to="/profile"
-                className="mu-sb-stat-card"
-                style={{ textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center" }}
-              >
-                <span className="mu-sb-stat-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <TrophyIcon size={20} />
-                  {trophyCount}
-                </span>
-                <span className="mu-sb-stat-label">Kupalarım</span>
-              </Link>
-            )}
-          </div>
-          <div style={{ marginTop: 16 }}>
-            {myStats.map((stat) => (
-              <div key={stat.gameId} className="mu-lrow">
-                <span className="mu-lrank" style={{ fontSize: 14 }}>{stat.totalPlays}x</span>
-                <span className="mu-lname" style={{ fontSize: 15 }}>{GAME_TITLES[stat.gameId] ?? stat.gameId}</span>
-                <span className="mu-lxp" style={{ textAlign: "right" }}>{stat.totalScore}</span>
-                <span className="mu-lxp" style={{ textAlign: "right", opacity: 0.6, fontSize: 13 }}>{stat.bestScore}</span>
-              </div>
-            ))}
-          </div>
-        </section>
       )}
 
       {/* League ladder — sezon hareket politikası */}

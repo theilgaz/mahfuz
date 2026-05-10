@@ -382,6 +382,11 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes game-advance-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 .game-bounce-in { animation: game-bounce-in 0.4s ease-out; }
 .game-pop { animation: game-pop 0.2s ease-out 0.2s both; }
 .game-tile-appear { animation: game-tile-appear 0.2s ease-out 0.2s both; }

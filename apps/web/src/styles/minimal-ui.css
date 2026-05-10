@@ -644,14 +644,21 @@
   background: var(--mu-accent-soft);
 }
 
-/* Alpha bar */
+/* Alpha jump rail */
 .mu-alpha-bar {
   display: flex;
   gap: 4px;
-  padding: 8px 0 4px;
+  padding: 8px 0;
+  margin-bottom: 4px;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  position: sticky;
+  top: 64px;
+  z-index: 5;
+  background: color-mix(in oklab, var(--mu-bg), transparent 8%);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--mu-line);
 }
 
 .mu-alpha-bar::-webkit-scrollbar {
@@ -663,25 +670,62 @@
   cursor: pointer;
   min-width: 32px;
   height: 32px;
+  padding: 0 8px;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--mu-muted);
   transition: all 0.15s;
 }
 
 .mu-alpha-btn:hover {
-  color: var(--mu-ink);
-  background: var(--mu-surface);
-}
-
-.mu-alpha-btn.on {
   color: var(--mu-accent-ink);
   background: var(--mu-accent-soft);
+}
+
+.mu-alpha-btn-count {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--mu-muted);
+  background: var(--mu-surface);
+  padding: 1px 5px;
+  border-radius: 999px;
+  line-height: 1.4;
+}
+
+.mu-alpha-btn:hover .mu-alpha-btn-count {
+  color: var(--mu-accent-ink);
+  background: color-mix(in oklab, var(--mu-accent), white 70%);
+}
+
+/* Alpha section group */
+.mu-alpha-group {
+  scroll-margin-top: 112px;
+}
+
+.mu-alpha-group + .mu-alpha-group {
+  margin-top: 8px;
+}
+
+.mu-alpha-heading {
+  position: sticky;
+  top: 112px;
+  z-index: 4;
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mu-muted);
+  background: color-mix(in oklab, var(--mu-bg), transparent 6%);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--mu-line);
 }
 
 /* Surah list */
@@ -3935,6 +3979,33 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   background: var(--mu-accent);
   color: #fff;
   border-color: var(--mu-accent);
+}
+
+.mu-sb-season {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--mu-line);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--mu-accent), transparent 94%);
+}
+.mu-sb-season-name {
+  font-family: var(--mu-ff-display);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--mu-ink);
+  margin-bottom: 4px;
+}
+.mu-sb-season-meta {
+  font-size: 12px;
+  color: var(--mu-ink-3);
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+.mu-sb-season-next {
+  font-size: 11px;
+  color: var(--mu-muted);
+  margin: 0;
+  font-family: var(--mu-ff-mono);
 }
 
 .mu-sb-tabs {

@@ -140,7 +140,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     setShowGameOver(true);
   }, [score, difficulty, timer]);
 
-  const nextRound = () => {
+  const nextRound = useCallback(() => {
     if (timer.isExpired) { endGame(); return; }
     timer.start();
     setGameState("playing");
@@ -148,7 +148,23 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     setLastDelta(null);
     setRound((r) => r + 1);
     setRefreshKey((k) => k + 1);
-  };
+  }, [timer, endGame]);
+
+  const AUTO_ADVANCE_MS = 1000;
+  useEffect(() => {
+    if (gameState !== "correct") return;
+    const id = setTimeout(() => nextRound(), AUTO_ADVANCE_MS);
+    return () => clearTimeout(id);
+  }, [gameState, nextRound]);
+
+  useEffect(() => {
+    if (gameState === "playing") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); nextRound(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [gameState, nextRound]);
 
   const handleRestart = () => {
     setScore(0); setRound(1); setStreak(0); setBestStreak(0);
@@ -205,9 +221,12 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
           onFinish={endGame}
         />
 
-        {/* Verse card */}
+        {/* Verse card -- after answering, tapping the card also advances. */}
         <div
-          className="px-5 py-5 rounded-2xl border bg-[var(--color-surface)] mb-5 game-slide-up"
+          role={gameState !== "playing" ? "button" : undefined}
+          tabIndex={gameState !== "playing" ? 0 : -1}
+          onClick={gameState !== "playing" ? nextRound : undefined}
+          className={`px-5 py-5 rounded-2xl border bg-[var(--color-surface)] mb-5 game-slide-up ${gameState !== "playing" ? "cursor-pointer active:scale-[0.99] transition-transform" : ""}`}
           style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
         >
           <p className="text-xs text-[var(--color-text-secondary)] mb-3 text-center">{t.surahGuessGame.questionPrompt}</p>
@@ -272,10 +291,15 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
             </div>
             <button
               onClick={nextRound}
-              className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              className="relative overflow-hidden w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
-              {t.fillBlankGame.next}
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 origin-left"
+                style={{ background: "rgba(255,255,255,0.22)", animation: `game-advance-fill ${AUTO_ADVANCE_MS}ms linear forwards` }}
+              />
+              <span className="relative">{t.fillBlankGame.next}</span>
             </button>
           </>
         )}

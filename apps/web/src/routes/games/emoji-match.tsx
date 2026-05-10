@@ -220,24 +220,6 @@ function EmojiMatchPage() {
     [selectedCardIdx, matchedPairs, timer.isExpired, allMatched, feedback, roundData.cards, streak, difficulty], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const nextRound = () => {
-    if (timer.isExpired) { endGame(); return; }
-
-    const newUsed = new Set(usedGlobalIndices);
-    for (const picked of roundData.items) {
-      newUsed.add(picked.globalIdx);
-    }
-    setUsedGlobalIndices(newUsed);
-
-    setRoundData(generateRound(newUsed));
-    setMatchedPairs(new Set());
-    setSelectedCardIdx(null);
-    setFeedback(null);
-    setLastDelta(null);
-    setRound((r) => r + 1);
-    matchStart.current = Date.now();
-  };
-
   const endGame = useCallback(() => {
     timer.pause();
     if (!submittedRef.current && score > 0) {
@@ -262,6 +244,40 @@ function EmojiMatchPage() {
     }
     setScreen("gameover");
   }, [score, difficulty, correctCount, wrongCount, bestStreak, timer]);
+
+  const nextRound = useCallback(() => {
+    if (timer.isExpired) { endGame(); return; }
+
+    const newUsed = new Set(usedGlobalIndices);
+    for (const picked of roundData.items) {
+      newUsed.add(picked.globalIdx);
+    }
+    setUsedGlobalIndices(newUsed);
+
+    setRoundData(generateRound(newUsed));
+    setMatchedPairs(new Set());
+    setSelectedCardIdx(null);
+    setFeedback(null);
+    setLastDelta(null);
+    setRound((r) => r + 1);
+    matchStart.current = Date.now();
+  }, [timer, endGame, usedGlobalIndices, roundData]);
+
+  const AUTO_ADVANCE_MS = 1000;
+  useEffect(() => {
+    if (!allMatched) return;
+    const id = setTimeout(() => nextRound(), AUTO_ADVANCE_MS);
+    return () => clearTimeout(id);
+  }, [allMatched, nextRound]);
+
+  useEffect(() => {
+    if (!allMatched) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); nextRound(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [allMatched, nextRound]);
 
   const handleRestart = () => {
     const fresh = new Set<number>();
@@ -430,13 +446,18 @@ function EmojiMatchPage() {
             </div>
             <button
               onClick={nextRound}
-              className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              className="relative overflow-hidden w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
               style={{
                 background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`,
                 boxShadow: `0 2px 10px ${THEME.glow}`,
               }}
             >
-              {gt.nextRound}
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 origin-left"
+                style={{ background: "rgba(255,255,255,0.22)", animation: `game-advance-fill ${AUTO_ADVANCE_MS}ms linear forwards` }}
+              />
+              <span className="relative">{gt.nextRound}</span>
             </button>
           </div>
         )}

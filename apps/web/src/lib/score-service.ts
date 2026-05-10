@@ -174,22 +174,20 @@ export const submitScore = createServerFn({ method: "POST" })
 /**
  * "all"     → tüm zamanlar (toplam emek, SUM)
  * "season"  → bu sezon (içinde bulunulan ay, MAX)
- * "week"    → son 7 gün (MAX)
  */
-export type LeaderboardPeriod = "week" | "season" | "all";
+export type LeaderboardPeriod = "season" | "all";
 
-export const LEADERBOARD_PERIODS: LeaderboardPeriod[] = ["week", "season", "all"];
+export const LEADERBOARD_PERIODS: LeaderboardPeriod[] = ["season", "all"];
 
 interface PeriodWindow {
   startedAt: number | null;
   endedAt: number | null;
-  /** "all" sezonluk dışı tüm zamanlar = SUM, diğerleri = MAX */
+  /** "all" tüm zamanlar = SUM, sezon = MAX */
   agg: "sum" | "max";
 }
 
 function periodWindow(period: LeaderboardPeriod, now: number = Date.now()): PeriodWindow {
   if (period === "all") return { startedAt: null, endedAt: null, agg: "sum" };
-  if (period === "week") return { startedAt: now - 7 * 24 * 60 * 60 * 1000, endedAt: null, agg: "max" };
   // season — içinde bulunulan ay
   const range = seasonRange(seasonKeyFor(new Date(now)));
   return { startedAt: range.startedAt, endedAt: range.endedAt, agg: "max" };

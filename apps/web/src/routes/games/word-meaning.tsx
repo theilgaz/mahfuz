@@ -165,7 +165,7 @@ function WordMeaningPage() {
     setScreen("gameover");
   }, [score, difficulty, timer]);
 
-  const nextRound = () => {
+  const nextRound = useCallback(() => {
     if (timer.isExpired) { endGame(); return; }
     if (words.length === 0) return;
     timer.start();
@@ -176,7 +176,28 @@ function WordMeaningPage() {
     setLastDelta(null);
     setRound((r) => r + 1);
     questionStart.current = Date.now();
-  };
+  }, [timer, endGame, words, gameState, question, usedIndices, optionCount]);
+
+  // Auto-advance only on correct answers (1s); wrong stays manual so user can study the right answer.
+  const AUTO_ADVANCE_MS = 1000;
+  useEffect(() => {
+    if (gameState !== "correct") return;
+    const id = setTimeout(() => nextRound(), AUTO_ADVANCE_MS);
+    return () => clearTimeout(id);
+  }, [gameState, nextRound]);
+
+  // Keyboard shortcut: Space/Enter to skip ahead in correct or wrong state.
+  useEffect(() => {
+    if (gameState === "playing") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        nextRound();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [gameState, nextRound]);
 
   const handleRestart = () => {
     const fresh = new Set<number>();
@@ -240,9 +261,12 @@ function WordMeaningPage() {
           onFinish={endGame}
         />
 
-        {/* Arabic word card */}
+        {/* Arabic word card -- after answering, tapping the card also advances. */}
         <div
-          className="px-5 py-8 rounded-2xl border bg-[var(--color-surface)] mb-5 text-center game-slide-up"
+          role={gameState !== "playing" ? "button" : undefined}
+          tabIndex={gameState !== "playing" ? 0 : -1}
+          onClick={gameState !== "playing" ? nextRound : undefined}
+          className={`px-5 py-8 rounded-2xl border bg-[var(--color-surface)] mb-5 text-center game-slide-up ${gameState !== "playing" ? "cursor-pointer active:scale-[0.99] transition-transform" : ""}`}
           style={{ borderColor: `${P}25`, boxShadow: `0 4px 20px ${THEME.glow}` }}
         >
           <p className="text-xs text-[var(--color-text-secondary)] mb-6">{t.wordMeaningGame.questionPrompt}</p>
@@ -308,10 +332,18 @@ function WordMeaningPage() {
             </div>
             <button
               onClick={nextRound}
-              className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              className="relative overflow-hidden w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
-              {t.wordMeaningGame.nextQuestion}
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 origin-left"
+                style={{
+                  background: "rgba(255,255,255,0.22)",
+                  animation: `game-advance-fill ${AUTO_ADVANCE_MS}ms linear forwards`,
+                }}
+              />
+              <span className="relative">{t.wordMeaningGame.nextQuestion}</span>
             </button>
           </>
         )}

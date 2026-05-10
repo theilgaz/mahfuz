@@ -36,20 +36,9 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
   const { t, locale } = useTranslation();
   const [tab, setTab] = useState("all");
   const [q, setQ] = useState("");
-  const [alphaFilter, setAlphaFilter] = useState<string | null>(null);
 
   const makkahCount = useMemo(() => surahs.filter((s) => s.revelation === "makkah").length, [surahs]);
   const madinahCount = useMemo(() => surahs.filter((s) => s.revelation === "madinah").length, [surahs]);
-
-  const alphaLetters = useMemo(() => {
-    if (tab !== "alfa") return [];
-    const letters = new Set<string>();
-    for (const s of surahs) {
-      const name = getSurahName(s.id, locale) || s.nameSimple;
-      if (name) letters.add(normalize(name[0]).toUpperCase());
-    }
-    return [...letters].sort((a, b) => a.localeCompare(b, locale));
-  }, [surahs, tab, locale]);
 
   const filtered = useMemo(() => {
     let xs = [...surahs];
@@ -62,12 +51,6 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
         const nameB = getSurahName(b.id, locale) || b.nameSimple;
         return nameA.localeCompare(nameB, locale);
       });
-      if (alphaFilter) {
-        xs = xs.filter((s) => {
-          const name = getSurahName(s.id, locale) || s.nameSimple;
-          return name && normalize(name[0]).toUpperCase() === alphaFilter;
-        });
-      }
     }
     if (q.trim()) {
       const term = normalize(q);
@@ -84,7 +67,30 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
       });
     }
     return xs;
-  }, [surahs, tab, q, locale, alphaFilter]);
+  }, [surahs, tab, q, locale]);
+
+  const alphaGroups = useMemo(() => {
+    if (tab !== "alfa") return [];
+    const groups: Array<{ letter: string; surahs: Surah[] }> = [];
+    for (const s of filtered) {
+      const name = getSurahName(s.id, locale) || s.nameSimple;
+      if (!name) continue;
+      const letter = normalize(name[0]).toUpperCase();
+      const last = groups[groups.length - 1];
+      if (last && last.letter === letter) last.surahs.push(s);
+      else groups.push({ letter, surahs: [s] });
+    }
+    return groups;
+  }, [filtered, tab, locale]);
+
+  const scrollToLetter = useCallback((letter: string | null) => {
+    if (typeof window === "undefined") return;
+    if (!letter) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    document.getElementById(`alpha-${letter}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const tabs = [
     { id: "all", label: t.surahList?.filterAll ?? "Tumu", count: 114, icon: null },
@@ -140,7 +146,7 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
           <button
             key={t.id}
             className={`mu-tab ${tab === t.id ? "on" : ""}`}
-            onClick={() => { setTab(t.id); if (t.id !== "alfa") setAlphaFilter(null); }}
+            onClick={() => setTab(t.id)}
           >
             {t.icon && <img src={t.icon} alt="" aria-hidden="true" style={{ width: 16, height: 16, objectFit: "contain" }} />}
             {t.label}
@@ -149,74 +155,93 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
         ))}
       </div>
 
-      {tab === "alfa" && alphaLetters.length > 0 && (
+      {tab === "alfa" && alphaGroups.length > 0 && (
         <div className="mu-alpha-bar">
           <button
-            className={`mu-alpha-btn ${alphaFilter === null ? "on" : ""}`}
-            onClick={() => setAlphaFilter(null)}
+            className="mu-alpha-btn"
+            onClick={() => scrollToLetter(null)}
+            aria-label={t.surahList?.filterAll ?? "Tumu"}
           >
             {t.surahList?.filterAll ?? "Tumu"}
           </button>
-          {alphaLetters.map((letter) => (
+          {alphaGroups.map(({ letter, surahs: group }) => (
             <button
               key={letter}
-              className={`mu-alpha-btn ${alphaFilter === letter ? "on" : ""}`}
-              onClick={() => setAlphaFilter(alphaFilter === letter ? null : letter)}
+              className="mu-alpha-btn"
+              onClick={() => scrollToLetter(letter)}
+              aria-label={`${letter} (${group.length})`}
             >
               {letter}
+              <span className="mu-alpha-btn-count">{group.length}</span>
             </button>
           ))}
         </div>
       )}
 
-      <ul className="mu-slist">
-        {filtered.map((surah) => {
-          const linkProps = {
-                  to: "/surah/$surahSlug" as const,
-                  params: { surahSlug: surahSlug(surah.id) },
-                };
-          const displayNum = tab === "nuzul" ? surah.revelationOrder : surah.id;
-          const isMekki = surah.revelation === "makkah";
-
-          return (
-            <li key={surah.id}>
-              <Link {...linkProps} className="mu-srow">
-                <div className="mu-badge">
-                  <span className="mu-badge-n">
-                    {String(displayNum).padStart(3, "0")}
-                  </span>
-                </div>
-                <div className="mu-srow-meta">
-                  <div className="mu-srow-name">
-                    <span className="mu-srow-latin">
-                      {getSurahName(surah.id, locale) || surah.nameSimple}
-                    </span>
-                    <span className="mu-srow-tr">
-                      - {getSurahMeaning(surah.id, locale) || surah.nameTranslation}
-                    </span>
-                  </div>
-                  <div className="mu-srow-sub">
-                    <span className={`mu-chip ${isMekki ? "mu-chip-mekki" : "mu-chip-medeni"}`}>
-                      {isMekki ? "Mekki" : "Medeni"}
-                    </span>
-                    <span>
-                      {surah.ayahCount} {t.surahList?.verses ?? "ayet"}
-                    </span>
-                    <span className="mu-dot">-</span>
-                    <span>
-                      {t.surahList?.nuzul ?? "Nuzul"} {surah.revelationOrder}
-                    </span>
-                  </div>
-                </div>
-                <div className="mu-srow-ar" aria-hidden="true" dir="rtl">
-                  سُورَةُ {surah.nameArabic}
-                </div>
-                <span className="mu-srow-chev">{MuIcons.chev}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      {tab === "alfa" && alphaGroups.length > 0 ? (
+        alphaGroups.map(({ letter, surahs: group }) => (
+          <section key={letter} id={`alpha-${letter}`} className="mu-alpha-group">
+            <h3 className="mu-alpha-heading">{letter}</h3>
+            <ul className="mu-slist">
+              {group.map((surah) => renderSurahRow(surah, tab, locale, t))}
+            </ul>
+          </section>
+        ))
+      ) : (
+        <ul className="mu-slist">
+          {filtered.map((surah) => renderSurahRow(surah, tab, locale, t))}
+        </ul>
+      )}
     </section>
+  );
+}
+
+function renderSurahRow(
+  surah: Surah,
+  tab: string,
+  locale: string,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
+  const linkProps = {
+    to: "/surah/$surahSlug" as const,
+    params: { surahSlug: surahSlug(surah.id) },
+  };
+  const displayNum = tab === "nuzul" ? surah.revelationOrder : surah.id;
+  const isMekki = surah.revelation === "makkah";
+
+  return (
+    <li key={surah.id}>
+      <Link {...linkProps} className="mu-srow">
+        <div className="mu-badge">
+          <span className="mu-badge-n">{String(displayNum).padStart(3, "0")}</span>
+        </div>
+        <div className="mu-srow-meta">
+          <div className="mu-srow-name">
+            <span className="mu-srow-latin">
+              {getSurahName(surah.id, locale) || surah.nameSimple}
+            </span>
+            <span className="mu-srow-tr">
+              - {getSurahMeaning(surah.id, locale) || surah.nameTranslation}
+            </span>
+          </div>
+          <div className="mu-srow-sub">
+            <span className={`mu-chip ${isMekki ? "mu-chip-mekki" : "mu-chip-medeni"}`}>
+              {isMekki ? "Mekki" : "Medeni"}
+            </span>
+            <span>
+              {surah.ayahCount} {t.surahList?.verses ?? "ayet"}
+            </span>
+            <span className="mu-dot">-</span>
+            <span>
+              {t.surahList?.nuzul ?? "Nuzul"} {surah.revelationOrder}
+            </span>
+          </div>
+        </div>
+        <div className="mu-srow-ar" aria-hidden="true" dir="rtl">
+          سُورَةُ {surah.nameArabic}
+        </div>
+        <span className="mu-srow-chev">{MuIcons.chev}</span>
+      </Link>
+    </li>
   );
 }
