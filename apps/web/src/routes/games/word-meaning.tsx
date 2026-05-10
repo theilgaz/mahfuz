@@ -210,6 +210,7 @@ function WordMeaningPage() {
           streak={streak}
           lastDelta={lastDelta}
           round={round}
+          onFinish={endGame}
         />
 
         {/* Arabic word card */}

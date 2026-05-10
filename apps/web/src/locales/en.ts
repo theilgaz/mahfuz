@@ -674,6 +674,8 @@ export const en: Messages = {
     diffHardHint: "2x points",
     diffHafizHint: "3x points",
     newHighScore: "New high score!",
+    finish: "Finish",
+    confirmFinish: "Finish the game now and save your score?",
   },
   hexagonGame: {
     title: "Word Construction",

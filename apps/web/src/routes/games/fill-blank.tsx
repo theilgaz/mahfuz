@@ -237,6 +237,7 @@ function GameScreen({
           streak={streak}
           lastDelta={lastDelta}
           round={round}
+          onFinish={endGame}
         />
 
         {/* Verse label */}

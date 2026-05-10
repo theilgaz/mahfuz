@@ -676,6 +676,8 @@ export const tr = {
     diffHardHint: "2x puan",
     diffHafizHint: "3x puan",
     newHighScore: "Yeni rekor!",
+    finish: "Bitir",
+    confirmFinish: "Oyunu burada bitirip skoru kaydetmek istiyor musun?",
   },
   hexagonGame: {
     title: "Kelime Oluşturma",

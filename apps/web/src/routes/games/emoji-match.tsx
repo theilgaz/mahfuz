@@ -337,6 +337,7 @@ function EmojiMatchPage() {
           streak={streak}
           lastDelta={lastDelta}
           round={round}
+          onFinish={endGame}
         />
 
         <p className="text-xs text-center text-[var(--color-text-secondary)] mb-4">

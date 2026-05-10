@@ -202,6 +202,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
           streak={streak}
           lastDelta={lastDelta}
           round={round}
+          onFinish={endGame}
         />
 
         {/* Verse card */}

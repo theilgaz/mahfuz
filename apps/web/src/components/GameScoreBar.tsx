@@ -2,6 +2,7 @@
  * In-game score bar with countdown timer, score badge, streak indicator.
  */
 import type { GameTheme } from "~/lib/game-themes";
+import { useTranslation } from "~/hooks/useTranslation";
 
 interface GameScoreBarProps {
   theme: GameTheme;
@@ -11,11 +12,21 @@ interface GameScoreBarProps {
   streak: number;
   lastDelta: number | null;
   round: number;
+  onFinish?: () => void;
 }
 
-export function GameScoreBar({ theme, timerDisplay, timerProgress, score, streak, lastDelta, round }: GameScoreBarProps) {
+export function GameScoreBar({ theme, timerDisplay, timerProgress, score, streak, lastDelta, round, onFinish }: GameScoreBarProps) {
   const P = theme.primary;
   const urgent = timerProgress < 0.25;
+  const { t } = useTranslation();
+
+  const handleFinish = () => {
+    if (!onFinish) return;
+    const msg = t.gameScoring?.confirmFinish ?? "Oyunu burada bitirip skoru kaydetmek istiyor musun?";
+    if (typeof window !== "undefined" && window.confirm(msg)) {
+      onFinish();
+    }
+  };
 
   return (
     <div className="mb-4">
@@ -37,6 +48,16 @@ export function GameScoreBar({ theme, timerDisplay, timerProgress, score, streak
           />
         </div>
         <span className="text-[10px] text-[var(--color-text-secondary)] tabular-nums">#{round}</span>
+        {onFinish && (
+          <button
+            type="button"
+            onClick={handleFinish}
+            className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md transition-opacity active:opacity-60"
+            style={{ color: P, backgroundColor: `${P}15` }}
+          >
+            {t.gameScoring?.finish ?? "Bitir"}
+          </button>
+        )}
       </div>
 
       {/* Score + streak */}

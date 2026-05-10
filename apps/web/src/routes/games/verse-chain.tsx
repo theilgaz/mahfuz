@@ -305,6 +305,7 @@ function VerseChainGame({
           streak={streak}
           lastDelta={lastDelta}
           round={round}
+          onFinish={endGame}
         />
 
         {/* Chain indicator */}
