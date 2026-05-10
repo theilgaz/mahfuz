@@ -60,7 +60,7 @@ const GAME_IMGS: Record<string, string> = {
   "elifba-kelime-bul":    "/images/games/mahfuz-word-find.webp",
   "kelime-tahmini":       "/images/games/mahfuz-kelime-tahmini.webp",
   "ayet-2048":            "/images/games/mahfuz-ayet-2048.webp",
-  "emoji-eslestirme":     "/images/games/mahfuz-emoji-match.webp",
+  "kelime-eslestirme":    "/images/games/mahfuz-word-match.webp",
 };
 
 const GAME_COLORS: Record<string, { bg: string; glow: string }> = {
@@ -72,7 +72,7 @@ const GAME_COLORS: Record<string, { bg: string; glow: string }> = {
   "sure-tanima":          { bg: "#B8C9B0", glow: "#5C7A55" },
   "kelime-tahmini":       { bg: "#1A3D2B", glow: "#4A9B6A" },
   "ayet-2048":            { bg: "#1A1A2E", glow: "#E94560" },
-  "emoji-eslestirme":     { bg: "#2A1B0E", glow: "#F5A623" },
+  "kelime-eslestirme":    { bg: "#2A1B0E", glow: "#F5A623" },
   "elifba-sesli-quiz":    { bg: "#1B2B4A", glow: "#4A7BB5" },
   "elifba-form-quiz":     { bg: "#C49B6B", glow: "#8B6B3A" },
   "elifba-karisik-sinav": { bg: "#2D6B5A", glow: "#4A9B7B" },
@@ -91,7 +91,7 @@ function makeGames(t: T): Game[] {
     { id: "hexagon-harf", img: GAME_IMGS["hexagon-harf"], title: t.gamesHub.hexagonTitle, description: t.gamesHub.hexagonDesc, category: t.gamesHub.catWord, link: "/games/hexagon", surahScoped: true },
     { id: "kelime-tahmini", img: GAME_IMGS["kelime-tahmini"], title: t.gamesHub.kelimeTahminiTitle, description: t.gamesHub.kelimeTahminiDesc, category: t.gamesHub.catPuzzle, link: "/games/kelime-tahmini" },
     { id: "ayet-2048", img: GAME_IMGS["ayet-2048"], title: t.gamesHub.ayet2048Title, description: t.gamesHub.ayet2048Desc, category: t.gamesHub.catPuzzle, link: "/games/ayah-2048" },
-    { id: "emoji-eslestirme", img: GAME_IMGS["emoji-eslestirme"], title: t.gamesHub.emojiMatchTitle, description: t.gamesHub.emojiMatchDesc, category: t.gamesHub.catPuzzle, link: "/games/emoji-match" },
+    { id: "kelime-eslestirme", img: GAME_IMGS["kelime-eslestirme"], title: t.gamesHub.wordMatchTitle, description: t.gamesHub.wordMatchDesc, category: t.gamesHub.catPuzzle, link: "/games/word-match" },
   ];
   return games.map((g) => ({ ...g, colors: GAME_COLORS[g.id] }));
 }

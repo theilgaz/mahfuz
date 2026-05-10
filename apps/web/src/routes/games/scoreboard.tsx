@@ -27,6 +27,7 @@ import { LEAGUE_LABELS, LEAGUE_ORDER, type League, seasonKeyFor, seasonRange, fo
 import { LeagueBadge, MedalLeague, RosetteIcon } from "~/components/minimal-ui/LeagueIcons";
 import { Podium } from "~/components/minimal-ui/Podium";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getRecentMeclises } from "~/lib/meclis-service";
 
 export const Route = createFileRoute("/games/scoreboard")({
   component: ScoreboardPage,
@@ -292,7 +293,64 @@ function ScoreboardPage() {
           <RosetteIcon league="altin" size={14} /> Genel sezon ilk 10'una giren oyuncular kokart kazanır.
         </p>
       </section>
+
+      {/* Son Meclisler */}
+      <RecentMeclisesSection />
     </div>
+  );
+}
+
+function RecentMeclisesSection() {
+  const { data: meclises = [] } = useQuery({
+    queryKey: ["recent-meclises"],
+    queryFn: () => getRecentMeclises(),
+    staleTime: 60_000,
+  });
+
+  return (
+    <section style={{ paddingTop: 32, marginTop: 32, borderTop: "1px solid var(--mu-line)" }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+        <h2 className="mu-h2" style={{ fontSize: 20 }}>Son Meclisler</h2>
+        <Link to="/meclis" className="mu-muted" style={{ fontSize: 13, textDecoration: "none" }}>
+          Yeni Meclis →
+        </Link>
+      </div>
+      <p className="mu-muted" style={{ fontSize: 13, marginBottom: 16 }}>
+        Arkadaşlarınla canlı oynayabileceğin parti modu. Skorlar lige sayılmaz, eğlence için.
+      </p>
+      {meclises.length === 0 ? (
+        <p className="mu-muted" style={{ fontSize: 13 }}>Henüz tamamlanmış bir meclis yok.</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {meclises.map((m) => (
+            <div
+              key={m.id}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                gap: 8,
+                padding: 12,
+                border: "1px solid var(--mu-line)",
+                borderRadius: 10,
+                background: "var(--mu-bg-card)",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>
+                  {m.winnerName} kazandı · {m.winnerScore} puan
+                </div>
+                <div className="mu-muted" style={{ fontSize: 12, marginTop: 2 }}>
+                  Mihmandar {m.hostName} · {m.playerCount} katılımcı · {new Date(m.endedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long" })}
+                </div>
+              </div>
+              <code style={{ fontFamily: "var(--mu-ff-mono)", fontSize: 11, color: "var(--mu-muted)", alignSelf: "center" }}>
+                {m.code}
+              </code>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 

@@ -3636,6 +3636,7 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 .mu-games-topbar {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   padding: 0 0 12px;
 }
 
@@ -3678,6 +3679,40 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 
 .mu-games-scoreboard-cta:hover .mu-gscb-arrow {
   color: var(--mu-accent);
+  transform: translateX(2px);
+}
+
+.mu-games-meclis-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: var(--mu-accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--mu-accent);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.mu-games-meclis-cta:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.mu-games-meclis-cta:focus-visible {
+  outline: 2px solid var(--mu-accent);
+  outline-offset: 3px;
+}
+
+.mu-games-meclis-cta .mu-gscb-icon,
+.mu-games-meclis-cta .mu-gscb-arrow {
+  color: #fff;
+}
+
+.mu-games-meclis-cta:hover .mu-gscb-arrow {
   transform: translateX(2px);
 }
 

@@ -838,8 +838,8 @@ export const en: Messages = {
     kelimeTahminiDesc: "Guess the Arabic word from its meaning",
     ayet2048Title: "Quranic 2048",
     ayet2048Desc: "Slide, merge & discover surahs",
-    emojiMatchTitle: "Emoji Match",
-    emojiMatchDesc: "Match the emoji with the correct Arabic word",
+    wordMatchTitle: "Word Match",
+    wordMatchDesc: "Match the Turkish meaning with the correct Arabic word",
     catPuzzle: "Puzzle",
   },
   ayet2048: {
@@ -901,9 +901,9 @@ export const en: Messages = {
     transliteration: "Pronunciation:",
     nextDaily: "Next word:",
   },
-  emojiMatchGame: {
-    title: "Emoji Match",
-    subtitle: "Match the emoji with the correct Arabic word",
+  wordMatchGame: {
+    title: "Word Match",
+    subtitle: "Match the Turkish meaning with the correct Arabic word",
     tapEmoji: "Find the matching pair and tap both",
     matched: "Matched!",
     wrong: "Wrong match",

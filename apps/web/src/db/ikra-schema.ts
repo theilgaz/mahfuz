@@ -281,6 +281,89 @@ export const seasonParticipants = sqliteTable("season_participants", {
   index("season_participants_user_idx").on(t.userId),
 ]);
 
+// ── Meclis (party mode, real-time) ───────────────────────
+
+/**
+ * Bir meclis oturumu. Mihmandar açar, kod paylaşır, katılımcılar
+ * kendi cihazlarından girer; senkron 3 el oynanır.
+ */
+export const meclisSessions = sqliteTable("meclis_sessions", {
+  id: text("id").primaryKey(),
+  /** 6-haneli davet kodu (örn. "MAH741") */
+  code: text("code").notNull().unique(),
+  hostUserId: text("host_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  /** "lobby" | "voting" | "playing" | "interim" | "final" | "cancelled" */
+  status: text("status").notNull().default("lobby"),
+  /** Mihmandar belirler: easy | medium | hard | hafiz */
+  difficulty: text("difficulty").notNull().default("easy"),
+  /** Oylama sonrası kilitlenen 3 oyun: JSON ["fill-blank","surah-guess","word-meaning"] */
+  gamePool: text("game_pool").notNull().default("[]"),
+  /** Şu an hangi el oynanıyor (0-2). final → 3. */
+  currentGameIndex: integer("current_game_index").notNull().default(0),
+  /** Aktif elin sunucu zamanı; client'lar bundan timer kurar */
+  roundStartedAt: integer("round_started_at"),
+  createdAt: integer("created_at").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+}, (t) => [
+  index("meclis_sessions_code_idx").on(t.code),
+  index("meclis_sessions_host_idx").on(t.hostUserId),
+]);
+
+/**
+ * Meclis katılımcıları — userId ile composite PK.
+ * Mihmandar da bir player kaydına sahip.
+ */
+export const meclisPlayers = sqliteTable("meclis_players", {
+  meclisId: text("meclis_id")
+    .notNull()
+    .references(() => meclisSessions.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  ready: integer("ready", { mode: "boolean" }).notNull().default(false),
+  /** Oylama fazında oyuncunun seçtiği 3 oyun: JSON */
+  votes: text("votes").notNull().default("[]"),
+  /** Tüm meclis boyu kümülatif skor */
+  totalScore: integer("total_score").notNull().default(0),
+  /** Aktif el için mevcut skor (her el başında sıfırlanır) */
+  currentScore: integer("current_score").notNull().default(0),
+  /** Aktif eli ne zaman bitirdi (Bitir butonu ya da timeout). null = devam ediyor */
+  finishedAt: integer("finished_at"),
+  joinedAt: integer("joined_at").notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.meclisId, t.userId] }),
+  index("meclis_players_user_idx").on(t.userId),
+]);
+
+/**
+ * Her el sonunda her oyuncu için sonuç kaydı.
+ * Final podium ve "Son Meclisler" bunu okur.
+ */
+export const meclisResults = sqliteTable("meclis_results", {
+  id: text("id").primaryKey(),
+  meclisId: text("meclis_id")
+    .notNull()
+    .references(() => meclisSessions.id, { onDelete: "cascade" }),
+  /** Hangi el (0-2) */
+  gameIndex: integer("game_index").notNull(),
+  /** Hangi oyun çeşidi */
+  gameId: text("game_id").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  score: integer("score").notNull(),
+  correctCount: integer("correct_count").notNull().default(0),
+  wrongCount: integer("wrong_count").notNull().default(0),
+  durationMs: integer("duration_ms").notNull().default(0),
+  createdAt: integer("created_at").notNull(),
+}, (t) => [
+  index("meclis_results_meclis_idx").on(t.meclisId),
+  index("meclis_results_user_idx").on(t.userId),
+]);
+
 // ── Günlük Meydan Okuma (Daily Challenge) ────────────────
 
 export const dailyChallengeResults = sqliteTable("daily_challenge_results", {

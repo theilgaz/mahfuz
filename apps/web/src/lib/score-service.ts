@@ -61,7 +61,7 @@ export const GAME_TITLES: Record<string, string> = {
   "hexagon": "Hexagon Harf",
   "kelime-tahmini": "Kelime Tahmini",
   "ayet-2048": "Quranic 2048",
-  "emoji-match": "Emoji Eşleştirme",
+  "word-match": "Kelime Eşleştirme",
 };
 
 const GAME_TITLES_EN: Record<string, string> = {
@@ -72,7 +72,7 @@ const GAME_TITLES_EN: Record<string, string> = {
   "hexagon": "Hexagon Letters",
   "kelime-tahmini": "Word Guess",
   "ayet-2048": "Quranic 2048",
-  "emoji-match": "Emoji Match",
+  "word-match": "Word Match",
 };
 
 /** Returns game title for the given locale. Falls back to Turkish. */

@@ -82,14 +82,14 @@ const GAMES = [
     path: "/games/ayah-2048",
   },
   {
-    id: "emoji-match",
-    t: GAME_TITLES["emoji-match"]!,
+    id: "word-match",
+    t: GAME_TITLES["word-match"]!,
     tag: "Bulmaca",
-    s: "Emojiyi doğru Arapça kelimeyle eşleştir.",
+    s: "Türkçe anlamla Arapça kelimeyi eşleştir.",
     d: "kolay" as const,
     time: "3 dk",
     xp: 50,
-    path: "/games/emoji-match",
+    path: "/games/word-match",
   },
 ];
 
@@ -109,11 +109,16 @@ export function GamesPageMinimal() {
 
   return (
     <div className="mu-games">
-      {/* Top bar with scoreboard CTA */}
+      {/* Top bar with scoreboard + meclis CTAs */}
       <div className="mu-games-topbar">
         <Link to="/games/scoreboard" className="mu-games-scoreboard-cta">
           <span className="mu-gscb-icon" aria-hidden="true">{MuIcons.games}</span>
           <span className="mu-gscb-label">Skor Tablosu</span>
+          <span className="mu-gscb-arrow" aria-hidden="true">{MuIcons.arrowRight}</span>
+        </Link>
+        <Link to="/meclis" className="mu-games-meclis-cta">
+          <span className="mu-gscb-icon" aria-hidden="true">{MuIcons.usersFour}</span>
+          <span className="mu-gscb-label">Meclis</span>
           <span className="mu-gscb-arrow" aria-hidden="true">{MuIcons.arrowRight}</span>
         </Link>
       </div>

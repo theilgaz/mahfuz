@@ -24,21 +24,23 @@ import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MeclisIndexRouteImport } from './routes/meclis/index'
 import { Route as KhatmIndexRouteImport } from './routes/khatm/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as AlifbaIndexRouteImport } from './routes/alifba/index'
 import { Route as SurahSurahSlugRouteImport } from './routes/surah/$surahSlug'
 import { Route as PagePageNumberRouteImport } from './routes/page/$pageNumber'
+import { Route as MeclisCodeRouteImport } from './routes/meclis/$code'
 import { Route as KhatmGroupIdRouteImport } from './routes/khatm/$groupId'
 import { Route as JuzJuzIdRouteImport } from './routes/juz/$juzId'
 import { Route as GamesWordMeaningRouteImport } from './routes/games/word-meaning'
+import { Route as GamesWordMatchRouteImport } from './routes/games/word-match'
 import { Route as GamesVerseChainRouteImport } from './routes/games/verse-chain'
 import { Route as GamesSurahGuessRouteImport } from './routes/games/surah-guess'
 import { Route as GamesScoreboardRouteImport } from './routes/games/scoreboard'
 import { Route as GamesKelimeTahminiRouteImport } from './routes/games/kelime-tahmini'
 import { Route as GamesHexagonRouteImport } from './routes/games/hexagon'
 import { Route as GamesFillBlankRouteImport } from './routes/games/fill-blank'
-import { Route as GamesEmojiMatchRouteImport } from './routes/games/emoji-match'
 import { Route as GamesAyah2048RouteImport } from './routes/games/ayah-2048'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
@@ -145,6 +147,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeclisIndexRoute = MeclisIndexRouteImport.update({
+  id: '/meclis/',
+  path: '/meclis/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KhatmIndexRoute = KhatmIndexRouteImport.update({
   id: '/khatm/',
   path: '/khatm/',
@@ -170,6 +177,11 @@ const PagePageNumberRoute = PagePageNumberRouteImport.update({
   path: '/page/$pageNumber',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeclisCodeRoute = MeclisCodeRouteImport.update({
+  id: '/meclis/$code',
+  path: '/meclis/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KhatmGroupIdRoute = KhatmGroupIdRouteImport.update({
   id: '/khatm/$groupId',
   path: '/khatm/$groupId',
@@ -183,6 +195,11 @@ const JuzJuzIdRoute = JuzJuzIdRouteImport.update({
 const GamesWordMeaningRoute = GamesWordMeaningRouteImport.update({
   id: '/word-meaning',
   path: '/word-meaning',
+  getParentRoute: () => GamesRoute,
+} as any)
+const GamesWordMatchRoute = GamesWordMatchRouteImport.update({
+  id: '/word-match',
+  path: '/word-match',
   getParentRoute: () => GamesRoute,
 } as any)
 const GamesVerseChainRoute = GamesVerseChainRouteImport.update({
@@ -213,11 +230,6 @@ const GamesHexagonRoute = GamesHexagonRouteImport.update({
 const GamesFillBlankRoute = GamesFillBlankRouteImport.update({
   id: '/fill-blank',
   path: '/fill-blank',
-  getParentRoute: () => GamesRoute,
-} as any)
-const GamesEmojiMatchRoute = GamesEmojiMatchRouteImport.update({
-  id: '/emoji-match',
-  path: '/emoji-match',
   getParentRoute: () => GamesRoute,
 } as any)
 const GamesAyah2048Route = GamesAyah2048RouteImport.update({
@@ -396,21 +408,23 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/games/ayah-2048': typeof GamesAyah2048Route
-  '/games/emoji-match': typeof GamesEmojiMatchRoute
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
   '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
   '/games/scoreboard': typeof GamesScoreboardRoute
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
+  '/games/word-match': typeof GamesWordMatchRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/khatm/$groupId': typeof KhatmGroupIdRoute
+  '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
   '/khatm/': typeof KhatmIndexRoute
+  '/meclis/': typeof MeclisIndexRoute
   '/alifba/exam/$stepId': typeof AlifbaExamStepIdRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
@@ -455,21 +469,23 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/games/ayah-2048': typeof GamesAyah2048Route
-  '/games/emoji-match': typeof GamesEmojiMatchRoute
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
   '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
   '/games/scoreboard': typeof GamesScoreboardRoute
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
+  '/games/word-match': typeof GamesWordMatchRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/khatm/$groupId': typeof KhatmGroupIdRoute
+  '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba': typeof AlifbaIndexRoute
   '/games': typeof GamesIndexRoute
   '/khatm': typeof KhatmIndexRoute
+  '/meclis': typeof MeclisIndexRoute
   '/alifba/exam/$stepId': typeof AlifbaExamStepIdRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
@@ -518,21 +534,23 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/games/ayah-2048': typeof GamesAyah2048Route
-  '/games/emoji-match': typeof GamesEmojiMatchRoute
   '/games/fill-blank': typeof GamesFillBlankRoute
   '/games/hexagon': typeof GamesHexagonRoute
   '/games/kelime-tahmini': typeof GamesKelimeTahminiRoute
   '/games/scoreboard': typeof GamesScoreboardRoute
   '/games/surah-guess': typeof GamesSurahGuessRoute
   '/games/verse-chain': typeof GamesVerseChainRoute
+  '/games/word-match': typeof GamesWordMatchRoute
   '/games/word-meaning': typeof GamesWordMeaningRoute
   '/juz/$juzId': typeof JuzJuzIdRoute
   '/khatm/$groupId': typeof KhatmGroupIdRoute
+  '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
   '/khatm/': typeof KhatmIndexRoute
+  '/meclis/': typeof MeclisIndexRoute
   '/alifba/exam/$stepId': typeof AlifbaExamStepIdRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
@@ -582,21 +600,23 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/games/ayah-2048'
-    | '/games/emoji-match'
     | '/games/fill-blank'
     | '/games/hexagon'
     | '/games/kelime-tahmini'
     | '/games/scoreboard'
     | '/games/surah-guess'
     | '/games/verse-chain'
+    | '/games/word-match'
     | '/games/word-meaning'
     | '/juz/$juzId'
     | '/khatm/$groupId'
+    | '/meclis/$code'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
     | '/alifba/'
     | '/games/'
     | '/khatm/'
+    | '/meclis/'
     | '/alifba/exam/$stepId'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
@@ -641,21 +661,23 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/games/ayah-2048'
-    | '/games/emoji-match'
     | '/games/fill-blank'
     | '/games/hexagon'
     | '/games/kelime-tahmini'
     | '/games/scoreboard'
     | '/games/surah-guess'
     | '/games/verse-chain'
+    | '/games/word-match'
     | '/games/word-meaning'
     | '/juz/$juzId'
     | '/khatm/$groupId'
+    | '/meclis/$code'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
     | '/alifba'
     | '/games'
     | '/khatm'
+    | '/meclis'
     | '/alifba/exam/$stepId'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
@@ -703,21 +725,23 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/games/ayah-2048'
-    | '/games/emoji-match'
     | '/games/fill-blank'
     | '/games/hexagon'
     | '/games/kelime-tahmini'
     | '/games/scoreboard'
     | '/games/surah-guess'
     | '/games/verse-chain'
+    | '/games/word-match'
     | '/games/word-meaning'
     | '/juz/$juzId'
     | '/khatm/$groupId'
+    | '/meclis/$code'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
     | '/alifba/'
     | '/games/'
     | '/khatm/'
+    | '/meclis/'
     | '/alifba/exam/$stepId'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
@@ -767,10 +791,12 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   JuzJuzIdRoute: typeof JuzJuzIdRoute
   KhatmGroupIdRoute: typeof KhatmGroupIdRoute
+  MeclisCodeRoute: typeof MeclisCodeRoute
   PagePageNumberRoute: typeof PagePageNumberRoute
   SurahSurahSlugRoute: typeof SurahSurahSlugRoute
   AlifbaIndexRoute: typeof AlifbaIndexRoute
   KhatmIndexRoute: typeof KhatmIndexRoute
+  MeclisIndexRoute: typeof MeclisIndexRoute
   AlifbaQuizFormsRoute: typeof AlifbaQuizFormsRoute
   AlifbaQuizVoiceRoute: typeof AlifbaQuizVoiceRoute
   AlifbaStepStepIdRoute: typeof AlifbaStepStepIdRoute
@@ -892,6 +918,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meclis/': {
+      id: '/meclis/'
+      path: '/meclis'
+      fullPath: '/meclis/'
+      preLoaderRoute: typeof MeclisIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/khatm/': {
       id: '/khatm/'
       path: '/khatm'
@@ -927,6 +960,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagePageNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meclis/$code': {
+      id: '/meclis/$code'
+      path: '/meclis/$code'
+      fullPath: '/meclis/$code'
+      preLoaderRoute: typeof MeclisCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/khatm/$groupId': {
       id: '/khatm/$groupId'
       path: '/khatm/$groupId'
@@ -946,6 +986,13 @@ declare module '@tanstack/react-router' {
       path: '/word-meaning'
       fullPath: '/games/word-meaning'
       preLoaderRoute: typeof GamesWordMeaningRouteImport
+      parentRoute: typeof GamesRoute
+    }
+    '/games/word-match': {
+      id: '/games/word-match'
+      path: '/word-match'
+      fullPath: '/games/word-match'
+      preLoaderRoute: typeof GamesWordMatchRouteImport
       parentRoute: typeof GamesRoute
     }
     '/games/verse-chain': {
@@ -988,13 +1035,6 @@ declare module '@tanstack/react-router' {
       path: '/fill-blank'
       fullPath: '/games/fill-blank'
       preLoaderRoute: typeof GamesFillBlankRouteImport
-      parentRoute: typeof GamesRoute
-    }
-    '/games/emoji-match': {
-      id: '/games/emoji-match'
-      path: '/emoji-match'
-      fullPath: '/games/emoji-match'
-      preLoaderRoute: typeof GamesEmojiMatchRouteImport
       parentRoute: typeof GamesRoute
     }
     '/games/ayah-2048': {
@@ -1212,26 +1252,26 @@ declare module '@tanstack/react-router' {
 
 interface GamesRouteChildren {
   GamesAyah2048Route: typeof GamesAyah2048Route
-  GamesEmojiMatchRoute: typeof GamesEmojiMatchRoute
   GamesFillBlankRoute: typeof GamesFillBlankRoute
   GamesHexagonRoute: typeof GamesHexagonRoute
   GamesKelimeTahminiRoute: typeof GamesKelimeTahminiRoute
   GamesScoreboardRoute: typeof GamesScoreboardRoute
   GamesSurahGuessRoute: typeof GamesSurahGuessRoute
   GamesVerseChainRoute: typeof GamesVerseChainRoute
+  GamesWordMatchRoute: typeof GamesWordMatchRoute
   GamesWordMeaningRoute: typeof GamesWordMeaningRoute
   GamesIndexRoute: typeof GamesIndexRoute
 }
 
 const GamesRouteChildren: GamesRouteChildren = {
   GamesAyah2048Route: GamesAyah2048Route,
-  GamesEmojiMatchRoute: GamesEmojiMatchRoute,
   GamesFillBlankRoute: GamesFillBlankRoute,
   GamesHexagonRoute: GamesHexagonRoute,
   GamesKelimeTahminiRoute: GamesKelimeTahminiRoute,
   GamesScoreboardRoute: GamesScoreboardRoute,
   GamesSurahGuessRoute: GamesSurahGuessRoute,
   GamesVerseChainRoute: GamesVerseChainRoute,
+  GamesWordMatchRoute: GamesWordMatchRoute,
   GamesWordMeaningRoute: GamesWordMeaningRoute,
   GamesIndexRoute: GamesIndexRoute,
 }
@@ -1321,10 +1361,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   JuzJuzIdRoute: JuzJuzIdRoute,
   KhatmGroupIdRoute: KhatmGroupIdRoute,
+  MeclisCodeRoute: MeclisCodeRoute,
   PagePageNumberRoute: PagePageNumberRoute,
   SurahSurahSlugRoute: SurahSurahSlugRoute,
   AlifbaIndexRoute: AlifbaIndexRoute,
   KhatmIndexRoute: KhatmIndexRoute,
+  MeclisIndexRoute: MeclisIndexRoute,
   AlifbaQuizFormsRoute: AlifbaQuizFormsRoute,
   AlifbaQuizVoiceRoute: AlifbaQuizVoiceRoute,
   AlifbaStepStepIdRoute: AlifbaStepStepIdRoute,

@@ -1,11 +1,11 @@
 /**
- * Emoji Eslestirme -- grid matching puzzle.
- * Emojiler solda, karisik Arapca kelimeler sagda.
- * Eslesen ciftler kaybolur, tahtayi temizle, yeni tura gec.
+ * Kelime Eşleştirme — grid matching puzzle.
+ * Türkçe anlamlar bir kartta, karışık Arapça kelimeler diğerinde;
+ * eşleşen çiftler kaybolur, tahta temizlenir, yeni tura geçilir.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { submitScore } from "~/lib/score-service";
 import type { League } from "~/lib/league";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -21,19 +21,17 @@ import {
   formatDelta,
   type Difficulty,
 } from "~/lib/game-scoring";
-import {
-  pickRandomItems,
-  getEmojiMeaning,
-  type PickedItem,
-} from "~/lib/emoji-words";
+import { useQuranWordPool, type QuranWord } from "~/lib/quran-word-pool";
+import { EMOJI_WORDS } from "~/lib/emoji-words";
+import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 
-const GAME_ID = "emoji-match" as const;
+const GAME_ID = "word-match" as const;
 const THEME = GAME_THEMES[GAME_ID];
 const P = THEME.primary;
-const PAIRS_PER_ROUND = 6;
+const PAIRS_PER_ROUND = 8;
 
-export const Route = createFileRoute("/games/emoji-match")({
-  component: EmojiMatchPage,
+export const Route = createFileRoute("/games/word-match")({
+  component: WordMatchPage,
 });
 
 function shuffle<T>(arr: T[]): T[] {
@@ -46,29 +44,45 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 type Card =
-  | { kind: "emoji"; pairIdx: number; emoji: string; meaning: string }
+  | { kind: "tr"; pairIdx: number; meaning: string }
   | { kind: "arabic"; pairIdx: number; arabic: string };
 
 interface RoundData {
-  items: PickedItem[];
+  items: QuranWord[];
   cards: Card[];
 }
 
-function generateRound(usedIndices: Set<number>): RoundData {
-  const items = pickRandomItems(PAIRS_PER_ROUND, usedIndices);
-  const emojiCards: Card[] = items.map((picked, idx) => ({
-    kind: "emoji",
+function pickRandomItems(words: QuranWord[], count: number, usedIndices: Set<number>): { items: QuranWord[]; pickedIdx: number[] } {
+  const available = words.map((_, i) => i).filter((i) => !usedIndices.has(i));
+  const indexPool = available.length >= count ? available : words.map((_, i) => i);
+  // Aynı meaning iki kez gelmesin
+  const picked: number[] = [];
+  const usedMeanings = new Set<string>();
+  const order = shuffle(indexPool);
+  for (const i of order) {
+    const m = words[i].meaning;
+    if (usedMeanings.has(m)) continue;
+    picked.push(i);
+    usedMeanings.add(m);
+    if (picked.length === count) break;
+  }
+  return { items: picked.map((i) => words[i]), pickedIdx: picked };
+}
+
+function generateRound(words: QuranWord[], usedIndices: Set<number>): RoundData & { pickedIdx: number[] } {
+  const { items, pickedIdx } = pickRandomItems(words, PAIRS_PER_ROUND, usedIndices);
+  const trCards: Card[] = items.map((it, idx) => ({
+    kind: "tr",
     pairIdx: idx,
-    emoji: picked.item.emoji,
-    meaning: "",
+    meaning: it.meaning,
   }));
-  const arabicCards: Card[] = items.map((picked, idx) => ({
+  const arabicCards: Card[] = items.map((it, idx) => ({
     kind: "arabic",
     pairIdx: idx,
-    arabic: picked.item.arabic,
+    arabic: it.arabic,
   }));
-  const cards = shuffle([...emojiCards, ...arabicCards]);
-  return { items, cards };
+  const cards = shuffle([...trCards, ...arabicCards]);
+  return { items, cards, pickedIdx };
 }
 
 type MatchFeedback = {
@@ -114,12 +128,25 @@ function resolveCardStyle(
   return { style: base, extraClass: "" };
 }
 
-function EmojiMatchPage() {
+function WordMatchPage() {
   const { t, locale } = useTranslation();
-  const gt = t.emojiMatchGame;
-  const [screen, setScreen] = useState<"game" | "gameover">("game");
-  const difficulty: Difficulty = "easy";
+  const gt = t.wordMatchGame;
+  const [screen, setScreen] = useState<"setup" | "game" | "gameover">("setup");
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const timer = useGameTimer(difficulty);
+
+  const { data: pool } = useQuranWordPool();
+
+  // easy → emoji oyunundaki gibi seçili tahmin edilebilir kelimeler (taş, su, kitap...)
+  // hard → quran-word-pool zor bucket'ı (nadir / çekimli formlar)
+  const wordsFor = useCallback((diff: Difficulty): QuranWord[] => {
+    if (diff === "easy") {
+      return EMOJI_WORDS.map((e) => ({ arabic: e.arabic, meaning: locale === "en" ? e.en : e.tr }));
+    }
+    return pool ? pool.zor : [];
+  }, [pool, locale]);
+
+  const words = useMemo(() => wordsFor(difficulty), [wordsFor, difficulty]);
 
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
@@ -132,8 +159,8 @@ function EmojiMatchPage() {
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const [leagueUp, setLeagueUp] = useState<{ from: League; to: League } | null>(null);
 
-  const [usedGlobalIndices, setUsedGlobalIndices] = useState<Set<number>>(new Set());
-  const [roundData, setRoundData] = useState<RoundData>(() => generateRound(new Set()));
+  const [usedIndices, setUsedIndices] = useState<Set<number>>(new Set());
+  const [roundData, setRoundData] = useState<RoundData | null>(null);
   const [matchedPairs, setMatchedPairs] = useState<Set<number>>(new Set());
   const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<MatchFeedback | null>(null);
@@ -144,11 +171,11 @@ function EmojiMatchPage() {
   const timerStartedRef = useRef(false);
 
   useEffect(() => {
-    if (screen === "game" && !timerStartedRef.current && !timer.isExpired) {
+    if (screen === "game" && !timerStartedRef.current && !timer.isExpired && roundData) {
       timer.start();
       timerStartedRef.current = true;
     }
-  }, [screen]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [screen, roundData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (timer.isExpired && screen === "game") {
@@ -162,10 +189,11 @@ function EmojiMatchPage() {
     return () => clearTimeout(id);
   }, [feedback]);
 
-  const allMatched = matchedPairs.size === PAIRS_PER_ROUND;
+  const allMatched = roundData != null && matchedPairs.size === roundData.items.length;
 
   const handleTapCard = useCallback(
     (cardIdx: number) => {
+      if (!roundData) return;
       const card = roundData.cards[cardIdx];
       if (matchedPairs.has(card.pairIdx) || timer.isExpired || allMatched) return;
       if (feedback) return;
@@ -183,14 +211,13 @@ function EmojiMatchPage() {
 
       const prevCard = roundData.cards[selectedCardIdx];
 
-      // Must select one emoji and one arabic - same kind is just re-select
+      // Aynı taraftan iki kart seçilirse sadece seçimi güncelle
       if (prevCard.kind === card.kind) {
         setSelectedCardIdx(cardIdx);
         matchStart.current = Date.now();
         return;
       }
 
-      // Try match
       const isCorrect = prevCard.pairIdx === card.pairIdx;
 
       if (isCorrect) {
@@ -217,7 +244,7 @@ function EmojiMatchPage() {
       setFeedback({ cardA: selectedCardIdx, cardB: cardIdx, correct: isCorrect });
       setSelectedCardIdx(null);
     },
-    [selectedCardIdx, matchedPairs, timer.isExpired, allMatched, feedback, roundData.cards, streak, difficulty], // eslint-disable-line react-hooks/exhaustive-deps
+    [selectedCardIdx, matchedPairs, timer.isExpired, allMatched, feedback, roundData, streak, difficulty], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const endGame = useCallback(() => {
@@ -246,22 +273,28 @@ function EmojiMatchPage() {
   }, [score, difficulty, correctCount, wrongCount, bestStreak, timer]);
 
   const nextRound = useCallback(() => {
-    if (timer.isExpired) { endGame(); return; }
-
-    const newUsed = new Set(usedGlobalIndices);
-    for (const picked of roundData.items) {
-      newUsed.add(picked.globalIdx);
+    if (timer.isExpired || !roundData || words.length === 0) {
+      if (timer.isExpired) endGame();
+      return;
     }
-    setUsedGlobalIndices(newUsed);
+    // Şu turun kelime indekslerini dışlanan setine ekle
+    const newUsed = new Set(usedIndices);
+    const indexInWords = (item: QuranWord) => words.findIndex((w) => w.arabic === item.arabic && w.meaning === item.meaning);
+    for (const it of roundData.items) {
+      const i = indexInWords(it);
+      if (i >= 0) newUsed.add(i);
+    }
+    setUsedIndices(newUsed);
 
-    setRoundData(generateRound(newUsed));
+    const next = generateRound(words, newUsed);
+    setRoundData({ items: next.items, cards: next.cards });
     setMatchedPairs(new Set());
     setSelectedCardIdx(null);
     setFeedback(null);
     setLastDelta(null);
     setRound((r) => r + 1);
     matchStart.current = Date.now();
-  }, [timer, endGame, usedGlobalIndices, roundData]);
+  }, [timer, endGame, usedIndices, roundData, words]);
 
   const AUTO_ADVANCE_MS = 1000;
   useEffect(() => {
@@ -279,9 +312,11 @@ function EmojiMatchPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [allMatched, nextRound]);
 
-  const handleRestart = () => {
+  const handleRestart = useCallback((nextDifficulty?: Difficulty) => {
+    const diff = nextDifficulty ?? difficulty;
     const fresh = new Set<number>();
-    setUsedGlobalIndices(fresh);
+    const sourceWords = wordsFor(diff);
+    setUsedIndices(fresh);
     setScore(0);
     setRound(1);
     setStreak(0);
@@ -296,13 +331,34 @@ function EmojiMatchPage() {
     sessionStart.current = Date.now();
     matchStart.current = Date.now();
     timerStartedRef.current = false;
-    setRoundData(generateRound(fresh));
+    if (sourceWords.length > 0) {
+      const r = generateRound(sourceWords, fresh);
+      setRoundData({ items: r.items, cards: r.cards });
+    } else {
+      setRoundData(null);
+    }
     setMatchedPairs(new Set());
     setSelectedCardIdx(null);
     setFeedback(null);
     setScreen("game");
     timer.reset();
-  };
+  }, [difficulty, pool, timer]);
+
+  if (screen === "setup") {
+    return (
+      <SurahPickerScreen
+        gameImg={THEME.img}
+        gameId={GAME_ID}
+        difficultyOnly
+        simpleDifficulty
+        onStart={(_ids, _vf, diff) => {
+          const next = diff ?? "easy";
+          setDifficulty(next);
+          handleRestart(next);
+        }}
+      />
+    );
+  }
 
   if (screen === "gameover") {
     return (
@@ -316,12 +372,23 @@ function EmojiMatchPage() {
         t={t}
         newAchievements={newAchievements}
         leagueUp={leagueUp}
-        onRestart={handleRestart}
+        onRestart={() => handleRestart(difficulty)}
+        onSetup={() => setScreen("setup")}
       />
     );
   }
 
-  const pairsLeft = PAIRS_PER_ROUND - matchedPairs.size;
+  if (!roundData) {
+    return (
+      <div className="max-w-lg mx-auto pb-24 px-4 pt-10 game-bg" style={gameBgStyle(THEME, GAME_ID)}>
+        <div className="px-5 py-12 rounded-2xl border bg-[var(--color-surface)] text-center text-sm text-[var(--color-text-secondary)]">
+          Kelime havuzu yükleniyor…
+        </div>
+      </div>
+    );
+  }
+
+  const pairsLeft = roundData.items.length - matchedPairs.size;
 
   return (
     <div
@@ -348,7 +415,7 @@ function EmojiMatchPage() {
           </span>
         </p>
 
-        <div className="grid grid-cols-3 gap-2 mb-5">
+        <div className="grid grid-cols-4 gap-2 mb-5">
           {roundData.cards.map((card, cardIdx) => {
             const isMatched = matchedPairs.has(card.pairIdx);
             const isFeedback = feedback?.cardA === cardIdx || feedback?.cardB === cardIdx;
@@ -359,18 +426,17 @@ function EmojiMatchPage() {
               isSelected,
             );
 
-            if (card.kind === "emoji") {
+            if (card.kind === "tr") {
               return (
                 <button
                   key={cardIdx}
                   onClick={() => handleTapCard(cardIdx)}
                   disabled={isMatched}
-                  className={`flex flex-col items-center justify-center gap-1 px-2 py-3 rounded-xl border transition-all ${extraClass}`}
+                  className={`flex items-center justify-center px-2 py-3 rounded-xl border transition-all min-h-[64px] ${extraClass}`}
                   style={cardStyle}
                 >
-                  <span className="text-2xl">{card.emoji}</span>
-                  <span className="text-[10px] text-[var(--color-text-secondary)] truncate max-w-full">
-                    {getEmojiMeaning(roundData.items[card.pairIdx].item, locale)}
+                  <span className="text-xs sm:text-sm font-medium text-[var(--color-text-primary)] text-center leading-tight">
+                    {card.meaning}
                   </span>
                 </button>
               );
@@ -381,11 +447,11 @@ function EmojiMatchPage() {
                 key={cardIdx}
                 onClick={() => handleTapCard(cardIdx)}
                 disabled={isMatched}
-                className={`flex items-center justify-center px-2 py-3 rounded-xl border transition-all ${extraClass}`}
+                className={`flex items-center justify-center px-2 py-3 rounded-xl border transition-all min-h-[64px] ${extraClass}`}
                 style={cardStyle}
               >
                 <span
-                  className="text-lg font-bold text-[var(--color-text-primary)]"
+                  className="text-base sm:text-lg font-bold text-[var(--color-text-primary)]"
                   dir="rtl"
                   lang="ar"
                   style={{ fontFamily: "var(--font-arabic)" }}
@@ -410,55 +476,9 @@ function EmojiMatchPage() {
               className="text-sm font-semibold flex items-center justify-center gap-2"
               style={{ color: P }}
             >
-              <span className="game-star-spin">{"\u2713"}</span>
+              <span className="game-star-spin">{"✓"}</span>
               {gt.matched} {lastDelta !== null && formatDelta(lastDelta)}
             </p>
-          </div>
-        )}
-
-        {feedback && !feedback.correct && (
-          <div
-            className="px-4 py-3 rounded-xl text-center border mb-3 game-slide-up"
-            style={{
-              backgroundColor: "rgba(220,38,38,0.10)",
-              borderColor: "rgba(239,68,68,0.3)",
-            }}
-          >
-            <p
-              className="text-sm font-semibold flex items-center justify-center gap-2"
-              style={{ color: "#f87171" }}
-            >
-              <span>{"\u2717"}</span>
-              {gt.wrong} {lastDelta !== null && formatDelta(lastDelta)}
-            </p>
-          </div>
-        )}
-
-        {allMatched && (
-          <div className="text-center game-slide-up">
-            <div
-              className="px-4 py-3 rounded-xl border mb-3"
-              style={{ backgroundColor: `${P}10`, borderColor: `${P}30` }}
-            >
-              <p className="text-sm font-bold" style={{ color: P }}>
-                {gt.roundComplete}
-              </p>
-            </div>
-            <button
-              onClick={nextRound}
-              className="relative overflow-hidden w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
-              style={{
-                background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`,
-                boxShadow: `0 2px 10px ${THEME.glow}`,
-              }}
-            >
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 origin-left"
-                style={{ background: "rgba(255,255,255,0.22)", animation: `game-advance-fill ${AUTO_ADVANCE_MS}ms linear forwards` }}
-              />
-              <span className="relative">{gt.nextRound}</span>
-            </button>
           </div>
         )}
       </div>

@@ -843,8 +843,8 @@ export const tr = {
     kelimeTahminiDesc: "Anlamdan Arapça kelimeyi tahmin et",
     ayet2048Title: "Quranic 2048",
     ayet2048Desc: "Sureleri kaydır, birleştir, keşfet",
-    emojiMatchTitle: "Emoji Eşleştirme",
-    emojiMatchDesc: "Emojiyi doğru Arapça kelimeyle eşleştir",
+    wordMatchTitle: "Kelime Eşleştirme",
+    wordMatchDesc: "Türkçe anlamla Arapça kelimeyi eşleştir",
     catPuzzle: "Bulmaca",
   },
   ayet2048: {
@@ -906,9 +906,9 @@ export const tr = {
     transliteration: "Okunuşu:",
     nextDaily: "Sonraki kelime:",
   },
-  emojiMatchGame: {
-    title: "Emoji Eşleştirme",
-    subtitle: "Emojiyi doğru Arapça kelimeyle eşle",
+  wordMatchGame: {
+    title: "Kelime Eşleştirme",
+    subtitle: "Türkçe anlamı doğru Arapça kelimeyle eşle",
     tapEmoji: "Eşleşen çifti bul ve ikisine de dokun",
     matched: "Eşleştirildi!",
     wrong: "Yanlış eşleşme",
