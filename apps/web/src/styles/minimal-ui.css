@@ -3623,23 +3623,6 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   transform: translateY(-2px);
 }
 
-.mu-gcard-icon {
-  height: 112px;
-  background:
-    radial-gradient(200px 120px at 50% 50%, color-mix(in oklab, var(--mu-accent), transparent 85%), transparent 70%),
-    var(--mu-bg-soft);
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  color: var(--mu-ink-2);
-  padding: 16px;
-}
-
-.mu-gcard-icon svg {
-  width: 72px;
-  height: 72px;
-}
-
 .mu-gcard-top {
   display: flex;
   justify-content: space-between;
@@ -5230,8 +5213,6 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   .mu-games { padding: 20px 12px 64px; }
   .mu-games-grid { gap: 10px; }
   .mu-gcard { padding: 14px; gap: 12px; border-radius: 14px; }
-  .mu-gcard-icon { height: 80px; padding: 12px; }
-  .mu-gcard-icon svg { width: 56px; height: 56px; }
   .mu-gcard h3 { font-size: 17px; }
   .mu-gcard-top { margin-bottom: 4px; }
   .mu-gcard-foot {

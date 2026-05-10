@@ -155,12 +155,6 @@ export function GamesPageMinimal() {
         {list.map((g) => (
           <Link to={g.path as any} key={g.id} style={{ textDecoration: "none", color: "inherit" }}>
             <article className="mu-gcard">
-              <div className="mu-gcard-icon">
-                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.2">
-                  <rect x="10" y="14" width="44" height="36" rx="3" opacity="0.4" />
-                  <path d="M16 24h32M16 32h22M16 40h28" opacity="0.6" />
-                </svg>
-              </div>
               <div style={{ flex: 1 }}>
                 <div className="mu-gcard-top">
                   <span className="mu-gcard-tag">{g.tag}</span>
