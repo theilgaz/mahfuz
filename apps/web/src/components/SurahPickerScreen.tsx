@@ -30,17 +30,19 @@ interface Props {
   gameImg?: string;
   /** When true, hides surah selection and only shows difficulty. */
   difficultyOnly?: boolean;
+  /** When true, shows only Normal/Zor (mapped to easy/hard) instead of 4 levels. */
+  simpleDifficulty?: boolean;
   /** Game ID for showing mini leaderboard (e.g. "fill-blank"). */
   gameId?: string;
   onStart: (surahIds: number[], verseFilter?: VerseFilter, difficulty?: Difficulty) => void;
 }
 
-export function SurahPickerScreen({ gameImg, difficultyOnly, gameId, onStart }: Props) {
+export function SurahPickerScreen({ gameImg, difficultyOnly, simpleDifficulty, gameId, onStart }: Props) {
   const { t } = useTranslation();
   const savedIds = useSurahSelectionStore((s) => s.selectedSurahIds);
   const saveIds = useSurahSelectionStore((s) => s.setSelectedSurahIds);
   const memorized = useHifzStore((s) => s.memorized);
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [difficulty, setDifficulty] = useState<Difficulty>(simpleDifficulty ? "easy" : "medium");
 
   const studiedIds = useStudiedStore((s) => s.surahIds);
 
@@ -140,10 +142,19 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, gameId, onStart }: 
       {/* Zorluk seçimi */}
       <div className="mb-5">
         <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
-          {(["easy", "medium", "hard", "hafiz"] as const).map((d) => {
+          {(simpleDifficulty
+            ? ([
+                { d: "easy" as Difficulty, label: "Normal", dotColor: "bg-emerald-500" },
+                { d: "hard" as Difficulty, label: "Zor", dotColor: "bg-red-500" },
+              ])
+            : ([
+                { d: "easy" as Difficulty, label: t.gameScoring.diffEasy, dotColor: "bg-emerald-500" },
+                { d: "medium" as Difficulty, label: t.gameScoring.diffMedium, dotColor: "bg-amber-500" },
+                { d: "hard" as Difficulty, label: t.gameScoring.diffHard, dotColor: "bg-red-500" },
+                { d: "hafiz" as Difficulty, label: t.gameScoring.diffHafiz, dotColor: "bg-purple-500" },
+              ])
+          ).map(({ d, label, dotColor }) => {
             const active = difficulty === d;
-            const label = t.gameScoring[d === "easy" ? "diffEasy" : d === "medium" ? "diffMedium" : d === "hard" ? "diffHard" : "diffHafiz"];
-            const dotColor = d === "easy" ? "bg-emerald-500" : d === "medium" ? "bg-amber-500" : d === "hard" ? "bg-red-500" : "bg-purple-500";
             return (
               <button
                 key={d}

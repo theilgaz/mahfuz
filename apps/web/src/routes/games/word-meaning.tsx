@@ -1,11 +1,12 @@
 /**
  * Kelime Anlamı -- Arapça kelime -> Türkçe anlam.
- * 2 dakika sayaç (zorluk çarpanına göre erime hızı değişir).
- * Şık sayısı zorluğa göre: Kolay 3, Orta 4, Zor 5, Hafız 6.
+ * Iki zorluk seviyesi: Normal (sık kelimeler) / Zor (nadir kelimeler).
+ * Kelime havuzu public/data/quran-word-pool.json dosyasından gelir.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { submitScore } from "~/lib/score-service";
 import type { League } from "~/lib/league";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -15,7 +16,7 @@ import { GameOverCard } from "~/components/GameOverCard";
 
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
-import { WORD_PAIRS, getLocalizedPair } from "~/lib/word-pairs";
+import { useQuranWordPool, bucketForDifficulty, type QuranWord } from "~/lib/quran-word-pool";
 import {
   OPTION_COUNT,
   calcCorrectPoints,
@@ -43,34 +44,41 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function getRandomQuestion(usedIndices: Set<number>, optionCount = 4, locale = "tr") {
-  const available = WORD_PAIRS.map((_, i) => i).filter((i) => !usedIndices.has(i));
-  const pool = available.length > 0 ? available : Array.from({ length: WORD_PAIRS.length }, (_, i) => i);
-  const idx = pool[Math.floor(Math.random() * pool.length)];
-  const pair = WORD_PAIRS[idx];
-  const localized = getLocalizedPair(pair, locale);
-  // Base 3 wrong answers + extra distractors from other pairs for harder difficulties
-  const wrongs = [...localized.wrong];
-  if (optionCount > 4) {
-    const extras = WORD_PAIRS
-      .filter((_, i) => i !== idx)
-      .map((p) => getLocalizedPair(p, locale).meaning)
-      .filter((m) => m !== localized.meaning && !wrongs.includes(m));
-    const shuffledExtras = shuffle(extras);
-    wrongs.push(...shuffledExtras.slice(0, optionCount - 4));
+function buildQuestion(words: QuranWord[], usedIndices: Set<number>, optionCount: number) {
+  const available = words.map((_, i) => i).filter((i) => !usedIndices.has(i));
+  const indexPool = available.length > 0 ? available : words.map((_, i) => i);
+  const idx = indexPool[Math.floor(Math.random() * indexPool.length)];
+  const target = words[idx];
+
+  const wrongs: string[] = [];
+  const used = new Set([target.meaning]);
+  const decoyOrder = shuffle(words.map((_, i) => i)).filter((i) => i !== idx);
+  for (const j of decoyOrder) {
+    const m = words[j].meaning;
+    if (used.has(m)) continue;
+    wrongs.push(m);
+    used.add(m);
+    if (wrongs.length === optionCount - 1) break;
   }
-  const options = shuffle([localized.meaning, ...wrongs.slice(0, optionCount - 1)]);
-  return { arabic: pair.arabic, meaning: localized.meaning, options, idx };
+
+  const options = shuffle([target.meaning, ...wrongs]);
+  return { arabic: target.arabic, meaning: target.meaning, options, idx };
 }
 
 type GameState = "playing" | "correct" | "wrong";
 
 function WordMeaningPage() {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const [screen, setScreen] = useState<"setup" | "game" | "gameover">("setup");
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const timer = useGameTimer(difficulty);
   const optionCount = OPTION_COUNT[difficulty];
+  const { data: pool } = useQuranWordPool();
+
+  const words = useMemo<QuranWord[]>(() => {
+    if (!pool) return [];
+    return pool[bucketForDifficulty(difficulty)];
+  }, [pool, difficulty]);
 
   // Game state
   const [usedIndices, setUsedIndices] = useState<Set<number>>(new Set());
@@ -84,7 +92,7 @@ function WordMeaningPage() {
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const [leagueUp, setLeagueUp] = useState<{ from: League; to: League } | null>(null);
-  const [question, setQuestion] = useState(() => getRandomQuestion(new Set(), optionCount, locale));
+  const [question, setQuestion] = useState<{ arabic: string; meaning: string; options: string[]; idx: number } | null>(null);
   const [gameState, setGameState] = useState<GameState>("playing");
   const [selected, setSelected] = useState<string | null>(null);
   const submittedRef = useRef(false);
@@ -109,7 +117,7 @@ function WordMeaningPage() {
 
   const handleSelect = useCallback(
     (opt: string) => {
-      if (gameState !== "playing" || timer.isExpired) return;
+      if (gameState !== "playing" || timer.isExpired || !question) return;
       timer.pause();
       setSelected(opt);
       const answerTime = Date.now() - questionStart.current;
@@ -139,6 +147,13 @@ function WordMeaningPage() {
     [gameState, question, streak, difficulty, timer.isExpired],
   );
 
+  // Once the pool is loaded, seed the first question.
+  useEffect(() => {
+    if (words.length > 0 && !question) {
+      setQuestion(buildQuestion(words, new Set(), optionCount));
+    }
+  }, [words, question, optionCount]);
+
   const endGame = useCallback(() => {
     timer.pause();
     if (!submittedRef.current && score > 0) {
@@ -152,9 +167,10 @@ function WordMeaningPage() {
 
   const nextRound = () => {
     if (timer.isExpired) { endGame(); return; }
+    if (words.length === 0) return;
     timer.start();
-    const nextUsed = gameState === "correct" ? new Set([...usedIndices, question.idx]) : usedIndices;
-    setQuestion(getRandomQuestion(nextUsed, optionCount, locale));
+    const nextUsed = gameState === "correct" && question ? new Set([...usedIndices, question.idx]) : usedIndices;
+    setQuestion(buildQuestion(words, nextUsed, optionCount));
     setGameState("playing");
     setSelected(null);
     setLastDelta(null);
@@ -169,7 +185,7 @@ function WordMeaningPage() {
     setLastDelta(null); setIsNewHighScore(false); setNewAchievements([]); setLeagueUp(null);
     submittedRef.current = false; sessionStart.current = Date.now();
     questionStart.current = Date.now(); timerStartedRef.current = false;
-    setQuestion(getRandomQuestion(fresh, optionCount, locale));
+    setQuestion(words.length > 0 ? buildQuestion(words, fresh, optionCount) : null);
     setGameState("playing"); setSelected(null); setScreen("game");
     timer.reset();
   };
@@ -180,8 +196,9 @@ function WordMeaningPage() {
         gameImg={THEME.img}
         gameId="word-meaning"
         difficultyOnly
+        simpleDifficulty
         onStart={(_ids, _vf, diff) => {
-          setDifficulty(diff ?? "medium");
+          setDifficulty(diff ?? "easy");
           handleRestart();
         }}
       />
@@ -196,6 +213,16 @@ function WordMeaningPage() {
         newAchievements={newAchievements} leagueUp={leagueUp}
         onRestart={handleRestart} onSetup={() => setScreen("setup")}
       />
+    );
+  }
+
+  if (!question) {
+    return (
+      <div className="max-w-lg mx-auto pb-24 px-4 pt-6 game-bg" style={gameBgStyle(THEME, "word-meaning")}>
+        <div className="px-5 py-12 rounded-2xl border bg-[var(--color-surface)] text-center text-sm text-[var(--color-text-secondary)]">
+          Yükleniyor…
+        </div>
+      </div>
     );
   }
 
