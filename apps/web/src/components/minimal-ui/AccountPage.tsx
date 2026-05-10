@@ -10,12 +10,19 @@ import { useHifzStore, computeHifzStats, SURAH_VERSE_COUNTS } from "~/stores/hif
 import { useStudiedStore } from "~/stores/studied.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useLocaleStore } from "~/stores/locale.store";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { streakQueryOptions, activeHatimQueryOptions, completedHatimsQueryOptions } from "~/hooks/useHabitQuery";
-import { getMyScoreStats, getMyLeagueStatus, getMyTrophies } from "~/lib/score-service";
+import { getMyScoreStats, getMyLeagueStatus, getMyTrophies, getMySeasonStanding } from "~/lib/score-service";
+import {
+  getMyDisplayNameMode,
+  setDisplayNameMode,
+  formatDisplayName,
+  DISPLAY_NAME_MODES,
+  type DisplayNameMode,
+} from "~/lib/display-name";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { getSurahs } from "~/lib/quran-service";
-import { LEAGUE_LABELS, leagueProgress } from "~/lib/league";
+import { LEAGUE_LABELS } from "~/lib/league";
 import { LeagueBadge, MedalLeague, RosetteIcon, TrophyIcon } from "./LeagueIcons";
 import { MuIcons } from "./icons";
 import { useMemo, useState } from "react";
@@ -50,6 +57,11 @@ export function AccountPage({ user }: AccountPageProps) {
   const { data: leagueStatus } = useQuery({
     queryKey: ["my-league"],
     queryFn: () => getMyLeagueStatus(),
+    staleTime: 60_000,
+  });
+  const { data: seasonStanding } = useQuery({
+    queryKey: ["my-season-standing"],
+    queryFn: () => getMySeasonStanding(),
     staleTime: 60_000,
   });
   const { data: trophies } = useQuery({
@@ -212,13 +224,16 @@ export function AccountPage({ user }: AccountPageProps) {
 
       {/* Lig kartı */}
       {leagueStatus && (
-        <LeagueCard totalScore={leagueStatus.totalScore} league={leagueStatus.league} />
+        <LeagueCard totalScore={leagueStatus.totalScore} league={leagueStatus.league} standing={seasonStanding ?? null} />
       )}
 
       {/* Kupalarım */}
       {trophies && trophyCount > 0 && (
         <TrophiesCard trophies={trophies} />
       )}
+
+      {/* Gizlilik: liderlik tablosunda görünüm */}
+      <PrivacyCard userId={user.id} userName={user.name ?? ""} />
 
       {/* Navigation grid */}
       <nav className="mu-account-grid">
@@ -521,9 +536,45 @@ function StudiedCard({
 
 /* ── Lig karti ────────────────────────────────────── */
 
-function LeagueCard({ totalScore, league }: { totalScore: number; league: import("~/lib/league").League }) {
-  const progress = leagueProgress(totalScore);
-  const pct = Math.round(progress.ratio * 100);
+function LeagueCard({
+  totalScore,
+  league,
+  standing,
+}: {
+  totalScore: number;
+  league: import("~/lib/league").League;
+  standing: import("~/lib/score-service").MySeasonStanding | null;
+}) {
+  const inPromoteZone = standing && standing.myRank > 0 && standing.promoteCount > 0
+    && standing.myRank <= standing.promoteCount;
+  const inDemoteZone = standing && standing.myRank > 0 && standing.demoteCount > 0
+    && standing.myRank > standing.bucketSize - standing.demoteCount;
+
+  let hint: string;
+  if (!standing || standing.bucketSize === 0) {
+    hint = "Sezon yeni başladı. Bir oyun oyna ve lige adım at.";
+  } else if (standing.myRank === 0) {
+    hint = `Bu sezon henüz oynamadın. ${standing.bucketSize} kişiyle yarışacaksın.`;
+  } else if (standing.bucketSize < 3) {
+    hint = "Bu sezon ligin yeterince kalabalık değil — en az 3 oyuncu gerekli.";
+  } else if (inPromoteZone && standing.promoteTarget) {
+    hint = `Şu an terfi bandındasın — ${LEAGUE_LABELS[standing.promoteTarget]} ligine yükseliyorsun.`;
+  } else if (inDemoteZone && standing.demoteTarget) {
+    const need = standing.safeFloor != null ? Math.max(0, standing.safeFloor - standing.seasonMax + 1) : null;
+    hint = need != null && need > 0
+      ? `Tenzil bandındasın — ${LEAGUE_LABELS[standing.demoteTarget]} ligine düşmemek için ${need.toLocaleString("tr")} puan üzerine bir tek skor at.`
+      : `Tenzil bandındasın — daha iyi bir skor atmaya çalış.`;
+  } else if (standing.promoteTarget && standing.promoteFloor != null) {
+    const need = Math.max(0, standing.promoteFloor - standing.seasonMax + 1);
+    hint = need > 0
+      ? `${LEAGUE_LABELS[standing.promoteTarget]} ligine terfi için ${need.toLocaleString("tr")} puan üzerine bir tek skor at.`
+      : `${LEAGUE_LABELS[standing.promoteTarget]} ligine terfi mesafesindesin.`;
+  } else if (!standing.promoteTarget) {
+    hint = "En üst ligdesin — sezon sonu ilk 3'te kal, kupayı kapma şansını koru.";
+  } else {
+    hint = "Sezon sonunda ilk 3'e gir, üst lige yüksel.";
+  }
+
   return (
     <section className="mu-profile-card">
       <div className="mu-profile-card-header">
@@ -531,24 +582,58 @@ function LeagueCard({ totalScore, league }: { totalScore: number; league: import
           <MedalLeague league={league} size={22} />
           {LEAGUE_LABELS[league]} Ligi
         </span>
-        <span className="mu-muted" style={{ fontSize: 12, fontFamily: "var(--mu-ff-mono)" }}>
-          {totalScore.toLocaleString("tr")} puan
+        {standing && standing.myRank > 0 && (
+          <span className="mu-muted" style={{ fontSize: 12, fontFamily: "var(--mu-ff-mono)" }}>
+            sezon: {standing.myRank}/{standing.bucketSize}
+          </span>
+        )}
+      </div>
+
+      {standing && standing.bucketSize > 0 && (
+        <ZoneBar
+          rank={standing.myRank}
+          size={standing.bucketSize}
+          promote={standing.promoteCount}
+          demote={standing.demoteCount}
+        />
+      )}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8, gap: 12 }}>
+        <span className="mu-muted" style={{ fontSize: 12 }}>{hint}</span>
+        <span className="mu-muted" style={{ fontSize: 12, fontFamily: "var(--mu-ff-mono)", whiteSpace: "nowrap" }}>
+          {totalScore.toLocaleString("tr")} pt
         </span>
       </div>
-      <div className="mu-profile-progress-bar">
-        <div className="mu-profile-progress-fill" style={{ width: `${pct}%` }} />
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-        {progress.next && progress.toNext != null ? (
-          <span className="mu-muted" style={{ fontSize: 12 }}>
-            {LEAGUE_LABELS[progress.next]} ligine {progress.toNext.toLocaleString("tr")} puan
-          </span>
-        ) : (
-          <span className="mu-muted" style={{ fontSize: 12 }}>En üst ligdesin — devam et!</span>
-        )}
-        <span className="mu-muted" style={{ fontSize: 12 }}>%{pct}</span>
-      </div>
     </section>
+  );
+}
+
+function ZoneBar({ rank, size, promote, demote }: { rank: number; size: number; promote: number; demote: number }) {
+  const total = Math.max(size, 1);
+  const promotePct = (promote / total) * 100;
+  const demotePct = (demote / total) * 100;
+  const safePct = Math.max(0, 100 - promotePct - demotePct);
+  // Marker: rank 1 = sol uç (top); rank size = sağ uç (bottom). 0 = oynamadı, en sağa koy.
+  const markerPct = rank === 0 ? 100 : ((rank - 0.5) / total) * 100;
+  return (
+    <div style={{ position: "relative", height: 10, borderRadius: 6, overflow: "hidden", marginTop: 4, display: "flex" }}>
+      <div style={{ width: `${promotePct}%`, background: "rgba(212, 164, 55, 0.55)" }} />
+      <div style={{ width: `${safePct}%`, background: "var(--mu-line)" }} />
+      <div style={{ width: `${demotePct}%`, background: "rgba(180, 70, 70, 0.45)" }} />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: -2,
+          left: `calc(${markerPct}% - 5px)`,
+          width: 10,
+          height: 14,
+          borderRadius: 3,
+          background: "var(--mu-ink)",
+          boxShadow: "0 0 0 2px var(--mu-bg-card)",
+        }}
+      />
+    </div>
   );
 }
 
@@ -608,6 +693,102 @@ function TrophiesCard({ trophies }: { trophies: import("~/lib/score-service").My
           </ul>
         </div>
       )}
+    </section>
+  );
+}
+
+/* ── Gizlilik karti ──────────────────────────────────── */
+
+const MODE_LABELS: Record<DisplayNameMode, string> = {
+  full: "Tam adım",
+  initials: "Baş harflerim",
+  anonymous: "Anonim",
+};
+
+const MODE_HINTS: Record<DisplayNameMode, string> = {
+  full: "Liderlik tablosunda tam adın görünür.",
+  initials: "Yalnızca baş harflerin görünür.",
+  anonymous: "Adın yerine \u201cMahfuz Kullanıcısı\u201d ve kısa bir kod görünür.",
+};
+
+function PrivacyCard({ userId, userName }: { userId: string; userName: string }) {
+  const qc = useQueryClient();
+  const { data: mode } = useQuery({
+    queryKey: ["display-name-mode"],
+    queryFn: () => getMyDisplayNameMode(),
+    staleTime: 5 * 60_000,
+  });
+  const current: DisplayNameMode = mode ?? "full";
+
+  const mutation = useMutation({
+    mutationFn: (next: DisplayNameMode) => setDisplayNameMode({ data: next }),
+    onMutate: async (next) => {
+      await qc.cancelQueries({ queryKey: ["display-name-mode"] });
+      const prev = qc.getQueryData<DisplayNameMode>(["display-name-mode"]);
+      qc.setQueryData(["display-name-mode"], next);
+      return { prev };
+    },
+    onError: (_e, _next, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["display-name-mode"], ctx.prev);
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["display-name-mode"] });
+      qc.invalidateQueries({ queryKey: ["leaderboard"] });
+      qc.invalidateQueries({ queryKey: ["global-leaderboard"] });
+    },
+  });
+
+  return (
+    <section className="mu-profile-card">
+      <div className="mu-profile-card-header">
+        <span className="mu-profile-card-title">Liderlik tablosunda görünüm</span>
+      </div>
+      <p className="mu-muted" style={{ fontSize: 12, marginTop: -4, marginBottom: 12 }}>
+        Adının başkalarına nasıl görüneceğini seç. Kendi satırında her zaman tam adın görünür.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {DISPLAY_NAME_MODES.map((m) => {
+          const isActive = current === m;
+          const preview = formatDisplayName(userName, m, userId);
+          return (
+            <label
+              key={m}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "10px 12px",
+                borderRadius: 12,
+                border: `1px solid ${isActive ? "var(--mu-accent)" : "var(--color-border)"}`,
+                background: isActive ? "var(--mu-accent-soft)" : "transparent",
+                cursor: mutation.isPending ? "wait" : "pointer",
+                transition: "background 120ms, border-color 120ms",
+              }}
+            >
+              <input
+                type="radio"
+                name="display-name-mode"
+                value={m}
+                checked={isActive}
+                disabled={mutation.isPending}
+                onChange={() => mutation.mutate(m)}
+                style={{ accentColor: "var(--mu-accent, #9a7b2d)" }}
+              />
+              <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>{MODE_LABELS[m]}</span>
+                <span className="mu-muted" style={{ fontSize: 12 }}>{MODE_HINTS[m]}</span>
+              </div>
+              <span
+                className="mu-muted"
+                style={{ fontSize: 12, fontFamily: "var(--mu-ff-mono)", maxWidth: 140, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                title={preview}
+              >
+                {preview}
+              </span>
+            </label>
+          );
+        })}
+      </div>
     </section>
   );
 }

@@ -57,6 +57,20 @@
       "when": 1777292249927,
       "tag": "0007_purple_the_twelve",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1777297909441,
+      "tag": "0008_mute_naoko",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1777298515251,
+      "tag": "0009_oval_wendell_vaughn",
+      "breakpoints": true
     }
   ]
 }

@@ -9,9 +9,20 @@
  *   - Lig = kullanıcının O ANDAKİ lig durumu (sezon kapanış anındaki lifetime SUM'a göre)
  */
 
-import { db, gameScores, seasons, seasonChampions, seasonParticipants } from "~/db";
-import { and, eq, gte, lt, sql } from "drizzle-orm";
-import { computeLeague, formatSeasonName, seasonKeyFor, seasonRange, type League } from "./league";
+import { db, gameScores, seasons, seasonChampions, seasonParticipants, userSettings } from "~/db";
+import { and, eq, gte, lt, sql, inArray } from "drizzle-orm";
+import {
+  asLeague,
+  computeLeague,
+  demoteLeague,
+  formatSeasonName,
+  LEAGUE_ORDER,
+  movementCount,
+  promoteLeague,
+  seasonKeyFor,
+  seasonRange,
+  type League,
+} from "./league";
 
 interface MaxScoreRow {
   userId: string;
@@ -83,7 +94,108 @@ async function closeSeason(seasonKey: string, startedAt: number, endedAt: number
   await insertChampions(seasonKey, "global", globalTop.slice(0, 3));
   await insertParticipants(seasonKey, globalTop.slice(3));
 
+  // Lig hareketleri: her lig içinde en yüksek puanlılar terfi, en düşük puanlılar tenzil
+  await applySeasonMovements(startedAt, endedAt);
+
   await db.update(seasons).set({ closedAt: Date.now() }).where(eq(seasons.key, seasonKey));
+}
+
+/**
+ * Sezonda aktif olan oyuncuları kendi liglerine göre kümeler, MAX skorla sıralar
+ * ve `movementCount` politikasına göre terfi/tenzil uygular.
+ * Bronz tabanı altına düşmez, Hafız tavanı üstüne çıkmaz.
+ */
+async function applySeasonMovements(startedAt: number, endedAt: number): Promise<void> {
+  // Sezon penceresinde skor üreten her kullanıcının MAX'ı
+  const rows = await db
+    .select({
+      userId: gameScores.userId,
+      maxScore: sql<number>`MAX(${gameScores.score})`.as("max_score"),
+      achievedAt: sql<number>`MIN(${gameScores.createdAt})`.as("achieved_at"),
+    })
+    .from(gameScores)
+    .where(and(gte(gameScores.createdAt, startedAt), lt(gameScores.createdAt, endedAt)))
+    .groupBy(gameScores.userId);
+
+  if (rows.length === 0) return;
+
+  const activeIds = rows.map((r) => r.userId);
+
+  // Mevcut lig durumlarını oku (yoksa lifetime SUM ile fallback)
+  const settingsRows = await db
+    .select({ userId: userSettings.userId, currentLeague: userSettings.currentLeague })
+    .from(userSettings)
+    .where(inArray(userSettings.userId, activeIds));
+  const leagueByUser = new Map<string, League>(
+    settingsRows.map((s) => [s.userId, asLeague(s.currentLeague, "bronz")]),
+  );
+
+  const lifetimeSums = await db
+    .select({
+      userId: gameScores.userId,
+      total: sql<number>`SUM(${gameScores.score})`.as("total"),
+    })
+    .from(gameScores)
+    .where(inArray(gameScores.userId, activeIds))
+    .groupBy(gameScores.userId);
+  const lifetimeMap = new Map(lifetimeSums.map((r) => [r.userId, r.total ?? 0]));
+
+  // Lige göre kümele
+  const buckets = new Map<League, Array<{ userId: string; maxScore: number; achievedAt: number }>>();
+  for (const r of rows) {
+    const league = leagueByUser.get(r.userId) ?? computeLeague(lifetimeMap.get(r.userId) ?? 0);
+    const bucket = buckets.get(league) ?? [];
+    bucket.push({ userId: r.userId, maxScore: r.maxScore, achievedAt: r.achievedAt });
+    buckets.set(league, bucket);
+  }
+
+  const movements: Array<{ userId: string; nextLeague: League }> = [];
+  for (const league of LEAGUE_ORDER) {
+    const bucket = buckets.get(league);
+    if (!bucket || bucket.length === 0) continue;
+
+    // MAX desc, achievedAt asc (önce ulaşan kazanır)
+    bucket.sort((a, b) => b.maxScore - a.maxScore || a.achievedAt - b.achievedAt);
+
+    const policy = movementCount(bucket.length);
+    const promoteTarget = promoteLeague(league);
+    const demoteTarget = demoteLeague(league);
+
+    if (policy.promote > 0 && promoteTarget) {
+      for (let i = 0; i < policy.promote && i < bucket.length; i++) {
+        movements.push({ userId: bucket[i]!.userId, nextLeague: promoteTarget });
+      }
+    }
+    if (policy.demote > 0 && demoteTarget) {
+      // Tail'den, terfi alanlarla çakışmayacak şekilde
+      const start = Math.max(policy.promote, bucket.length - policy.demote);
+      for (let i = start; i < bucket.length; i++) {
+        movements.push({ userId: bucket[i]!.userId, nextLeague: demoteTarget });
+      }
+    }
+  }
+
+  if (movements.length === 0) return;
+
+  const now = new Date();
+  for (const m of movements) {
+    // Upsert: önce update, etkilenen yoksa insert
+    const updated = await db
+      .update(userSettings)
+      .set({ currentLeague: m.nextLeague, updatedAt: now })
+      .where(eq(userSettings.userId, m.userId))
+      .returning({ userId: userSettings.userId });
+
+    if (updated.length === 0) {
+      await db
+        .insert(userSettings)
+        .values({ userId: m.userId, currentLeague: m.nextLeague, updatedAt: now })
+        .onConflictDoUpdate({
+          target: userSettings.userId,
+          set: { currentLeague: m.nextLeague, updatedAt: now },
+        });
+    }
+  }
 }
 
 /**

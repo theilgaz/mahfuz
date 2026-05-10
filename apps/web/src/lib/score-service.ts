@@ -6,12 +6,50 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { db, gameScores, userAchievements, seasonChampions, seasonParticipants, seasons } from "~/db";
-import { user } from "~/db";
+import { user, userSettings } from "~/db";
 import { auth } from "~/lib/auth";
 import { eq, sql, desc, and, gte, lt } from "drizzle-orm";
 import { checkAndGrantAchievements } from "./achievement-service";
-import { computeLeague, seasonKeyFor, seasonRange, type League } from "./league";
+import {
+  asLeague,
+  computeLeague,
+  demoteLeague,
+  movementCount,
+  promoteLeague,
+  seasonKeyFor,
+  seasonRange,
+  type League,
+} from "./league";
 import { ensureSeasonsClosed } from "./season-service";
+import { formatDisplayName } from "./display-name";
+
+async function currentUserId(): Promise<string | null> {
+  try {
+    const session = await auth.api.getSession({ headers: getRequestHeaders() });
+    return session?.user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Viewer'ın user_settings.currentLeague değeri; satır yoksa null. */
+async function viewerLeague(viewerId: string | null): Promise<League | null> {
+  if (!viewerId) return null;
+  const [row] = await db
+    .select({ currentLeague: userSettings.currentLeague })
+    .from(userSettings)
+    .where(eq(userSettings.userId, viewerId))
+    .limit(1);
+  return row?.currentLeague ? asLeague(row.currentLeague, "bronz") : null;
+}
+
+/** Liderlik tablosunda lig filtresi seçenekleri. "all" = filtre yok. */
+export type LeagueFilter = League | "all";
+
+function maskName(rowUserId: string, rowName: string, rowMode: string | null, viewerId: string | null): string {
+  if (viewerId && rowUserId === viewerId) return rowName; // kendi adını her zaman tam gör
+  return formatDisplayName(rowName, rowMode, rowUserId);
+}
 
 // ── Oyun isimleri (UI için) ────────────────────────────────
 
@@ -80,16 +118,6 @@ export const submitScore = createServerFn({ method: "POST" })
     const currentBest = existing?.best ?? 0;
     const isNewHighScore = data.score > currentBest;
 
-    // Lig atlama tespiti — insert'ten ÖNCE ve SONRAKİ lifetime SUM'ı karşılaştır
-    const [beforeRow] = await db
-      .select({ total: sql<number>`COALESCE(SUM(${gameScores.score}), 0)` })
-      .from(gameScores)
-      .where(eq(gameScores.userId, userId));
-    const beforeTotal = beforeRow?.total ?? 0;
-    const beforeLeague = computeLeague(beforeTotal);
-    const afterLeague = computeLeague(beforeTotal + data.score);
-    const leagueUp = beforeLeague !== afterLeague ? { from: beforeLeague, to: afterLeague } : null;
-
     await db.insert(gameScores).values({
       id: crypto.randomUUID(),
       userId,
@@ -100,6 +128,26 @@ export const submitScore = createServerFn({ method: "POST" })
       metadata: "{}",
       createdAt: Date.now(),
     });
+
+    // user_settings yoksa oluştur — başlangıç ligi lifetime SUM'a göre belirlenir.
+    // Lig hareketleri artık sadece sezon kapanışında yapılır.
+    const [settings] = await db
+      .select({ userId: userSettings.userId })
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId))
+      .limit(1);
+
+    if (!settings) {
+      const [totalRow] = await db
+        .select({ total: sql<number>`COALESCE(SUM(${gameScores.score}), 0)` })
+        .from(gameScores)
+        .where(eq(gameScores.userId, userId));
+      const initialLeague = computeLeague(totalRow?.total ?? 0);
+      await db
+        .insert(userSettings)
+        .values({ userId, currentLeague: initialLeague, updatedAt: new Date() })
+        .onConflictDoNothing();
+    }
 
     // Check achievements
     let newAchievements: string[] = [];
@@ -117,7 +165,8 @@ export const submitScore = createServerFn({ method: "POST" })
       // Don't fail score submission if achievements fail
     }
 
-    return { saved: true, isNewHighScore, newAchievements, leagueUp };
+    // Lig hareketleri sezon kapanışında yapıldığı için anlık leagueUp döndürmüyoruz.
+    return { saved: true, isNewHighScore, newAchievements, leagueUp: null as null | { from: League; to: League } };
   });
 
 // ── Zaman Dilimleri ───────────────────────────────────────
@@ -163,7 +212,7 @@ export interface LeaderboardEntry {
 }
 
 export const getGameLeaderboard = createServerFn({ method: "GET" })
-  .inputValidator((input: { gameId: string; period?: LeaderboardPeriod }) => input)
+  .inputValidator((input: { gameId: string; period?: LeaderboardPeriod; league?: LeagueFilter }) => input)
   .handler(async ({ data }): Promise<LeaderboardEntry[]> => {
     await ensureSeasonsClosed();
     const period = data.period ?? "all";
@@ -171,6 +220,12 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
     const conditions = [eq(gameScores.gameId, data.gameId)];
     if (win.startedAt != null) conditions.push(gte(gameScores.createdAt, win.startedAt));
     if (win.endedAt != null) conditions.push(lt(gameScores.createdAt, win.endedAt));
+
+    const viewerId = await currentUserId();
+    const leagueFilter = data.league ?? (await viewerLeague(viewerId)) ?? "all";
+    if (leagueFilter !== "all") {
+      conditions.push(sql`COALESCE(${userSettings.currentLeague}, 'bronz') = ${leagueFilter}`);
+    }
 
     // Hem MAX hem SUM'ı her zaman hesapla; sıralama agg'a göre seçilir
     const rows = await db
@@ -181,9 +236,12 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
         achievedAt: sql<number>`MIN(${gameScores.createdAt})`.as("achieved_at"),
         userName: user.name,
         userImage: user.image,
+        displayNameMode: userSettings.displayNameMode,
+        currentLeague: userSettings.currentLeague,
       })
       .from(gameScores)
       .innerJoin(user, eq(gameScores.userId, user.id))
+      .leftJoin(userSettings, eq(userSettings.userId, user.id))
       .where(and(...conditions))
       .groupBy(gameScores.userId)
       .orderBy(win.agg === "sum"
@@ -191,8 +249,8 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
         : sql`window_max DESC, achieved_at ASC`)
       .limit(50);
 
-    // Lig hesabı için kullanıcının lifetime SUM'ı (oyun ayrımı yok)
-    const userIds = rows.map((r) => r.userId);
+    // Henüz user_settings.currentLeague atanmamış kullanıcılar için lifetime SUM fallback
+    const userIds = rows.filter((r) => !r.currentLeague).map((r) => r.userId);
     const lifetime = userIds.length > 0
       ? await db
         .select({
@@ -208,19 +266,19 @@ export const getGameLeaderboard = createServerFn({ method: "GET" })
     return rows.map((r, i) => ({
       rank: i + 1,
       userId: r.userId,
-      userName: r.userName,
+      userName: maskName(r.userId, r.userName, r.displayNameMode, viewerId),
       userImage: r.userImage ?? null,
       bestScore: win.agg === "sum" ? r.windowSum : r.windowMax,
       windowMax: r.windowMax,
       windowSum: r.windowSum,
-      league: computeLeague(lifetimeMap.get(r.userId) ?? 0),
+      league: asLeague(r.currentLeague, computeLeague(lifetimeMap.get(r.userId) ?? 0)),
     }));
   });
 
 // ── Global Liderlik ────────────────────────────────────────
 
 export const getGlobalLeaderboard = createServerFn({ method: "GET" })
-  .inputValidator((input: { period?: LeaderboardPeriod }) => input)
+  .inputValidator((input: { period?: LeaderboardPeriod; league?: LeagueFilter }) => input)
   .handler(async ({ data }): Promise<LeaderboardEntry[]> => {
     await ensureSeasonsClosed();
     const period = data.period ?? "all";
@@ -228,6 +286,12 @@ export const getGlobalLeaderboard = createServerFn({ method: "GET" })
     const conditions = [];
     if (win.startedAt != null) conditions.push(gte(gameScores.createdAt, win.startedAt));
     if (win.endedAt != null) conditions.push(lt(gameScores.createdAt, win.endedAt));
+
+    const viewerId = await currentUserId();
+    const leagueFilter = data.league ?? (await viewerLeague(viewerId)) ?? "all";
+    if (leagueFilter !== "all") {
+      conditions.push(sql`COALESCE(${userSettings.currentLeague}, 'bronz') = ${leagueFilter}`);
+    }
 
     if (win.agg === "sum") {
       // Tüm zamanlar — kullanıcının tüm oyunlardaki SUM'ı
@@ -238,9 +302,12 @@ export const getGlobalLeaderboard = createServerFn({ method: "GET" })
           achievedAt: sql<number>`MIN(${gameScores.createdAt})`.as("achieved_at"),
           userName: user.name,
           userImage: user.image,
+          displayNameMode: userSettings.displayNameMode,
+          currentLeague: userSettings.currentLeague,
         })
         .from(gameScores)
         .innerJoin(user, eq(gameScores.userId, user.id))
+        .leftJoin(userSettings, eq(userSettings.userId, user.id))
         .where(conditions.length > 0 ? and(...conditions) : undefined)
         .groupBy(gameScores.userId)
         .orderBy(sql`agg_score DESC, achieved_at ASC`)
@@ -249,10 +316,10 @@ export const getGlobalLeaderboard = createServerFn({ method: "GET" })
       return rows.map((r, i) => ({
         rank: i + 1,
         userId: r.userId,
-        userName: r.userName,
+        userName: maskName(r.userId, r.userName, r.displayNameMode, viewerId),
         userImage: r.userImage ?? null,
         bestScore: r.score,
-        league: computeLeague(r.score),
+        league: asLeague(r.currentLeague, computeLeague(r.score)),
       }));
     }
 
@@ -264,16 +331,19 @@ export const getGlobalLeaderboard = createServerFn({ method: "GET" })
         achievedAt: sql<number>`MIN(${gameScores.createdAt})`.as("achieved_at"),
         userName: user.name,
         userImage: user.image,
+        displayNameMode: userSettings.displayNameMode,
+        currentLeague: userSettings.currentLeague,
       })
       .from(gameScores)
       .innerJoin(user, eq(gameScores.userId, user.id))
+      .leftJoin(userSettings, eq(userSettings.userId, user.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .groupBy(gameScores.userId)
       .orderBy(sql`agg_score DESC, achieved_at ASC`)
       .limit(50);
 
-    // Lig hesabı: lifetime SUM'a göre (sezon liderinin kendi ligini de doğru göstermek için)
-    const userIds = rows.map((r) => r.userId);
+    // currentLeague atanmamış kullanıcılar için lifetime SUM fallback
+    const userIds = rows.filter((r) => !r.currentLeague).map((r) => r.userId);
     const lifetime = userIds.length > 0
       ? await db
         .select({
@@ -289,10 +359,10 @@ export const getGlobalLeaderboard = createServerFn({ method: "GET" })
     return rows.map((r, i) => ({
       rank: i + 1,
       userId: r.userId,
-      userName: r.userName,
+      userName: maskName(r.userId, r.userName, r.displayNameMode, viewerId),
       userImage: r.userImage ?? null,
       bestScore: r.score,
-      league: computeLeague(lifetimeMap.get(r.userId) ?? 0),
+      league: asLeague(r.currentLeague, computeLeague(lifetimeMap.get(r.userId) ?? 0)),
     }));
   });
 
@@ -332,6 +402,90 @@ export interface MyLeagueStatus {
   league: League;
 }
 
+export interface MySeasonStanding {
+  league: League;
+  seasonKey: string;
+  seasonMax: number;
+  myRank: number; // 0 = sezonda hiç oynamadı
+  bucketSize: number;
+  promoteCount: number;
+  demoteCount: number;
+  promoteTarget: League | null;
+  demoteTarget: League | null;
+  /** Terfi zonuna girmek için en azından geçilmesi gereken skor (yoksa null). */
+  promoteFloor: number | null;
+  /** Tenzil zonundan çıkmak için en azından geçilmesi gereken skor (yoksa null). */
+  safeFloor: number | null;
+}
+
+export const getMySeasonStanding = createServerFn({ method: "GET" })
+  .handler(async (): Promise<MySeasonStanding | null> => {
+    await ensureSeasonsClosed();
+    const session = await auth.api.getSession({ headers: getRequestHeaders() });
+    if (!session?.user?.id) return null;
+    const userId = session.user.id;
+
+    const seasonKey = seasonKeyFor();
+    const range = seasonRange(seasonKey);
+
+    const [settings] = await db
+      .select({ currentLeague: userSettings.currentLeague })
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId))
+      .limit(1);
+    const myLeague = asLeague(settings?.currentLeague, "bronz");
+
+    // Bu sezon, bu lig içindeki tüm aktif oyuncuların MAX skorları
+    const rows = await db
+      .select({
+        userId: gameScores.userId,
+        maxScore: sql<number>`MAX(${gameScores.score})`.as("max_score"),
+        achievedAt: sql<number>`MIN(${gameScores.createdAt})`.as("achieved_at"),
+        currentLeague: userSettings.currentLeague,
+      })
+      .from(gameScores)
+      .leftJoin(userSettings, eq(userSettings.userId, gameScores.userId))
+      .where(and(gte(gameScores.createdAt, range.startedAt), lt(gameScores.createdAt, range.endedAt)))
+      .groupBy(gameScores.userId);
+
+    const bucket = rows
+      .filter((r) => asLeague(r.currentLeague, "bronz") === myLeague)
+      .map((r) => ({ userId: r.userId, maxScore: r.maxScore, achievedAt: r.achievedAt }))
+      .sort((a, b) => b.maxScore - a.maxScore || a.achievedAt - b.achievedAt);
+
+    const meIdx = bucket.findIndex((b) => b.userId === userId);
+    const seasonMax = meIdx >= 0 ? bucket[meIdx]!.maxScore : 0;
+    const myRank = meIdx >= 0 ? meIdx + 1 : 0;
+    const bucketSize = bucket.length;
+
+    const policy = movementCount(bucketSize);
+    const promoteTarget = promoteLeague(myLeague);
+    const demoteTarget = demoteLeague(myLeague);
+
+    // Terfi zonu = bucket[0..promoteCount-1]
+    const promoteFloor = policy.promote > 0 && bucket.length >= policy.promote
+      ? bucket[policy.promote - 1]!.maxScore
+      : null;
+    // Tenzil zonu = bucket[bucketSize - demoteCount..]
+    const safeFloor = policy.demote > 0 && bucket.length > policy.demote
+      ? bucket[bucketSize - policy.demote]!.maxScore
+      : null;
+
+    return {
+      league: myLeague,
+      seasonKey,
+      seasonMax,
+      myRank,
+      bucketSize,
+      promoteCount: policy.promote,
+      demoteCount: policy.demote,
+      promoteTarget,
+      demoteTarget,
+      promoteFloor,
+      safeFloor,
+    };
+  });
+
 export const getMyLeagueStatus = createServerFn({ method: "GET" })
   .handler(async (): Promise<MyLeagueStatus | null> => {
     const session = await auth.api.getSession({ headers: getRequestHeaders() });
@@ -341,9 +495,16 @@ export const getMyLeagueStatus = createServerFn({ method: "GET" })
       .select({ total: sql<number>`COALESCE(SUM(${gameScores.score}), 0)` })
       .from(gameScores)
       .where(eq(gameScores.userId, session.user.id));
-
     const totalScore = row?.total ?? 0;
-    return { totalScore, league: computeLeague(totalScore) };
+
+    const [settings] = await db
+      .select({ currentLeague: userSettings.currentLeague })
+      .from(userSettings)
+      .where(eq(userSettings.userId, session.user.id))
+      .limit(1);
+
+    const league = asLeague(settings?.currentLeague, computeLeague(totalScore));
+    return { totalScore, league };
   });
 
 // ── Kupa & Kokart ──────────────────────────────────────────

@@ -42,6 +42,38 @@ export function nextLeague(current: League): League | null {
   return LEAGUE_ORDER[idx + 1];
 }
 
+/** Bir üst lig (Hafız zaten en üst → null). */
+export function promoteLeague(current: League): League | null {
+  return nextLeague(current);
+}
+
+/** Bir alt lig (Bronz zaten en alt → null). */
+export function demoteLeague(current: League): League | null {
+  const idx = LEAGUE_ORDER.indexOf(current);
+  if (idx <= 0) return null;
+  return LEAGUE_ORDER[idx - 1];
+}
+
+/** Bir lig'e güvenle string cast (geçersizse fallback'e döner). */
+export function asLeague(value: string | null | undefined, fallback: League = "bronz"): League {
+  return LEAGUE_ORDER.includes(value as League) ? (value as League) : fallback;
+}
+
+/**
+ * Sezon hareket politikası — kaç kişi terfi/tenzil edilecek?
+ * Aktif (sezonda oynamış) oyuncu sayısına göre değişir.
+ */
+export interface MovementPolicy {
+  promote: number;
+  demote: number;
+}
+
+export function movementCount(activeCount: number): MovementPolicy {
+  if (activeCount < 3) return { promote: 0, demote: 0 };
+  if (activeCount < 6) return { promote: 1, demote: 1 };
+  return { promote: 3, demote: 3 };
+}
+
 export interface LeagueProgress {
   league: League;
   next: League | null;

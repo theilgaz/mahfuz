@@ -54,6 +54,10 @@ export const userSettings = sqliteTable("user_settings", {
   data: text("data").notNull().default("{}"),
   /** Alan bazlı LWW zaman damgaları: { "theme": 1711000000000, ... } */
   fieldTimestamps: text("field_timestamps").notNull().default("{}"),
+  /** Liderlik tablosu / şampiyonlarda görünecek isim modu: full | initials | anonymous */
+  displayNameMode: text("display_name_mode").notNull().default("full"),
+  /** Kullanıcının içinde bulunduğu lig: bronz | gumus | altin | hafiz */
+  currentLeague: text("current_league").notNull().default("bronz"),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 

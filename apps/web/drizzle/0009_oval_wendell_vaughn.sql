@@ -1,0 +1,1 @@
+ALTER TABLE `user_settings` ADD `current_league` text DEFAULT 'bronz' NOT NULL;

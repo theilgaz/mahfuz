@@ -1,0 +1,1 @@
+ALTER TABLE `user_settings` ADD `display_name_mode` text DEFAULT 'full' NOT NULL;

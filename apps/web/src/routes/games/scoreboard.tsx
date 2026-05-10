@@ -18,13 +18,16 @@ import {
   getGameLeaderboard,
   getMyScoreStats,
   getMyTrophies,
+  getMyLeagueStatus,
   GAME_TITLES,
   GAME_IDS,
   LEADERBOARD_PERIODS,
   type LeaderboardPeriod,
+  type LeagueFilter,
 } from "~/lib/score-service";
-import { LEAGUE_LABELS, type League } from "~/lib/league";
+import { LEAGUE_LABELS, LEAGUE_ORDER, type League } from "~/lib/league";
 import { LeagueBadge, MedalLeague, RosetteIcon, TrophyIcon } from "~/components/minimal-ui/LeagueIcons";
+import { Podium } from "~/components/minimal-ui/Podium";
 import { useTranslation } from "~/hooks/useTranslation";
 
 export const Route = createFileRoute("/games/scoreboard")({
@@ -43,7 +46,8 @@ function ScoreboardPage() {
   const [activeTab, setActiveTab] = useState<"global" | string>(
     game && GAME_IDS.includes(game) ? game : "global",
   );
-  const [period, setPeriod] = useState<LeaderboardPeriod>("all");
+  const [period, setPeriod] = useState<LeaderboardPeriod>("season");
+  const [leagueFilter, setLeagueFilter] = useState<LeagueFilter | null>(null);
 
   const periodLabels: Record<LeaderboardPeriod, string> = {
     week: t.gamesHub.periodWeek,
@@ -51,15 +55,25 @@ function ScoreboardPage() {
     all: t.gamesHub.periodAll,
   };
 
+  const { data: myLeagueStatus } = useQuery({
+    queryKey: ["my-league-status"],
+    queryFn: () => getMyLeagueStatus(),
+    enabled: !!userId,
+    staleTime: 60_000,
+  });
+
+  // Varsayılan: viewer'ın ligi; viewer yoksa "all"
+  const activeLeague: LeagueFilter = leagueFilter ?? myLeagueStatus?.league ?? "all";
+
   const { data: globalBoard } = useQuery({
-    queryKey: ["global-leaderboard", period],
-    queryFn: () => getGlobalLeaderboard({ data: { period } }),
+    queryKey: ["global-leaderboard", period, activeLeague],
+    queryFn: () => getGlobalLeaderboard({ data: { period, league: activeLeague } }),
     staleTime: 60_000,
   });
 
   const { data: gameBoard } = useQuery({
-    queryKey: ["game-leaderboard", activeTab, period],
-    queryFn: () => getGameLeaderboard({ data: { gameId: activeTab, period } }),
+    queryKey: ["game-leaderboard", activeTab, period, activeLeague],
+    queryFn: () => getGameLeaderboard({ data: { gameId: activeTab, period, league: activeLeague } }),
     enabled: activeTab !== "global",
     staleTime: 60_000,
   });
@@ -157,45 +171,30 @@ function ScoreboardPage() {
         ))}
       </div>
 
+      {/* League filter — viewer'ın ligi default, diğer ligler ve "Tümü" seçilebilir */}
+      <div className="mu-sb-periods" style={{ marginTop: 12 }}>
+        {(["all", ...LEAGUE_ORDER] as LeagueFilter[]).map((lg) => {
+          const isMine = myLeagueStatus?.league === lg;
+          return (
+            <button
+              key={lg}
+              className={`mu-sb-period ${activeLeague === lg ? "active" : ""}`}
+              onClick={() => setLeagueFilter(lg)}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              {lg !== "all" && <LeagueBadge league={lg} size={12} />}
+              {lg === "all" ? "Tüm Ligler" : LEAGUE_LABELS[lg]}
+              {isMine && (
+                <span className="mu-ybadge" style={{ fontSize: 9, marginLeft: 4 }}>sen</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Top 3 podium */}
       {top3.length > 0 && (
-        <div className="mu-sb-podium">
-          {/* Reorder: 2nd, 1st, 3rd for visual podium */}
-          {[top3[1], top3[0], top3[2]].map((entry, i) => {
-            if (!entry) return <div key={i} className="mu-sb-podium-slot" />;
-            const isYou = userId === entry.userId;
-            const place = entry.rank;
-            const podiumColors = ["", "#d4a437", "#a8a8a8", "#b87333"];
-            return (
-              <div
-                key={entry.userId}
-                className={`mu-sb-podium-slot place-${place}`}
-              >
-                <div
-                  className="mu-sb-podium-avatar"
-                  style={{ borderColor: podiumColors[place] || "var(--mu-line)" }}
-                >
-                  {entry.userImage ? (
-                    <img src={entry.userImage} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
-                  ) : (
-                    <span style={{ fontSize: place === 1 ? 24 : 18, fontFamily: "var(--mu-ff-display)", color: "var(--mu-muted)" }}>
-                      {(entry.userName || "?")[0].toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <span className="mu-sb-podium-rank" style={{ color: podiumColors[place] }}>
-                  {place}
-                </span>
-                <span className="mu-sb-podium-name" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <LeagueBadge league={entry.league} size={12} />
-                  {entry.userName || "Anonim"}
-                  {isYou && <span className="mu-ybadge" style={{ fontSize: 9, marginLeft: 4 }}>sen</span>}
-                </span>
-                <span className="mu-sb-podium-score">{entry.bestScore}</span>
-              </div>
-            );
-          })}
-        </div>
+        <Podium entries={top3} currentUserId={userId} />
       )}
 
       {/* Per-game header with two columns */}
@@ -305,14 +304,14 @@ function ScoreboardPage() {
         </section>
       )}
 
-      {/* League ladder reference */}
+      {/* League ladder — sezon hareket politikası */}
       <section style={{ paddingTop: 32, marginTop: 32, borderTop: "1px solid var(--mu-line)" }}>
         <h2 className="mu-h2" style={{ fontSize: 20 }}>Ligler</h2>
         <p className="mu-muted" style={{ fontSize: 13, marginBottom: 12 }}>
-          Tüm zaman toplam skoruna göre ligin belirlenir.
+          Her sezon kapanışında lig içindeki ilk 3 üst lige çıkar, son 3 alt lige iner. 3'ten az aktif oyuncu varsa hareket olmaz.
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
-          {(["bronz", "gumus", "altin", "hafiz"] as League[]).map((lg) => (
+          {LEAGUE_ORDER.map((lg) => (
             <div
               key={lg}
               style={{
@@ -322,27 +321,30 @@ function ScoreboardPage() {
                 padding: 12,
                 border: "1px solid var(--mu-line)",
                 borderRadius: 8,
+                background: myLeagueStatus?.league === lg ? "var(--mu-accent-soft)" : undefined,
+                borderColor: myLeagueStatus?.league === lg ? "var(--mu-accent)" : undefined,
               }}
             >
               <MedalLeague league={lg} size={28} />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontSize: 14, fontWeight: 600 }}>{LEAGUE_LABELS[lg]}</span>
-                <span className="mu-muted" style={{ fontSize: 12 }}>{leagueRangeLabel(lg)}</span>
+                <span className="mu-muted" style={{ fontSize: 12 }}>
+                  {myLeagueStatus?.league === lg ? "Senin Ligin" : leagueMoveLabel(lg)}
+                </span>
               </div>
             </div>
           ))}
         </div>
         <p className="mu-muted" style={{ fontSize: 12, marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <RosetteIcon league="altin" size={14} /> Sezon ilk 10'una giren oyuncular kokart kazanır.
+          <RosetteIcon league="altin" size={14} /> Genel sezon ilk 10'una giren oyuncular kokart kazanır.
         </p>
       </section>
     </div>
   );
 }
 
-function leagueRangeLabel(lg: League): string {
-  if (lg === "bronz") return "0 – 499";
-  if (lg === "gumus") return "500 – 2.999";
-  if (lg === "altin") return "3.000 – 9.999";
-  return "10.000+";
+function leagueMoveLabel(lg: League): string {
+  if (lg === "bronz") return "Başlangıç ligi";
+  if (lg === "hafiz") return "En üst lig";
+  return "Terfi & tenzil";
 }
