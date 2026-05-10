@@ -79,7 +79,7 @@ export function BottomNav() {
 
       <nav
         aria-label="Mahfuz"
-        className="fixed bottom-0 inset-x-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+        className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 4px)" }}
       >
         <div className="flex items-center justify-around h-12 max-w-lg mx-auto">

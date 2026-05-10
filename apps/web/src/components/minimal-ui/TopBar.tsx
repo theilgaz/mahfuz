@@ -78,7 +78,7 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
           <button className="mu-icon-btn" title="Tema" onClick={cycleTheme}>
             {theme === "dark" ? MuIcons.sun : MuIcons.moon}
           </button>
-          <button className="mu-icon-btn" title="Ayarlar" onClick={onSettings}>
+          <button className="mu-icon-btn mu-icon-btn--settings" title="Ayarlar" onClick={onSettings}>
             {MuIcons.settings}
           </button>
           {session?.user ? (

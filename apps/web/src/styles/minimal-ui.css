@@ -5218,10 +5218,13 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 
 @media (max-width: 768px) {
   .mu-brand-wordmark { display: none; }
+  .mu-topnav { display: none; }
+  .mu-icon-btn--settings { display: none; }
   .mu-tnav-kbd,
   .mu-tnav-search-label { display: none; }
   .mu-topbar-inner { padding: 8px 12px; gap: 8px; }
   .mu-topright { margin-left: auto; }
+  body { padding-bottom: calc(48px + env(safe-area-inset-bottom)); }
   .mu-reader-topbar { padding-left: 12px; padding-right: 12px; top: 49px; }
 
   .mu-sb-podium { gap: 8px; }

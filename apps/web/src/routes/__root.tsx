@@ -533,6 +533,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         {!isMushafMode && <Footer />}
         {!isMushafMode && <AudioBar />}
         {!isMushafMode && <RecitationBar />}
+        {!isMushafMode && <BottomNav />}
         <LanguageSelector />
         <Scripts />
       </body>
