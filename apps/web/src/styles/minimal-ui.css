@@ -1683,39 +1683,94 @@
 }
 
 /* ── 4. Collection grid (2x2) ── */
-.mu-coll-grid {
+.mu-mood-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.mu-coll-card {
+.mu-mood-box {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 14px;
   border: 1px solid var(--mu-line);
-  border-radius: 10px;
-  padding: 20px 20px 12px;
-  transition: border-color 0.15s;
+  border-radius: 12px;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
 }
 
-.mu-coll-card:hover { border-color: var(--mu-accent); }
+.mu-mood-box:hover {
+  border-color: var(--mu-accent);
+  background: color-mix(in oklab, var(--mu-accent), transparent 95%);
+  transform: translateY(-1px);
+}
 
-.mu-coll-card h3 {
+.mu-mood-box:focus-visible {
+  outline: 2px solid var(--mu-accent);
+  outline-offset: 3px;
+}
+
+.mu-mood-title {
   font-family: var(--mu-ff-display);
-  font-size: 18px;
+  font-size: 16px;
+  color: var(--mu-ink);
+  letter-spacing: -0.01em;
+}
+
+.mu-mood-sub {
+  font-size: 11px;
+  color: var(--mu-muted);
+  line-height: 1.35;
+}
+
+.mu-mood-count {
+  font-family: var(--mu-ff-mono);
+  font-size: 10px;
+  color: var(--mu-accent-ink);
+  margin-top: 2px;
+}
+
+.mu-mood-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: min(80vh, 720px);
+}
+
+.mu-mood-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--mu-line);
+}
+
+.mu-mood-modal-head h3 {
+  font-family: var(--mu-ff-display);
+  font-size: 20px;
   font-weight: 500;
   color: var(--mu-ink);
-  margin-bottom: 2px;
+  margin: 0 0 2px;
 }
 
-.mu-coll-sub {
+.mu-mood-modal-head p {
   font-size: 12px;
-  color: var(--mu-muted);
-  margin-bottom: 12px;
+  margin: 0;
+}
+
+.mu-mood-modal-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 20px 16px;
+  overflow-y: auto;
 }
 
 .mu-coll-item {
   display: grid;
-  grid-template-columns: 32px 1fr auto;
-  gap: 8px;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
   align-items: baseline;
   padding: 8px 0;
   border-bottom: 1px solid color-mix(in oklab, var(--mu-line), transparent 50%);
@@ -5194,8 +5249,8 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
     font-size: 28px;
   }
 
-  .mu-coll-grid {
-    grid-template-columns: 1fr;
+  .mu-mood-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -5214,6 +5269,13 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   .mu-games-grid { gap: 10px; }
   .mu-gcard { padding: 14px; gap: 12px; border-radius: 14px; }
   .mu-gcard h3 { font-size: 17px; }
+
+  .mu-disc-section { padding: 16px 16px; }
+  .mu-disc-section + .mu-disc-section { padding-top: 12px; }
+  .mu-mood-grid { gap: 8px; }
+  .mu-mood-box { padding: 12px; }
+  .mu-mood-modal-head { padding: 14px 16px; }
+  .mu-mood-modal-list { padding: 8px 16px 16px; }
   .mu-gcard-top { margin-bottom: 4px; }
   .mu-gcard-foot {
     flex-direction: column;

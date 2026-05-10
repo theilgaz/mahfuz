@@ -5,18 +5,230 @@
  *   3. Mood-based suggestions
  */
 
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSurahs } from "~/hooks/useQuranQuery";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { surahSlug } from "~/lib/surah-slugs";
+import { toArabicIndic } from "~/lib/svg-helpers";
 import { MuIcons } from "./icons";
 
-const MOODS = [
-  { title: "Huzur", sub: "Kalbi sakinleştiren sureler", items: [55, 67, 36, 1, 112] },
-  { title: "Üzüntü & teselli", sub: "Zorluk anında sığınılacak", items: [93, 94, 65, 12, 39] },
-  { title: "Korku & endişe", sub: "Sığınma ve koruma", items: [113, 114, 1, 2, 23] },
-  { title: "Tefekkür", sub: "Düşünmeye davet eden", items: [67, 56, 36, 30, 88] },
+type VerseRef = { s: number; a: number };
+
+const MOODS: { title: string; sub: string; items: VerseRef[] }[] = [
+  {
+    title: "Huzur",
+    sub: "Kalbi sakinleştiren ayetler",
+    items: [
+      { s: 13, a: 28 },
+      { s: 89, a: 27 },
+      { s: 65, a: 3 },
+      { s: 2, a: 286 },
+      { s: 94, a: 5 },
+      { s: 6, a: 82 },
+      { s: 39, a: 23 },
+      { s: 1, a: 1 },
+    ],
+  },
+  {
+    title: "Üzüntü & teselli",
+    sub: "Zorluk anında sığınılacak",
+    items: [
+      { s: 93, a: 3 },
+      { s: 94, a: 1 },
+      { s: 39, a: 53 },
+      { s: 12, a: 87 },
+      { s: 65, a: 7 },
+      { s: 21, a: 87 },
+      { s: 2, a: 156 },
+      { s: 9, a: 40 },
+    ],
+  },
+  {
+    title: "Korku & endişe",
+    sub: "Sığınma ve koruma",
+    items: [
+      { s: 113, a: 1 },
+      { s: 114, a: 1 },
+      { s: 3, a: 173 },
+      { s: 2, a: 255 },
+      { s: 41, a: 30 },
+      { s: 27, a: 62 },
+      { s: 9, a: 40 },
+    ],
+  },
+  {
+    title: "Tefekkür",
+    sub: "Düşünmeye davet eden ayetler",
+    items: [
+      { s: 3, a: 190 },
+      { s: 2, a: 164 },
+      { s: 30, a: 22 },
+      { s: 67, a: 3 },
+      { s: 88, a: 17 },
+      { s: 51, a: 21 },
+      { s: 41, a: 53 },
+      { s: 50, a: 6 },
+    ],
+  },
+  {
+    title: "Motivasyon",
+    sub: "Harekete geçiren ayetler",
+    items: [
+      { s: 13, a: 11 },
+      { s: 53, a: 39 },
+      { s: 94, a: 7 },
+      { s: 39, a: 9 },
+      { s: 9, a: 105 },
+      { s: 3, a: 139 },
+      { s: 4, a: 95 },
+    ],
+  },
+  {
+    title: "Cesaret",
+    sub: "Korkuyu yenmek için",
+    items: [
+      { s: 3, a: 139 },
+      { s: 9, a: 38 },
+      { s: 2, a: 249 },
+      { s: 47, a: 7 },
+      { s: 33, a: 23 },
+      { s: 8, a: 65 },
+    ],
+  },
+  {
+    title: "Odaklanma & ihlas",
+    sub: "Niyeti diri tutmak için",
+    items: [
+      { s: 51, a: 56 },
+      { s: 6, a: 162 },
+      { s: 2, a: 152 },
+      { s: 33, a: 21 },
+      { s: 23, a: 1 },
+      { s: 98, a: 5 },
+      { s: 39, a: 11 },
+    ],
+  },
+  {
+    title: "Sabır & azim",
+    sub: "Yola devam edebilmek için",
+    items: [
+      { s: 3, a: 200 },
+      { s: 2, a: 155 },
+      { s: 8, a: 46 },
+      { s: 39, a: 10 },
+      { s: 16, a: 96 },
+      { s: 41, a: 35 },
+      { s: 31, a: 17 },
+      { s: 13, a: 24 },
+    ],
+  },
+  {
+    title: "Hassasiyet & merhamet",
+    sub: "Kalbi yumuşatan ayetler",
+    items: [
+      { s: 49, a: 13 },
+      { s: 5, a: 32 },
+      { s: 2, a: 177 },
+      { s: 4, a: 1 },
+      { s: 17, a: 23 },
+      { s: 33, a: 70 },
+    ],
+  },
+  {
+    title: "Yardımseverlik & infak",
+    sub: "Vermenin bereketi",
+    items: [
+      { s: 2, a: 261 },
+      { s: 3, a: 92 },
+      { s: 76, a: 8 },
+      { s: 64, a: 17 },
+      { s: 2, a: 267 },
+      { s: 9, a: 60 },
+    ],
+  },
+  {
+    title: "Şükür",
+    sub: "Nimete sahip çıkmak",
+    items: [
+      { s: 14, a: 7 },
+      { s: 2, a: 152 },
+      { s: 16, a: 18 },
+      { s: 27, a: 40 },
+      { s: 31, a: 12 },
+      { s: 39, a: 7 },
+    ],
+  },
+  {
+    title: "Tevekkül",
+    sub: "Allah'a güvenle bırakmak",
+    items: [
+      { s: 65, a: 3 },
+      { s: 3, a: 159 },
+      { s: 11, a: 88 },
+      { s: 8, a: 2 },
+      { s: 9, a: 51 },
+      { s: 14, a: 12 },
+    ],
+  },
+  {
+    title: "Tevbe & af",
+    sub: "Yeniden başlamak için",
+    items: [
+      { s: 39, a: 53 },
+      { s: 66, a: 8 },
+      { s: 11, a: 3 },
+      { s: 24, a: 31 },
+      { s: 4, a: 110 },
+      { s: 25, a: 70 },
+    ],
+  },
+  {
+    title: "Adalet",
+    sub: "Hak ve hukuk için",
+    items: [
+      { s: 4, a: 135 },
+      { s: 5, a: 8 },
+      { s: 16, a: 90 },
+      { s: 4, a: 58 },
+      { s: 49, a: 9 },
+    ],
+  },
+  {
+    title: "Aile & sevgi",
+    sub: "Yakınlık ve şefkat",
+    items: [
+      { s: 30, a: 21 },
+      { s: 17, a: 23 },
+      { s: 25, a: 74 },
+      { s: 31, a: 14 },
+      { s: 46, a: 15 },
+    ],
+  },
+  {
+    title: "Ölüm bilinci",
+    sub: "Geçiciliği hatırlamak",
+    items: [
+      { s: 3, a: 185 },
+      { s: 39, a: 30 },
+      { s: 102, a: 1 },
+      { s: 99, a: 7 },
+      { s: 4, a: 78 },
+      { s: 75, a: 1 },
+    ],
+  },
+  {
+    title: "Gece ibadeti",
+    sub: "Sehir vakti ve teheccüd",
+    items: [
+      { s: 73, a: 1 },
+      { s: 17, a: 79 },
+      { s: 39, a: 9 },
+      { s: 51, a: 17 },
+      { s: 25, a: 64 },
+    ],
+  },
 ];
 
 const ACTIONS = [
@@ -32,6 +244,20 @@ export function DiscoverPage() {
   const { t, locale } = useTranslation();
   const { data: surahs } = useSurahs();
   const hub = t.hub as unknown as Record<string, string>;
+  const [selectedMood, setSelectedMood] = useState<typeof MOODS[number] | null>(null);
+
+  useEffect(() => {
+    if (!selectedMood) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedMood(null);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [selectedMood]);
 
   return (
     <div className="mu-discover">
@@ -40,14 +266,10 @@ export function DiscoverPage() {
         <div className="mu-feat-grid">
           {FEATURED.map((f) => {
             const titleKey = `feat${f.key}`;
-            const descKey = `${titleKey}Desc`;
             return (
-              <Link key={f.key} to={f.to} className="mu-feat-card">
+              <Link key={f.key} to={f.to} className="mu-feat-card mu-feat-card-compact">
                 <span className="mu-feat-icon" aria-hidden="true">{f.icon}</span>
-                <div className="mu-feat-body">
-                  <div className="mu-feat-title">{hub[titleKey] ?? f.key}</div>
-                  <div className="mu-feat-desc">{hub[descKey] ?? ""}</div>
-                </div>
+                <div className="mu-feat-title">{hub[titleKey] ?? f.key}</div>
                 <span className="mu-feat-arrow" aria-hidden="true">{"\u2192"}</span>
               </Link>
             );
@@ -86,36 +308,58 @@ export function DiscoverPage() {
       {/* 3. Mood */}
       <section className="mu-disc-section">
         <h2 className="mu-disc-section-title">Ruh haline göre</h2>
-        <div className="mu-coll-grid">
+        <div className="mu-mood-grid">
           {MOODS.map((m) => (
-            <article key={m.title} className="mu-coll-card">
-              <h3>{m.title}</h3>
-              <p className="mu-coll-sub">{m.sub}</p>
-              <ul>
-                {m.items.map((n) => {
-                  const s = surahs.find((x) => x.id === n);
-                  if (!s) return null;
-                  return (
-                    <li key={n}>
-                      <Link
-                        to="/surah/$surahSlug"
-                        params={{ surahSlug: surahSlug(n) }}
-                        search={{ ayah: undefined }}
-                        className="mu-coll-item"
-                      >
-                        <span className="mu-ci-num">{String(n).padStart(3, "0")}</span>
-                        <span className="mu-ci-name">{getSurahName(n, locale) || s.nameSimple}</span>
-                        <span className="mu-ci-ar" dir="rtl">{s.nameArabic}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </article>
+            <button key={m.title} type="button" className="mu-mood-box" onClick={() => setSelectedMood(m)}>
+              <span className="mu-mood-title">{m.title}</span>
+              <span className="mu-mood-sub">{m.sub}</span>
+              <span className="mu-mood-count">{m.items.length} ayet</span>
+            </button>
           ))}
         </div>
       </section>
 
+      {selectedMood && (
+        <div
+          className="mu-sover"
+          role="dialog"
+          aria-modal="true"
+          aria-label={selectedMood.title}
+          onClick={() => setSelectedMood(null)}
+        >
+          <div className="mu-sover-box mu-mood-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="mu-mood-modal-head">
+              <div>
+                <h3>{selectedMood.title}</h3>
+                <p className="mu-muted">{selectedMood.sub}</p>
+              </div>
+              <button className="mu-sover-close" onClick={() => setSelectedMood(null)} aria-label="Kapat">
+                esc
+              </button>
+            </div>
+            <ul className="mu-mood-modal-list">
+              {selectedMood.items.map(({ s, a }) => {
+                const surah = surahs.find((x) => x.id === s);
+                if (!surah) return null;
+                return (
+                  <li key={`${s}-${a}`}>
+                    <Link
+                      to="/surah/$surahSlug"
+                      params={{ surahSlug: surahSlug(s) }}
+                      search={{ ayah: a }}
+                      className="mu-coll-item"
+                    >
+                      <span className="mu-ci-num">{s}:{a}</span>
+                      <span className="mu-ci-name">{getSurahName(s, locale) || surah.nameSimple}</span>
+                      <span className="mu-ci-ar" dir="rtl">{toArabicIndic(a)}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
