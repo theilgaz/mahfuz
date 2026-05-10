@@ -261,44 +261,32 @@ export function DiscoverPage() {
 
   return (
     <div className="mu-discover">
-      {/* 1. Featured: Elifba + Oyunlar */}
+      {/* Quick tiles: Öğren / Oyna / Mushaf / Topluluk -- vertical 4-up */}
       <section className="mu-disc-section">
-        <div className="mu-feat-grid">
+        <div className="mu-quick-grid">
           {FEATURED.map((f) => {
             const titleKey = `feat${f.key}`;
             return (
-              <Link key={f.key} to={f.to} className="mu-feat-card mu-feat-card-compact">
-                <span className="mu-feat-icon" aria-hidden="true">{f.icon}</span>
-                <div className="mu-feat-title">{hub[titleKey] ?? f.key}</div>
-                <span className="mu-feat-arrow" aria-hidden="true">{"\u2192"}</span>
+              <Link key={f.key} to={f.to} className="mu-quick-tile">
+                <span className="mu-quick-icon" aria-hidden="true">{f.icon}</span>
+                <span className="mu-quick-title">{hub[titleKey] ?? f.key}</span>
               </Link>
             );
           })}
-        </div>
-      </section>
-
-      {/* 3. Actions */}
-      <section className="mu-disc-section">
-        <p className="mu-eyebrow" style={{ marginBottom: 20 }}>
-          {hub.journeyTitle ?? "Yolculuğun"}
-        </p>
-        <div className="mu-feat-list">
           <Link
             to="/page/$pageNumber"
             params={{ pageNumber: "1" }}
-            className="mu-feat-card mu-feat-card-compact"
+            className="mu-quick-tile"
           >
-            <span className="mu-feat-icon" aria-hidden="true">{MuIcons.book}</span>
-            <div className="mu-feat-title">{hub.featMushaf ?? "Mushaf"}</div>
-            <span className="mu-feat-arrow" aria-hidden="true">{"\u2192"}</span>
+            <span className="mu-quick-icon" aria-hidden="true">{MuIcons.book}</span>
+            <span className="mu-quick-title">{hub.featMushaf ?? "Mushaf"}</span>
           </Link>
           {ACTIONS.map((a) => {
             const titleKey = `feat${a.key}` as string;
             return (
-              <Link key={a.key} to={a.to} className="mu-feat-card mu-feat-card-compact">
-                <span className="mu-feat-icon" aria-hidden="true">{a.icon}</span>
-                <div className="mu-feat-title">{hub[titleKey] ?? a.key}</div>
-                <span className="mu-feat-arrow" aria-hidden="true">{"\u2192"}</span>
+              <Link key={a.key} to={a.to} className="mu-quick-tile">
+                <span className="mu-quick-icon" aria-hidden="true">{a.icon}</span>
+                <span className="mu-quick-title">{hub[titleKey] ?? a.key}</span>
               </Link>
             );
           })}

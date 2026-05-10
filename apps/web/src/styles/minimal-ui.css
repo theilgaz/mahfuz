@@ -1626,6 +1626,60 @@
   transform: translateX(3px);
 }
 
+/* ── Quick access tiles (Öğren / Oyna / Mushaf / Topluluk) ── */
+.mu-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.mu-quick-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border: 1px solid var(--mu-line);
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--mu-accent), transparent 94%);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  text-align: center;
+}
+
+.mu-quick-tile:hover {
+  border-color: var(--mu-accent);
+  background: color-mix(in oklab, var(--mu-accent), transparent 88%);
+  transform: translateY(-1px);
+}
+
+.mu-quick-tile:focus-visible {
+  outline: 2px solid var(--mu-accent);
+  outline-offset: 3px;
+}
+
+.mu-quick-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--mu-bg);
+  border: 1px solid var(--mu-line);
+  color: var(--mu-accent);
+}
+
+.mu-quick-title {
+  font-family: var(--mu-ff-display);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mu-ink);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
 /* ── Featured cards (Elifba + Oyunlar) ── */
 .mu-feat-grid {
   display: grid;
