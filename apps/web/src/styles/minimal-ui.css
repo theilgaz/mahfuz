@@ -5227,6 +5227,22 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   body { padding-bottom: calc(48px + env(safe-area-inset-bottom)); }
   .mu-reader-topbar { padding-left: 12px; padding-right: 12px; top: 49px; }
 
+  .mu-games { padding: 20px 12px 64px; }
+  .mu-games-grid { gap: 10px; }
+  .mu-gcard { padding: 14px; gap: 12px; border-radius: 14px; }
+  .mu-gcard-icon { height: 80px; padding: 12px; }
+  .mu-gcard-icon svg { width: 56px; height: 56px; }
+  .mu-gcard h3 { font-size: 17px; }
+  .mu-gcard-top { margin-bottom: 4px; }
+  .mu-gcard-foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding-top: 12px;
+  }
+  .mu-gcard-meta { justify-content: center; }
+  .mu-gcard-foot .mu-btn { justify-content: center; text-align: center; }
+
   .mu-sb-podium { gap: 8px; }
   .mu-sb-podium-slot { padding: 14px 8px; }
   .mu-sb-podium-avatar { width: 44px; height: 44px; }
