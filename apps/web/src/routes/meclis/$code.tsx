@@ -28,6 +28,7 @@ const GAME_LABELS: Record<string, { title: string; sub: string }> = {
   "surah-guess": { title: "Sûre Tanıma", sub: "Türkçe anlama bakıp doğru sûreyi seç" },
   "word-meaning": { title: "Kelime Anlamı", sub: "Arapça kelimenin Türkçe anlamını eşleştir" },
   "word-match": { title: "Kelime Eşleştirme", sub: "Türkçe anlamı doğru Arapça kelimeyle eşleştir" },
+  "peygamber-kim": { title: "Kim Bu Peygamber?", sub: "3 ipucundan peygamberi tahmin et — erken bilen kazanır" },
 };
 
 const POLL_FAST = 1500;
@@ -212,7 +213,7 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
 
 // ── Voting ───────────────────────────────────────────────
 
-const ALL_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match"] as const;
+const ALL_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match", "peygamber-kim"] as const;
 
 const SCOPE_OPTIONS: { key: string; label: string; sub: string }[] = [
   { key: "all", label: "Tüm Kuran", sub: "Tüm sure ve ayetlerden" },

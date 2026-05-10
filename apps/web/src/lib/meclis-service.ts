@@ -16,7 +16,7 @@ import { auth } from "~/lib/auth";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { STARTING_TIME_MS, type Difficulty } from "~/lib/game-scoring";
 
-const MECLIS_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match"] as const;
+const MECLIS_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match", "peygamber-kim"] as const;
 export type MeclisGameId = (typeof MECLIS_GAMES)[number];
 
 const MECLIS_SCOPES = ["all", "namaz", "duha-nas", "tebareke", "amme", "yasin", "bakara"] as const;

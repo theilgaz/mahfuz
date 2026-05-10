@@ -20,6 +20,7 @@ import { MeclisFillBlank } from "./MeclisFillBlank";
 import { MeclisSurahGuess } from "./MeclisSurahGuess";
 import { MeclisWordMeaning } from "./MeclisWordMeaning";
 import { MeclisWordMatch } from "./MeclisWordMatch";
+import { MeclisPeygamberKim } from "./MeclisPeygamberKim";
 
 interface Props {
   code: string;
@@ -172,6 +173,7 @@ export function MeclisGamePlay({ code, gameId, difficulty, roundStartedAt, round
       {gameId === "surah-guess" && <MeclisSurahGuess {...gameProps} />}
       {gameId === "word-meaning" && <MeclisWordMeaning {...gameProps} />}
       {gameId === "word-match" && <MeclisWordMatch {...gameProps} />}
+      {gameId === "peygamber-kim" && <MeclisPeygamberKim {...gameProps} />}
     </div>
   );
 }
