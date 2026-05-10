@@ -92,12 +92,19 @@ async function fetchWbwChapter(chapterId: number, locale: string = "tr"): Promis
       const words: WbwWord[] = verse.words
         .filter((w) => w.char_type_name === "word")
         .map((w) => {
-          const translation = w.translation?.text ?? "";
-          const patchTranslation = isTr && !translation ? (patch[w.text_uthmani] ?? "") : "";
+          const apiTranslation = w.translation?.text ?? "";
+          const apiLang = w.translation?.language_name?.toLowerCase() ?? "";
+          // API "tr" istense bile Türkçe yoksa İngilizce metin dönebiliyor.
+          // Türkçe modda dönen metin Türkçe değilse patch'i tercih et.
+          const apiIsTurkish = apiLang === "turkish" || apiLang === "tr";
+          let translation = apiTranslation;
+          if (isTr && (!translation || !apiIsTurkish)) {
+            translation = patch[w.text_uthmani] || apiTranslation;
+          }
           return {
             position: w.position,
             textUthmani: w.text_uthmani,
-            translation: translation || patchTranslation,
+            translation,
             transliteration: w.transliteration?.text ?? "",
           };
         });
@@ -112,7 +119,7 @@ async function fetchWbwChapter(chapterId: number, locale: string = "tr"): Promis
 
 export const wbwQueryOptions = (chapterId: number, locale: string = "tr") =>
   queryOptions({
-    queryKey: ["wbw", chapterId, locale],
+    queryKey: ["wbw", chapterId, locale, "v2"],
     queryFn: () => fetchWbwChapter(chapterId, locale),
     staleTime: Infinity,
     gcTime: 30 * 60 * 1000, // 30 min
