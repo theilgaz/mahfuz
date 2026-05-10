@@ -12,7 +12,6 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useGameTimer } from "~/hooks/useGameTimer";
 import { GameScoreBar } from "~/components/GameScoreBar";
 import { GameOverCard } from "~/components/GameOverCard";
-import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import {
   calcCorrectPoints,
@@ -118,8 +117,8 @@ function resolveCardStyle(
 function EmojiMatchPage() {
   const { t, locale } = useTranslation();
   const gt = t.emojiMatchGame;
-  const [screen, setScreen] = useState<"setup" | "game" | "gameover">("setup");
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [screen, setScreen] = useState<"game" | "gameover">("game");
+  const difficulty: Difficulty = "easy";
   const timer = useGameTimer(difficulty);
 
   const [score, setScore] = useState(0);
@@ -289,20 +288,6 @@ function EmojiMatchPage() {
     timer.reset();
   };
 
-  if (screen === "setup") {
-    return (
-      <SurahPickerScreen
-        gameImg={THEME.img}
-        gameId={GAME_ID}
-        difficultyOnly
-        onStart={(_ids, _vf, diff) => {
-          setDifficulty(diff ?? "medium");
-          handleRestart();
-        }}
-      />
-    );
-  }
-
   if (screen === "gameover") {
     return (
       <GameOverCard
@@ -316,7 +301,6 @@ function EmojiMatchPage() {
         newAchievements={newAchievements}
         leagueUp={leagueUp}
         onRestart={handleRestart}
-        onSetup={() => setScreen("setup")}
       />
     );
   }
