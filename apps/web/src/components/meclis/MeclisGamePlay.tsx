@@ -19,6 +19,7 @@ import {
 import { MeclisFillBlank } from "./MeclisFillBlank";
 import { MeclisSurahGuess } from "./MeclisSurahGuess";
 import { MeclisWordMeaning } from "./MeclisWordMeaning";
+import { MeclisWordMatch } from "./MeclisWordMatch";
 
 interface Props {
   code: string;
@@ -26,6 +27,7 @@ interface Props {
   difficulty: Difficulty;
   roundStartedAt: number;
   roundDurationMs: number;
+  surahIds: number[];
 }
 
 export interface MeclisGameState {
@@ -33,9 +35,10 @@ export interface MeclisGameState {
   scoreCorrect: (answerTimeMs: number) => void;
   scoreWrong: () => void;
   finished: boolean;
+  surahIds: number[];
 }
 
-export function MeclisGamePlay({ code, gameId, difficulty, roundStartedAt, roundDurationMs }: Props) {
+export function MeclisGamePlay({ code, gameId, difficulty, roundStartedAt, roundDurationMs, surahIds }: Props) {
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [wrong, setWrong] = useState(0);
@@ -136,7 +139,7 @@ export function MeclisGamePlay({ code, gameId, difficulty, roundStartedAt, round
     );
   }
 
-  const gameProps = { difficulty, scoreCorrect, scoreWrong, finished };
+  const gameProps = { difficulty, scoreCorrect, scoreWrong, finished, surahIds };
 
   return (
     <div>
@@ -168,6 +171,7 @@ export function MeclisGamePlay({ code, gameId, difficulty, roundStartedAt, round
       {gameId === "fill-blank" && <MeclisFillBlank {...gameProps} />}
       {gameId === "surah-guess" && <MeclisSurahGuess {...gameProps} />}
       {gameId === "word-meaning" && <MeclisWordMeaning {...gameProps} />}
+      {gameId === "word-match" && <MeclisWordMatch {...gameProps} />}
     </div>
   );
 }

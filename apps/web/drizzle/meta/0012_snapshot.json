@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4288cc23-de88-401e-ac4a-5454159c08e3",
-  "prevId": "bae209be-64d5-4ce0-b478-f7a1bd300379",
+  "id": "7531ea10-1f3b-4330-8b8f-8da4f6653332",
+  "prevId": "4288cc23-de88-401e-ac4a-5454159c08e3",
   "tables": {
     "account": {
       "name": "account",
@@ -1964,6 +1964,13 @@
           "autoincrement": false,
           "default": "'[]'"
         },
+        "scope_vote": {
+          "name": "scope_vote",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "total_score": {
           "name": "total_score",
           "type": "integer",
@@ -2216,6 +2223,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'[]'"
+        },
+        "surah_scope": {
+          "name": "surah_scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'all'"
         },
         "current_game_index": {
           "name": "current_game_index",

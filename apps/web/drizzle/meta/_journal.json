@@ -85,6 +85,13 @@
       "when": 1778431200000,
       "tag": "0011_rename_emoji_match_to_word_match",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1778444658431,
+      "tag": "0012_aspiring_synch",
+      "breakpoints": true
     }
   ]
 }

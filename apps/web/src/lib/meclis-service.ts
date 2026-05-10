@@ -16,8 +16,40 @@ import { auth } from "~/lib/auth";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { STARTING_TIME_MS, type Difficulty } from "~/lib/game-scoring";
 
-const MECLIS_GAMES = ["fill-blank", "surah-guess", "word-meaning"] as const;
+const MECLIS_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match"] as const;
 export type MeclisGameId = (typeof MECLIS_GAMES)[number];
+
+const MECLIS_SCOPES = ["all", "namaz", "duha-nas", "tebareke", "amme", "yasin", "bakara"] as const;
+export type MeclisScope = (typeof MECLIS_SCOPES)[number];
+
+/** Bir scope için sure id'leri (boş → tüm Kuran). */
+export function surahIdsForScope(scope: string): number[] {
+  switch (scope) {
+    case "namaz":
+      return [1, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114];
+    case "duha-nas": {
+      const ids: number[] = [];
+      for (let i = 93; i <= 114; i++) ids.push(i);
+      return ids;
+    }
+    case "tebareke": {
+      const ids: number[] = [];
+      for (let i = 67; i <= 77; i++) ids.push(i);
+      return ids;
+    }
+    case "amme": {
+      const ids: number[] = [];
+      for (let i = 78; i <= 114; i++) ids.push(i);
+      return ids;
+    }
+    case "yasin":
+      return [36];
+    case "bakara":
+      return [2];
+    default:
+      return [];
+  }
+}
 
 const MAX_PLAYERS = 8;
 const VOTING_TIMEOUT_MS = 30_000;
@@ -57,7 +89,7 @@ async function advanceVotingIfReady(meclisId: string) {
   const players = await db.select().from(meclisPlayers).where(eq(meclisPlayers.meclisId, meclisId));
   const allVoted = players.every((p) => {
     try {
-      return Array.isArray(JSON.parse(p.votes)) && JSON.parse(p.votes).length > 0;
+      return Array.isArray(JSON.parse(p.votes)) && JSON.parse(p.votes).length > 0 && p.scopeVote != null;
     } catch {
       return false;
     }
@@ -66,7 +98,7 @@ async function advanceVotingIfReady(meclisId: string) {
   const timedOut = Date.now() - startedAt > VOTING_TIMEOUT_MS;
   if (!allVoted && !timedOut) return;
 
-  // Oyları topla; en çok oy alan POOL_SIZE oyunu seç. Eşitlikte sıralama kararlı.
+  // Oyun oyları
   const tally = new Map<string, number>();
   for (const game of MECLIS_GAMES) tally.set(game, 0);
   for (const p of players) {
@@ -81,12 +113,21 @@ async function advanceVotingIfReady(meclisId: string) {
   }
   const sorted = [...tally.entries()].sort((a, b) => b[1] - a[1]);
   const pool = sorted.slice(0, POOL_SIZE).map(([g]) => g);
-  // Tüm 3 oyun bizim havuzumuzda zaten; boş oysa yine de POOL_SIZE'a tamamla
   while (pool.length < POOL_SIZE) {
     const next = MECLIS_GAMES.find((g) => !pool.includes(g));
     if (!next) break;
     pool.push(next);
   }
+
+  // Scope oyları
+  const scopeTally = new Map<string, number>();
+  for (const sc of MECLIS_SCOPES) scopeTally.set(sc, 0);
+  for (const p of players) {
+    const v = p.scopeVote;
+    if (v && scopeTally.has(v)) scopeTally.set(v, (scopeTally.get(v) ?? 0) + 1);
+  }
+  const scopeSorted = [...scopeTally.entries()].sort((a, b) => b[1] - a[1]);
+  const winningScope = scopeSorted[0]?.[1] && scopeSorted[0][1] > 0 ? scopeSorted[0][0] : "all";
 
   const now = Date.now();
   await db
@@ -94,6 +135,7 @@ async function advanceVotingIfReady(meclisId: string) {
     .set({
       status: "playing",
       gamePool: JSON.stringify(pool),
+      surahScope: winningScope,
       currentGameIndex: 0,
       roundStartedAt: now,
       updatedAt: now,
@@ -298,7 +340,7 @@ export const startMeclisVoting = createServerFn({ method: "POST" })
   });
 
 export const submitMeclisVotes = createServerFn({ method: "POST" })
-  .inputValidator((input: { code: string; votes: string[] }) => input)
+  .inputValidator((input: { code: string; votes: string[]; scope: string }) => input)
   .handler(async ({ data }) => {
     const me = await requireUser();
     const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.code, data.code)).limit(1);
@@ -308,9 +350,11 @@ export const submitMeclisVotes = createServerFn({ method: "POST" })
     const cleanVotes = data.votes
       .filter((v) => MECLIS_GAMES.includes(v as MeclisGameId))
       .slice(0, POOL_SIZE);
+    const cleanScope = MECLIS_SCOPES.includes(data.scope as MeclisScope) ? data.scope : "all";
+
     await db
       .update(meclisPlayers)
-      .set({ votes: JSON.stringify(cleanVotes) })
+      .set({ votes: JSON.stringify(cleanVotes), scopeVote: cleanScope })
       .where(and(eq(meclisPlayers.meclisId, s.id), eq(meclisPlayers.userId, me.id)));
 
     await maybeAdvance(s.id);
@@ -372,6 +416,8 @@ export interface MeclisStatePayload {
     status: string;
     difficulty: Difficulty;
     gamePool: string[];
+    surahScope: string;
+    surahIds: number[];
     currentGameIndex: number;
     roundStartedAt: number | null;
     roundDurationMs: number;
@@ -383,6 +429,7 @@ export interface MeclisStatePayload {
     name: string;
     ready: boolean;
     votes: string[];
+    scopeVote: string | null;
     totalScore: number;
     currentScore: number;
     finishedAt: number | null;
@@ -428,6 +475,8 @@ export const getMeclisState = createServerFn({ method: "GET" })
         status: s.status,
         difficulty,
         gamePool: pool,
+        surahScope: s.surahScope ?? "all",
+        surahIds: surahIdsForScope(s.surahScope ?? "all"),
         currentGameIndex: s.currentGameIndex,
         roundStartedAt: s.roundStartedAt,
         roundDurationMs: STARTING_TIME_MS[difficulty] ?? STARTING_TIME_MS.easy,
@@ -445,6 +494,7 @@ export const getMeclisState = createServerFn({ method: "GET" })
             return [];
           }
         })(),
+        scopeVote: p.scopeVote,
         totalScore: p.totalScore,
         currentScore: p.currentScore,
         finishedAt: p.finishedAt,
@@ -453,6 +503,45 @@ export const getMeclisState = createServerFn({ method: "GET" })
       meId,
       isHost: meId != null && meId === s.hostUserId,
     };
+  });
+
+/**
+ * Final ekranındaki "Yeniden Oyna" akışı. Mihmandar başlatır;
+ * skorlar, oylar, gamePool, scope sıfırlanır ve oturum yeniden voting
+ * fazına girer. Katılımcı listesi korunur — kimse partiyi terk etmez.
+ */
+export const restartMeclis = createServerFn({ method: "POST" })
+  .inputValidator((input: { code: string }) => input)
+  .handler(async ({ data }) => {
+    const me = await requireUser();
+    const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.code, data.code)).limit(1);
+    if (!s) throw new Error("Meclis bulunamadı");
+    if (s.hostUserId !== me.id) throw new Error("Sadece mihmandar başlatabilir");
+    if (s.status !== "final") throw new Error("Sadece final ekranından yeniden başlatılır");
+
+    const now = Date.now();
+    await db
+      .update(meclisSessions)
+      .set({
+        status: "voting",
+        gamePool: "[]",
+        surahScope: "all",
+        currentGameIndex: 0,
+        roundStartedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(meclisSessions.id, s.id));
+    await db
+      .update(meclisPlayers)
+      .set({
+        votes: "[]",
+        scopeVote: null,
+        totalScore: 0,
+        currentScore: 0,
+        finishedAt: null,
+      })
+      .where(eq(meclisPlayers.meclisId, s.id));
+    return { ok: true };
   });
 
 export const cancelMeclis = createServerFn({ method: "POST" })

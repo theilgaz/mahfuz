@@ -300,6 +300,8 @@ export const meclisSessions = sqliteTable("meclis_sessions", {
   difficulty: text("difficulty").notNull().default("easy"),
   /** Oylama sonrası kilitlenen 3 oyun: JSON ["fill-blank","surah-guess","word-meaning"] */
   gamePool: text("game_pool").notNull().default("[]"),
+  /** Sure kapsamı: all | namaz | duha-nas | tebareke | amme | yasin | bakara */
+  surahScope: text("surah_scope").notNull().default("all"),
   /** Şu an hangi el oynanıyor (0-2). final → 3. */
   currentGameIndex: integer("current_game_index").notNull().default(0),
   /** Aktif elin sunucu zamanı; client'lar bundan timer kurar */
@@ -326,6 +328,8 @@ export const meclisPlayers = sqliteTable("meclis_players", {
   ready: integer("ready", { mode: "boolean" }).notNull().default(false),
   /** Oylama fazında oyuncunun seçtiği 3 oyun: JSON */
   votes: text("votes").notNull().default("[]"),
+  /** Oyuncunun seçtiği sure kapsamı (1 oy): scope key */
+  scopeVote: text("scope_vote"),
   /** Tüm meclis boyu kümülatif skor */
   totalScore: integer("total_score").notNull().default(0),
   /** Aktif el için mevcut skor (her el başında sıfırlanır) */

@@ -20,7 +20,7 @@ interface Verse {
   options: string[];
 }
 
-export function MeclisFillBlank({ difficulty, scoreCorrect, scoreWrong, finished }: MeclisGameState) {
+export function MeclisFillBlank({ difficulty, scoreCorrect, scoreWrong, finished, surahIds }: MeclisGameState) {
   const [verse, setVerse] = useState<Verse | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -34,7 +34,7 @@ export function MeclisFillBlank({ difficulty, scoreCorrect, scoreWrong, finished
     setVerse(null);
     try {
       const v = await getRandomVerseForGame({
-        data: { excludeAyahIds: usedRef.current, optionCount },
+        data: { surahIds: surahIds.length > 0 ? surahIds : undefined, excludeAyahIds: usedRef.current, optionCount },
       });
       if (v) {
         usedRef.current.push(v.ayahId);

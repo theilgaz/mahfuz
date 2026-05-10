@@ -13,6 +13,7 @@ import {
   startMeclisVoting,
   submitMeclisVotes,
   cancelMeclis,
+  restartMeclis,
   type MeclisStatePayload,
 } from "~/lib/meclis-service";
 import type { Difficulty } from "~/lib/game-scoring";
@@ -26,6 +27,7 @@ const GAME_LABELS: Record<string, { title: string; sub: string }> = {
   "fill-blank": { title: "Kelime Doldurma", sub: "Eksik kelimeyi seçerek ayeti doğru tamamla" },
   "surah-guess": { title: "Sûre Tanıma", sub: "Türkçe anlama bakıp doğru sûreyi seç" },
   "word-meaning": { title: "Kelime Anlamı", sub: "Arapça kelimenin Türkçe anlamını eşleştir" },
+  "word-match": { title: "Kelime Eşleştirme", sub: "Türkçe anlamı doğru Arapça kelimeyle eşleştir" },
 };
 
 const POLL_FAST = 1500;
@@ -210,27 +212,39 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
 
 // ── Voting ───────────────────────────────────────────────
 
-const ALL_GAMES = ["fill-blank", "surah-guess", "word-meaning"] as const;
+const ALL_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match"] as const;
+
+const SCOPE_OPTIONS: { key: string; label: string; sub: string }[] = [
+  { key: "all", label: "Tüm Kuran", sub: "Tüm sure ve ayetlerden" },
+  { key: "namaz", label: "Namaz Sureleri", sub: "Fatiha + Fil'den Nas'a (kısa sureler)" },
+  { key: "duha-nas", label: "Duha → Nas", sub: "93-114 arası kısa sureler" },
+  { key: "amme", label: "Amme Cüzü", sub: "30. cüz (78-114)" },
+  { key: "tebareke", label: "Tebareke Cüzü", sub: "29. cüz (67-77)" },
+  { key: "yasin", label: "Yâsîn", sub: "Sadece 36. sure" },
+  { key: "bakara", label: "Bakara", sub: "Sadece 2. sure" },
+];
 
 function VotingView({ state }: { state: MeclisStatePayload }) {
   const qc = useQueryClient();
   const { session, players, meId } = state;
   const me = players.find((p) => p.userId === meId);
-  const initial = (me?.votes ?? []) as string[];
-  const [picks, setPicks] = useState<string[]>(initial);
-  const [submitted, setSubmitted] = useState(initial.length > 0);
+  const initialGames = (me?.votes ?? []) as string[];
+  const initialScope = me?.scopeVote ?? "";
+  const [picks, setPicks] = useState<string[]>(initialGames);
+  const [scope, setScope] = useState<string>(initialScope);
+  const [submitted, setSubmitted] = useState(initialGames.length > 0 && initialScope !== "");
   const elapsed = session.roundStartedAt ? Math.floor((Date.now() - session.roundStartedAt) / 1000) : 0;
   const remaining = Math.max(0, 30 - elapsed);
 
   const submitMutation = useMutation({
-    mutationFn: () => submitMeclisVotes({ data: { code: session.code, votes: picks } }),
+    mutationFn: () => submitMeclisVotes({ data: { code: session.code, votes: picks, scope } }),
     onSuccess: () => {
       setSubmitted(true);
       qc.invalidateQueries({ queryKey: ["meclis-state", session.code] });
     },
   });
 
-  const toggle = (g: string) => {
+  const toggleGame = (g: string) => {
     if (submitted) return;
     setPicks((prev) => {
       if (prev.includes(g)) return prev.filter((x) => x !== g);
@@ -239,14 +253,14 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
     });
   };
 
-  const votedCount = players.filter((p) => p.votes.length > 0).length;
+  const votedCount = players.filter((p) => p.votes.length > 0 && p.scopeVote != null).length;
 
   return (
     <div className="max-w-md mx-auto px-4 py-6">
       <p className="mu-eyebrow"><span className="mu-eb-line" />Oylama</p>
-      <h1 className="mu-display" style={{ marginBottom: 6 }}>3 oyun seç</h1>
+      <h1 className="mu-display" style={{ marginBottom: 6 }}>Oyun & sure seç</h1>
       <p className="mu-lede" style={{ marginBottom: 18 }}>
-        En çok oy alan {ALL_GAMES.length > 3 ? "3" : "3"} oyun mecliste oynanır.
+        En çok oy alan 3 oyun ve sure kapsamı mecliste oynanır.
       </p>
 
       <div className="flex justify-between items-center mb-4 text-xs">
@@ -254,6 +268,9 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
         <span className="font-bold text-[var(--mu-accent)] tabular-nums">{remaining}sn</span>
       </div>
 
+      <p className="text-xs uppercase tracking-wider text-[var(--color-text-secondary)] mb-2">
+        Oyunlar — 3 tanesini seç ({picks.length}/3)
+      </p>
       <div className="space-y-2 mb-5">
         {ALL_GAMES.map((g) => {
           const picked = picks.includes(g);
@@ -262,7 +279,7 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
             <button
               key={g}
               disabled={submitted}
-              onClick={() => toggle(g)}
+              onClick={() => toggleGame(g)}
               className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${
                 picked
                   ? "border-[var(--mu-accent)] bg-[var(--mu-accent-soft)]"
@@ -287,10 +304,34 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
         })}
       </div>
 
+      <p className="text-xs uppercase tracking-wider text-[var(--color-text-secondary)] mb-2">
+        Sure kapsamı — 1 tane seç
+      </p>
+      <div className="grid grid-cols-2 gap-2 mb-5">
+        {SCOPE_OPTIONS.map((opt) => {
+          const picked = scope === opt.key;
+          return (
+            <button
+              key={opt.key}
+              disabled={submitted}
+              onClick={() => !submitted && setScope(opt.key)}
+              className={`text-left px-3 py-2.5 rounded-xl border transition-all ${
+                picked
+                  ? "border-[var(--mu-accent)] bg-[var(--mu-accent-soft)]"
+                  : "border-[var(--color-border)] bg-[var(--color-surface)]"
+              } ${submitted ? "opacity-60 cursor-default" : ""}`}
+            >
+              <div className="text-xs font-bold text-[var(--color-text-primary)]">{opt.label}</div>
+              <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5 leading-tight">{opt.sub}</div>
+            </button>
+          );
+        })}
+      </div>
+
       {!submitted ? (
         <button
           onClick={() => submitMutation.mutate()}
-          disabled={picks.length === 0 || submitMutation.isPending}
+          disabled={picks.length === 0 || scope === "" || submitMutation.isPending}
           className="mu-btn primary w-full disabled:opacity-50"
         >
           {submitMutation.isPending ? "Kaydediliyor..." : `Onayla (${picks.length} seçim)`}
@@ -322,6 +363,7 @@ function PlayingView({ state }: { state: MeclisStatePayload }) {
         difficulty={session.difficulty}
         roundStartedAt={session.roundStartedAt ?? Date.now()}
         roundDurationMs={session.roundDurationMs}
+        surahIds={session.surahIds}
       />
       <LiveScoreStrip state={state} />
     </div>
@@ -432,8 +474,16 @@ function InterimView({ state }: { state: MeclisStatePayload }) {
 // ── Final ────────────────────────────────────────────────
 
 function FinalView({ state }: { state: MeclisStatePayload }) {
-  const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+  const qc = useQueryClient();
+  const { session, players, isHost } = state;
+  const sorted = [...players].sort((a, b) => b.totalScore - a.totalScore);
   const winner = sorted[0];
+
+  const restartMutation = useMutation({
+    mutationFn: () => restartMeclis({ data: { code: session.code } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
+  });
+
   return (
     <div className="max-w-md mx-auto px-4 py-8">
       <p className="mu-eyebrow text-center"><span className="mu-eb-line" />Meclis tamam</p>
@@ -457,8 +507,25 @@ function FinalView({ state }: { state: MeclisStatePayload }) {
         })}
       </div>
 
-      <Link to="/meclis" className="mu-btn primary w-full mb-2">Yeni Meclis</Link>
-      <Link to="/games/scoreboard" className="mu-btn small w-full block text-center">Skor Tablosuna git</Link>
+      {isHost ? (
+        <button
+          onClick={() => restartMutation.mutate()}
+          disabled={restartMutation.isPending}
+          className="w-full px-4 py-3 rounded-xl text-sm font-bold bg-[var(--mu-accent)] text-white hover:opacity-90 transition-opacity mb-2 disabled:opacity-50"
+        >
+          {restartMutation.isPending ? "Hazırlanıyor..." : "Aynı kadroyla yeniden oyna"}
+        </button>
+      ) : (
+        <p className="text-center text-xs text-[var(--color-text-secondary)] mb-2 py-2">
+          Mihmandar yeniden başlatabilir — buradan ayrılma.
+        </p>
+      )}
+      <Link to="/meclis" className="block text-center w-full px-4 py-2.5 rounded-xl text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]/40 transition-colors">
+        Çık ve yeni meclis
+      </Link>
+      <Link to="/games/scoreboard" className="block text-center w-full px-4 py-2 rounded-xl text-xs font-medium text-[var(--color-text-secondary)] mt-1">
+        Skor Tablosuna git
+      </Link>
     </div>
   );
 }

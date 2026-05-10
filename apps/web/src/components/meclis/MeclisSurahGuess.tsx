@@ -17,7 +17,7 @@ interface Question {
   options: { id: number; name: string; arabic: string }[];
 }
 
-export function MeclisSurahGuess({ difficulty, scoreCorrect, scoreWrong, finished }: MeclisGameState) {
+export function MeclisSurahGuess({ difficulty, scoreCorrect, scoreWrong, finished, surahIds }: MeclisGameState) {
   const [q, setQ] = useState<Question | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
   const usedRef = useRef<number[]>([]);
@@ -29,7 +29,7 @@ export function MeclisSurahGuess({ difficulty, scoreCorrect, scoreWrong, finishe
     setQ(null);
     try {
       const next = await getVerseGuessQuestion({
-        data: { excludeAyahIds: usedRef.current, optionCount },
+        data: { surahIds: surahIds.length > 0 ? surahIds : undefined, excludeAyahIds: usedRef.current, optionCount },
       });
       if (next) {
         usedRef.current.push(next.ayahId);
