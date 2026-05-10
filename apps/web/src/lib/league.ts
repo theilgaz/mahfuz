@@ -118,24 +118,86 @@ const TR_MONTHS = [
   "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
 ];
 
+const HIJRI_MONTHS_TR = [
+  "Muharrem", "Safer", "Rebiülevvel", "Rebiülahir",
+  "Cemaziyelevvel", "Cemaziyelahir", "Recep", "Şaban",
+  "Ramazan", "Şevval", "Zilkade", "Zilhicce",
+];
+
+// Kuwaiti algoritması — Intl islamic-umalqura desteklemeyen cihazlar için fallback.
+function gregorianToHijri(date: Date): { year: number; month: number } {
+  const gy = date.getUTCFullYear();
+  const gm = date.getUTCMonth() + 1;
+  const gd = date.getUTCDate();
+  const a = Math.floor((14 - gm) / 12);
+  const y = gy + 4800 - a;
+  const m = gm + 12 * a - 3;
+  const jd =
+    gd +
+    Math.floor((153 * m + 2) / 5) +
+    365 * y +
+    Math.floor(y / 4) -
+    Math.floor(y / 100) +
+    Math.floor(y / 400) -
+    32045;
+  const l1 = jd - 1948440 + 10632;
+  const n = Math.floor((l1 - 1) / 10631);
+  const l2 = l1 - 10631 * n + 354;
+  const j =
+    Math.floor((10985 - l2) / 5316) * Math.floor((50 * l2) / 17719) +
+    Math.floor(l2 / 5670) * Math.floor((43 * l2) / 15238);
+  const l3 =
+    l2 -
+    Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) -
+    Math.floor(j / 16) * Math.floor((15238 * j) / 43) +
+    29;
+  const month = Math.floor((24 * l3) / 709);
+  const year = 30 * n + j - 30;
+  return { year, month };
+}
+
 /**
- * Sezon adı: "Nisan 2026 - Şevval 1447" formatında.
- * Hicri ay, Gregorian ayın 15'indeki Hicri ayı baskın kabul eder (sıfır bağımlılık).
+ * Sezon adı: "Nisan 2026 - Hicri Şevval 1447" formatında.
+ * Gregoryen ayın 15'indeki Hicri ay baskın kabul edilir.
  */
 export function formatSeasonName(key: SeasonKey): string {
   const [y, m] = key.split("-").map(Number);
   const greg = `${TR_MONTHS[m - 1]} ${y}`;
   const mid = new Date(Date.UTC(y, m - 1, 15));
-  let hijri = "";
+
+  // Önce Intl'i dene — formatToParts ile sadece month/year parçalarını al.
+  // Bazı cihazlar (eski Safari, sınırlı ICU verisi) islamic-umalqura takvimini
+  // desteklemiyor ve Gregoryen'e düşüyor; ay adı TR_MONTHS'tan gelir ve "MS"
+  // era marker'ı eklenebilir. O durumda manuel Hicri hesabına düş.
+  let hijriMonth = "";
+  let hijriYear = "";
   try {
     const fmt = new Intl.DateTimeFormat("tr-u-ca-islamic-umalqura", {
       month: "long",
       year: "numeric",
       timeZone: "UTC",
     });
-    hijri = fmt.format(mid).replace(/\u00a0/g, " ").trim();
+    const parts = fmt.formatToParts(mid);
+    hijriMonth = (parts.find((p) => p.type === "month")?.value ?? "")
+      .replace(/ /g, " ")
+      .trim();
+    hijriYear = (parts.find((p) => p.type === "year")?.value ?? "")
+      .replace(/ /g, " ")
+      .trim();
+    if (TR_MONTHS.includes(hijriMonth)) {
+      hijriMonth = "";
+      hijriYear = "";
+    }
   } catch {
-    hijri = "";
+    hijriMonth = "";
+    hijriYear = "";
   }
-  return hijri ? `${greg} - ${hijri}` : greg;
+
+  if (!hijriMonth || !hijriYear) {
+    const h = gregorianToHijri(mid);
+    hijriMonth = HIJRI_MONTHS_TR[h.month - 1] ?? "";
+    hijriYear = String(h.year);
+  }
+
+  return hijriMonth && hijriYear ? `${greg} - Hicri ${hijriMonth} ${hijriYear}` : greg;
 }
