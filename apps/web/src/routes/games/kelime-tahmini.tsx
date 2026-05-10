@@ -586,18 +586,10 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
 
       {/* Arabic Keyboard - pinned to bottom */}
       {!finished && (
-        <div className="flex flex-col items-center gap-1 pb-3 pt-2 shrink-0">
+        <div className="flex flex-col items-center gap-1.5 pb-3 pt-2 shrink-0 w-full">
+          {/* Letter rows — flex-1 letters, no fixed maxWidth so mobile fits */}
           {KB_ROWS.map((row, rowIdx) => (
-            <div key={rowIdx} className="flex gap-[3px] w-full justify-center">
-              {rowIdx === 2 && (
-                <button
-                  onClick={handleSubmit}
-                  className="h-10 px-2 rounded-md text-[11px] font-bold text-white active:scale-95 transition-all shrink-0"
-                  style={{ backgroundColor: P }}
-                >
-                  {t.kelimeTahmini.submit}
-                </button>
-              )}
+            <div key={rowIdx} className="flex gap-[3px] w-full justify-center px-1">
               {row.map((letter) => {
                 const norm = normalizeAlef(letter);
                 const status = keyStatuses.get(norm);
@@ -617,13 +609,12 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
                   <button
                     key={letter}
                     onClick={() => handleKey(letter)}
-                    className="flex-1 min-w-0 h-10 rounded-md border text-[15px] font-semibold active:scale-90 transition-all flex items-center justify-center"
+                    className="flex-1 min-w-0 max-w-[36px] h-10 rounded-md border text-[15px] font-semibold active:scale-90 transition-all flex items-center justify-center"
                     style={{
                       backgroundColor: kbBg,
                       color: kbText,
                       borderColor: kbBorder,
                       fontFamily: "var(--font-arabic)",
-                      maxWidth: "32px",
                     }}
                     dir="rtl"
                   >
@@ -631,16 +622,25 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
                   </button>
                 );
               })}
-              {rowIdx === 2 && (
-                <button
-                  onClick={handleBackspace}
-                  className="h-10 px-2 rounded-md text-[11px] font-bold border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] active:scale-95 transition-all shrink-0"
-                >
-                  {t.kelimeTahmini.backspace}
-                </button>
-              )}
             </div>
           ))}
+
+          {/* Action row: Submit + Backspace */}
+          <div className="flex gap-2 w-full justify-center px-2 mt-1">
+            <button
+              onClick={handleBackspace}
+              className="flex-1 max-w-[160px] h-10 rounded-md text-xs font-bold border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] active:scale-95 transition-all"
+            >
+              {t.kelimeTahmini.backspace}
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex-1 max-w-[160px] h-10 rounded-md text-xs font-bold text-white active:scale-95 transition-all"
+              style={{ backgroundColor: P }}
+            >
+              {t.kelimeTahmini.submit}
+            </button>
+          </div>
         </div>
       )}
     </div>
