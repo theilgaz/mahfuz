@@ -36,6 +36,7 @@ const SLUG_TO_LANGUAGE: Record<string, string> = {
   "dar-al-salam-tr": "tr",
   "muslim-shahin-tr": "tr",
   "shaban-britch-tr": "tr",
+  "ibni-kesir-tr": "tr",
   "sahih-international": "en",
   "taisirul-quran": "bn",
   "islamhouse-fa": "fa",
@@ -90,7 +91,7 @@ const importAll = process.argv.includes("--all");
 const PRIORITY_SLUGS = [
   "omer-celik", "diyanet", "elmali-yeni", "muhammed-esed",  // TR
   "ali-fikri-yavuz", "omer-nasuhi-bilmen",                  // TR (ek)
-  "dar-al-salam-tr", "muslim-shahin-tr", "shaban-britch-tr", // TR (API)
+  "dar-al-salam-tr", "muslim-shahin-tr", "shaban-britch-tr", "ibni-kesir-tr", // TR (API)
   "sahih-international", "pickthall-en",                     // EN
   "haleem-en", "yusufali-en", "usmani-en", "bridges-en", "hilali-khan-en", // EN (popüler)
   "isa-garcia",                                              // ES

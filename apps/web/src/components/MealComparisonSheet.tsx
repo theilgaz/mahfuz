@@ -19,6 +19,7 @@ const SUPPORTED_TRANSLATORS: Record<string, { name: string; author: string; lang
   "muhammed-esed": { name: "Muhammed Esed", author: "Muhammed Esed", lang: "TR" },
   "omer-nasuhi-bilmen": { name: "Ömer Nasuhi Bilmen", author: "Ömer Nasuhi Bilmen", lang: "TR" },
   "omer-celik": { name: "Ömer Çelik", author: "Ömer Çelik", lang: "TR" },
+  "ibni-kesir-tr": { name: "İbn Kesir", author: "İbn Kesir (tefsir tercümesi)", lang: "TR" },
   // İngilizce
   "sahih-international": { name: "Sahih International", author: "Saheeh International", lang: "EN" },
   "pickthall-en": { name: "Pickthall", author: "Mohammad M. Pickthall", lang: "EN", era: "1930" },
@@ -31,6 +32,7 @@ const PREFERRED_TRANSLATOR_ORDER = [
   "muhammed-esed",
   "diyanet",
   "elmali-yeni",
+  "ibni-kesir-tr",
   "pickthall-en",
   "sahih-international",
   "yusufali-en",
