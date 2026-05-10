@@ -89,6 +89,8 @@ export function V1ImageRenderer({
       <img
         src={`/mushaf-images/p${pageNumber}.png`}
         alt={`Mushaf page ${pageNumber}`}
+        width={2304}
+        height={3390}
         className={`w-full h-auto transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
         loading="eager"
         decoding="async"
