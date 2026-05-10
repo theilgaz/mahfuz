@@ -11,6 +11,7 @@ import { getSurahs } from "~/lib/quran-service";
 import { useSurahSelectionStore } from "~/stores/surahSelection.store";
 import { useHifzStore } from "~/stores/hifz.store";
 import { useStudiedStore } from "~/stores/studied.store";
+import { useGamePreferencesStore } from "~/stores/gamePreferences.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { GameMiniLeaderboard } from "~/components/GameMiniLeaderboard";
 import type { VerseFilter } from "~/lib/game-service";
@@ -42,7 +43,15 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, simpleDifficulty, g
   const savedIds = useSurahSelectionStore((s) => s.selectedSurahIds);
   const saveIds = useSurahSelectionStore((s) => s.setSelectedSurahIds);
   const memorized = useHifzStore((s) => s.memorized);
-  const [difficulty, setDifficulty] = useState<Difficulty>(simpleDifficulty ? "easy" : "medium");
+  const persistDifficulty = useGamePreferencesStore((s) => s.setDifficulty);
+  const [difficulty, setDifficultyState] = useState<Difficulty>(() => {
+    const saved = gameId ? useGamePreferencesStore.getState().getDifficulty(gameId) : undefined;
+    return saved ?? (simpleDifficulty ? "easy" : "medium");
+  });
+  const setDifficulty = (d: Difficulty) => {
+    setDifficultyState(d);
+    if (gameId) persistDifficulty(gameId, d);
+  };
 
   const studiedIds = useStudiedStore((s) => s.surahIds);
 
