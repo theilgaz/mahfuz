@@ -5,7 +5,7 @@
  * - Base points per correct answer: 10
  * - Time bonus: up to +5 (decays linearly over 10 seconds)
  * - Streak bonus: +2 per consecutive correct (max +10 at 5+ streak)
- * - Difficulty multiplier: Easy 1x, Medium 1.25x, Hard 1.5x, Hafiz 2x
+ * - Difficulty multiplier: Easy 1x, Medium 1.75x, Hard 3x, Hafiz 5x
  * - Wrong answer penalty: -5 (also scaled by difficulty)
  *
  * Timer:
@@ -13,7 +13,7 @@
  * - Starting time varies by difficulty
  * - Fast correct answers earn bonus seconds
  * - Wrong answers cost seconds
- * - Max cap prevents infinite play
+ * - Max cap of 1:00 prevents infinite play
  *
  * Question difficulty: option count scales with difficulty.
  * Easy 3, Medium 4, Hard 5, Hafiz 6.
@@ -25,21 +25,21 @@ export type Difficulty = "easy" | "medium" | "hard" | "hafiz";
 
 export const DIFFICULTY_MULTIPLIER: Record<Difficulty, number> = {
   easy: 1,
-  medium: 1.25,
-  hard: 1.5,
-  hafiz: 2,
+  medium: 1.75,
+  hard: 3,
+  hafiz: 5,
 };
 
 /** Starting time per difficulty (ms). */
 export const STARTING_TIME_MS: Record<Difficulty, number> = {
-  easy: 90_000,   // 1:30
-  medium: 75_000, // 1:15
-  hard: 60_000,   // 1:00
-  hafiz: 45_000,  // 0:45
+  easy: 60_000,   // 1:00
+  medium: 50_000, // 0:50
+  hard: 40_000,   // 0:40
+  hafiz: 30_000,  // 0:30
 };
 
 /** Absolute max time cap (ms) -- prevents infinite accumulation. */
-export const MAX_TIME_MS = 120_000; // 2:00
+export const MAX_TIME_MS = 60_000; // 1:00
 
 /** Time penalty for wrong answer (ms). */
 export const WRONG_TIME_PENALTY_MS = 5_000; // -5s
