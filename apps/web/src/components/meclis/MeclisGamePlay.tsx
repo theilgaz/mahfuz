@@ -34,7 +34,9 @@ interface Props {
 
 export interface MeclisGameState {
   difficulty: Difficulty;
-  scoreCorrect: (answerTimeMs: number) => void;
+  /** answerTimeMs ne kadar düşükse time bonus o kadar yüksek. multiplier
+   *  alt-oyunun ek puan ölçeği (1.0 default — peygamber gibi ipucu sayısına göre düşer). */
+  scoreCorrect: (answerTimeMs: number, multiplier?: number) => void;
   scoreWrong: () => void;
   finished: boolean;
   surahIds: number[];
@@ -106,10 +108,11 @@ export function MeclisGamePlay({ code, gameId, difficulty, roundStartedAt, round
   }, [score, correct, wrong, finished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scoreCorrect = useCallback(
-    (answerTimeMs: number) => {
+    (answerTimeMs: number, multiplier: number = 1) => {
       if (finishedRef.current) return;
       const newStreak = streak + 1;
-      const pts = calcCorrectPoints(difficulty, answerTimeMs, newStreak);
+      const basePts = calcCorrectPoints(difficulty, answerTimeMs, newStreak);
+      const pts = Math.max(1, Math.round(basePts * multiplier));
       setScore((s) => s + pts);
       setStreak(newStreak);
       setCorrect((c) => c + 1);
