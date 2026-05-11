@@ -6,7 +6,8 @@
       "Bash(pnpm --filter @mahfuz/api lint)",
       "Bash(pnpm --filter @mahfuz/shared lint)",
       "Bash(pnpm --filter @mahfuz/web lint)",
-      "Bash(pnpm lint *)"
+      "Bash(pnpm lint *)",
+      "Bash(pnpm typecheck *)"
     ]
   }
 }
