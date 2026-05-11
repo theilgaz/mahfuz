@@ -1,14 +1,15 @@
 /**
- * "Karı Tahmini" Meclis oyunu için server fn.
+ * "Kâri Tahmini" Meclis oyunu için server fn.
  *
  * Kısa, tanınır ayet havuzundan rastgele bir verse_key seçer; verse-level
  * mp3 desteği olan 4 kâri arasından birini doğru cevap olarak işaretler.
- * Audio URL: `${reciter.audioBaseUrl}/${SSSAAA}.mp3` (verses.quran.com pattern).
+ * Audio URL quran.com v4 API'sinden runtime'da çözümlenir; reciters tablosundaki
+ * audioBaseUrl değerleri çoğunlukla 404 verdiği için bu yola gidildi.
  */
 
 import { createServerFn } from "@tanstack/react-start";
 import { db, reciters } from "~/db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 
 /**
  * Kısa, melodik, tanınır ayetler — kâri stilini ayırt etmek için
@@ -36,9 +37,6 @@ const VERSE_POOL: { key: string; surahName: string }[] = [
   { key: "114:1", surahName: "Nâs" },
 ];
 
-/** QDC verse-level mp3'ü olmayan, sadece sure-bazlı mp3 sunan kâriler. */
-const CHAPTER_ONLY_SLUGS = new Set(["badr-al-turki"]);
-
 interface ReciterOption {
   slug: string;
   name: string;
@@ -53,34 +51,52 @@ export interface KariTahminiQuestion {
   options: ReciterOption[];
 }
 
-function buildAudioUrl(baseUrl: string, verseKey: string): string {
-  const [s, a] = verseKey.split(":").map(Number);
-  const padded = `${String(s).padStart(3, "0")}${String(a).padStart(3, "0")}`;
-  return `${baseUrl}/${padded}.mp3`;
+/**
+ * Quran.com v4 API'sinde verse-level mp3'ü olduğu doğrulanmış qurancom_id'ler.
+ * Bu liste dışındaki kâriler (Ghamdi, Maher, Yasser, Banna, Seferagic, Jalil)
+ * /recitations/{id}/by_ayah endpoint'inden ses döndürmüyor, bu yüzden
+ * Kâri Tahmini havuzuna dahil edilmiyor.
+ */
+const KARI_TAHMINI_SUPPORTED_IDS = [1, 2, 3, 6, 7, 8, 9, 10, 12];
+
+async function resolveQuranComAudioUrl(qurancomId: number, verseKey: string): Promise<string | null> {
+  try {
+    const res = await fetch(`https://api.quran.com/api/v4/recitations/${qurancomId}/by_ayah/${verseKey}`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as { audio_files?: { url?: string }[] };
+    const url = data.audio_files?.[0]?.url;
+    if (!url) return null;
+    if (url.startsWith("//")) return `https:${url}`;
+    if (url.startsWith("http")) return url;
+    return `https://verses.quran.com/${url}`;
+  } catch {
+    return null;
+  }
 }
 
 export const getKariTahminiQuestion = createServerFn({ method: "GET" })
   .inputValidator((input: { optionCount?: number }) => input)
   .handler(async ({ data }): Promise<KariTahminiQuestion | null> => {
     const optionCount = data.optionCount ?? 4;
-    const all = await db
+    const pool = await db
       .select()
       .from(reciters)
-      .where(eq(reciters.isActive, true));
-    const verseReciters = all.filter((r) => !CHAPTER_ONLY_SLUGS.has(r.slug));
-    if (verseReciters.length < optionCount) return null;
+      .where(and(eq(reciters.isActive, true), inArray(reciters.qurancomId, KARI_TAHMINI_SUPPORTED_IDS)));
+    if (pool.length < optionCount) return null;
 
-    // 4 (veya optionCount) kâri seç
-    const shuffled = [...verseReciters].sort(() => Math.random() - 0.5);
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
     const picks = shuffled.slice(0, optionCount);
     const correct = picks[Math.floor(Math.random() * picks.length)];
 
     const verse = VERSE_POOL[Math.floor(Math.random() * VERSE_POOL.length)];
+    if (correct.qurancomId == null) return null;
+    const audioUrl = await resolveQuranComAudioUrl(correct.qurancomId, verse.key);
+    if (!audioUrl) return null;
 
     return {
       verseKey: verse.key,
       surahName: verse.surahName,
-      audioUrl: buildAudioUrl(correct.audioBaseUrl, verse.key),
+      audioUrl,
       correctSlug: correct.slug,
       options: picks.map((r) => ({ slug: r.slug, name: r.name })),
     };

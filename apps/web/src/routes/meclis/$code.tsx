@@ -10,12 +10,57 @@ import {
   getMeclisState,
   toggleMeclisReady,
   setMeclisDifficulty,
+  setMeclisVotesVisibility,
   startMeclisVoting,
   submitMeclisVotes,
   cancelMeclis,
   restartMeclis,
   type MeclisStatePayload,
 } from "~/lib/meclis-service";
+
+type MeclisPlayer = MeclisStatePayload["players"][number];
+
+function VoterStack({ voters, visible, max = 4 }: { voters: MeclisPlayer[]; visible: boolean; max?: number }) {
+  if (voters.length === 0) return null;
+  if (!visible) {
+    return (
+      <span className="text-[10px] font-bold tabular-nums text-[var(--mu-accent)] px-1.5 py-0.5 rounded-full bg-[var(--mu-accent-soft)]">
+        {voters.length} oy
+      </span>
+    );
+  }
+  const shown = voters.slice(0, max);
+  const extra = voters.length - shown.length;
+  return (
+    <div className="flex items-center -space-x-1.5">
+      {shown.map((v) =>
+        v.image ? (
+          <img
+            key={v.userId}
+            src={v.image}
+            alt={v.name}
+            title={v.name}
+            referrerPolicy="no-referrer"
+            className="w-5 h-5 rounded-full object-cover ring-2 ring-[var(--color-surface)]"
+          />
+        ) : (
+          <span
+            key={v.userId}
+            title={v.name}
+            className="w-5 h-5 rounded-full ring-2 ring-[var(--color-surface)] bg-[var(--color-border)] text-[var(--color-text-secondary)] text-[9px] font-bold flex items-center justify-center"
+          >
+            {(v.name?.[0] ?? "?").toUpperCase()}
+          </span>
+        ),
+      )}
+      {extra > 0 && (
+        <span className="w-5 h-5 rounded-full ring-2 ring-[var(--color-surface)] bg-[var(--color-border)] text-[var(--color-text-secondary)] text-[9px] font-bold flex items-center justify-center">
+          +{extra}
+        </span>
+      )}
+    </div>
+  );
+}
 import type { Difficulty } from "~/lib/game-scoring";
 import { MeclisGamePlay } from "~/components/meclis/MeclisGamePlay";
 
@@ -28,8 +73,8 @@ const GAME_LABELS: Record<string, { title: string; sub: string }> = {
   "surah-guess": { title: "Sûre Tanıma", sub: "Türkçe anlama bakıp doğru sûreyi seç" },
   "word-meaning": { title: "Kelime Anlamı", sub: "Arapça kelimenin Türkçe anlamını eşleştir" },
   "word-match": { title: "Kelime Eşleştirme", sub: "Türkçe anlamı doğru Arapça kelimeyle eşleştir" },
-  "peygamber-kim": { title: "Kim Bu Peygamber?", sub: "3 ipucundan peygamberi tahmin et — erken bilen kazanır" },
-  "kari-tahmini": { title: "Karı Tahmini", sub: "Tilaveti dinle, doğru kâriyi seç" },
+  "peygamber-kim": { title: "Kim Bu Peygamber?", sub: "3 ipucundan peygamberi tahmin et, erken bilen kazanır" },
+  "kari-tahmini": { title: "Kâri Tahmini", sub: "Tilaveti dinle, doğru kâriyi seç" },
 };
 
 const POLL_FAST = 1500;
@@ -100,6 +145,10 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
     mutationFn: (d: Difficulty) => setMeclisDifficulty({ data: { code: session.code, difficulty: d } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
   });
+  const visibilityMutation = useMutation({
+    mutationFn: (visible: boolean) => setMeclisVotesVisibility({ data: { code: session.code, visible } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
+  });
   const startMutation = useMutation({
     mutationFn: () => startMeclisVoting({ data: { code: session.code } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
@@ -141,6 +190,28 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-all ${session.difficulty === d ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"} ${!isHost ? "cursor-default" : ""}`}
             >
               <span className={`w-2 h-2 rounded-full ${dot}`} />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Oylama görünürlüğü (mihmandar belirler) */}
+      <div className="mb-4">
+        <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">
+          Oylama {!isHost && <span className="opacity-60">(mihmandar belirler)</span>}
+        </label>
+        <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+          {([
+            { v: true, label: "Görünür" },
+            { v: false, label: "Gizli (sadece sayı)" },
+          ] as const).map(({ v, label }) => (
+            <button
+              key={String(v)}
+              disabled={!isHost}
+              onClick={() => visibilityMutation.mutate(v)}
+              className={`flex-1 py-2.5 text-xs font-medium transition-all ${session.votesVisible === v ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"} ${!isHost ? "cursor-default" : ""}`}
+            >
               {label}
             </button>
           ))}
@@ -228,7 +299,7 @@ const SCOPE_OPTIONS: { key: string; label: string; sub: string }[] = [
 
 function VotingView({ state }: { state: MeclisStatePayload }) {
   const qc = useQueryClient();
-  const { session, players, meId } = state;
+  const { session, players, meId, isHost } = state;
   const me = players.find((p) => p.userId === meId);
   const initialGames = (me?.votes ?? []) as string[];
   const initialScope = me?.scopeVote ?? "";
@@ -237,6 +308,7 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
   const [submitted, setSubmitted] = useState(initialGames.length > 0 && initialScope !== "");
   const elapsed = session.roundStartedAt ? Math.floor((Date.now() - session.roundStartedAt) / 1000) : 0;
   const remaining = Math.max(0, 30 - elapsed);
+  const votesVisible = session.votesVisible;
 
   const submitMutation = useMutation({
     mutationFn: () => submitMeclisVotes({ data: { code: session.code, votes: picks, scope } }),
@@ -244,6 +316,11 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
       setSubmitted(true);
       qc.invalidateQueries({ queryKey: ["meclis-state", session.code] });
     },
+  });
+
+  const visibilityMutation = useMutation({
+    mutationFn: (visible: boolean) => setMeclisVotesVisibility({ data: { code: session.code, visible } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
   });
 
   const toggleGame = (g: string) => {
@@ -265,10 +342,21 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
         En çok oy alan 3 oyun ve sure kapsamı mecliste oynanır.
       </p>
 
-      <div className="flex justify-between items-center mb-4 text-xs">
+      <div className="flex justify-between items-center mb-2 text-xs">
         <span className="text-[var(--color-text-secondary)]">{votedCount}/{players.length} oy verdi</span>
         <span className="font-bold text-[var(--mu-accent)] tabular-nums">{remaining}sn</span>
       </div>
+      {isHost && (
+        <div className="flex justify-end mb-3">
+          <button
+            onClick={() => visibilityMutation.mutate(!votesVisible)}
+            disabled={visibilityMutation.isPending}
+            className="text-[11px] font-medium text-[var(--color-text-secondary)] underline-offset-2 hover:underline disabled:opacity-50"
+          >
+            {votesVisible ? "Oyları gizle" : "Oyları göster"}
+          </button>
+        </div>
+      )}
 
       <p className="text-xs uppercase tracking-wider text-[var(--color-text-secondary)] mb-2">
         Oyunlar — 3 tanesini seç ({picks.length}/3)
@@ -277,6 +365,7 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
         {ALL_GAMES.map((g) => {
           const picked = picks.includes(g);
           const meta = GAME_LABELS[g];
+          const voters = players.filter((p) => p.votes.includes(g));
           return (
             <button
               key={g}
@@ -288,18 +377,21 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
                   : "border-[var(--color-border)] bg-[var(--color-surface)]"
               } ${submitted ? "opacity-60 cursor-default" : ""}`}
             >
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
                   <div className="text-sm font-bold text-[var(--color-text-primary)]">{meta?.title ?? g}</div>
                   <div className="text-xs text-[var(--color-text-secondary)] mt-0.5">{meta?.sub ?? ""}</div>
                 </div>
-                <span
-                  className={`w-5 h-5 rounded-full border-2 ${
-                    picked ? "bg-[var(--mu-accent)] border-[var(--mu-accent)]" : "border-[var(--color-border)]"
-                  } flex items-center justify-center`}
-                >
-                  {picked && <span className="text-white text-xs">✓</span>}
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <VoterStack voters={voters} visible={votesVisible} />
+                  <span
+                    className={`w-5 h-5 rounded-full border-2 ${
+                      picked ? "bg-[var(--mu-accent)] border-[var(--mu-accent)]" : "border-[var(--color-border)]"
+                    } flex items-center justify-center`}
+                  >
+                    {picked && <span className="text-white text-xs">✓</span>}
+                  </span>
+                </div>
               </div>
             </button>
           );
@@ -312,6 +404,7 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
       <div className="grid grid-cols-2 gap-2 mb-5">
         {SCOPE_OPTIONS.map((opt) => {
           const picked = scope === opt.key;
+          const voters = players.filter((p) => p.scopeVote === opt.key);
           return (
             <button
               key={opt.key}
@@ -323,8 +416,17 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
                   : "border-[var(--color-border)] bg-[var(--color-surface)]"
               } ${submitted ? "opacity-60 cursor-default" : ""}`}
             >
-              <div className="text-xs font-bold text-[var(--color-text-primary)]">{opt.label}</div>
-              <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5 leading-tight">{opt.sub}</div>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold text-[var(--color-text-primary)]">{opt.label}</div>
+                  <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5 leading-tight">{opt.sub}</div>
+                </div>
+              </div>
+              {voters.length > 0 && (
+                <div className="mt-1.5">
+                  <VoterStack voters={voters} visible={votesVisible} />
+                </div>
+              )}
             </button>
           );
         })}
@@ -490,18 +592,17 @@ function FinalView({ state }: { state: MeclisStatePayload }) {
     <div className="max-w-md mx-auto px-4 py-8">
       <p className="mu-eyebrow text-center"><span className="mu-eb-line" />Meclis tamam</p>
       <h1 className="mu-display text-center" style={{ marginBottom: 24 }}>
-        Birincilik {winner?.name}'nın
+        Kazanan: {winner?.name}
       </h1>
 
       <div className="space-y-2 mb-6">
         {sorted.map((p, i) => {
-          const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
           return (
             <div
               key={p.userId}
               className={`flex items-center gap-3 px-4 py-4 rounded-xl border ${i === 0 ? "border-[var(--mu-accent)] bg-[var(--mu-accent-soft)]" : "border-[var(--color-border)] bg-[var(--color-surface)]"}`}
             >
-              <span className="text-2xl w-10 text-center">{medal || `#${i + 1}`}</span>
+              <span className="text-2xl font-bold tabular-nums w-10 text-center text-[var(--color-text-secondary)]">{i + 1}.</span>
               <span className="flex-1 text-base font-medium">{p.name}</span>
               <span className="text-xl font-bold tabular-nums text-[var(--mu-accent)]">{p.totalScore}</span>
             </div>
@@ -519,7 +620,7 @@ function FinalView({ state }: { state: MeclisStatePayload }) {
         </button>
       ) : (
         <p className="text-center text-xs text-[var(--color-text-secondary)] mb-2 py-2">
-          Mihmandar yeniden başlatabilir — buradan ayrılma.
+          Mihmandar yeniden başlatabilir, buradan ayrılma.
         </p>
       )}
       <Link to="/meclis" className="block text-center w-full px-4 py-2.5 rounded-xl text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]/40 transition-colors">

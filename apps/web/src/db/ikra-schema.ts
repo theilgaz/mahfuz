@@ -302,6 +302,8 @@ export const meclisSessions = sqliteTable("meclis_sessions", {
   gamePool: text("game_pool").notNull().default("[]"),
   /** Sure kapsamı: all | namaz | duha-nas | tebareke | amme | yasin | bakara */
   surahScope: text("surah_scope").notNull().default("all"),
+  /** Oylama fazında kimin neye oy verdiği herkese görünür mü. Mihmandar değiştirir. */
+  votesVisible: integer("votes_visible", { mode: "boolean" }).notNull().default(true),
   /** Şu an hangi el oynanıyor (0-2). final → 3. */
   currentGameIndex: integer("current_game_index").notNull().default(0),
   /** Aktif elin sunucu zamanı; client'lar bundan timer kurar */

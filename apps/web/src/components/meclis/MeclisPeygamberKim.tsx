@@ -106,7 +106,7 @@ export function MeclisPeygamberKim({ scoreCorrect, scoreWrong, finished }: Mecli
           Kim bu peygamber?
         </div>
         <div className="text-[10px] font-mono text-[var(--mu-accent)]">
-          {revealedClues}/3 ipucu · {Math.round((MULTIPLIER_BY_CLUES[revealedClues] ?? 0.3) * 100)}% puan
+          {revealedClues}/3 ipucu · %{Math.round((MULTIPLIER_BY_CLUES[revealedClues] ?? 0.3) * 100)} puan
         </div>
       </div>
 
@@ -131,7 +131,7 @@ export function MeclisPeygamberKim({ scoreCorrect, scoreWrong, finished }: Mecli
           onClick={revealNextClue}
           className="w-full mb-4 px-3 py-2 rounded-lg border border-dashed border-[var(--mu-accent)] text-xs font-medium text-[var(--mu-accent)] hover:bg-[var(--mu-accent-soft)] transition-colors"
         >
-          İpucu Al · sonraki ipucu ile puan {Math.round(nextMultiplier * 100)}%
+          İpucu Al · puan düşer
         </button>
       )}
 
@@ -163,7 +163,7 @@ export function MeclisPeygamberKim({ scoreCorrect, scoreWrong, finished }: Mecli
 
       {picked === "__TIMEOUT__" && (
         <p className="text-center text-xs text-[var(--color-text-secondary)] mt-4">
-          Süre doldu — cevap: <span className="font-bold">{round.target.name}</span>
+          Süre doldu. Cevap: <span className="font-bold">{round.target.name}</span>
         </p>
       )}
     </div>

@@ -1,0 +1,1 @@
+ALTER TABLE `meclis_sessions` ADD `votes_visible` integer DEFAULT true NOT NULL;

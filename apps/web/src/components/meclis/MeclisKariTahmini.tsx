@@ -160,7 +160,7 @@ export function MeclisKariTahmini({ scoreCorrect, scoreWrong, finished }: Meclis
 
       {picked === "__TIMEOUT__" && (
         <p className="text-center text-xs text-[var(--color-text-secondary)] mt-4">
-          Süre doldu — doğru cevap: <span className="font-bold">{question.options.find((o) => o.slug === question.correctSlug)?.name}</span>
+          Süre doldu. Doğru cevap: <span className="font-bold">{question.options.find((o) => o.slug === question.correctSlug)?.name}</span>
         </p>
       )}
     </div>

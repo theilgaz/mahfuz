@@ -317,6 +317,21 @@ export const setMeclisDifficulty = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setMeclisVotesVisibility = createServerFn({ method: "POST" })
+  .inputValidator((input: { code: string; visible: boolean }) => input)
+  .handler(async ({ data }) => {
+    const me = await requireUser();
+    const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.code, data.code)).limit(1);
+    if (!s) throw new Error("Meclis bulunamadı");
+    if (s.hostUserId !== me.id) throw new Error("Sadece mihmandar değiştirebilir");
+    if (s.status !== "lobby" && s.status !== "voting") throw new Error("Sadece lobby veya oylama fazında değiştirilebilir");
+    await db
+      .update(meclisSessions)
+      .set({ votesVisible: data.visible, updatedAt: Date.now() })
+      .where(eq(meclisSessions.id, s.id));
+    return { ok: true };
+  });
+
 export const startMeclisVoting = createServerFn({ method: "POST" })
   .inputValidator((input: { code: string }) => input)
   .handler(async ({ data }) => {
@@ -423,10 +438,12 @@ export interface MeclisStatePayload {
     roundDurationMs: number;
     interimMs: number;
     hostUserId: string;
+    votesVisible: boolean;
   };
   players: {
     userId: string;
     name: string;
+    image: string | null;
     ready: boolean;
     votes: string[];
     scopeVote: string | null;
@@ -453,8 +470,19 @@ export const getMeclisState = createServerFn({ method: "GET" })
     if (!s) return null;
 
     const players = await db
-      .select()
+      .select({
+        userId: meclisPlayers.userId,
+        name: meclisPlayers.name,
+        image: user.image,
+        ready: meclisPlayers.ready,
+        votes: meclisPlayers.votes,
+        scopeVote: meclisPlayers.scopeVote,
+        totalScore: meclisPlayers.totalScore,
+        currentScore: meclisPlayers.currentScore,
+        finishedAt: meclisPlayers.finishedAt,
+      })
       .from(meclisPlayers)
+      .leftJoin(user, eq(meclisPlayers.userId, user.id))
       .where(eq(meclisPlayers.meclisId, s.id))
       .orderBy(meclisPlayers.joinedAt);
 
@@ -482,10 +510,12 @@ export const getMeclisState = createServerFn({ method: "GET" })
         roundDurationMs: STARTING_TIME_MS[difficulty] ?? STARTING_TIME_MS.easy,
         interimMs: INTERIM_MS,
         hostUserId: s.hostUserId,
+        votesVisible: s.votesVisible,
       },
       players: players.map((p) => ({
         userId: p.userId,
         name: p.name,
+        image: p.image,
         ready: p.ready,
         votes: (() => {
           try {
