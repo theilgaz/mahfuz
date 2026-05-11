@@ -270,7 +270,7 @@ function WordMatchPage() {
         .catch(() => {});
     }
     setScreen("gameover");
-  }, [score, difficulty, correctCount, wrongCount, bestStreak, timer]);
+  }, [score, difficulty, correctCount, wrongCount, bestStreak, timer.pause]);
 
   const nextRound = useCallback(() => {
     if (timer.isExpired || !roundData || words.length === 0) {
@@ -294,7 +294,7 @@ function WordMatchPage() {
     setLastDelta(null);
     setRound((r) => r + 1);
     matchStart.current = Date.now();
-  }, [timer, endGame, usedIndices, roundData, words]);
+  }, [timer.isExpired, endGame, usedIndices, roundData, words]);
 
   const AUTO_ADVANCE_MS = 1000;
   useEffect(() => {
