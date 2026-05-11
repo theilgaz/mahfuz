@@ -15,6 +15,7 @@ import { useLocaleStore } from "~/stores/locale.store";
 import { getAllLocaleConfigs, type Locale } from "~/locales/registry";
 import { SearchableSelect } from "~/components/SearchableSelect";
 import { GroupedMultiSelect } from "~/components/GroupedMultiSelect";
+import { ReciterPicker, type ReciterRow, type VoiceTag } from "~/components/reader/ReciterPicker";
 
 // ── Constants ────────────────────────────────────────────
 
@@ -248,18 +249,34 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
 
   const groupOrder = useMemo(() => langOrder.map((l) => LANG_LABELS[l] || l), [langOrder]);
 
-  const reciterOptions = useMemo(() => {
+  const reciterRows: ReciterRow[] = useMemo(() => {
     if (!reciterList?.length) return [];
     return reciterList.map((r: any) => {
-      const baseLabel = r.nameArabic ? `${r.name} · ${r.nameArabic}` : r.name;
-      const chapterOnly = r.source && r.source !== "qurancom";
+      let voiceTags: VoiceTag[] = [];
+      if (typeof r.voiceTags === "string") {
+        try { voiceTags = JSON.parse(r.voiceTags); } catch { voiceTags = []; }
+      } else if (Array.isArray(r.voiceTags)) {
+        voiceTags = r.voiceTags;
+      }
       return {
-        value: r.slug,
-        label: chapterOnly ? `${baseLabel} · ${t.settings.reciterChapterOnly}` : baseLabel,
-        searchText: [r.name, r.nameArabic, r.slug].filter(Boolean).join(" "),
+        slug: r.slug,
+        name: r.name,
+        nameArabic: r.nameArabic ?? null,
+        country: r.country || null,
+        style: r.style || null,
+        source: r.source || null,
+        featured: !!r.featured,
+        voiceTags,
       };
     });
-  }, [reciterList, t.settings.reciterChapterOnly]);
+  }, [reciterList]);
+
+  const currentReciter = useMemo(
+    () => reciterRows.find((r) => r.slug === store.reciterSlug),
+    [reciterRows, store.reciterSlug],
+  );
+
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const FONT_PRESETS = [
     { id: "small", size: 1.5, label: "S" },
@@ -331,19 +348,32 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
       <Divider />
 
       {/* ── Kari ── */}
-      {reciterOptions.length > 0 && (
+      {reciterRows.length > 0 && (
         <>
           <div>
             <Label>{t.settings.reciter}</Label>
-            <SearchableSelect
-              options={reciterOptions}
-              value={store.reciterSlug}
-              onChange={store.setReciter}
-              placeholder={t.settings.select}
-              searchPlaceholder={t.settings.searchReciter}
-              noResultsText={t.common.noResults}
-            />
+            <button
+              onClick={() => setPickerOpen(true)}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm hover:border-[var(--color-accent)] transition-colors"
+            >
+              <span className="truncate text-left flex-1 text-[var(--color-text-primary)]">
+                {currentReciter
+                  ? (currentReciter.nameArabic ? `${currentReciter.name} · ${currentReciter.nameArabic}` : currentReciter.name)
+                  : (t.settings.select ?? "—")}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" className="shrink-0 text-[var(--color-text-secondary)]">
+                <path d="M3 5L6 8L9 5" />
+              </svg>
+            </button>
           </div>
+          {pickerOpen && (
+            <ReciterPicker
+              reciters={reciterRows}
+              value={store.reciterSlug}
+              onSelect={store.setReciter}
+              onClose={() => setPickerOpen(false)}
+            />
+          )}
           <Divider />
         </>
       )}

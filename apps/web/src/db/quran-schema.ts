@@ -111,6 +111,8 @@ export const reciters = sqliteTable("reciters", {
   isActive: integer("is_active", { mode: "boolean" }).default(true),
   source: text("source").default("qurancom"), // self | qurancom
   qurancomId: integer("qurancom_id"), // quran.com/QDC ID
+  featured: integer("featured", { mode: "boolean" }).notNull().default(false),
+  voiceTags: text("voice_tags").notNull().default("[]"), // JSON: ("bas"|"tiz"|"yavas"|"hizli"|"melodik"|"klasik"|"teravih")[]
 });
 
 // ── Alışkanlık / Okuma ───────────────────────────────────
