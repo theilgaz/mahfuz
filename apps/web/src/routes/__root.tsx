@@ -32,8 +32,11 @@ import { getSession } from "~/lib/auth-session";
 import { useSyncEngine } from "~/hooks/useSyncEngine";
 import { surahSlug, surahIdFromSlug } from "~/lib/surah-slugs";
 import type { Session } from "~/lib/auth";
-import appCss from "~/styles/app.css?url";
-import minimalUiCss from "~/styles/minimal-ui.css?url";
+// Side-effect imports — Vite tracks CSS chunks via JS dependency graph and
+// TanStack Start auto-injects <link> tags in the SSR head. Using ?url here
+// produced mismatched hashes between server and client bundles in prod.
+import "~/styles/app.css";
+import "~/styles/minimal-ui.css";
 
 export interface RouterContext {
   queryClient: QueryClient;
@@ -83,8 +86,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Amiri:ital,wght@0,400;0,700;1,400&family=Amiri+Quran&display=swap" },
       { rel: "preload", href: "/fonts/KFGQPCUthmanicScriptHAFS.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "preload", href: "/fonts/ScheherazadeNew-Regular.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: appCss },
-      { rel: "stylesheet", href: minimalUiCss },
     ],
   }),
   component: RootComponent,
