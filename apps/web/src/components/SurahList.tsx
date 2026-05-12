@@ -189,7 +189,7 @@ export function SurahList({ surahs }: SurahListProps) {
                   {/* Sure adi + meta */}
                   <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-sm font-medium text-[var(--color-text-primary)] truncate">
-                      {surah.nameSimple}
+                      {getSurahName(surah.id, locale) || surah.nameSimple}
                     </span>
                     <span className="text-[11px] text-[var(--color-text-secondary)]">
                       {getSurahMeaning(surah.id, locale)}

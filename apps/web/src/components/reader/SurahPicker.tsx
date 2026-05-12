@@ -84,7 +84,9 @@ export function SurahPicker({
   const filtered = surahs.filter((s) => {
     if (!search) return true;
     const q = search.toLowerCase();
+    const i18nName = getSurahName(s.id, locale) ?? "";
     return (
+      i18nName.toLowerCase().includes(q) ||
       s.nameSimple.toLowerCase().includes(q) ||
       s.nameTranslation.toLowerCase().includes(q) ||
       String(s.id) === q
@@ -206,7 +208,7 @@ export function SurahPicker({
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-sm font-medium truncate">{surah.nameSimple}</span>
+                          <span className="text-sm font-medium truncate">{getSurahName(surah.id, locale) || surah.nameSimple}</span>
                           <span className="text-sm shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
                             {surah.nameArabic}
                           </span>
@@ -342,7 +344,7 @@ export function SurahPicker({
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm truncate">{surah.nameSimple}</span>
+                            <span className="text-sm truncate">{getSurahName(id, locale) || surah.nameSimple}</span>
                             <span className="text-xs shrink-0" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
                               {surah.nameArabic}
                             </span>

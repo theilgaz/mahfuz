@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { searchQuran, type SearchResult } from "~/lib/search-service";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-names-i18n";
 import { SettingsButton } from "~/components/SettingsButton";
 import { surahSlug } from "~/lib/surah-slugs";
 import { LatinRootSearch } from "~/components/LatinRootSearch";
@@ -336,7 +337,7 @@ function SearchSuggestions({ onSelect, locale, t }: { onSelect: (q: string) => v
               className="flex items-center gap-2 px-3 py-2 rounded bg-[var(--color-surface)] hover:bg-[var(--color-accent)]/8 active:scale-[0.97] text-xs transition-all"
             >
               <span dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "0.85rem" }}>{s.nameAr}</span>
-              <span className="text-[var(--color-text-secondary)]">{s.nameSimple}</span>
+              <span className="text-[var(--color-text-secondary)]">{getSurahName(s.id, locale) || s.nameSimple}</span>
             </Link>
           ))}
         </div>

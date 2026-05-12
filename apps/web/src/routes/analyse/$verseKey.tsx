@@ -10,6 +10,7 @@ import { getThemesForSurah, detectVerseThemes } from "~/lib/themes-data";
 import { getVerseContext } from "~/lib/verse-context-data";
 import { MealComparisonSheet } from "~/components/MealComparisonSheet";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-names-i18n";
 import { splitWords } from "~/lib/split-words";
 
 // ── Route ────────────────────────────────────────────────
@@ -334,7 +335,7 @@ function ThemesTab({ surahId, translation }: { surahId: number; translation: str
 // ── Ana Bileşen ──────────────────────────────────────────
 
 function AnalysePage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { verseKey } = Route.useParams();
   const { tab: initialTab } = Route.useSearch();
   const [tab, setTab] = useState<Tab>(initialTab as Tab ?? "meal");
@@ -374,7 +375,7 @@ function AnalysePage() {
         <div>
           <h1 className="text-lg font-bold text-[var(--color-text-primary)]">{t.analyse.title}</h1>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            {isLoading ? t.common.loading : `${data?.surah?.nameSimple ?? ""} · ${t.analyse.verse.replace("{verseNum}", String(verseNum))}`}
+            {isLoading ? t.common.loading : `${getSurahName(surahId, locale) || data?.surah?.nameSimple || ""} · ${t.analyse.verse.replace("{verseNum}", String(verseNum))}`}
           </p>
         </div>
       </div>

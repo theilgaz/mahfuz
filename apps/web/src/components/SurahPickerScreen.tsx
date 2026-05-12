@@ -13,6 +13,7 @@ import { useHifzStore } from "~/stores/hifz.store";
 import { useStudiedStore } from "~/stores/studied.store";
 import { useGamePreferencesStore } from "~/stores/gamePreferences.store";
 import { useTranslation } from "~/hooks/useTranslation";
+import { getSurahName } from "~/lib/surah-names-i18n";
 import { GameMiniLeaderboard } from "~/components/GameMiniLeaderboard";
 import type { VerseFilter } from "~/lib/game-service";
 import type { Difficulty } from "~/lib/game-scoring";
@@ -39,7 +40,7 @@ interface Props {
 }
 
 export function SurahPickerScreen({ gameImg, difficultyOnly, simpleDifficulty, gameId, onStart }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const savedIds = useSurahSelectionStore((s) => s.selectedSurahIds);
   const saveIds = useSurahSelectionStore((s) => s.setSelectedSurahIds);
   const memorized = useHifzStore((s) => s.memorized);
@@ -81,12 +82,16 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, simpleDifficulty, g
 
   const surahMap = new Map(surahs.map((s) => [s.id, s]));
 
-  const filtered = surahs.filter(
-    (s) =>
-      s.nameSimple.toLowerCase().includes(search.toLowerCase()) ||
+  const filtered = surahs.filter((s) => {
+    const q = search.toLowerCase();
+    const i18nName = getSurahName(s.id, locale) ?? "";
+    return (
+      i18nName.toLowerCase().includes(q) ||
+      s.nameSimple.toLowerCase().includes(q) ||
       s.nameArabic.includes(search) ||
       String(s.id).includes(search)
-  );
+    );
+  });
 
   const toggle = (id: number) =>
     setSelected((prev) => {
@@ -245,7 +250,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, simpleDifficulty, g
                     className={`flex items-center gap-2 px-4 py-1.5 ${i > 0 ? "border-t border-[var(--color-border)]/50" : ""}`}
                   >
                     <span className="text-[10px] text-[var(--color-text-secondary)] w-6 shrink-0 tabular-nums">{surahId}</span>
-                    <span className="text-xs text-[var(--color-text-primary)] flex-1 truncate">{surah?.nameSimple ?? `Sure ${surahId}`}</span>
+                    <span className="text-xs text-[var(--color-text-primary)] flex-1 truncate">{getSurahName(surahId, locale) || surah?.nameSimple || `Sure ${surahId}`}</span>
                     <span className="text-xs text-[var(--color-text-secondary)]" style={{ fontFamily: "var(--font-arabic)" }} dir="rtl">{surah?.nameArabic}</span>
                     <span className="text-[10px] text-[var(--color-accent)] font-medium tabular-nums shrink-0 w-12 text-right">{verses.length} ayet</span>
                   </div>
@@ -384,7 +389,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, simpleDifficulty, g
                         )}
                       </div>
                       <span className="text-[10px] text-[var(--color-text-secondary)] w-5 shrink-0 tabular-nums">{s.id}</span>
-                      <span className={`text-xs flex-1 ${isSelected ? "text-[var(--color-accent)] font-medium" : "text-[var(--color-text-primary)]"}`}>{s.nameSimple}</span>
+                      <span className={`text-xs flex-1 ${isSelected ? "text-[var(--color-accent)] font-medium" : "text-[var(--color-text-primary)]"}`}>{getSurahName(s.id, locale) || s.nameSimple}</span>
                       <span className="text-xs text-[var(--color-text-secondary)]" style={{ fontFamily: "var(--font-arabic)" }} dir="rtl">{s.nameArabic}</span>
                       <span className="text-[10px] text-[var(--color-text-secondary)] shrink-0 tabular-nums w-8 text-right">{s.ayahCount}</span>
                     </button>

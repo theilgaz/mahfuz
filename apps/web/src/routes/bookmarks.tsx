@@ -125,7 +125,7 @@ function BookmarksPage() {
                 surahId={bm.surahId}
                 ayahNumber={bm.ayahNumber}
                 pageNumber={bm.pageNumber}
-                surahName={surah?.nameSimple || `${t.common.surah} ${bm.surahId}`}
+                surahName={getSurahName(bm.surahId, locale) || surah?.nameSimple || `${t.common.surah} ${bm.surahId}`}
                 surahNameArabic={surah?.nameArabic}
                 showDivider={i < recentSorted.length - 1}
               />
