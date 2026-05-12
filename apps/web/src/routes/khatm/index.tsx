@@ -6,8 +6,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
 import { staticHead } from "~/lib/seo";
+import {
   getMyHatimGroups,
   createHatimGroup,
   joinHatimGroup,

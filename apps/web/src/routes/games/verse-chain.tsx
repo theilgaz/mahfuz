@@ -20,8 +20,8 @@ import { getSurahName } from "~/lib/surah-names-i18n";
 import { useLocaleStore } from "~/stores/locale.store";
 import { getVerseChainRounds, type ChainRound, type ChainVerse } from "~/lib/quran-service";
 import { splitWords } from "~/lib/split-words";
-import {
 import { staticHead } from "~/lib/seo";
+import {
   calcCorrectPoints,
   calcWrongPenalty,
   calcTimeBonusMs,

@@ -18,8 +18,8 @@ import { GameOverCard } from "~/components/GameOverCard";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useLocaleStore } from "~/stores/locale.store";
-import {
 import { staticHead } from "~/lib/seo";
+import {
   OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,

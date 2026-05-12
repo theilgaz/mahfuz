@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TajweedRouteImport } from './routes/tajweed'
 import { Route as StatsRouteImport } from './routes/stats'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReciteRouteImport } from './routes/recite'
 import { Route as PromoRouteImport } from './routes/promo'
@@ -80,6 +81,11 @@ const TajweedRoute = TajweedRouteImport.update({
 const StatsRoute = StatsRouteImport.update({
   id: '/stats',
   path: '/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -397,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
   '/disabled': typeof ContextDisabledRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
   '/disabled': typeof ContextDisabledRoute
@@ -523,6 +531,7 @@ export interface FileRoutesById {
   '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stats': typeof StatsRoute
   '/tajweed': typeof TajweedRoute
   '/_context/disabled': typeof ContextDisabledRoute
@@ -589,6 +598,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/recite'
     | '/search'
+    | '/sitemap.xml'
     | '/stats'
     | '/tajweed'
     | '/disabled'
@@ -652,6 +662,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/recite'
     | '/search'
+    | '/sitemap.xml'
     | '/stats'
     | '/tajweed'
     | '/disabled'
@@ -714,6 +725,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/recite'
     | '/search'
+    | '/sitemap.xml'
     | '/stats'
     | '/tajweed'
     | '/_context/disabled'
@@ -779,6 +791,7 @@ export interface RootRouteChildren {
   PromoRoute: typeof PromoRoute
   ReciteRoute: typeof ReciteRoute
   SearchRoute: typeof SearchRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StatsRoute: typeof StatsRoute
   TajweedRoute: typeof TajweedRoute
   ContextDisabledRoute: typeof ContextDisabledRoute
@@ -825,6 +838,13 @@ declare module '@tanstack/react-router' {
       path: '/stats'
       fullPath: '/stats'
       preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -1349,6 +1369,7 @@ const rootRouteChildren: RootRouteChildren = {
   PromoRoute: PromoRoute,
   ReciteRoute: ReciteRoute,
   SearchRoute: SearchRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   StatsRoute: StatsRoute,
   TajweedRoute: TajweedRoute,
   ContextDisabledRoute: ContextDisabledRoute,
@@ -1383,12 +1404,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

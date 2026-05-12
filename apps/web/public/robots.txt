@@ -1,0 +1,27 @@
+# Mahfuz - https://mahfuz.ilg.az
+User-agent: *
+Allow: /
+
+# Auth-required ve kullanıcıya özel sayfalar
+Disallow: /profile
+Disallow: /bookmarks
+Disallow: /notes
+Disallow: /stats
+Disallow: /hifz
+Disallow: /recite
+Disallow: /auth/
+
+# Geçici/ephemeral oturumlar
+Disallow: /meclis
+Disallow: /meclis/
+Disallow: /khatm
+Disallow: /khatm/
+Disallow: /promo
+
+# API endpoint'leri
+Disallow: /api/
+
+# Skor tabloları
+Disallow: /games/scoreboard
+
+Sitemap: https://mahfuz.ilg.az/sitemap.xml
