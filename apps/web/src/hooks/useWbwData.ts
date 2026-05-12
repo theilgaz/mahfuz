@@ -43,36 +43,29 @@ interface QDCResponse {
 
 /** Türkçe yama: Arapça kelime formu → Türkçe çeviri */
 type TrPatch = Record<string, string>;
+type TrLookup = (textUthmani: string) => string | undefined;
 
-let patchCache: TrPatch | null = null;
-let normPatchCache: TrPatch | null = null;
-
-/** Trailing waqf/secavend işaretleri + boşluk — patch eşleşmesi için sıyrılır. */
+/** API kelimeleri sonuna waqf/secavend (U+06D6-06DC, U+06DF-06E4, U+06E7-06E8) +
+ *  ZWJ/ZWNJ + boşluk ekleyebiliyor; bunlar patch eşleşmesini bozmasın diye sıyrılır. */
 const WAQF_TRIM = /[ۖ-ۜ۟-ۤۧۨ‌‍\s]+$/;
 
-function normalizeArabic(s: string): string {
-  return s.replace(WAQF_TRIM, "").trim();
-}
+let lookupCache: TrLookup | null = null;
 
-async function loadTrPatch(): Promise<{ exact: TrPatch; norm: TrPatch }> {
-  if (patchCache && normPatchCache) return { exact: patchCache, norm: normPatchCache };
+async function loadTrLookup(): Promise<TrLookup> {
+  if (lookupCache) return lookupCache;
+  let exact: TrPatch = {};
   try {
     const res = await fetch("/wbw-tr-patch.json");
-    if (res.ok) {
-      patchCache = await res.json();
-    } else {
-      patchCache = {};
-    }
+    if (res.ok) exact = (await res.json()) as TrPatch;
   } catch {
-    patchCache = {};
+    /* boş patch ile devam */
   }
-  // Build normalized index for fuzzy lookup (strips trailing waqf marks)
   const norm: TrPatch = {};
-  for (const [k, v] of Object.entries(patchCache!)) {
-    norm[normalizeArabic(k)] = v;
+  for (const [k, v] of Object.entries(exact)) {
+    norm[k.replace(WAQF_TRIM, "").trim()] = v;
   }
-  normPatchCache = norm;
-  return { exact: patchCache!, norm };
+  lookupCache = (key) => exact[key] ?? norm[key.replace(WAQF_TRIM, "").trim()];
+  return lookupCache;
 }
 
 /** Map app locale to Quran.com API language code */
@@ -88,7 +81,7 @@ const LOCALE_TO_WBW_LANG: Record<string, string> = {
 
 async function fetchWbwChapter(chapterId: number, locale: string = "tr"): Promise<WbwData> {
   const isTr = locale === "tr";
-  const { exact: patch, norm: normPatch } = isTr ? await loadTrPatch() : { exact: {} as TrPatch, norm: {} as TrPatch };
+  const lookupTr: TrLookup = isTr ? await loadTrLookup() : () => undefined;
   const lang = LOCALE_TO_WBW_LANG[locale] ?? "en";
   const map: WbwData = new Map();
   let page = 1;
@@ -113,11 +106,7 @@ async function fetchWbwChapter(chapterId: number, locale: string = "tr"): Promis
           const apiIsTurkish = apiLang === "turkish" || apiLang === "tr";
           let translation = apiTranslation;
           if (isTr && (!translation || !apiIsTurkish)) {
-            // Önce tam Arapça form, yoksa waqf/secavend işaretleri sıyrılmış normalize edilmiş form
-            translation =
-              patch[w.text_uthmani] ||
-              normPatch[normalizeArabic(w.text_uthmani)] ||
-              apiTranslation;
+            translation = lookupTr(w.text_uthmani) || apiTranslation;
           }
           return {
             position: w.position,
