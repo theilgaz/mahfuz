@@ -298,14 +298,24 @@ export const meclisSessions = sqliteTable("meclis_sessions", {
   status: text("status").notNull().default("lobby"),
   /** Mihmandar belirler: easy | medium | hard | hafiz */
   difficulty: text("difficulty").notNull().default("easy"),
-  /** Oylama sonrası kilitlenen 3 oyun: JSON ["fill-blank","surah-guess","word-meaning"] */
+  /** Oylama sonrası kilitlenen oyunlar: JSON ["fill-blank","surah-guess","word-meaning"] */
   gamePool: text("game_pool").notNull().default("[]"),
+  /** Bu meclisten kaç el oynanacak (3/5/7) — mihmandar belirler */
+  targetGameCount: integer("target_game_count").notNull().default(3),
+  /** Her el için süre (ms). Mihmandar zorluktan bağımsız ayarlayabilir. */
+  roundDurationMs: integer("round_duration_ms").notNull().default(60_000),
   /** Sure kapsamı: all | namaz | duha-nas | tebareke | amme | yasin | bakara */
   surahScope: text("surah_scope").notNull().default("all"),
   /** Oylama fazında kimin neye oy verdiği herkese görünür mü. Mihmandar değiştirir. */
   votesVisible: integer("votes_visible", { mode: "boolean" }).notNull().default(true),
-  /** Şu an hangi el oynanıyor (0-2). final → 3. */
+  /** Şu an hangi el oynanıyor (0..targetGameCount-1) */
   currentGameIndex: integer("current_game_index").notNull().default(0),
+  /** "private" → sadece davet kodu, "public" → /meclis index'inde listelenir */
+  visibility: text("visibility").notNull().default("private"),
+  /** 4-haneli numerik şifre hash'i (scrypt). null → şifresiz. */
+  passwordHash: text("password_hash"),
+  /** scrypt salt — hash ile birlikte tutulur */
+  passwordSalt: text("password_salt"),
   /** Aktif elin sunucu zamanı; client'lar bundan timer kurar */
   roundStartedAt: integer("round_started_at"),
   createdAt: integer("created_at").notNull(),
@@ -332,6 +342,8 @@ export const meclisPlayers = sqliteTable("meclis_players", {
   votes: text("votes").notNull().default("[]"),
   /** Oyuncunun seçtiği sure kapsamı (1 oy): scope key */
   scopeVote: text("scope_vote"),
+  /** Oylar kilitlendi mi (canlı oylama: kilitleyene kadar değiştirilebilir). null = açık, timestamp = kilitli */
+  votesLockedAt: integer("votes_locked_at"),
   /** Tüm meclis boyu kümülatif skor */
   totalScore: integer("total_score").notNull().default(0),
   /** Aktif el için mevcut skor (her el başında sıfırlanır) */

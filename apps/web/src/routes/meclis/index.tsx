@@ -1,11 +1,11 @@
 /**
- * Meclis girişi — yeni meclis kur ya da davet koduyla katıl.
+ * Meclis girişi — yeni meclis kur, kodla katıl, ya da public lobby listesinden seç.
  */
 
 import { createFileRoute, useNavigate, useRouteContext } from "@tanstack/react-router";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { createMeclis, joinMeclis } from "~/lib/meclis-service";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createMeclis, joinMeclis, listPublicMeclises } from "~/lib/meclis-service";
 import type { Difficulty } from "~/lib/game-scoring";
 
 export const Route = createFileRoute("/meclis/")({
@@ -15,25 +15,72 @@ export const Route = createFileRoute("/meclis/")({
   }),
 });
 
+type Tab = "create" | "join" | "public";
+
+const GAME_COUNT_OPTIONS = [3, 5, 7] as const;
+const DURATION_OPTIONS = [
+  { ms: 30_000, label: "30 sn" },
+  { ms: 45_000, label: "45 sn" },
+  { ms: 60_000, label: "1 dk" },
+  { ms: 90_000, label: "1:30" },
+  { ms: 120_000, label: "2 dk" },
+] as const;
+
 function MeclisLanding() {
   const navigate = useNavigate();
   const { session } = useRouteContext({ from: "__root__" });
   const { code: incomingCode } = Route.useSearch();
-  const [tab, setTab] = useState<"create" | "join">(incomingCode ? "join" : "create");
-  const [code, setCode] = useState((incomingCode ?? "").toUpperCase());
+  const [tab, setTab] = useState<Tab>(incomingCode ? "join" : "create");
+
+  // Create state
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [gameCount, setGameCount] = useState<number>(3);
+  const [durationMs, setDurationMs] = useState<number>(60_000);
+  const [visibility, setVisibility] = useState<"private" | "public">("private");
+  const [password, setPassword] = useState<string>("");
+  const [usePassword, setUsePassword] = useState(false);
+
+  // Join state
+  const [code, setCode] = useState((incomingCode ?? "").toUpperCase());
+  const [joinPassword, setJoinPassword] = useState("");
+  const [passwordRequired, setPasswordRequired] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
+  const publicQuery = useQuery({
+    queryKey: ["meclis-public"],
+    queryFn: () => listPublicMeclises(),
+    refetchInterval: tab === "public" ? 5_000 : false,
+    enabled: tab === "public",
+  });
+
   const createMutation = useMutation({
-    mutationFn: () => createMeclis({ data: { difficulty } }),
+    mutationFn: () =>
+      createMeclis({
+        data: {
+          difficulty,
+          gameCount,
+          roundDurationMs: durationMs,
+          visibility,
+          password: usePassword && /^\d{4}$/.test(password) ? password : undefined,
+        },
+      }),
     onSuccess: ({ code }) => navigate({ to: "/meclis/$code", params: { code } }),
     onError: (e: Error) => setError(e.message),
   });
 
   const joinMutation = useMutation({
-    mutationFn: (input: { code: string }) => joinMeclis({ data: { code: input.code } }),
+    mutationFn: (input: { code: string; password?: string }) =>
+      joinMeclis({ data: { code: input.code, password: input.password } }),
     onSuccess: ({ code }) => navigate({ to: "/meclis/$code", params: { code } }),
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => {
+      if (e.message.includes("Şifre")) {
+        setPasswordRequired(true);
+        setError("Bu meclis şifreli — 4 haneli şifreyi gir.");
+      } else {
+        setError(e.message);
+      }
+    },
   });
 
   if (!session?.user) {
@@ -58,28 +105,29 @@ function MeclisLanding() {
         Birlikte oynayalım
       </h1>
       <p className="mu-lede" style={{ marginBottom: 24 }}>
-        Mihmandar bir meclis açar, davet kodunu paylaşır; herkes kendi cihazından girer ve eş zamanlı 3 el oynanır.
+        Mihmandar bir meclis açar, davet kodunu paylaşır ya da herkesin görüp katılabileceği bir public meclis kurar.
       </p>
 
       <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)] mb-5">
-        <button
-          onClick={() => { setTab("create"); setError(null); }}
-          className={`flex-1 py-2.5 text-sm font-medium transition-all ${tab === "create" ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
-        >
-          Yeni Meclis
-        </button>
-        <button
-          onClick={() => { setTab("join"); setError(null); }}
-          className={`flex-1 py-2.5 text-sm font-medium transition-all ${tab === "join" ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
-        >
-          Kodla Katıl
-        </button>
+        {([
+          { id: "create" as const, label: "Yeni" },
+          { id: "join" as const, label: "Kodla Katıl" },
+          { id: "public" as const, label: "Public" },
+        ]).map(({ id, label }) => (
+          <button
+            key={id}
+            onClick={() => { setTab(id); setError(null); setPasswordRequired(false); }}
+            className={`flex-1 py-2.5 text-sm font-medium transition-all ${tab === id ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      {tab === "create" ? (
+      {tab === "create" && (
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">Zorluk</label>
+            <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">Zorluk (puanlama)</label>
             <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
               {([
                 { d: "easy", label: "Normal", dot: "bg-emerald-500" },
@@ -96,30 +144,123 @@ function MeclisLanding() {
               ))}
             </div>
           </div>
+
+          <div>
+            <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">Oyun sayısı</label>
+            <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+              {GAME_COUNT_OPTIONS.map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setGameCount(n)}
+                  className={`flex-1 py-2.5 text-sm font-medium transition-all ${gameCount === n ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
+                >
+                  {n} el
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">El süresi</label>
+            <div className="grid grid-cols-5 rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+              {DURATION_OPTIONS.map(({ ms, label }) => (
+                <button
+                  key={ms}
+                  onClick={() => setDurationMs(ms)}
+                  className={`py-2.5 text-xs font-medium transition-all ${durationMs === ms ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">Görünürlük</label>
+            <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+              {([
+                { v: "private" as const, label: "Özel (sadece kod)" },
+                { v: "public" as const, label: "Public (listede)" },
+              ]).map(({ v, label }) => (
+                <button
+                  key={v}
+                  onClick={() => setVisibility(v)}
+                  className={`flex-1 py-2.5 text-xs font-medium transition-all ${visibility === v ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] mb-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={usePassword}
+                onChange={(e) => setUsePassword(e.target.checked)}
+                className="rounded"
+              />
+              4 haneli şifre koy (rastgele kimse katılmasın)
+            </label>
+            {usePassword && (
+              <input
+                value={password}
+                onChange={(e) => setPassword(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="0000"
+                inputMode="numeric"
+                maxLength={4}
+                className="w-full px-4 py-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-lg font-bold tracking-widest text-center"
+                style={{ fontFamily: "var(--mu-ff-mono)" }}
+              />
+            )}
+          </div>
+
           <button
             onClick={() => { setError(null); createMutation.mutate(); }}
-            disabled={createMutation.isPending}
-            className="mu-btn primary w-full"
+            disabled={createMutation.isPending || (usePassword && !/^\d{4}$/.test(password))}
+            className="mu-btn primary w-full disabled:opacity-50"
           >
             {createMutation.isPending ? "Açılıyor..." : "Meclisi Aç"}
           </button>
         </div>
-      ) : (
+      )}
+
+      {tab === "join" && (
         <div className="space-y-4">
           <div>
             <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">Davet Kodu</label>
             <input
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              onChange={(e) => { setCode(e.target.value.toUpperCase()); setPasswordRequired(false); }}
               placeholder="MAH741"
               maxLength={6}
               className="w-full px-4 py-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-lg font-bold tracking-widest text-center uppercase"
               style={{ fontFamily: "var(--mu-ff-mono)" }}
             />
           </div>
+          {passwordRequired && (
+            <div>
+              <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">4 haneli şifre</label>
+              <input
+                value={joinPassword}
+                onChange={(e) => setJoinPassword(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="0000"
+                inputMode="numeric"
+                maxLength={4}
+                className="w-full px-4 py-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-lg font-bold tracking-widest text-center"
+                style={{ fontFamily: "var(--mu-ff-mono)" }}
+              />
+            </div>
+          )}
           <button
-            onClick={() => { setError(null); if (code.length === 6) joinMutation.mutate({ code }); }}
-            disabled={code.length !== 6 || joinMutation.isPending}
+            onClick={() => {
+              setError(null);
+              if (code.length === 6) {
+                joinMutation.mutate({ code, password: joinPassword || undefined });
+              }
+            }}
+            disabled={code.length !== 6 || joinMutation.isPending || (passwordRequired && joinPassword.length !== 4)}
             className="mu-btn primary w-full disabled:opacity-50"
           >
             {joinMutation.isPending ? "Katılıyor..." : "Mecliste yer al"}
@@ -127,9 +268,77 @@ function MeclisLanding() {
         </div>
       )}
 
+      {tab === "public" && (
+        <PublicList
+          rows={publicQuery.data ?? []}
+          loading={publicQuery.isLoading}
+          onJoin={(c, needsPwd) => {
+            setCode(c);
+            setTab("join");
+            setPasswordRequired(needsPwd);
+            setError(null);
+          }}
+        />
+      )}
+
       {error && (
         <p className="mt-4 text-sm text-red-500 text-center">{error}</p>
       )}
+    </div>
+  );
+}
+
+interface PublicRow {
+  code: string;
+  difficulty: string;
+  gameCount: number;
+  hasPassword: boolean;
+  hostName: string;
+  playerCount: number;
+  maxPlayers: number;
+}
+
+function PublicList({ rows, loading, onJoin }: { rows: PublicRow[]; loading: boolean; onJoin: (code: string, needsPwd: boolean) => void }) {
+  if (loading) {
+    return <p className="text-center text-sm text-[var(--color-text-secondary)] py-8">Yükleniyor…</p>;
+  }
+  if (rows.length === 0) {
+    return (
+      <p className="text-center text-sm text-[var(--color-text-secondary)] py-8">
+        Şu an public meclis yok. Sen ilki aç :)
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      {rows.map((r) => (
+        <button
+          key={r.code}
+          onClick={() => onJoin(r.code, r.hasPassword)}
+          className="w-full text-left px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)] transition-colors"
+        >
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <span className="text-base font-bold tabular-nums tracking-widest text-[var(--mu-accent)]" style={{ fontFamily: "var(--mu-ff-mono)" }}>
+              {r.code}
+            </span>
+            <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
+              {r.hasPassword && (
+                <span aria-label="Şifreli" title="Şifreli">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                </span>
+              )}
+              <span className="tabular-nums">{r.playerCount}/{r.maxPlayers}</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-[var(--color-text-secondary)]">
+            <span className="truncate">Mihmandar: {r.hostName}</span>
+            <span>{r.gameCount} el · {r.difficulty === "hard" ? "Zor" : "Normal"}</span>
+          </div>
+        </button>
+      ))}
     </div>
   );
 }

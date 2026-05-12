@@ -1,0 +1,1 @@
+ALTER TABLE `meclis_players` ADD `votes_locked_at` integer;

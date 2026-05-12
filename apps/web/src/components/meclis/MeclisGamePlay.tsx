@@ -22,6 +22,7 @@ import { MeclisWordMeaning } from "./MeclisWordMeaning";
 import { MeclisWordMatch } from "./MeclisWordMatch";
 import { MeclisPeygamberKim } from "./MeclisPeygamberKim";
 import { MeclisKariTahmini } from "./MeclisKariTahmini";
+import { MeclisArapcaSecim } from "./MeclisArapcaSecim";
 
 interface Props {
   code: string;
@@ -179,6 +180,7 @@ export function MeclisGamePlay({ code, gameId, difficulty, roundStartedAt, round
       {gameId === "word-match" && <MeclisWordMatch {...gameProps} />}
       {gameId === "peygamber-kim" && <MeclisPeygamberKim {...gameProps} />}
       {gameId === "kari-tahmini" && <MeclisKariTahmini {...gameProps} />}
+      {gameId === "arapca-secim" && <MeclisArapcaSecim {...gameProps} />}
     </div>
   );
 }

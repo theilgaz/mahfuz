@@ -13,10 +13,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { db, meclisSessions, meclisPlayers, meclisResults, user } from "~/db";
 import { auth } from "~/lib/auth";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, gte } from "drizzle-orm";
 import { STARTING_TIME_MS, type Difficulty } from "~/lib/game-scoring";
+import { scryptSync, randomBytes, timingSafeEqual } from "node:crypto";
 
-const MECLIS_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match", "peygamber-kim", "kari-tahmini"] as const;
+const MECLIS_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match", "peygamber-kim", "kari-tahmini", "arapca-secim"] as const;
 export type MeclisGameId = (typeof MECLIS_GAMES)[number];
 
 const MECLIS_SCOPES = ["all", "namaz", "duha-nas", "tebareke", "amme", "yasin", "bakara"] as const;
@@ -54,7 +55,29 @@ export function surahIdsForScope(scope: string): number[] {
 const MAX_PLAYERS = 8;
 const VOTING_TIMEOUT_MS = 30_000;
 const INTERIM_MS = 5_000;
-const POOL_SIZE = 3;
+const DEFAULT_POOL_SIZE = 3;
+const DEFAULT_ROUND_DURATION_MS = 60_000;
+const PUBLIC_LOBBY_STALE_MS = 30 * 60 * 1000;
+const VALID_GAME_COUNTS = new Set([3, 5, 7]);
+const VALID_DURATIONS_MS = new Set([30_000, 45_000, 60_000, 90_000, 120_000]);
+
+/** 4-haneli numerik şifre için scrypt hash + salt. */
+function hashPassword(plain: string): { hash: string; salt: string } {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(plain, salt, 32).toString("hex");
+  return { hash, salt };
+}
+
+function verifyPassword(plain: string, hash: string, salt: string): boolean {
+  const derived = scryptSync(plain, salt, 32);
+  const stored = Buffer.from(hash, "hex");
+  if (derived.length !== stored.length) return false;
+  return timingSafeEqual(derived, stored);
+}
+
+function isValidNumericPassword(p: string): boolean {
+  return /^\d{4}$/.test(p);
+}
 
 async function requireUser() {
   const session = await auth.api.getSession({ headers: getRequestHeaders() });
@@ -87,16 +110,10 @@ async function advanceVotingIfReady(meclisId: string) {
   const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.id, meclisId)).limit(1);
   if (!s || s.status !== "voting") return;
   const players = await db.select().from(meclisPlayers).where(eq(meclisPlayers.meclisId, meclisId));
-  const allVoted = players.every((p) => {
-    try {
-      return Array.isArray(JSON.parse(p.votes)) && JSON.parse(p.votes).length > 0 && p.scopeVote != null;
-    } catch {
-      return false;
-    }
-  });
+  const allLocked = players.length > 0 && players.every((p) => p.votesLockedAt != null);
   const startedAt = s.roundStartedAt ?? s.updatedAt;
   const timedOut = Date.now() - startedAt > VOTING_TIMEOUT_MS;
-  if (!allVoted && !timedOut) return;
+  if (!allLocked && !timedOut) return;
 
   // Oyun oyları
   const tally = new Map<string, number>();
@@ -112,11 +129,13 @@ async function advanceVotingIfReady(meclisId: string) {
     }
   }
   const sorted = [...tally.entries()].sort((a, b) => b[1] - a[1]);
-  const pool = sorted.slice(0, POOL_SIZE).map(([g]) => g);
-  while (pool.length < POOL_SIZE) {
-    const next = MECLIS_GAMES.find((g) => !pool.includes(g));
-    if (!next) break;
-    pool.push(next);
+  const targetCount = s.targetGameCount ?? DEFAULT_POOL_SIZE;
+  const pool = sorted.slice(0, targetCount).map(([g]) => g);
+  // Önce eksik kaldıysa diğer oyunları ekle, sonra hala azsa baştan döngüye gir (tekrar OK)
+  while (pool.length < targetCount) {
+    const fresh = MECLIS_GAMES.find((g) => !pool.includes(g));
+    if (fresh) pool.push(fresh);
+    else pool.push(sorted[pool.length % sorted.length]?.[0] ?? MECLIS_GAMES[0]);
   }
 
   // Scope oyları
@@ -151,7 +170,7 @@ async function advanceVotingIfReady(meclisId: string) {
 async function advancePlayingIfDone(meclisId: string) {
   const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.id, meclisId)).limit(1);
   if (!s || s.status !== "playing" || s.roundStartedAt == null) return;
-  const roundDuration = STARTING_TIME_MS[s.difficulty as Difficulty] ?? STARTING_TIME_MS.easy;
+  const roundDuration = s.roundDurationMs ?? STARTING_TIME_MS[s.difficulty as Difficulty] ?? STARTING_TIME_MS.easy;
   const players = await db.select().from(meclisPlayers).where(eq(meclisPlayers.meclisId, meclisId));
   const allDone = players.length > 0 && players.every((p) => p.finishedAt != null);
   const timedOut = Date.now() - s.roundStartedAt > roundDuration;
@@ -170,9 +189,16 @@ async function advancePlayingIfDone(meclisId: string) {
       .where(and(eq(meclisPlayers.meclisId, meclisId), eq(meclisPlayers.userId, p.userId)));
   }
 
+  // Son eldeyse interim atla, doğrudan final'a geç — 5sn boşa bekleme olmasın
+  const pool: string[] = JSON.parse(s.gamePool || "[]");
+  const isLast = s.currentGameIndex >= pool.length - 1;
   await db
     .update(meclisSessions)
-    .set({ status: "interim", roundStartedAt: now, updatedAt: now })
+    .set({
+      status: isLast ? "final" : "interim",
+      roundStartedAt: isLast ? null : now,
+      updatedAt: now,
+    })
     .where(eq(meclisSessions.id, meclisId));
 }
 
@@ -215,12 +241,29 @@ async function maybeAdvance(meclisId: string) {
 // ── Server fonksiyonları ─────────────────────────────────
 
 export const createMeclis = createServerFn({ method: "POST" })
-  .inputValidator((input: { difficulty?: Difficulty }) => input)
+  .inputValidator((input: {
+    difficulty?: Difficulty;
+    gameCount?: number;
+    roundDurationMs?: number;
+    visibility?: "private" | "public";
+    password?: string;
+  }) => input)
   .handler(async ({ data }) => {
     const me = await requireUser();
     const code = await generateUniqueCode();
     const meclisId = crypto.randomUUID();
     const now = Date.now();
+    const gameCount = data.gameCount && VALID_GAME_COUNTS.has(data.gameCount) ? data.gameCount : DEFAULT_POOL_SIZE;
+    const roundDuration = data.roundDurationMs && VALID_DURATIONS_MS.has(data.roundDurationMs) ? data.roundDurationMs : DEFAULT_ROUND_DURATION_MS;
+    const visibility = data.visibility === "public" ? "public" : "private";
+    let passwordHash: string | null = null;
+    let passwordSalt: string | null = null;
+    if (data.password) {
+      if (!isValidNumericPassword(data.password)) throw new Error("Şifre 4 haneli rakam olmalı");
+      const h = hashPassword(data.password);
+      passwordHash = h.hash;
+      passwordSalt = h.salt;
+    }
     await db.insert(meclisSessions).values({
       id: meclisId,
       code,
@@ -228,8 +271,13 @@ export const createMeclis = createServerFn({ method: "POST" })
       status: "lobby",
       difficulty: data.difficulty ?? "easy",
       gamePool: "[]",
+      targetGameCount: gameCount,
+      roundDurationMs: roundDuration,
       currentGameIndex: 0,
       roundStartedAt: null,
+      visibility,
+      passwordHash,
+      passwordSalt,
       createdAt: now,
       updatedAt: now,
     });
@@ -248,7 +296,7 @@ export const createMeclis = createServerFn({ method: "POST" })
   });
 
 export const joinMeclis = createServerFn({ method: "POST" })
-  .inputValidator((input: { code: string; name?: string }) => input)
+  .inputValidator((input: { code: string; name?: string; password?: string }) => input)
   .handler(async ({ data }) => {
     const me = await requireUser();
     const code = data.code.trim().toUpperCase();
@@ -261,9 +309,17 @@ export const joinMeclis = createServerFn({ method: "POST" })
       .from(meclisPlayers)
       .where(and(eq(meclisPlayers.meclisId, s.id), eq(meclisPlayers.userId, me.id)))
       .limit(1);
+    // Zaten içerideyse şifre tekrar sorulmaz
     if (existing.length > 0) return { meclisId: s.id, code: s.code };
 
     if (s.status !== "lobby") throw new Error("Meclis başladı, geç kaldın");
+
+    // Şifre kontrolü — yeni katılan için
+    if (s.passwordHash && s.passwordSalt) {
+      if (!data.password || !verifyPassword(data.password, s.passwordHash, s.passwordSalt)) {
+        throw new Error("Şifre yanlış");
+      }
+    }
 
     const playerCount = await db
       .select({ c: sql<number>`count(*)` })
@@ -317,6 +373,89 @@ export const setMeclisDifficulty = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Mihmandar lobby aşamasında oyun sayısını, süreyi, görünürlüğü ve şifreyi değiştirir.
+ * Tüm alanlar opsiyonel — sadece verilenler güncellenir.
+ */
+export const updateMeclisSetup = createServerFn({ method: "POST" })
+  .inputValidator((input: {
+    code: string;
+    gameCount?: number;
+    roundDurationMs?: number;
+    visibility?: "private" | "public";
+    password?: string | null;
+  }) => input)
+  .handler(async ({ data }) => {
+    const me = await requireUser();
+    const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.code, data.code)).limit(1);
+    if (!s) throw new Error("Meclis bulunamadı");
+    if (s.hostUserId !== me.id) throw new Error("Sadece mihmandar değiştirebilir");
+    if (s.status !== "lobby") throw new Error("Sadece lobide değiştirilebilir");
+
+    const update: Record<string, unknown> = { updatedAt: Date.now() };
+    if (data.gameCount != null) {
+      if (!VALID_GAME_COUNTS.has(data.gameCount)) throw new Error("Geçersiz oyun sayısı");
+      update.targetGameCount = data.gameCount;
+    }
+    if (data.roundDurationMs != null) {
+      if (!VALID_DURATIONS_MS.has(data.roundDurationMs)) throw new Error("Geçersiz süre");
+      update.roundDurationMs = data.roundDurationMs;
+    }
+    if (data.visibility) {
+      update.visibility = data.visibility === "public" ? "public" : "private";
+    }
+    if (data.password === null) {
+      update.passwordHash = null;
+      update.passwordSalt = null;
+    } else if (typeof data.password === "string") {
+      if (!isValidNumericPassword(data.password)) throw new Error("Şifre 4 haneli rakam olmalı");
+      const h = hashPassword(data.password);
+      update.passwordHash = h.hash;
+      update.passwordSalt = h.salt;
+    }
+
+    await db.update(meclisSessions).set(update).where(eq(meclisSessions.id, s.id));
+    return { ok: true };
+  });
+
+/**
+ * Public lobby listesi — /meclis index sayfasında görünür.
+ * Sadece status='lobby' ve son aktivitesi 30 dk içinde olanlar.
+ */
+export const listPublicMeclises = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const cutoff = Date.now() - PUBLIC_LOBBY_STALE_MS;
+    const rows = await db
+      .select({
+        code: meclisSessions.code,
+        difficulty: meclisSessions.difficulty,
+        targetGameCount: meclisSessions.targetGameCount,
+        hasPassword: sql<number>`CASE WHEN ${meclisSessions.passwordHash} IS NULL THEN 0 ELSE 1 END`,
+        hostName: user.name,
+        updatedAt: meclisSessions.updatedAt,
+        playerCount: sql<number>`(SELECT COUNT(*) FROM meclis_players WHERE meclis_players.meclis_id = ${meclisSessions.id})`,
+      })
+      .from(meclisSessions)
+      .leftJoin(user, eq(meclisSessions.hostUserId, user.id))
+      .where(and(
+        eq(meclisSessions.visibility, "public"),
+        eq(meclisSessions.status, "lobby"),
+        gte(meclisSessions.updatedAt, cutoff),
+      ))
+      .orderBy(desc(meclisSessions.updatedAt))
+      .limit(30);
+
+    return rows.map((r) => ({
+      code: r.code,
+      difficulty: r.difficulty,
+      gameCount: r.targetGameCount,
+      hasPassword: r.hasPassword === 1,
+      hostName: r.hostName ?? "Mihmandar",
+      playerCount: Number(r.playerCount ?? 0),
+      maxPlayers: MAX_PLAYERS,
+    }));
+  });
+
 export const setMeclisVotesVisibility = createServerFn({ method: "POST" })
   .inputValidator((input: { code: string; visible: boolean }) => input)
   .handler(async ({ data }) => {
@@ -354,7 +493,48 @@ export const startMeclisVoting = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Canlı oylama: her toggle'da çağrılır, picks ve scope'u sunucuya yansıtır.
+ * Kullanıcı kilitlemeden önce diğer oyuncular VoterStack üzerinden anında görür.
+ * Kilitliyse (`votesLockedAt != null`) değişikliği reddeder.
+ */
 export const submitMeclisVotes = createServerFn({ method: "POST" })
+  .inputValidator((input: { code: string; votes: string[]; scope: string }) => input)
+  .handler(async ({ data }) => {
+    const me = await requireUser();
+    const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.code, data.code)).limit(1);
+    if (!s) throw new Error("Meclis bulunamadı");
+    if (s.status !== "voting") throw new Error("Oylama fazında değil");
+
+    const [player] = await db
+      .select()
+      .from(meclisPlayers)
+      .where(and(eq(meclisPlayers.meclisId, s.id), eq(meclisPlayers.userId, me.id)))
+      .limit(1);
+    if (player?.votesLockedAt != null) {
+      // Kilitli; sessizce yok say (UI zaten read-only)
+      return { ok: false, locked: true };
+    }
+
+    const cleanVotes = data.votes
+      .filter((v) => MECLIS_GAMES.includes(v as MeclisGameId))
+      .slice(0, s.targetGameCount ?? DEFAULT_POOL_SIZE);
+    const cleanScope = data.scope && MECLIS_SCOPES.includes(data.scope as MeclisScope) ? data.scope : null;
+
+    await db
+      .update(meclisPlayers)
+      .set({ votes: JSON.stringify(cleanVotes), scopeVote: cleanScope })
+      .where(and(eq(meclisPlayers.meclisId, s.id), eq(meclisPlayers.userId, me.id)));
+
+    // Live submit — advance tetikleme; sadece lock geldiğinde advance ol
+    return { ok: true };
+  });
+
+/**
+ * Kullanıcı kararını kilitler. Daha sonra değişiklik yapılamaz.
+ * Tüm oyuncular kilitlerse advanceVotingIfReady ileri taşır.
+ */
+export const lockMeclisVotes = createServerFn({ method: "POST" })
   .inputValidator((input: { code: string; votes: string[]; scope: string }) => input)
   .handler(async ({ data }) => {
     const me = await requireUser();
@@ -364,12 +544,15 @@ export const submitMeclisVotes = createServerFn({ method: "POST" })
 
     const cleanVotes = data.votes
       .filter((v) => MECLIS_GAMES.includes(v as MeclisGameId))
-      .slice(0, POOL_SIZE);
-    const cleanScope = MECLIS_SCOPES.includes(data.scope as MeclisScope) ? data.scope : "all";
+      .slice(0, s.targetGameCount ?? DEFAULT_POOL_SIZE);
+    if (cleanVotes.length === 0) throw new Error("En az 1 oyun seçmelisin");
+    const cleanScope = MECLIS_SCOPES.includes(data.scope as MeclisScope) ? data.scope : null;
+    if (!cleanScope) throw new Error("Bir sure kapsamı seçmelisin");
 
+    const now = Date.now();
     await db
       .update(meclisPlayers)
-      .set({ votes: JSON.stringify(cleanVotes), scopeVote: cleanScope })
+      .set({ votes: JSON.stringify(cleanVotes), scopeVote: cleanScope, votesLockedAt: now })
       .where(and(eq(meclisPlayers.meclisId, s.id), eq(meclisPlayers.userId, me.id)));
 
     await maybeAdvance(s.id);
@@ -439,6 +622,9 @@ export interface MeclisStatePayload {
     interimMs: number;
     hostUserId: string;
     votesVisible: boolean;
+    targetGameCount: number;
+    visibility: "private" | "public";
+    hasPassword: boolean;
   };
   players: {
     userId: string;
@@ -447,6 +633,7 @@ export interface MeclisStatePayload {
     ready: boolean;
     votes: string[];
     scopeVote: string | null;
+    votesLockedAt: number | null;
     totalScore: number;
     currentScore: number;
     finishedAt: number | null;
@@ -477,6 +664,7 @@ export const getMeclisState = createServerFn({ method: "GET" })
         ready: meclisPlayers.ready,
         votes: meclisPlayers.votes,
         scopeVote: meclisPlayers.scopeVote,
+        votesLockedAt: meclisPlayers.votesLockedAt,
         totalScore: meclisPlayers.totalScore,
         currentScore: meclisPlayers.currentScore,
         finishedAt: meclisPlayers.finishedAt,
@@ -507,7 +695,10 @@ export const getMeclisState = createServerFn({ method: "GET" })
         surahIds: surahIdsForScope(s.surahScope ?? "all"),
         currentGameIndex: s.currentGameIndex,
         roundStartedAt: s.roundStartedAt,
-        roundDurationMs: STARTING_TIME_MS[difficulty] ?? STARTING_TIME_MS.easy,
+        roundDurationMs: s.roundDurationMs ?? STARTING_TIME_MS[difficulty] ?? STARTING_TIME_MS.easy,
+        targetGameCount: s.targetGameCount ?? DEFAULT_POOL_SIZE,
+        visibility: (s.visibility === "public" ? "public" : "private"),
+        hasPassword: !!s.passwordHash,
         interimMs: INTERIM_MS,
         hostUserId: s.hostUserId,
         votesVisible: s.votesVisible,
@@ -525,6 +716,7 @@ export const getMeclisState = createServerFn({ method: "GET" })
           }
         })(),
         scopeVote: p.scopeVote,
+        votesLockedAt: p.votesLockedAt,
         totalScore: p.totalScore,
         currentScore: p.currentScore,
         finishedAt: p.finishedAt,
@@ -566,6 +758,7 @@ export const restartMeclis = createServerFn({ method: "POST" })
       .set({
         votes: "[]",
         scopeVote: null,
+        votesLockedAt: null,
         totalScore: 0,
         currentScore: 0,
         finishedAt: null,

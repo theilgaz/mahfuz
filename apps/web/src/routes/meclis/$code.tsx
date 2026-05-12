@@ -13,6 +13,8 @@ import {
   setMeclisVotesVisibility,
   startMeclisVoting,
   submitMeclisVotes,
+  lockMeclisVotes,
+  updateMeclisSetup,
   cancelMeclis,
   restartMeclis,
   type MeclisStatePayload,
@@ -75,6 +77,7 @@ const GAME_LABELS: Record<string, { title: string; sub: string }> = {
   "word-match": { title: "Kelime Eşleştirme", sub: "Türkçe anlamı doğru Arapça kelimeyle eşleştir" },
   "peygamber-kim": { title: "Kim Bu Peygamber?", sub: "3 ipucundan peygamberi tahmin et, erken bilen kazanır" },
   "kari-tahmini": { title: "Kâri Tahmini", sub: "Tilaveti dinle, doğru kâriyi seç" },
+  "arapca-secim": { title: "Arapça Seçim", sub: "Türkçe anlama bakıp doğru Arapça kelimeyi seç" },
 };
 
 const POLL_FAST = 1500;
@@ -88,7 +91,9 @@ function MeclisSession() {
     queryFn: () => getMeclisState({ data: { code } }),
     refetchInterval: (q) => {
       const s = q.state.data?.session.status;
-      if (!s || s === "final" || s === "cancelled") return false;
+      if (!s || s === "cancelled") return false;
+      // final için slow poll bırak — host restart ettiğinde non-host'lar status değişimini fark etsin
+      if (s === "final") return POLL_NORMAL;
       if (s === "interim" || s === "voting") return POLL_FAST;
       return POLL_NORMAL;
     },
@@ -157,6 +162,12 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
     mutationFn: () => cancelMeclis({ data: { code: session.code } }),
     onSuccess: () => navigate({ to: "/meclis" }),
   });
+  const setupMutation = useMutation({
+    mutationFn: (input: { gameCount?: number; roundDurationMs?: number; visibility?: "private" | "public"; password?: string | null }) =>
+      updateMeclisSetup({ data: { code: session.code, ...input } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
+  });
+  const [pwInput, setPwInput] = useState("");
 
   return (
     <div className="max-w-md mx-auto px-4 py-6">
@@ -176,7 +187,7 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
       {/* Difficulty (host only, editable) */}
       <div className="mb-4">
         <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">
-          Zorluk {!isHost && <span className="opacity-60">(mihmandar belirler)</span>}
+          Zorluk (puanlama) {!isHost && <span className="opacity-60">(mihmandar belirler)</span>}
         </label>
         <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
           {([
@@ -195,6 +206,107 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
           ))}
         </div>
       </div>
+
+      {/* Oyun sayısı */}
+      <div className="mb-4">
+        <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">
+          Oyun sayısı {!isHost && <span className="opacity-60">(mihmandar belirler)</span>}
+        </label>
+        <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+          {([3, 5, 7] as const).map((n) => (
+            <button
+              key={n}
+              disabled={!isHost}
+              onClick={() => setupMutation.mutate({ gameCount: n })}
+              className={`flex-1 py-2.5 text-xs font-medium transition-all ${session.targetGameCount === n ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"} ${!isHost ? "cursor-default" : ""}`}
+            >
+              {n} el
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* El süresi */}
+      <div className="mb-4">
+        <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">
+          El süresi {!isHost && <span className="opacity-60">(mihmandar belirler)</span>}
+        </label>
+        <div className="grid grid-cols-5 rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+          {([
+            { ms: 30_000, label: "30sn" },
+            { ms: 45_000, label: "45sn" },
+            { ms: 60_000, label: "1dk" },
+            { ms: 90_000, label: "1:30" },
+            { ms: 120_000, label: "2dk" },
+          ] as const).map(({ ms, label }) => (
+            <button
+              key={ms}
+              disabled={!isHost}
+              onClick={() => setupMutation.mutate({ roundDurationMs: ms })}
+              className={`py-2.5 text-xs font-medium transition-all ${session.roundDurationMs === ms ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"} ${!isHost ? "cursor-default" : ""}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Görünürlük */}
+      {isHost && (
+        <div className="mb-4">
+          <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">Görünürlük</label>
+          <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+            {([
+              { v: "private" as const, label: "Özel" },
+              { v: "public" as const, label: "Public" },
+            ]).map(({ v, label }) => (
+              <button
+                key={v}
+                onClick={() => setupMutation.mutate({ visibility: v })}
+                className={`flex-1 py-2.5 text-xs font-medium transition-all ${session.visibility === v ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Şifre (host only) */}
+      {isHost && (
+        <div className="mb-4">
+          <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">
+            Şifre {session.hasPassword && <span className="text-[var(--mu-accent)]">(aktif)</span>}
+          </label>
+          <div className="flex gap-2">
+            <input
+              value={pwInput}
+              onChange={(e) => setPwInput(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder={session.hasPassword ? "Değiştir (4 hane)" : "4 haneli (boş = şifresiz)"}
+              inputMode="numeric"
+              maxLength={4}
+              className="flex-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-center tracking-widest"
+              style={{ fontFamily: "var(--mu-ff-mono)" }}
+            />
+            {pwInput.length === 4 && (
+              <button
+                onClick={() => { setupMutation.mutate({ password: pwInput }); setPwInput(""); }}
+                className="px-3 py-2 rounded-lg text-xs font-medium bg-[var(--color-accent)] text-white"
+              >
+                Kaydet
+              </button>
+            )}
+            {session.hasPassword && pwInput.length === 0 && (
+              <button
+                onClick={() => setupMutation.mutate({ password: null })}
+                className="px-3 py-2 rounded-lg text-xs font-medium border border-[var(--color-border)] text-[var(--color-text-secondary)]"
+              >
+                Kaldır
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Oylama görünürlüğü (mihmandar belirler) */}
       <div className="mb-4">
@@ -285,7 +397,7 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
 
 // ── Voting ───────────────────────────────────────────────
 
-const ALL_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match", "peygamber-kim", "kari-tahmini"] as const;
+const ALL_GAMES = ["fill-blank", "surah-guess", "word-meaning", "word-match", "peygamber-kim", "kari-tahmini", "arapca-secim"] as const;
 
 const SCOPE_OPTIONS: { key: string; label: string; sub: string }[] = [
   { key: "all", label: "Tüm Kuran", sub: "Tüm sure ve ayetlerden" },
@@ -301,21 +413,25 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
   const qc = useQueryClient();
   const { session, players, meId, isHost } = state;
   const me = players.find((p) => p.userId === meId);
-  const initialGames = (me?.votes ?? []) as string[];
-  const initialScope = me?.scopeVote ?? "";
-  const [picks, setPicks] = useState<string[]>(initialGames);
-  const [scope, setScope] = useState<string>(initialScope);
-  const [submitted, setSubmitted] = useState(initialGames.length > 0 && initialScope !== "");
+  const locked = me?.votesLockedAt != null;
+  const picks = (me?.votes ?? []) as string[];
+  const scope = me?.scopeVote ?? "";
   const elapsed = session.roundStartedAt ? Math.floor((Date.now() - session.roundStartedAt) / 1000) : 0;
   const remaining = Math.max(0, 30 - elapsed);
   const votesVisible = session.votesVisible;
 
-  const submitMutation = useMutation({
-    mutationFn: () => submitMeclisVotes({ data: { code: session.code, votes: picks, scope } }),
-    onSuccess: () => {
-      setSubmitted(true);
-      qc.invalidateQueries({ queryKey: ["meclis-state", session.code] });
-    },
+  // Canlı oylama: her toggle'da sunucuya yansıt; advance lock'a kadar tetiklenmez.
+  const liveSubmitMutation = useMutation({
+    mutationFn: ({ nextPicks, nextScope }: { nextPicks: string[]; nextScope: string }) =>
+      submitMeclisVotes({ data: { code: session.code, votes: nextPicks, scope: nextScope } }),
+    // Refetch'i debounce'lamak için her başarılı yazımdan sonra cache'i invalidate ediyoruz —
+    // optimistic update zaten bir sonraki refetchInterval tick'inde gelir
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
+  });
+
+  const lockMutation = useMutation({
+    mutationFn: () => lockMeclisVotes({ data: { code: session.code, votes: picks, scope } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
   });
 
   const visibilityMutation = useMutation({
@@ -324,15 +440,23 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
   });
 
   const toggleGame = (g: string) => {
-    if (submitted) return;
-    setPicks((prev) => {
-      if (prev.includes(g)) return prev.filter((x) => x !== g);
-      if (prev.length >= 3) return prev;
-      return [...prev, g];
-    });
+    if (locked) return;
+    let nextPicks: string[];
+    if (picks.includes(g)) {
+      nextPicks = picks.filter((x) => x !== g);
+    } else {
+      if (picks.length >= 3) return;
+      nextPicks = [...picks, g];
+    }
+    liveSubmitMutation.mutate({ nextPicks, nextScope: scope });
   };
 
-  const votedCount = players.filter((p) => p.votes.length > 0 && p.scopeVote != null).length;
+  const pickScope = (sc: string) => {
+    if (locked) return;
+    liveSubmitMutation.mutate({ nextPicks: picks, nextScope: sc });
+  };
+
+  const lockedCount = players.filter((p) => p.votesLockedAt != null).length;
 
   return (
     <div className="max-w-md mx-auto px-4 py-6">
@@ -343,7 +467,7 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
       </p>
 
       <div className="flex justify-between items-center mb-2 text-xs">
-        <span className="text-[var(--color-text-secondary)]">{votedCount}/{players.length} oy verdi</span>
+        <span className="text-[var(--color-text-secondary)]">{lockedCount}/{players.length} kilitledi</span>
         <span className="font-bold text-[var(--mu-accent)] tabular-nums">{remaining}sn</span>
       </div>
       {isHost && (
@@ -369,13 +493,13 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
           return (
             <button
               key={g}
-              disabled={submitted}
+              disabled={locked}
               onClick={() => toggleGame(g)}
               className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${
                 picked
                   ? "border-[var(--mu-accent)] bg-[var(--mu-accent-soft)]"
                   : "border-[var(--color-border)] bg-[var(--color-surface)]"
-              } ${submitted ? "opacity-60 cursor-default" : ""}`}
+              } ${locked ? "opacity-60 cursor-default" : ""}`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -408,13 +532,13 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
           return (
             <button
               key={opt.key}
-              disabled={submitted}
-              onClick={() => !submitted && setScope(opt.key)}
+              disabled={locked}
+              onClick={() => pickScope(opt.key)}
               className={`text-left px-3 py-2.5 rounded-xl border transition-all ${
                 picked
                   ? "border-[var(--mu-accent)] bg-[var(--mu-accent-soft)]"
                   : "border-[var(--color-border)] bg-[var(--color-surface)]"
-              } ${submitted ? "opacity-60 cursor-default" : ""}`}
+              } ${locked ? "opacity-60 cursor-default" : ""}`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
@@ -432,17 +556,17 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
         })}
       </div>
 
-      {!submitted ? (
+      {!locked ? (
         <button
-          onClick={() => submitMutation.mutate()}
-          disabled={picks.length === 0 || scope === "" || submitMutation.isPending}
+          onClick={() => lockMutation.mutate()}
+          disabled={picks.length === 0 || scope === "" || lockMutation.isPending}
           className="mu-btn primary w-full disabled:opacity-50"
         >
-          {submitMutation.isPending ? "Kaydediliyor..." : `Onayla (${picks.length} seçim)`}
+          {lockMutation.isPending ? "Kilitleniyor..." : `Kilitle (${picks.length}/3)`}
         </button>
       ) : (
         <p className="text-center text-sm text-[var(--color-text-secondary)]">
-          Oyların alındı. Diğerleri bekleniyor…
+          Oyların kilitlendi. Diğerleri bekleniyor…
         </p>
       )}
     </div>
@@ -548,7 +672,6 @@ function InterimView({ state }: { state: MeclisStatePayload }) {
   const elapsed = state.session.roundStartedAt ? Math.floor((Date.now() - state.session.roundStartedAt) / 1000) : 0;
   const remaining = Math.max(0, Math.ceil(state.session.interimMs / 1000) - elapsed);
   const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
-  const isLast = state.session.currentGameIndex >= state.session.gamePool.length - 1;
   const nextGameId = state.session.gamePool[state.session.currentGameIndex + 1];
   const nextLabel = nextGameId ? GAME_LABELS[nextGameId]?.title ?? nextGameId : null;
 
@@ -556,7 +679,7 @@ function InterimView({ state }: { state: MeclisStatePayload }) {
     <div className="max-w-md mx-auto px-4 py-8">
       <p className="mu-eyebrow text-center"><span className="mu-eb-line" />{state.session.currentGameIndex + 1}. El bitti</p>
       <h1 className="mu-display text-center" style={{ marginBottom: 18 }}>
-        {isLast ? "Final yaklaşıyor" : `Sıra: ${nextLabel}`}
+        {nextLabel ? `Sıra: ${nextLabel}` : "Sıradaki el…"}
       </h1>
 
       <div className="space-y-2 mb-6">
