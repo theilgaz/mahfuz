@@ -45,9 +45,17 @@ interface QDCResponse {
 type TrPatch = Record<string, string>;
 
 let patchCache: TrPatch | null = null;
+let normPatchCache: TrPatch | null = null;
 
-async function loadTrPatch(): Promise<TrPatch> {
-  if (patchCache) return patchCache;
+/** Trailing waqf/secavend işaretleri + boşluk — patch eşleşmesi için sıyrılır. */
+const WAQF_TRIM = /[ۖ-ۜ۟-ۤۧۨ‌‍\s]+$/;
+
+function normalizeArabic(s: string): string {
+  return s.replace(WAQF_TRIM, "").trim();
+}
+
+async function loadTrPatch(): Promise<{ exact: TrPatch; norm: TrPatch }> {
+  if (patchCache && normPatchCache) return { exact: patchCache, norm: normPatchCache };
   try {
     const res = await fetch("/wbw-tr-patch.json");
     if (res.ok) {
@@ -58,7 +66,13 @@ async function loadTrPatch(): Promise<TrPatch> {
   } catch {
     patchCache = {};
   }
-  return patchCache!;
+  // Build normalized index for fuzzy lookup (strips trailing waqf marks)
+  const norm: TrPatch = {};
+  for (const [k, v] of Object.entries(patchCache!)) {
+    norm[normalizeArabic(k)] = v;
+  }
+  normPatchCache = norm;
+  return { exact: patchCache!, norm };
 }
 
 /** Map app locale to Quran.com API language code */
@@ -74,7 +88,7 @@ const LOCALE_TO_WBW_LANG: Record<string, string> = {
 
 async function fetchWbwChapter(chapterId: number, locale: string = "tr"): Promise<WbwData> {
   const isTr = locale === "tr";
-  const patch = isTr ? await loadTrPatch() : {};
+  const { exact: patch, norm: normPatch } = isTr ? await loadTrPatch() : { exact: {} as TrPatch, norm: {} as TrPatch };
   const lang = LOCALE_TO_WBW_LANG[locale] ?? "en";
   const map: WbwData = new Map();
   let page = 1;
@@ -99,7 +113,11 @@ async function fetchWbwChapter(chapterId: number, locale: string = "tr"): Promis
           const apiIsTurkish = apiLang === "turkish" || apiLang === "tr";
           let translation = apiTranslation;
           if (isTr && (!translation || !apiIsTurkish)) {
-            translation = patch[w.text_uthmani] || apiTranslation;
+            // Önce tam Arapça form, yoksa waqf/secavend işaretleri sıyrılmış normalize edilmiş form
+            translation =
+              patch[w.text_uthmani] ||
+              normPatch[normalizeArabic(w.text_uthmani)] ||
+              apiTranslation;
           }
           return {
             position: w.position,
