@@ -10,8 +10,10 @@ import { ARABIC_LETTERS } from "~/lib/kids-constants";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/games/memory")({
+  head: () => staticHead("alifba-games-memory"),
   component: MemoryGamePage,
 });
 

@@ -24,6 +24,7 @@ import {
 import { useQuranWordPool, type QuranWord } from "~/lib/quran-word-pool";
 import { EMOJI_WORDS } from "~/lib/emoji-words";
 import { SurahPickerScreen } from "~/components/SurahPickerScreen";
+import { staticHead } from "~/lib/seo";
 
 const GAME_ID = "word-match" as const;
 const THEME = GAME_THEMES[GAME_ID];
@@ -31,6 +32,7 @@ const P = THEME.primary;
 const PAIRS_PER_ROUND = 8;
 
 export const Route = createFileRoute("/games/word-match")({
+  head: () => staticHead("games-word-match"),
   component: WordMatchPage,
 });
 

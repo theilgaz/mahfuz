@@ -11,8 +11,10 @@ import { BookmarkRow } from "~/components/BookmarkRow";
 
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-names-i18n";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/bookmarks")({
+  head: () => staticHead("bookmarks"),
   loader: ({ context }) => context.queryClient.ensureQueryData(surahsQueryOptions()),
   component: BookmarksPage,
 });

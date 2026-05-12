@@ -9,8 +9,10 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore, computeAlifbaStats } from "~/stores/alifba.store";
 import { useShallow } from "zustand/react/shallow";
 import { useMemo } from "react";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/letters")({
+  head: () => staticHead("alifba-letters"),
   component: LetterIndexPage,
 });
 

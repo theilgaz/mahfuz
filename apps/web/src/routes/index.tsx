@@ -6,8 +6,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSurahs, surahsQueryOptions, dailyVerseQueryOptions } from "~/hooks/useQuranQuery";
 import { HomeHero } from "~/components/minimal-ui/HomeHero";
 import { SurahIndex } from "~/components/minimal-ui/SurahIndex";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/")({
+  head: () => staticHead("home"),
   loader: ({ context }) => Promise.all([
     context.queryClient.ensureQueryData(surahsQueryOptions()),
     context.queryClient.prefetchQuery(dailyVerseQueryOptions()),

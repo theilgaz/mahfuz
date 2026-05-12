@@ -30,10 +30,12 @@ import {
   type SurahInfo,
 } from "~/lib/surah-ayah-counts";
 import { getSurahName } from "~/lib/surah-names-i18n";
+import { staticHead } from "~/lib/seo";
 
 const THEME = GAME_THEMES["ayet-2048"];
 
 export const Route = createFileRoute("/games/ayah-2048")({
+  head: () => staticHead("games-ayah-2048"),
   component: Ayet2048Page,
 });
 

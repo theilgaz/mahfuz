@@ -19,6 +19,7 @@ import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { useLocaleStore } from "~/stores/locale.store";
 import {
+import { staticHead } from "~/lib/seo";
   OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,
@@ -32,6 +33,7 @@ const THEME = GAME_THEMES["surah-guess"];
 const P = THEME.primary;
 
 export const Route = createFileRoute("/games/surah-guess")({
+  head: () => staticHead("games-surah-guess"),
   component: SurahGuessGame,
 });
 

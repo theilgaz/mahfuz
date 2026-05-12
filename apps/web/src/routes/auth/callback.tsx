@@ -1,8 +1,10 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/auth/callback")({
+  head: () => staticHead("auth-callback"),
   component: AuthCallback,
 });
 

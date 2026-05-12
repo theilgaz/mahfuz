@@ -5,8 +5,10 @@
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { getAyahsByJuz } from "~/lib/quran-service";
+import { juzHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/juz/$juzId")({
+  head: ({ params }) => juzHead(params.juzId),
   beforeLoad: async ({ params }) => {
     const juzNumber = parseInt(params.juzId, 10);
     if (isNaN(juzNumber) || juzNumber < 1 || juzNumber > 30) {

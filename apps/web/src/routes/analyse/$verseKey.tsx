@@ -12,10 +12,12 @@ import { MealComparisonSheet } from "~/components/MealComparisonSheet";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-names-i18n";
 import { splitWords } from "~/lib/split-words";
+import { analyseHead } from "~/lib/seo";
 
 // ── Route ────────────────────────────────────────────────
 
 export const Route = createFileRoute("/analyse/$verseKey")({
+  head: ({ params }) => analyseHead(params.verseKey),
   component: AnalysePage,
   validateSearch: (search: Record<string, unknown>) => ({
     tab: (search.tab as Tab | undefined) ?? "meal",

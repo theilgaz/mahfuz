@@ -8,8 +8,10 @@ import { createFileRoute, useNavigate, useRouteContext } from "@tanstack/react-r
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createMeclis, joinMeclis, listPublicMeclises } from "~/lib/meclis-service";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/meclis/")({
+  head: () => staticHead("meclis"),
   component: MeclisLanding,
   validateSearch: (search: Record<string, unknown>): { code?: string } => ({
     code: typeof search.code === "string" ? search.code : undefined,

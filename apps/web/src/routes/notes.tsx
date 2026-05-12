@@ -7,8 +7,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { getMyVerseNotes, deleteVerseNote } from "~/lib/verse-notes-service";
 import { useTranslation } from "~/hooks/useTranslation";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/notes")({
+  head: () => staticHead("notes"),
   component: NotesPage,
 });
 

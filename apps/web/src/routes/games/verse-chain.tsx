@@ -21,6 +21,7 @@ import { useLocaleStore } from "~/stores/locale.store";
 import { getVerseChainRounds, type ChainRound, type ChainVerse } from "~/lib/quran-service";
 import { splitWords } from "~/lib/split-words";
 import {
+import { staticHead } from "~/lib/seo";
   calcCorrectPoints,
   calcWrongPenalty,
   calcTimeBonusMs,
@@ -31,6 +32,7 @@ import {
 } from "~/lib/game-scoring";
 
 export const Route = createFileRoute("/games/verse-chain")({
+  head: () => staticHead("games-verse-chain"),
   component: VerseChainPage,
 });
 

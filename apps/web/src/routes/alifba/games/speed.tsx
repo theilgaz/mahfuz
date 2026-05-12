@@ -10,8 +10,10 @@ import { playCorrect, playWrong } from "~/lib/quiz-sounds";
 import { ARABIC_LETTERS, shuffle } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/games/speed")({
+  head: () => staticHead("alifba-games-speed"),
   component: SpeedGamePage,
 });
 

@@ -7,8 +7,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { useShallow } from "zustand/react/shallow";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/games/")({
+  head: () => staticHead("alifba-games"),
   component: GamesHubPage,
 });
 

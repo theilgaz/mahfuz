@@ -28,8 +28,10 @@ import { LeagueBadge, MedalLeague, RosetteIcon } from "~/components/minimal-ui/L
 import { Podium } from "~/components/minimal-ui/Podium";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getRecentMeclises } from "~/lib/meclis-service";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/games/scoreboard")({
+  head: () => staticHead("games-scoreboard"),
   component: ScoreboardPage,
   validateSearch: (search: Record<string, unknown>): { game?: string } => ({
     game: typeof search.game === "string" ? search.game : undefined,

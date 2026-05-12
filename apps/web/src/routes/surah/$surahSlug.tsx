@@ -10,8 +10,10 @@ import { surahDataQueryOptions } from "~/hooks/useQuranQuery";
 import { ScrollToTop } from "~/components/ScrollToTop";
 import { surahIdFromSlug, surahSlug } from "~/lib/surah-slugs";
 import { RouteErrorFallback } from "~/components/RouteErrorFallback";
+import { surahHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/surah/$surahSlug")({
+  head: ({ params }) => surahHead(params.surahSlug),
   validateSearch: (search: Record<string, unknown>) => ({
     ayah: search.ayah ? Number(search.ayah) : undefined,
   }),

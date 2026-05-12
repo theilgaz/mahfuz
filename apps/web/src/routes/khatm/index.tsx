@@ -7,12 +7,14 @@ import { useState } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+import { staticHead } from "~/lib/seo";
   getMyHatimGroups,
   createHatimGroup,
   joinHatimGroup,
 } from "~/lib/hatim-group-service";
 
 export const Route = createFileRoute("/khatm/")({
+  head: () => staticHead("khatm"),
   component: HatimPage,
 });
 

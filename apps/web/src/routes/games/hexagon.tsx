@@ -17,6 +17,7 @@ import { GameOverCard } from "~/components/GameOverCard";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { GameVerseLabel } from "~/components/GameVerseLabel";
 import {
+import { staticHead } from "~/lib/seo";
   calcCorrectPoints,
   calcWrongPenalty,
   calcTimeBonusMs,
@@ -26,6 +27,7 @@ import {
 } from "~/lib/game-scoring";
 
 export const Route = createFileRoute("/games/hexagon")({
+  head: () => staticHead("games-hexagon"),
   component: WordConstructionPage,
 });
 

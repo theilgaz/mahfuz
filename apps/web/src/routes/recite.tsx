@@ -11,8 +11,10 @@ import { FindVerseSheet } from "~/components/recitation/FindVerseSheet";
 import { VerificationMode } from "~/components/recitation/VerificationMode";
 import { useSurahs } from "~/hooks/useQuranQuery";
 import { getSurahName } from "~/lib/surah-names-i18n";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/recite")({
+  head: () => staticHead("recite"),
   component: RecitePage,
 });
 

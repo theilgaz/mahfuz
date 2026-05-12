@@ -5,8 +5,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "~/hooks/useTranslation";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/tajweed")({
+  head: () => staticHead("tajweed"),
   component: TajweedPage,
 });
 

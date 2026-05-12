@@ -12,8 +12,10 @@ import { getSurahName } from "~/lib/surah-names-i18n";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
 import { TOTAL_CHAPTERS } from "@mahfuz/shared";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/stats")({
+  head: () => staticHead("stats"),
   component: StatsPage,
 });
 

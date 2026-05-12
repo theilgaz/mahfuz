@@ -9,8 +9,10 @@ import { ARABIC_LETTERS, getLetterForms, getSimilarDistractors, NON_CONNECTORS, 
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/quiz/forms")({
+  head: () => staticHead("alifba-quiz-forms"),
   component: FormsQuizPage,
 });
 

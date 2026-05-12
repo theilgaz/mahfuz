@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LoginPageMinimal } from "~/components/minimal-ui/LoginPage";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/auth/login")({
+  head: () => staticHead("auth-login"),
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: (search.redirect as string) || "",
   }),

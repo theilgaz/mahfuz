@@ -10,12 +10,14 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
 import { LetterFormsPanel } from "~/components/alifba/LetterFormsPanel";
 import { LetterAudioButton } from "~/components/alifba/LetterAudioButton";
+import { alifbaLetterHead } from "~/lib/seo";
 
 const LetterTrace = lazy(() =>
   import("~/components/kids/LetterTrace").then((m) => ({ default: m.LetterTrace }))
 );
 
 export const Route = createFileRoute("/alifba/$letterId")({
+  head: ({ params }) => alifbaLetterHead(params.letterId),
   component: LetterDetailPage,
 });
 

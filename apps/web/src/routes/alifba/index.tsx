@@ -11,8 +11,10 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore, computeAlifbaStats } from "~/stores/alifba.store";
 import { useShallow } from "zustand/react/shallow";
 import { AlifbaPage } from "~/components/minimal-ui/AlifbaPage";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/")({
+  head: () => staticHead("alifba"),
   component: () => <AlifbaPage />,
 });
 

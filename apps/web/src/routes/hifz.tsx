@@ -5,12 +5,14 @@
 
 import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { staticHead } from "~/lib/seo";
 
 const HifzStatus = lazy(() =>
   import("~/components/profile/HifzStatus").then((m) => ({ default: m.HifzStatus }))
 );
 
 export const Route = createFileRoute("/hifz")({
+  head: () => staticHead("hifz"),
   component: HifzPage,
 });
 

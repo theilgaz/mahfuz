@@ -13,8 +13,10 @@ import { ContentBlockRenderer } from "~/components/qaida/ContentBlockRenderer";
 import { ExerciseRunner } from "~/components/qaida/ExerciseRunner";
 import { STEP_EXAMPLES } from "~/components/minimal-ui/AlifbaPage";
 import type { Lesson } from "@mahfuz/shared/types";
+import { alifbaStepHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/step/$stepId")({
+  head: ({ params }) => alifbaStepHead(params.stepId),
   component: StepPage,
 });
 

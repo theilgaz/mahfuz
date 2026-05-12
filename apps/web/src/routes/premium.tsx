@@ -5,8 +5,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useTranslation } from "~/hooks/useTranslation";
 import { Ornament } from "~/components/minimal-ui/Ornament";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/premium")({
+  head: () => staticHead("premium"),
   component: PremiumPage,
 });
 

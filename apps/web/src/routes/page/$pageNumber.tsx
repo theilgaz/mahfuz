@@ -17,11 +17,13 @@ import { RouteErrorFallback } from "~/components/RouteErrorFallback";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useShallow } from "zustand/react/shallow";
 import { JUZ_FIRST_PAGE } from "@mahfuz/shared";
+import { pageHead } from "~/lib/seo";
 
 const TOTAL_PAGES = 604;
 const TOP_BAR_H = 36; // px — top bar height
 
 export const Route = createFileRoute("/page/$pageNumber")({
+  head: ({ params }) => pageHead(params.pageNumber),
   validateSearch: (search: Record<string, unknown>) => ({
     ayah: (search.ayah as string) || undefined,
   }),

@@ -10,8 +10,10 @@ import { getTopicByOrder } from "~/lib/qaida-topics";
 import { buildExam } from "~/lib/exam-builder";
 import { ExamRunner } from "~/components/qaida/ExamRunner";
 import { useQaidaStore } from "~/stores/qaida.store";
+import { alifbaExamHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/exam/$stepId")({
+  head: ({ params }) => alifbaExamHead(params.stepId),
   component: StepExamPage,
 });
 

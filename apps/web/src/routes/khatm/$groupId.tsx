@@ -12,8 +12,10 @@ import {
   unmarkSectionComplete,
 } from "~/lib/hatim-group-service";
 import { useTranslation } from "~/hooks/useTranslation";
+import { khatmGroupHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/khatm/$groupId")({
+  head: ({ params }) => khatmGroupHead(params.groupId),
   component: GroupDashboardPage,
 });
 

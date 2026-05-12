@@ -7,12 +7,14 @@ import { Suspense, lazy } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Credits } from "~/components/hub/Credits";
 import { useTranslation } from "~/hooks/useTranslation";
+import { staticHead } from "~/lib/seo";
 
 const GitHubContributors = lazy(() =>
   import("~/components/hub/GitHubContributors").then((m) => ({ default: m.GitHubContributors }))
 );
 
 export const Route = createFileRoute("/about")({
+  head: () => staticHead("about"),
   component: AboutPage,
 });
 

@@ -15,12 +15,14 @@ import { GameMiniLeaderboard } from "~/components/GameMiniLeaderboard";
 import type { League } from "~/lib/league";
 import { LEAGUE_LABELS } from "~/lib/league";
 import { MedalLeague } from "~/components/minimal-ui/LeagueIcons";
+import { staticHead } from "~/lib/seo";
 
 const THEME = GAME_THEMES["kelime-tahmini"];
 const P = THEME.primary;
 const MAX_GUESSES = 6;
 
 export const Route = createFileRoute("/games/kelime-tahmini")({
+  head: () => staticHead("games-kelime-tahmini"),
   component: KelimeTahminiPage,
 });
 

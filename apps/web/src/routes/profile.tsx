@@ -4,8 +4,10 @@
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AccountPage } from "~/components/minimal-ui/AccountPage";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/profile")({
+  head: () => staticHead("profile"),
   beforeLoad: ({ context }) => {
     if (!context.session) {
       throw redirect({ to: "/auth/login", search: { redirect: "/profile" } });

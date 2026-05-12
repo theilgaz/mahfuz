@@ -18,6 +18,7 @@ import { SurahPickerScreen } from "~/components/SurahPickerScreen";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { useQuranWordPool, bucketForDifficulty, type QuranWord } from "~/lib/quran-word-pool";
 import {
+import { staticHead } from "~/lib/seo";
   OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,
@@ -31,6 +32,7 @@ const THEME = GAME_THEMES["word-meaning"];
 const P = THEME.primary;
 
 export const Route = createFileRoute("/games/word-meaning")({
+  head: () => staticHead("games-word-meaning"),
   component: WordMeaningPage,
 });
 

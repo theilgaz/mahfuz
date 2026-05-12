@@ -6,8 +6,10 @@
 import { useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useTranslation } from "~/hooks/useTranslation";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/changelog")({
+  head: () => staticHead("changelog"),
   component: ChangelogPage,
 });
 

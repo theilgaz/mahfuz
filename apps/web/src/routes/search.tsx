@@ -13,8 +13,10 @@ import { getSurahName } from "~/lib/surah-names-i18n";
 import { SettingsButton } from "~/components/SettingsButton";
 import { surahSlug } from "~/lib/surah-slugs";
 import { LatinRootSearch } from "~/components/LatinRootSearch";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/search")({
+  head: () => staticHead("search"),
   component: SearchPage,
   validateSearch: (search: Record<string, unknown>) => ({
     q: typeof search.q === "string" ? search.q : undefined,

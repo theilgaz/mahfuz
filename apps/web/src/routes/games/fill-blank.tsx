@@ -17,6 +17,7 @@ import { GameOverCard } from "~/components/GameOverCard";
 import { GAME_THEMES, gameBgStyle } from "~/lib/game-themes";
 import { GameVerseLabel } from "~/components/GameVerseLabel";
 import {
+import { staticHead } from "~/lib/seo";
   OPTION_COUNT,
   calcCorrectPoints,
   calcWrongPenalty,
@@ -28,6 +29,7 @@ import {
 } from "~/lib/game-scoring";
 
 export const Route = createFileRoute("/games/fill-blank")({
+  head: () => staticHead("games-fill-blank"),
   component: FillBlankGame,
 });
 

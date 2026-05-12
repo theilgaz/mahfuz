@@ -11,8 +11,10 @@ import { useAlifbaStore } from "~/stores/alifba.store";
 import { LetterAudioButton } from "~/components/alifba/LetterAudioButton";
 import { playCorrect, playWrong } from "~/lib/quiz-sounds";
 import { playLetterAudio, type LetterAudioHandle } from "~/lib/letter-audio";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/exam/")({
+  head: () => staticHead("alifba-exam-index"),
   component: ExamPage,
 });
 

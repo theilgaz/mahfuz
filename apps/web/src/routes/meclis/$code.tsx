@@ -65,8 +65,10 @@ function VoterStack({ voters, visible, max = 4 }: { voters: MeclisPlayer[]; visi
 }
 import type { Difficulty } from "~/lib/game-scoring";
 import { MeclisGamePlay } from "~/components/meclis/MeclisGamePlay";
+import { meclisCodeHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/meclis/$code")({
+  head: ({ params }) => meclisCodeHead(params.code),
   component: MeclisSession,
 });
 

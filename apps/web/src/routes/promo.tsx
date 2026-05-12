@@ -8,8 +8,10 @@ import { surahSlug } from "~/lib/surah-slugs";
 import { MuIcons } from "~/components/minimal-ui/icons";
 import { LogoMeem } from "~/components/minimal-ui/LogoMeem";
 import { ACCENT_COLORS, type AccentColorId } from "~/stores/settings.store";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/promo")({
+  head: () => staticHead("promo"),
   loader: ({ context }) => Promise.all([
     context.queryClient.ensureQueryData(surahsQueryOptions()),
     context.queryClient.prefetchQuery(dailyVerseQueryOptions()),

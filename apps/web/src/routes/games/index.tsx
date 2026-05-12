@@ -22,8 +22,10 @@ import {
   getUserAchievements,
 } from "~/lib/score-service";
 import { ACHIEVEMENT_DEFS } from "~/lib/game-achievements";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/games/")({
+  head: () => staticHead("games"),
   component: GamesPageMinimal,
 });
 

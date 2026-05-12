@@ -11,8 +11,10 @@ import { playLetterAudio, type LetterAudioHandle } from "~/lib/letter-audio";
 import { ARABIC_LETTERS, LETTER_EXAMPLES, shuffle } from "~/lib/kids-constants";
 import { useTranslation } from "~/hooks/useTranslation";
 import { useAlifbaStore } from "~/stores/alifba.store";
+import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/alifba/games/fill")({
+  head: () => staticHead("alifba-games-fill"),
   component: FillGamePage,
 });
 
