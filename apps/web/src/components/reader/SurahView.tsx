@@ -182,16 +182,6 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     [sharedProps],
   );
 
-  if (!data || !data.surah) {
-    return <SurahSkeleton />;
-  }
-
-  const surah = data.surah;
-  const surahName = getSurahName(surahId, locale) || surah.nameSimple;
-  const surahMeaning = getSurahMeaning(surahId, locale);
-  const surahDesc = getSurahDescription(surahId, locale);
-  const typeLabel = surah.revelation === "makkah" ? "Mekki sure" : "Medeni sure";
-
   const { audioPlaybackState, audioChapterId, playSurahFn, togglePlayPause } = useAudioStore(
     useShallow((s) => ({
       audioPlaybackState: s.playbackState,
@@ -201,10 +191,10 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
     }))
   );
   const reciterSlug = useSettingsStore((s) => s.reciterSlug);
+  const [audioLoading, setAudioLoading] = useState(false);
 
   const isThisSurahPlaying = audioChapterId === surahId && (audioPlaybackState === "playing" || audioPlaybackState === "paused");
   const isPlaying = audioChapterId === surahId && audioPlaybackState === "playing";
-  const [audioLoading, setAudioLoading] = useState(false);
 
   const handleTopbarPlay = useCallback(async () => {
     if (isThisSurahPlaying) {
@@ -221,6 +211,16 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
       setAudioLoading(false);
     }
   }, [surahId, reciterSlug, isThisSurahPlaying, togglePlayPause, playSurahFn]);
+
+  if (!data || !data.surah) {
+    return <SurahSkeleton />;
+  }
+
+  const surah = data.surah;
+  const surahName = getSurahName(surahId, locale) || surah.nameSimple;
+  const surahMeaning = getSurahMeaning(surahId, locale);
+  const surahDesc = getSurahDescription(surahId, locale);
+  const typeLabel = surah.revelation === "makkah" ? "Mekki sure" : "Medeni sure";
 
   const progressPct = surah.ayahCount > 0 ? (activeAyah / surah.ayahCount) * 100 : 0;
 
