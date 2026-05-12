@@ -27,6 +27,7 @@ import { VerseJumpDialog } from "~/components/reader/VerseJumpDialog";
 import { SmartPlayButton } from "~/components/reader/SmartPlayButton";
 import { MahfuzLogo } from "~/components/icons/MahfuzLogo";
 import { LanguageSelector } from "~/components/LanguageSelector";
+import { GoogleAnalyticsScripts, GoogleAnalyticsTracker } from "~/components/GoogleAnalytics";
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { getSession } from "~/lib/auth-session";
 import { useSyncEngine } from "~/hooks/useSyncEngine";
@@ -516,6 +517,7 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} suppressHydrationWarning>
       <head>
         <HeadContent />
+        <GoogleAnalyticsScripts />
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('loading')` }} />
         <style dangerouslySetInnerHTML={{ __html: `.loading{opacity:0}.loaded{opacity:1;transition:opacity .15s ease}` }} />
       </head>
@@ -535,6 +537,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         {!isMushafMode && <RecitationBar />}
         {!isMushafMode && <BottomNav />}
         <LanguageSelector />
+        <GoogleAnalyticsTracker />
         <Scripts />
       </body>
     </html>
