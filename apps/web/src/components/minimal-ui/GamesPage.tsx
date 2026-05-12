@@ -158,8 +158,8 @@ export function GamesPageMinimal() {
       {/* Game grid */}
       <div className="mu-games-grid">
         {list.map((g) => (
-          <Link to={g.path as any} key={g.id} style={{ textDecoration: "none", color: "inherit" }}>
-            <article className="mu-gcard">
+          <Link to={g.path as any} key={g.id} style={{ textDecoration: "none", color: "inherit", display: "flex", height: "100%" }}>
+            <article className="mu-gcard" style={{ flex: 1 }}>
               <div style={{ flex: 1 }}>
                 <div className="mu-gcard-top">
                   <span className="mu-gcard-tag">{g.tag}</span>
