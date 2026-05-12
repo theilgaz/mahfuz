@@ -99,8 +99,8 @@ export function GamesPageMinimal() {
   const { t } = useTranslation();
   const { session } = useRouteContext({ from: "__root__" });
   const { data: leaderboard } = useQuery({
-    queryKey: ["global-leaderboard", "all"],
-    queryFn: () => getGlobalLeaderboard({ data: {} }),
+    queryKey: ["global-leaderboard", "season"],
+    queryFn: () => getGlobalLeaderboard({ data: { period: "season" } }),
     staleTime: 60_000,
   });
   const [cat, setCat] = useState("all");
@@ -194,32 +194,33 @@ export function GamesPageMinimal() {
 
       {/* Leaderboard */}
       <section style={{ paddingTop: 24, borderTop: "1px solid var(--mu-line)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 20 }}>
-          <h2 className="mu-h2" style={{ margin: 0 }}>Skor Tablosu</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <h2 className="mu-h2" style={{ margin: 0 }}>Skor Tablosu</h2>
+            <span className="mu-muted" style={{ fontSize: 12 }}>Bu sezon · İlk 10</span>
+          </div>
           <Link to="/games/scoreboard" className="mu-muted" style={{ fontSize: 13, textDecoration: "none" }}>
             Tümü {MuIcons.arrowRight}
           </Link>
         </div>
-        <ol style={{ listStyle: "none", padding: 0, margin: 0 }}>
+        <ol className="mu-lboard-compact" style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {leaderboard && leaderboard.length > 0 ? (
-            <>
-              {leaderboard.slice(0, 5).map((entry) => {
-                const isYou = session?.user?.id === entry.userId;
-                return (
-                  <li
-                    key={entry.userId}
-                    className={`mu-lrow ${isYou ? "you" : ""} ${entry.rank <= 3 ? `rank-${entry.rank}` : ""}`}
-                  >
-                    <span className="mu-lrank">{entry.rank}</span>
-                    <span className="mu-lname">
-                      {entry.userName || "Anonim"}
-                      {isYou && <span className="mu-ybadge">sen</span>}
-                    </span>
-                    <span className="mu-lxp">{entry.bestScore} XP</span>
-                  </li>
-                );
-              })}
-            </>
+            leaderboard.slice(0, 10).map((entry) => {
+              const isYou = session?.user?.id === entry.userId;
+              return (
+                <li
+                  key={entry.userId}
+                  className={`mu-lrow ${isYou ? "you" : ""} ${entry.rank <= 3 ? `rank-${entry.rank}` : ""}`}
+                >
+                  <span className="mu-lrank">{entry.rank}</span>
+                  <span className="mu-lname">
+                    {entry.userName || "Anonim"}
+                    {isYou && <span className="mu-ybadge">sen</span>}
+                  </span>
+                  <span className="mu-lxp">{entry.bestScore} XP</span>
+                </li>
+              );
+            })
           ) : (
             <li className="mu-lrow">
               <span className="mu-lname mu-muted" style={{ fontSize: 13 }}>Henüz skor yok. İlk sen ol!</span>

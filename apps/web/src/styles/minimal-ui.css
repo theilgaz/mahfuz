@@ -4041,6 +4041,30 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   font-variant-numeric: tabular-nums;
 }
 
+/* Compact variant - used on /games hub top-10 preview */
+.mu-lboard-compact .mu-lrow {
+  grid-template-columns: 28px 1fr auto;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 2px;
+}
+.mu-lboard-compact .mu-lrank {
+  font-size: 14px;
+  text-align: center;
+}
+.mu-lboard-compact .mu-lname {
+  font-size: 14px;
+  gap: 8px;
+}
+.mu-lboard-compact .mu-ybadge {
+  font-size: 9px;
+  padding: 1px 6px;
+}
+.mu-lboard-compact .mu-lxp {
+  font-size: 11px;
+}
+
 /* ── Scoreboard ─────────────────────────────────────── */
 
 .mu-sb-periods {
