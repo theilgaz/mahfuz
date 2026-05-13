@@ -52,64 +52,103 @@ export const searchQuran = createServerFn({ method: "GET" })
 
     const trimmed = query.trim();
 
-    // Sure:ayet referansı algıla (ör: "33:35", "2:255", "1/5")
-    const refMatch = trimmed.match(/^(\d{1,3})\s*[:./]\s*(\d{1,3})$/);
-    if (refMatch) {
-      const surahId = parseInt(refMatch[1], 10);
-      const ayahNumber = parseInt(refMatch[2], 10);
+    // Sure:ayet referansı algıla — sayı (ör: "33:35", "2:255", "1/5") veya sure adı (ör: "hud:7", "yasin 36")
+    let directRef: { surahId: number; ayahNumber: number } | null = null;
 
-      if (surahId >= 1 && surahId <= 114) {
-        const [source] = await db
-          .select()
-          .from(translationSources)
-          .where(eq(translationSources.slug, translationSlug));
+    const numericRef = trimmed.match(/^(\d{1,3})\s*[:./]\s*(\d{1,3})$/);
+    if (numericRef) {
+      const sId = parseInt(numericRef[1], 10);
+      const aN = parseInt(numericRef[2], 10);
+      if (sId >= 1 && sId <= 114) directRef = { surahId: sId, ayahNumber: aN };
+    }
 
-        const directHits = await db
-          .select({
-            surahId: ayahs.surahId,
-            ayahNumber: ayahs.ayahNumber,
-            textUthmani: ayahs.textUthmani,
-            pageNumber: ayahs.pageNumber,
-            surahNameArabic: surahs.nameArabic,
-            surahNameSimple: surahs.nameSimple,
-          })
-          .from(ayahs)
-          .innerJoin(surahs, eq(surahs.id, ayahs.surahId))
-          .where(and(eq(ayahs.surahId, surahId), eq(ayahs.ayahNumber, ayahNumber)))
-          .limit(1);
+    if (!directRef) {
+      const nameRef = trimmed.match(/^([\p{L}\-]+)\s*[:./\s]\s*(\d{1,3})$/u);
+      if (nameRef) {
+        const normalizedName = normalizeForSearch(nameRef[1]);
+        const ayahNumber = parseInt(nameRef[2], 10);
 
-        if (directHits.length > 0) {
-          const hit = directHits[0];
-          let translation: string | null = null;
+        let resolvedSurahId: number | undefined;
 
-          if (source) {
-            const [trans] = await db
-              .select({ text: translations.text })
-              .from(translations)
-              .where(
-                and(
-                  eq(translations.sourceId, source.id),
-                  eq(translations.surahId, surahId),
-                  eq(translations.ayahNumber, ayahNumber),
-                ),
-              )
-              .limit(1);
-            translation = trans?.text ?? null;
+        for (const [id, aliases] of Object.entries(SURAH_ALIASES)) {
+          if (aliases.includes(normalizedName)) {
+            resolvedSurahId = Number(id);
+            break;
           }
-
-          return [{
-            surahId: hit.surahId,
-            ayahNumber: hit.ayahNumber,
-            surahNameArabic: hit.surahNameArabic,
-            surahNameSimple: hit.surahNameSimple,
-            textUthmani: hit.textUthmani,
-            translation,
-            pageNumber: hit.pageNumber,
-          }];
         }
 
-        return [];
+        if (!resolvedSurahId && normalizedName.length >= 2) {
+          const allSurahs = await db
+            .select({ id: surahs.id, nameSimple: surahs.nameSimple })
+            .from(surahs);
+          const exact = allSurahs.find((s) => normalizeForSearch(s.nameSimple) === normalizedName);
+          if (exact) resolvedSurahId = exact.id;
+          else {
+            const partial = allSurahs.find((s) => normalizeForSearch(s.nameSimple).startsWith(normalizedName));
+            if (partial) resolvedSurahId = partial.id;
+          }
+        }
+
+        if (resolvedSurahId && resolvedSurahId >= 1 && resolvedSurahId <= 114) {
+          directRef = { surahId: resolvedSurahId, ayahNumber };
+        }
       }
+    }
+
+    if (directRef) {
+      const { surahId, ayahNumber } = directRef;
+
+      const [source] = await db
+        .select()
+        .from(translationSources)
+        .where(eq(translationSources.slug, translationSlug));
+
+      const directHits = await db
+        .select({
+          surahId: ayahs.surahId,
+          ayahNumber: ayahs.ayahNumber,
+          textUthmani: ayahs.textUthmani,
+          pageNumber: ayahs.pageNumber,
+          surahNameArabic: surahs.nameArabic,
+          surahNameSimple: surahs.nameSimple,
+        })
+        .from(ayahs)
+        .innerJoin(surahs, eq(surahs.id, ayahs.surahId))
+        .where(and(eq(ayahs.surahId, surahId), eq(ayahs.ayahNumber, ayahNumber)))
+        .limit(1);
+
+      if (directHits.length > 0) {
+        const hit = directHits[0];
+        let translation: string | null = null;
+
+        if (source) {
+          const [trans] = await db
+            .select({ text: translations.text })
+            .from(translations)
+            .where(
+              and(
+                eq(translations.sourceId, source.id),
+                eq(translations.surahId, surahId),
+                eq(translations.ayahNumber, ayahNumber),
+              ),
+            )
+            .limit(1);
+          translation = trans?.text ?? null;
+        }
+
+        return [{
+          surahId: hit.surahId,
+          ayahNumber: hit.ayahNumber,
+          surahNameArabic: hit.surahNameArabic,
+          surahNameSimple: hit.surahNameSimple,
+          textUthmani: hit.textUthmani,
+          translation,
+          pageNumber: hit.pageNumber,
+          matchType: "surah",
+        }];
+      }
+
+      return [];
     }
 
     // Sadece sayı — sure numarası (ör: "33", "2", "114")
