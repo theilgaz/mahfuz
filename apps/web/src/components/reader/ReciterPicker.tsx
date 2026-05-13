@@ -252,8 +252,8 @@ export function ReciterPicker({ reciters, value, onSelect, onClose }: Props) {
           ) : (
             grouped.map(([country, rows]) => (
               <div key={country} className="mb-4">
-                <p className="text-[11px] text-[var(--color-text-secondary)] mb-1">{country}</p>
-                <div className="flex flex-col">
+                <p className="text-[11px] uppercase tracking-wider text-[var(--color-text-secondary)] mb-2">{country}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {rows.map((rc) => (
                     <ReciterRowItem
                       key={rc.slug}
@@ -303,29 +303,107 @@ function FilterDropdown({
   options: { value: string; label: string }[];
   onChange: (v: string | null) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const active = value != null;
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey, true);
+    };
+  }, [open]);
+
+  function clear(e: React.MouseEvent) {
+    e.stopPropagation();
+    onChange(null);
+    setOpen(false);
+  }
+
   return (
-    <label className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors inline-flex items-center gap-1 cursor-pointer ${
-      active
-        ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
-        : "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:border-[var(--color-accent)]"
-    }`}>
-      <span>{label}{active ? `: ${displayValue}` : ""}</span>
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M2 4L5 7L8 4" />
-      </svg>
-      <select
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value || null)}
-        className="absolute opacity-0 inset-0 w-full cursor-pointer"
-        style={{ left: 0, top: 0 }}
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors inline-flex items-center gap-1.5 ${
+          active
+            ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+            : "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:border-[var(--color-accent)]"
+        }`}
       >
-        <option value="">—</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-    </label>
+        <span>{label}{active ? `: ${displayValue}` : ""}</span>
+        {active ? (
+          <span
+            role="button"
+            tabIndex={0}
+            aria-label="Clear"
+            onClick={clear}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                onChange(null);
+                setOpen(false);
+              }
+            }}
+            className="-mr-1 flex items-center justify-center w-4 h-4 rounded-full hover:bg-white/20"
+          >
+            <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M2 2L8 8M8 2L2 8" />
+            </svg>
+          </span>
+        ) : (
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M2 4L5 7L8 4" />
+          </svg>
+        )}
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          className="absolute z-20 top-full left-0 mt-1 min-w-[160px] max-h-64 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow-lg py-1"
+        >
+          {options.map((o) => {
+            const selected = value === o.value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => {
+                  onChange(o.value);
+                  setOpen(false);
+                }}
+                className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${
+                  selected
+                    ? "text-[var(--color-accent)] font-medium bg-[var(--color-surface)]"
+                    : "text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]"
+                }`}
+              >
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -382,10 +460,10 @@ function ReciterRowItem({
     <button
       onClick={onClick}
       aria-pressed={isSelected}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded transition-colors text-left ${
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors text-left ${
         isSelected
-          ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
-          : "hover:bg-[var(--color-surface)]"
+          ? "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
+          : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]"
       }`}
     >
       <div className="flex-1 min-w-0">
@@ -397,7 +475,7 @@ function ReciterRowItem({
             </span>
           )}
         </div>
-        <span className="text-[11px] text-[var(--color-text-secondary)]">
+        <span className="block text-[11px] text-[var(--color-text-secondary)] truncate">
           {[styleLabel(reciter.style), reciter.source === "self" ? "Sure" : "WBW", ...reciter.voiceTags.map(voiceLabel)].filter(Boolean).join(" · ")}
         </span>
       </div>
