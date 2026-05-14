@@ -286,9 +286,118 @@ async function advanceInterimIfElapsed(meclisId: string) {
 }
 
 async function maybeAdvance(meclisId: string) {
+  await tickBot(meclisId);
   await advanceVotingIfReady(meclisId);
   await advancePlayingIfDone(meclisId);
   await advanceInterimIfElapsed(meclisId);
+}
+
+// ── Bot (Abdullah) ───────────────────────────────────────
+// Her meclise otomatik eklenir ki ev sahibi tek basina baslatabilsin.
+// Sunucu icinde insan gibi davranir: voting fazinda gecikmeli oy kilitler,
+// playing fazinda makul bir skor yazip eli bitirir.
+
+const BOT_USER_ID = "__mahfuz_bot__";
+const BOT_DISPLAY_NAME = "Abdullah";
+const BOT_EMAIL = "bot@mahfuz.internal";
+const BOT_VOTING_DELAY_MS = 7_000;
+const BOT_PLAYING_FRACTION = 0.75;
+const BOT_BASE_SCORE: Record<Difficulty, number> = {
+  easy: 110, medium: 180, hard: 320, hafiz: 540,
+};
+
+async function ensureBotUser(): Promise<void> {
+  const existing = await db.select({ id: user.id }).from(user).where(eq(user.id, BOT_USER_ID)).limit(1);
+  if (existing.length > 0) return;
+  const now = new Date();
+  await db.insert(user).values({
+    id: BOT_USER_ID,
+    name: BOT_DISPLAY_NAME,
+    email: BOT_EMAIL,
+    emailVerified: true,
+    image: null,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
+async function addBotToMeclis(meclisId: string): Promise<void> {
+  const existing = await db
+    .select({ userId: meclisPlayers.userId })
+    .from(meclisPlayers)
+    .where(and(eq(meclisPlayers.meclisId, meclisId), eq(meclisPlayers.userId, BOT_USER_ID)))
+    .limit(1);
+  if (existing.length > 0) return;
+  await db.insert(meclisPlayers).values({
+    meclisId,
+    userId: BOT_USER_ID,
+    name: BOT_DISPLAY_NAME,
+    ready: true,
+    votes: "[]",
+    totalScore: 0,
+    currentScore: 0,
+    finishedAt: null,
+    joinedAt: Date.now(),
+  });
+}
+
+function botRoundScore(difficulty: Difficulty): number {
+  const base = BOT_BASE_SCORE[difficulty] ?? BOT_BASE_SCORE.easy;
+  const jitter = Math.floor((Math.random() - 0.5) * base * 0.7);
+  return Math.max(0, base + jitter);
+}
+
+async function tickBot(meclisId: string): Promise<void> {
+  const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.id, meclisId)).limit(1);
+  if (!s) return;
+  const [bot] = await db
+    .select()
+    .from(meclisPlayers)
+    .where(and(eq(meclisPlayers.meclisId, meclisId), eq(meclisPlayers.userId, BOT_USER_ID)))
+    .limit(1);
+  if (!bot) return;
+
+  const now = Date.now();
+
+  if (s.status === "voting" && bot.votesLockedAt == null) {
+    const startedAt = s.roundStartedAt ?? s.updatedAt;
+    if (now - startedAt < BOT_VOTING_DELAY_MS) return;
+    const target = s.targetGameCount ?? DEFAULT_POOL_SIZE;
+    const shuffled = [...MECLIS_GAMES].sort(() => Math.random() - 0.5).slice(0, target);
+    await db
+      .update(meclisPlayers)
+      .set({ votes: JSON.stringify(shuffled), scopeVote: "all", votesLockedAt: now })
+      .where(and(eq(meclisPlayers.meclisId, meclisId), eq(meclisPlayers.userId, BOT_USER_ID)));
+    return;
+  }
+
+  if (s.status === "playing" && bot.finishedAt == null && s.roundStartedAt != null) {
+    const elapsed = now - s.roundStartedAt;
+    const roundDuration = s.roundDurationMs ?? STARTING_TIME_MS[s.difficulty as Difficulty] ?? STARTING_TIME_MS.easy;
+    if (elapsed < roundDuration * BOT_PLAYING_FRACTION) return;
+
+    const score = botRoundScore(s.difficulty as Difficulty);
+    const pool: string[] = JSON.parse(s.gamePool || "[]");
+    const gameId = pool[s.currentGameIndex] ?? MECLIS_GAMES[0];
+
+    await db
+      .update(meclisPlayers)
+      .set({ currentScore: score, finishedAt: now })
+      .where(and(eq(meclisPlayers.meclisId, meclisId), eq(meclisPlayers.userId, BOT_USER_ID)));
+
+    await db.insert(meclisResults).values({
+      id: crypto.randomUUID(),
+      meclisId: s.id,
+      gameIndex: s.currentGameIndex,
+      gameId,
+      userId: BOT_USER_ID,
+      score,
+      correctCount: Math.floor(score / 12),
+      wrongCount: Math.floor(Math.random() * 3),
+      durationMs: Math.floor(roundDuration * BOT_PLAYING_FRACTION),
+      createdAt: now,
+    });
+  }
 }
 
 // ── Server fonksiyonları ─────────────────────────────────
@@ -345,6 +454,8 @@ export const createMeclis = createServerFn({ method: "POST" })
       finishedAt: null,
       joinedAt: now,
     });
+    await ensureBotUser();
+    await addBotToMeclis(meclisId);
     return { code, meclisId };
   });
 
