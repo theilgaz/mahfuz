@@ -10,6 +10,7 @@ import { searchQuran, type SearchResult } from "~/lib/search-service";
 import { useSettingsStore } from "~/stores/settings.store";
 import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
+import { getSurahName } from "~/lib/surah-names-i18n";
 import { MuIcons } from "./icons";
 
 interface SearchOverlayProps {
@@ -25,7 +26,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const translationSlugs = useSettingsStore((s) => s.translationSlugs);
   const translationSlug = translationSlugs[0];
 
@@ -119,7 +120,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                     {String(r.surahId).padStart(3, "0")}
                   </span>
                   <span className="mu-sover-name">
-                    {r.surahNameSimple}{" "}
+                    {getSurahName(r.surahId, locale) || r.surahNameSimple}{" "}
                     <span className="mu-muted">: {r.ayahNumber}</span>
                   </span>
                   <span className="mu-sover-ar" dir="rtl">
