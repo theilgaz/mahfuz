@@ -58,17 +58,10 @@
   font-display: swap;
 }
 
-/* ── Tema: Deniz (varsayılan) ──────────────────────── */
+/* ── Mushaf cercevesi + kagit (--color-* tokenlari minimal-ui.css'te) ── */
 
 :root,
 [data-theme="light"] {
-  --color-bg: #ffffff;
-  --color-surface: #f5f5f5;
-  --color-text-primary: #1C1A15;
-  --color-text-secondary: #8A8170;
-  --color-text-translation: #4A4335;
-  --color-border: #E8E8E8;
-
   /* Sayfa cercevesi */
   --frame-color: #b8860b;
   --frame-opacity: 0.12;
@@ -80,46 +73,27 @@
   --mushaf-shadow: rgba(0, 0, 0, 0.06);
   --mushaf-inner-shadow: rgba(0, 0, 0, 0.03);
 
-  /* Tipografi */
+  /* Arapca tipografi (mushaf okuyucu, --mu-ff-ar'dan ayri scale). */
   --font-arabic: "Scheherazade New", serif;
-  --font-ui: system-ui, -apple-system, sans-serif;
   --font-size-arabic: clamp(1.5rem, 3vw, 2.2rem);
   --line-height-arabic: 2.8;
   --font-size-translation: 0.95rem;
   --line-height-translation: 1.7;
 }
 
-/* ── Tema: Gece ──────────────────────────────────────── */
-
 [data-theme="dark"] {
-  --color-bg: #0f0e0c;
-  --color-surface: #1a1814;
-  --color-text-primary: #f0ece4;
-  --color-text-secondary: #9a9080;
-  --color-text-translation: #c4bdb0;
-  --color-border: #2a2820;
-
-  /* Sayfa cercevesi */
   --frame-color: #7aad4a;
   --frame-opacity: 0.3;
   --frame-corner-opacity: 0.4;
 
-  /* Mushaf kagit */
   --mushaf-bg: #1a1814;
   --mushaf-border: rgba(122, 173, 74, 0.15);
   --mushaf-shadow: rgba(0, 0, 0, 0.3);
   --mushaf-inner-shadow: rgba(0, 0, 0, 0.15);
 }
 
-/* Sistem karanlık modu -> tema secilmediyse gece temasi */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --color-bg: #0f0e0c;
-    --color-surface: #1a1814;
-    --color-text-primary: #f0ece4;
-    --color-text-secondary: #9a9080;
-    --color-text-translation: #c4bdb0;
-    --color-border: #2a2820;
     --mushaf-bg: #1a1814;
     --mushaf-border: rgba(122, 173, 74, 0.15);
     --mushaf-shadow: rgba(0, 0, 0, 0.3);

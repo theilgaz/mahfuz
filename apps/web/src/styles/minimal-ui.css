@@ -50,6 +50,48 @@
   --mu-ff-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
   --mu-maxw: 1240px;
+
+  /* Type scale (Latin/UI). Arapca kendi clamp() skalasinda. */
+  --mu-fs-display: clamp(2rem, 4vw, 3rem);
+  --mu-fs-h1: 1.625rem;
+  --mu-fs-h2: 1.25rem;
+  --mu-fs-body: 1rem;
+  --mu-fs-small: 0.875rem;
+  --mu-fs-caption: 0.75rem;
+
+  --mu-lh-tight: 1.2;
+  --mu-lh-normal: 1.5;
+  --mu-lh-loose: 1.7;
+  --mu-lh-arabic: 2.8;
+
+  /* Spacing scale (4px grid). Tailwind p-/gap- utilities ile ayni olcek. */
+  --mu-s-1: 4px;
+  --mu-s-2: 8px;
+  --mu-s-3: 12px;
+  --mu-s-4: 16px;
+  --mu-s-6: 24px;
+  --mu-s-8: 32px;
+  --mu-s-12: 48px;
+
+  /* Radius. --mu-radius (14px) zaten yukarida. */
+  --mu-radius-sm: 8px;
+  --mu-radius-lg: 20px;
+  --mu-radius-full: 999px;
+
+  /* Shadow lg, sheet/modal icin. */
+  --mu-shadow-lg: 0 4px 0 rgba(40,30,10,0.05), 0 30px 60px -30px rgba(40,30,10,0.28);
+
+  /* Motion. Tek easing curve. */
+  --mu-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --mu-dur-1: 150ms;
+  --mu-dur-2: 200ms;
+  --mu-dur-3: 300ms;
+  --mu-dur-4: 500ms;
+
+  /* Status. Yalniz yikici eylem (sil, vazgec) icin. */
+  --mu-danger: oklch(0.55 0.18 25);
+  --mu-danger-soft: oklch(0.92 0.06 25);
+  --mu-danger-ink: oklch(0.35 0.12 25);
 }
 
 [data-theme="sepia"] {
@@ -78,6 +120,10 @@
   --mu-accent-soft: oklch(0.28 0.05 70);
   --mu-accent-ink: oklch(0.88 0.10 70);
   --mu-shadow-md: 0 2px 0 rgba(0,0,0,0.2), 0 20px 40px -20px rgba(0,0,0,0.6);
+  --mu-shadow-lg: 0 4px 0 rgba(0,0,0,0.25), 0 30px 60px -30px rgba(0,0,0,0.7);
+  --mu-danger: oklch(0.68 0.16 25);
+  --mu-danger-soft: oklch(0.28 0.08 25);
+  --mu-danger-ink: oklch(0.88 0.12 25);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -95,6 +141,10 @@
     --mu-accent-soft: oklch(0.28 0.05 70);
     --mu-accent-ink: oklch(0.88 0.10 70);
     --mu-shadow-md: 0 2px 0 rgba(0,0,0,0.2), 0 20px 40px -20px rgba(0,0,0,0.6);
+    --mu-shadow-lg: 0 4px 0 rgba(0,0,0,0.25), 0 30px 60px -30px rgba(0,0,0,0.7);
+    --mu-danger: oklch(0.68 0.16 25);
+    --mu-danger-soft: oklch(0.28 0.08 25);
+    --mu-danger-ink: oklch(0.88 0.12 25);
   }
 }
 
@@ -1638,20 +1688,33 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 16px 8px;
+  gap: 10px;
+  padding: 20px 12px;
   border: 1px solid var(--mu-line);
-  border-radius: 14px;
-  background: color-mix(in oklab, var(--mu-accent), transparent 94%);
+  border-radius: var(--mu-radius-lg);
+  background: var(--mu-bg-card);
+  box-shadow: var(--mu-shadow-sm);
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s, background 0.15s, transform 0.15s;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--mu-dur-1) var(--mu-ease),
+              box-shadow var(--mu-dur-2) var(--mu-ease),
+              transform var(--mu-dur-2) var(--mu-ease);
+}
+
+.mu-quick-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(140px 90px at 100% 0%, color-mix(in oklab, var(--mu-accent), transparent 85%), transparent 70%);
+  pointer-events: none;
 }
 
 .mu-quick-tile:hover {
   border-color: var(--mu-accent);
-  background: color-mix(in oklab, var(--mu-accent), transparent 88%);
+  box-shadow: var(--mu-shadow-md);
   transform: translateY(-1px);
 }
 
@@ -1665,7 +1728,7 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: var(--mu-radius-sm);
   background: var(--mu-bg);
   border: 1px solid var(--mu-line);
   color: var(--mu-accent);
@@ -1795,13 +1858,15 @@
   gap: 4px;
   padding: 14px 14px;
   border: 1px solid var(--mu-line);
-  border-radius: 12px;
-  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  border-radius: var(--mu-radius);
+  transition: border-color var(--mu-dur-1) var(--mu-ease),
+              background var(--mu-dur-1) var(--mu-ease),
+              transform var(--mu-dur-1) var(--mu-ease);
 }
 
 .mu-mood-box:hover {
   border-color: var(--mu-accent);
-  background: color-mix(in oklab, var(--mu-accent), transparent 95%);
+  background: var(--mu-bg-soft);
   transform: translateY(-1px);
 }
 
@@ -1870,15 +1935,21 @@
   grid-template-columns: auto 1fr auto;
   gap: 10px;
   align-items: baseline;
-  padding: 8px 0;
+  margin: 0 -20px;
+  padding: 10px 20px;
   border-bottom: 1px solid color-mix(in oklab, var(--mu-line), transparent 50%);
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s;
+  transition: background var(--mu-dur-1) var(--mu-ease);
 }
 
 .mu-coll-item:last-child { border-bottom: none; }
-.mu-coll-item:hover { border-color: var(--mu-accent); }
+.mu-coll-item:hover { background: var(--mu-bg-soft); }
+.mu-coll-item:focus-visible {
+  outline: 2px solid var(--mu-accent);
+  outline-offset: -2px;
+  border-radius: var(--mu-radius-sm);
+}
 
 .mu-ci-num {
   font-family: var(--mu-ff-mono);
@@ -1967,10 +2038,10 @@
   width: min(640px, calc(100vw - 40px));
   background: var(--mu-bg-card);
   border: 1px solid var(--mu-line-2);
-  border-radius: 18px;
+  border-radius: var(--mu-radius-lg);
   box-shadow: var(--mu-shadow-md);
   overflow: hidden;
-  animation: mu-sover-rise 0.2s cubic-bezier(.2,.8,.2,1);
+  animation: mu-sover-rise var(--mu-dur-2) var(--mu-ease);
 }
 
 @keyframes mu-sover-rise {

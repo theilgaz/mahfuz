@@ -3,11 +3,12 @@
  * Grouped by surah (default) or sorted by recent.
  */
 
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useSurahs, surahsQueryOptions } from "~/hooks/useQuranQuery";
 import { BookmarkRow } from "~/components/BookmarkRow";
+import { Button, PageShell } from "~/components/ui";
 
 import { useTranslation } from "~/hooks/useTranslation";
 import { getSurahName } from "~/lib/surah-names-i18n";
@@ -53,19 +54,19 @@ function BookmarksPage() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
-      {/* Sort kontrol */}
+    <PageShell maxWidth="narrow">
       {bookmarks.length > 0 && (
         <div className="flex items-center justify-between mb-4">
           <span className="text-xs text-[var(--color-text-secondary)]">
             {bookmarks.length} {t.nav.bookmarks.toLowerCase()}
           </span>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setSort(sort === "surah" ? "recent" : "surah")}
-            className="text-xs px-2.5 py-1 rounded-md bg-[var(--color-surface)] hover:bg-[var(--color-surface)]/80 text-[var(--color-text-secondary)] transition-colors"
           >
             {sort === "surah" ? t.bookmarks.sortByRecent : t.bookmarks.sortBySurah}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -135,6 +136,6 @@ function BookmarksPage() {
           })}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
