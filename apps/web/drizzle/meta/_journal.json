@@ -120,6 +120,13 @@
       "when": 1778569014197,
       "tag": "0016_glossy_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1778759226979,
+      "tag": "0017_curly_thunderbolt_ross",
+      "breakpoints": true
     }
   ]
 }

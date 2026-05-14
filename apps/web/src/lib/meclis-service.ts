@@ -61,6 +61,14 @@ const PUBLIC_LOBBY_STALE_MS = 30 * 60 * 1000;
 const VALID_GAME_COUNTS = new Set([3, 5, 7]);
 const VALID_DURATIONS_MS = new Set([30_000, 45_000, 60_000, 90_000, 120_000]);
 
+// Takım modu sabitleri
+const TEAMS = ["green", "gold"] as const;
+export type MeclisTeam = (typeof TEAMS)[number];
+/** Takımın tüm üyeleri pozitif skor yaptıysa her üyeye bu kadar bonus eklenir. */
+const COMBO_BONUS = 30;
+/** Son elde takımın en yüksek skoru karşı takımı yendiyse her üyeye bu kadar bonus eklenir. */
+const DUEL_BONUS = 75;
+
 /** 4-haneli numerik şifre için scrypt hash + salt. */
 function hashPassword(plain: string): { hash: string; salt: string } {
   const salt = randomBytes(16).toString("hex");
@@ -176,14 +184,59 @@ async function advancePlayingIfDone(meclisId: string) {
   const timedOut = Date.now() - s.roundStartedAt > roundDuration;
   if (!allDone && !timedOut) return;
 
-  // currentScore'u totalScore'a topla, finishedAt set olmayanlar süreyi kullanmış sayılır
+  // Bu el için her oyuncunun nihai round skoru (combo/duel bonusundan önce)
+  const roundScores = new Map<string, number>();
+  for (const p of players) roundScores.set(p.userId, p.currentScore);
+
+  // Takım bonusları: her oyuncu için toplam ek puan (totalScore'a eklenecek)
+  const bonusByUser = new Map<string, number>();
+  if (s.teamMode) {
+    const pool: string[] = JSON.parse(s.gamePool || "[]");
+    const isLast = s.currentGameIndex >= pool.length - 1;
+    for (const team of TEAMS) {
+      const members = players.filter((p) => p.team === team);
+      if (members.length === 0) continue;
+      // Combo: tüm üyeler bu elde pozitif skor yaptıysa
+      const everyPositive = members.every((m) => (roundScores.get(m.userId) ?? 0) > 0);
+      if (everyPositive) {
+        for (const m of members) {
+          bonusByUser.set(m.userId, (bonusByUser.get(m.userId) ?? 0) + COMBO_BONUS);
+        }
+      }
+      // Düello finali: son eldeyse her takımın en yüksek round skorunu karşılaştır
+      if (isLast) {
+        const heroScore = members.reduce(
+          (max, m) => Math.max(max, roundScores.get(m.userId) ?? 0),
+          0,
+        );
+        // Tek bir kayıt olarak sakla, sonra karşılaştır
+        bonusByUser.set(`__hero:${team}`, heroScore);
+      }
+    }
+
+    // Düello kazananı: hangi takımın hero skoru daha yüksekse, o takım kazanır
+    const greenHero = bonusByUser.get("__hero:green");
+    const goldHero = bonusByUser.get("__hero:gold");
+    if (greenHero != null && goldHero != null && greenHero !== goldHero) {
+      const winningTeam: MeclisTeam = greenHero > goldHero ? "green" : "gold";
+      for (const m of players.filter((p) => p.team === winningTeam)) {
+        bonusByUser.set(m.userId, (bonusByUser.get(m.userId) ?? 0) + DUEL_BONUS);
+      }
+    }
+    // Geçici hero anahtarlarını temizle
+    bonusByUser.delete("__hero:green");
+    bonusByUser.delete("__hero:gold");
+  }
+
+  // currentScore'u totalScore'a topla + takım bonusu, finishedAt set olmayanlar süreyi kullanmış sayılır
   const now = Date.now();
   for (const p of players) {
     const finalCurrent = p.currentScore;
+    const bonus = bonusByUser.get(p.userId) ?? 0;
     await db
       .update(meclisPlayers)
       .set({
-        totalScore: p.totalScore + finalCurrent,
+        totalScore: p.totalScore + finalCurrent + bonus,
         finishedAt: p.finishedAt ?? now,
       })
       .where(and(eq(meclisPlayers.meclisId, meclisId), eq(meclisPlayers.userId, p.userId)));
@@ -456,6 +509,69 @@ export const listPublicMeclises = createServerFn({ method: "GET" })
     }));
   });
 
+/**
+ * Takım modunu aç/kapat. Açılırken üyeler join sırasına göre Yeşil/Altın
+ * arasında otomatik dengelenir. Kapanırken takım atamaları temizlenir.
+ * Sadece mihmandar ve sadece lobide.
+ */
+export const setMeclisTeamMode = createServerFn({ method: "POST" })
+  .inputValidator((input: { code: string; enabled: boolean }) => input)
+  .handler(async ({ data }) => {
+    const me = await requireUser();
+    const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.code, data.code)).limit(1);
+    if (!s) throw new Error("Meclis bulunamadı");
+    if (s.hostUserId !== me.id) throw new Error("Sadece mihmandar değiştirebilir");
+    if (s.status !== "lobby") throw new Error("Sadece lobide değiştirilebilir");
+
+    const now = Date.now();
+    await db
+      .update(meclisSessions)
+      .set({ teamMode: data.enabled, updatedAt: now })
+      .where(eq(meclisSessions.id, s.id));
+
+    if (data.enabled) {
+      const players = await db
+        .select()
+        .from(meclisPlayers)
+        .where(eq(meclisPlayers.meclisId, s.id))
+        .orderBy(meclisPlayers.joinedAt);
+      // Auto-balance — join sırasına göre alternatif olarak Yeşil/Altın
+      for (let i = 0; i < players.length; i++) {
+        const team: MeclisTeam = i % 2 === 0 ? "green" : "gold";
+        await db
+          .update(meclisPlayers)
+          .set({ team })
+          .where(and(eq(meclisPlayers.meclisId, s.id), eq(meclisPlayers.userId, players[i].userId)));
+      }
+    } else {
+      await db
+        .update(meclisPlayers)
+        .set({ team: null })
+        .where(eq(meclisPlayers.meclisId, s.id));
+    }
+    return { ok: true };
+  });
+
+/** Mihmandar bir oyuncunun takımını değiştirir. Sadece lobide. */
+export const setMeclisPlayerTeam = createServerFn({ method: "POST" })
+  .inputValidator((input: { code: string; userId: string; team: MeclisTeam }) => input)
+  .handler(async ({ data }) => {
+    const me = await requireUser();
+    const [s] = await db.select().from(meclisSessions).where(eq(meclisSessions.code, data.code)).limit(1);
+    if (!s) throw new Error("Meclis bulunamadı");
+    if (s.hostUserId !== me.id) throw new Error("Sadece mihmandar değiştirebilir");
+    if (s.status !== "lobby") throw new Error("Sadece lobide değiştirilebilir");
+    if (!s.teamMode) throw new Error("Takım modu kapalı");
+    if (!TEAMS.includes(data.team)) throw new Error("Geçersiz takım");
+
+    await db
+      .update(meclisPlayers)
+      .set({ team: data.team })
+      .where(and(eq(meclisPlayers.meclisId, s.id), eq(meclisPlayers.userId, data.userId)));
+    await db.update(meclisSessions).set({ updatedAt: Date.now() }).where(eq(meclisSessions.id, s.id));
+    return { ok: true };
+  });
+
 export const setMeclisVotesVisibility = createServerFn({ method: "POST" })
   .inputValidator((input: { code: string; visible: boolean }) => input)
   .handler(async ({ data }) => {
@@ -484,6 +600,11 @@ export const startMeclisVoting = createServerFn({ method: "POST" })
     if (players.length < 2) throw new Error("En az 2 katılımcı gerekli");
     const allReady = players.every((p) => p.ready);
     if (!allReady) throw new Error("Tüm katılımcılar 'Hazır' demeli");
+    if (s.teamMode) {
+      const green = players.filter((p) => p.team === "green").length;
+      const gold = players.filter((p) => p.team === "gold").length;
+      if (green === 0 || gold === 0) throw new Error("Her takımda en az 1 oyuncu olmalı");
+    }
 
     const now = Date.now();
     await db
@@ -625,6 +746,7 @@ export interface MeclisStatePayload {
     targetGameCount: number;
     visibility: "private" | "public";
     hasPassword: boolean;
+    teamMode: boolean;
   };
   players: {
     userId: string;
@@ -638,6 +760,7 @@ export interface MeclisStatePayload {
     currentScore: number;
     finishedAt: number | null;
     isHost: boolean;
+    team: MeclisTeam | null;
   }[];
   meId: string | null;
   isHost: boolean;
@@ -668,6 +791,7 @@ export const getMeclisState = createServerFn({ method: "GET" })
         totalScore: meclisPlayers.totalScore,
         currentScore: meclisPlayers.currentScore,
         finishedAt: meclisPlayers.finishedAt,
+        team: meclisPlayers.team,
       })
       .from(meclisPlayers)
       .leftJoin(user, eq(meclisPlayers.userId, user.id))
@@ -699,6 +823,7 @@ export const getMeclisState = createServerFn({ method: "GET" })
         targetGameCount: s.targetGameCount ?? DEFAULT_POOL_SIZE,
         visibility: (s.visibility === "public" ? "public" : "private"),
         hasPassword: !!s.passwordHash,
+        teamMode: !!s.teamMode,
         interimMs: INTERIM_MS,
         hostUserId: s.hostUserId,
         votesVisible: s.votesVisible,
@@ -721,6 +846,7 @@ export const getMeclisState = createServerFn({ method: "GET" })
         currentScore: p.currentScore,
         finishedAt: p.finishedAt,
         isHost: p.userId === s.hostUserId,
+        team: (p.team === "green" || p.team === "gold" ? p.team : null) as MeclisTeam | null,
       })),
       meId,
       isHost: meId != null && meId === s.hostUserId,

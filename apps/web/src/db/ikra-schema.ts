@@ -318,6 +318,8 @@ export const meclisSessions = sqliteTable("meclis_sessions", {
   passwordSalt: text("password_salt"),
   /** Aktif elin sunucu zamanı; client'lar bundan timer kurar */
   roundStartedAt: integer("round_started_at"),
+  /** Takım modu aktif mi (Yeşil vs Altın). Combo ve düello finali bu modda devrede. */
+  teamMode: integer("team_mode", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),
 }, (t) => [
@@ -350,6 +352,8 @@ export const meclisPlayers = sqliteTable("meclis_players", {
   currentScore: integer("current_score").notNull().default(0),
   /** Aktif eli ne zaman bitirdi (Bitir butonu ya da timeout). null = devam ediyor */
   finishedAt: integer("finished_at"),
+  /** Takım modu aktifken oyuncunun takımı: "green" | "gold" | null (atanmamış) */
+  team: text("team"),
   joinedAt: integer("joined_at").notNull(),
 }, (t) => [
   primaryKey({ columns: [t.meclisId, t.userId] }),

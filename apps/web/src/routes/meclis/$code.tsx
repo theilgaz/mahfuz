@@ -11,6 +11,8 @@ import {
   toggleMeclisReady,
   setMeclisDifficulty,
   setMeclisVotesVisibility,
+  setMeclisTeamMode,
+  setMeclisPlayerTeam,
   startMeclisVoting,
   submitMeclisVotes,
   lockMeclisVotes,
@@ -18,7 +20,23 @@ import {
   cancelMeclis,
   restartMeclis,
   type MeclisStatePayload,
+  type MeclisTeam,
 } from "~/lib/meclis-service";
+
+const TEAM_META: Record<MeclisTeam, { label: string; accent: string; soft: string; ring: string }> = {
+  green: {
+    label: "Yeşil",
+    accent: "text-emerald-600",
+    soft: "bg-emerald-500/10 border-emerald-500/40",
+    ring: "ring-emerald-500/60",
+  },
+  gold: {
+    label: "Altın",
+    accent: "text-amber-600",
+    soft: "bg-amber-500/10 border-amber-500/40",
+    ring: "ring-amber-500/60",
+  },
+};
 
 type MeclisPlayer = MeclisStatePayload["players"][number];
 
@@ -141,7 +159,10 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
   const readyCount = players.filter((p) => p.ready).length;
   const totalCount = players.length;
   const needsMore = totalCount < 2;
-  const allReady = !needsMore && readyCount === totalCount;
+  const greenCount = players.filter((p) => p.team === "green").length;
+  const goldCount = players.filter((p) => p.team === "gold").length;
+  const teamsBalanced = !session.teamMode || (greenCount > 0 && goldCount > 0);
+  const allReady = !needsMore && readyCount === totalCount && teamsBalanced;
   const navigate = useNavigate();
 
   const readyMutation = useMutation({
@@ -167,6 +188,15 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
   const setupMutation = useMutation({
     mutationFn: (input: { gameCount?: number; roundDurationMs?: number; visibility?: "private" | "public"; password?: string | null }) =>
       updateMeclisSetup({ data: { code: session.code, ...input } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
+  });
+  const teamModeMutation = useMutation({
+    mutationFn: (enabled: boolean) => setMeclisTeamMode({ data: { code: session.code, enabled } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
+  });
+  const teamAssignMutation = useMutation({
+    mutationFn: (input: { userId: string; team: MeclisTeam }) =>
+      setMeclisPlayerTeam({ data: { code: session.code, ...input } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
   });
   const [pwInput, setPwInput] = useState("");
@@ -332,24 +362,100 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
         </div>
       </div>
 
-      <div className="mb-5">
-        <p className="text-xs text-[var(--color-text-secondary)] mb-2">
-          Katılımcılar ({players.length})
-        </p>
-        <div className="space-y-2">
-          {players.map((p) => (
-            <div
-              key={p.userId}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]"
+      {/* Takım modu (host only) */}
+      <div className="mb-4">
+        <label className="text-xs text-[var(--color-text-secondary)] mb-2 block">
+          Takım modu {!isHost && <span className="opacity-60">(mihmandar belirler)</span>}
+        </label>
+        <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)]">
+          {([
+            { v: false, label: "Solo" },
+            { v: true, label: "Yeşil vs Altın" },
+          ] as const).map(({ v, label }) => (
+            <button
+              key={String(v)}
+              disabled={!isHost}
+              onClick={() => teamModeMutation.mutate(v)}
+              className={`flex-1 py-2.5 text-xs font-medium transition-all ${session.teamMode === v ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]" : "text-[var(--color-text-secondary)]"} ${!isHost ? "cursor-default" : ""}`}
             >
-              <span className={`w-2 h-2 rounded-full ${p.ready ? "bg-emerald-500" : "bg-[var(--color-text-secondary)]/40"}`} />
-              <span className="flex-1 text-sm font-medium text-[var(--color-text-primary)]">{p.name}</span>
-              {p.isHost && <span className="text-[10px] uppercase tracking-wider text-[var(--mu-accent)]">Mihmandar</span>}
-              {p.userId === meId && <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-secondary)]">Sen</span>}
-            </div>
+              {label}
+            </button>
           ))}
         </div>
+        {session.teamMode && (
+          <p className="text-[11px] text-[var(--color-text-secondary)] mt-2 leading-snug">
+            Her elde takımın tümü puan yaparsa <strong className="text-[var(--mu-accent)]">+30 combo</strong>. Son el düello: kazanan takıma <strong className="text-[var(--mu-accent)]">+75</strong>.
+          </p>
+        )}
       </div>
+
+      {session.teamMode ? (
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-[var(--color-text-secondary)]">Takımlar ({players.length})</p>
+            {!teamsBalanced && (
+              <span className="text-[10px] font-bold text-red-500">Her takımda en az 1 oyuncu olmalı</span>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {(["green", "gold"] as const).map((team) => {
+              const meta = TEAM_META[team];
+              const members = players.filter((p) => p.team === team);
+              return (
+                <div key={team} className={`rounded-xl border ${meta.soft} p-2.5 min-h-[120px]`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-[11px] font-bold uppercase tracking-wider ${meta.accent}`}>{meta.label}</span>
+                    <span className="text-[10px] tabular-nums text-[var(--color-text-secondary)]">{members.length}</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {members.map((p) => {
+                      const other: MeclisTeam = team === "green" ? "gold" : "green";
+                      return (
+                        <div key={p.userId} className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-[var(--color-surface)] text-[11px]">
+                          <span className={`w-1.5 h-1.5 rounded-full ${p.ready ? "bg-emerald-500" : "bg-[var(--color-text-secondary)]/40"}`} />
+                          <span className="flex-1 truncate font-medium">{p.name}</span>
+                          {p.isHost && <span className="text-[9px] uppercase text-[var(--mu-accent)]">M</span>}
+                          {isHost && (
+                            <button
+                              onClick={() => teamAssignMutation.mutate({ userId: p.userId, team: other })}
+                              className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--color-border)]/60 hover:bg-[var(--color-border)] transition-colors"
+                              title={`${TEAM_META[other].label}'a taşı`}
+                            >
+                              →
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {members.length === 0 && (
+                      <p className="text-[10px] text-[var(--color-text-secondary)] italic text-center py-2">Boş</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="mb-5">
+          <p className="text-xs text-[var(--color-text-secondary)] mb-2">
+            Katılımcılar ({players.length})
+          </p>
+          <div className="space-y-2">
+            {players.map((p) => (
+              <div
+                key={p.userId}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]"
+              >
+                <span className={`w-2 h-2 rounded-full ${p.ready ? "bg-emerald-500" : "bg-[var(--color-text-secondary)]/40"}`} />
+                <span className="flex-1 text-sm font-medium text-[var(--color-text-primary)]">{p.name}</span>
+                {p.isHost && <span className="text-[10px] uppercase tracking-wider text-[var(--mu-accent)]">Mihmandar</span>}
+                {p.userId === meId && <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-secondary)]">Sen</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         {me && (
@@ -378,6 +484,8 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
           >
             {needsMore
               ? "En az 2 katılımcı bekleniyor"
+              : !teamsBalanced
+              ? "Her takımda en az 1 oyuncu olmalı"
               : allReady
               ? "Meclisi Başlat"
               : `Bekleniyor · ${readyCount}/${totalCount} hazır`}
@@ -580,9 +688,15 @@ function VotingView({ state }: { state: MeclisStatePayload }) {
 function PlayingView({ state }: { state: MeclisStatePayload }) {
   const { session } = state;
   const gameId = session.gamePool[session.currentGameIndex] ?? "fill-blank";
+  const isDuel = session.teamMode && session.currentGameIndex === session.gamePool.length - 1;
   return (
     <div className="max-w-md mx-auto px-4 py-4">
       <div className="text-center mb-3">
+        {isDuel && (
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--mu-accent)] mb-1">
+            Düello finali · +75
+          </p>
+        )}
         <p className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wider">
           {session.currentGameIndex + 1}. El · {GAME_LABELS[gameId]?.title ?? gameId}
         </p>
@@ -650,6 +764,7 @@ function InviteShareRow({ code }: { code: string }) {
 }
 
 function LiveScoreStrip({ state }: { state: MeclisStatePayload }) {
+  if (state.session.teamMode) return <LiveTeamStrip state={state} />;
   const sorted = [...state.players].sort((a, b) => (b.totalScore + b.currentScore) - (a.totalScore + a.currentScore));
   return (
     <div className="mt-5 px-3 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -668,6 +783,49 @@ function LiveScoreStrip({ state }: { state: MeclisStatePayload }) {
   );
 }
 
+function teamTotal(state: MeclisStatePayload, team: MeclisTeam, includeCurrent: boolean) {
+  return state.players
+    .filter((p) => p.team === team)
+    .reduce((sum, p) => sum + p.totalScore + (includeCurrent ? p.currentScore : 0), 0);
+}
+
+function LiveTeamStrip({ state }: { state: MeclisStatePayload }) {
+  const greenSum = teamTotal(state, "green", true);
+  const goldSum = teamTotal(state, "gold", true);
+  const leader: MeclisTeam | null = greenSum === goldSum ? null : greenSum > goldSum ? "green" : "gold";
+  return (
+    <div className="mt-5 px-3 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-secondary)] mb-2">Canlı tablo</p>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        {(["green", "gold"] as const).map((team) => {
+          const meta = TEAM_META[team];
+          const sum = team === "green" ? greenSum : goldSum;
+          const isLead = leader === team;
+          return (
+            <div key={team} className={`rounded-lg px-3 py-2 border ${meta.soft} ${isLead ? `ring-1 ${meta.ring}` : ""}`}>
+              <div className={`text-[10px] uppercase tracking-wider font-bold ${meta.accent}`}>{meta.label}</div>
+              <div className={`text-xl font-bold tabular-nums ${meta.accent}`}>{sum}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="space-y-1">
+        {state.players.map((p) => {
+          const meta = p.team ? TEAM_META[p.team] : null;
+          return (
+            <div key={p.userId} className="flex items-center gap-2 text-xs">
+              <span className={`w-1.5 h-1.5 rounded-full ${p.team === "green" ? "bg-emerald-500" : p.team === "gold" ? "bg-amber-500" : "bg-[var(--color-border)]"}`} />
+              <span className="flex-1 truncate">{p.name}</span>
+              {p.finishedAt && <span className="text-[10px] text-emerald-500">bitirdi</span>}
+              <span className={`font-bold tabular-nums ${meta?.accent ?? ""}`}>{p.totalScore + p.currentScore}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Interim ──────────────────────────────────────────────
 
 function InterimView({ state }: { state: MeclisStatePayload }) {
@@ -676,23 +834,50 @@ function InterimView({ state }: { state: MeclisStatePayload }) {
   const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
   const nextGameId = state.session.gamePool[state.session.currentGameIndex + 1];
   const nextLabel = nextGameId ? GAME_LABELS[nextGameId]?.title ?? nextGameId : null;
+  const isDuelNext = state.session.teamMode && state.session.currentGameIndex + 1 === state.session.gamePool.length - 1;
 
   return (
     <div className="max-w-md mx-auto px-4 py-8">
       <p className="mu-eyebrow text-center"><span className="mu-eb-line" />{state.session.currentGameIndex + 1}. El bitti</p>
       <h1 className="mu-display text-center" style={{ marginBottom: 18 }}>
-        {nextLabel ? `Sıra: ${nextLabel}` : "Sıradaki el…"}
+        {isDuelNext ? "Düello finali!" : nextLabel ? `Sıra: ${nextLabel}` : "Sıradaki el…"}
       </h1>
 
-      <div className="space-y-2 mb-6">
-        {sorted.map((p, i) => (
-          <div key={p.userId} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-            <span className="text-2xl font-bold tabular-nums w-8 text-[var(--color-text-secondary)]">#{i + 1}</span>
-            <span className="flex-1 text-sm font-medium">{p.name}</span>
-            <span className="text-base font-bold tabular-nums text-[var(--mu-accent)]">{p.totalScore}</span>
+      {state.session.teamMode ? (
+        <>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {(["green", "gold"] as const).map((team) => {
+              const meta = TEAM_META[team];
+              const sum = teamTotal(state, team, false);
+              return (
+                <div key={team} className={`rounded-xl border ${meta.soft} px-3 py-3 text-center`}>
+                  <div className={`text-[11px] uppercase tracking-wider font-bold ${meta.accent}`}>{meta.label}</div>
+                  <div className={`text-3xl font-bold tabular-nums ${meta.accent} mt-1`}>{sum}</div>
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
+          <div className="space-y-1.5 mb-6">
+            {sorted.map((p) => (
+              <div key={p.userId} className="flex items-center gap-3 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+                <span className={`w-1.5 h-1.5 rounded-full ${p.team === "green" ? "bg-emerald-500" : p.team === "gold" ? "bg-amber-500" : "bg-[var(--color-border)]"}`} />
+                <span className="flex-1 text-xs font-medium truncate">{p.name}</span>
+                <span className="text-sm font-bold tabular-nums text-[var(--mu-accent)]">{p.totalScore}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="space-y-2 mb-6">
+          {sorted.map((p, i) => (
+            <div key={p.userId} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+              <span className="text-2xl font-bold tabular-nums w-8 text-[var(--color-text-secondary)]">#{i + 1}</span>
+              <span className="flex-1 text-sm font-medium">{p.name}</span>
+              <span className="text-base font-bold tabular-nums text-[var(--mu-accent)]">{p.totalScore}</span>
+            </div>
+          ))}
+        </div>
+      )}
       <p className="text-center text-xs text-[var(--color-text-secondary)] tabular-nums">
         {remaining}sn içinde devam…
       </p>
@@ -713,21 +898,56 @@ function FinalView({ state }: { state: MeclisStatePayload }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["meclis-state", session.code] }),
   });
 
+  // Takım modunda kazanan takımı belirle
+  const greenSum = teamTotal(state, "green", false);
+  const goldSum = teamTotal(state, "gold", false);
+  const winningTeam: MeclisTeam | null = !session.teamMode || greenSum === goldSum
+    ? null
+    : greenSum > goldSum ? "green" : "gold";
+
   return (
     <div className="max-w-md mx-auto px-4 py-8">
       <p className="mu-eyebrow text-center"><span className="mu-eb-line" />Meclis tamam</p>
       <h1 className="mu-display text-center" style={{ marginBottom: 24 }}>
-        Kazanan: {winner?.name}
+        {session.teamMode
+          ? winningTeam
+            ? `Kazanan: ${TEAM_META[winningTeam].label}`
+            : "Berabere!"
+          : `Kazanan: ${winner?.name}`}
       </h1>
+
+      {session.teamMode && (
+        <div className="grid grid-cols-2 gap-2 mb-5">
+          {(["green", "gold"] as const).map((team) => {
+            const meta = TEAM_META[team];
+            const sum = team === "green" ? greenSum : goldSum;
+            const isWin = winningTeam === team;
+            return (
+              <div
+                key={team}
+                className={`rounded-xl border ${meta.soft} px-3 py-4 text-center ${isWin ? `ring-2 ${meta.ring}` : ""}`}
+              >
+                <div className={`text-xs uppercase tracking-wider font-bold ${meta.accent}`}>{meta.label}</div>
+                <div className={`text-4xl font-bold tabular-nums ${meta.accent} mt-1`}>{sum}</div>
+                {isWin && <div className={`text-[10px] mt-1 ${meta.accent}`}>Kazanan takım</div>}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="space-y-2 mb-6">
         {sorted.map((p, i) => {
+          const meta = p.team ? TEAM_META[p.team] : null;
           return (
             <div
               key={p.userId}
               className={`flex items-center gap-3 px-4 py-4 rounded-xl border ${i === 0 ? "border-[var(--mu-accent)] bg-[var(--mu-accent-soft)]" : "border-[var(--color-border)] bg-[var(--color-surface)]"}`}
             >
               <span className="text-2xl font-bold tabular-nums w-10 text-center text-[var(--color-text-secondary)]">{i + 1}.</span>
+              {meta && (
+                <span className={`w-2 h-2 rounded-full ${p.team === "green" ? "bg-emerald-500" : "bg-amber-500"}`} title={meta.label} />
+              )}
               <span className="flex-1 text-base font-medium">{p.name}</span>
               <span className="text-xl font-bold tabular-nums text-[var(--mu-accent)]">{p.totalScore}</span>
             </div>
