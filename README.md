@@ -47,35 +47,37 @@ Whether you are reading for the first time or working on your hifz, Mahfuz gives
 ### Learn
 
 - **Alifba**: learn the 28 Arabic letters with forms, pronunciation, and finger tracing
-- **Qaida**: 14-stage structured reading curriculum from letters to tajweed
-- **Tajweed rules**: 17 interactive rules with examples (Madd, Idgham, Ikhfa, Izhar, Qalqala, and more)
+- **Qaida**: 10-stage structured reading curriculum from letters through Al-Fatiha to tajweed
+- **Tajweed rules**: 16 interactive rules with examples (Madd, Idgham, Ikhfa, Izhar, Iqlab, Qalqala, and more)
 - **Verse analysis**: side-by-side translations, morphology, themes, similar verses, and contextual explanations
 
 ### Play
 
-Seven Quran games to test your knowledge:
+Eight Quran games to test your knowledge:
 
 - **Fill in the blank**: complete the missing word in a verse
 - **Verse chain**: connect verses in the correct order
 - **Surah guess**: identify the surah from a verse
 - **Word meaning**: match Arabic words to their meanings
 - **Hexagon**: form words from scattered letters
-- **Word prediction**: guess the next word
+- **Word prediction**: guess the next word (daily and free modes)
 - **Verse 2048**: merge matching verse tiles
+- **Word match**: pair Arabic words with translations
 
-Plus seven Alifba mini-games for letter recognition and memory. Global leaderboards and achievements.
+Plus seven Alifba mini-games for letter recognition, memory, and speed. Global leaderboards and achievements.
 
 ### Together
 
+- **Meclis (party mode)**: real-time multiplayer rooms — vote on the next game, play three rounds together with live scoreboards, public and password-protected lobbies
 - **Khatm groups**: create or join a group to complete the Quran together, track each member's progress
 - **Personal notes** on verses
 - **Hifz tracker**: mark memorized verses and see your progress per surah
 
 ### Everything else
 
-- **3 themes**: Light, Sepia (warm), Dark, with 4 color palettes and 7 accent colors
-- **19 languages** for translations, UI in Turkish, English, Spanish, French, Arabic, German, Dutch
-- **55 reciters** including Mishari Rashid al-Afasy, Al-Husary, Al-Banna, and more
+- **3 themes** (Light, Sepia, Dark) with 7 accent colors
+- **7 UI languages** (Turkish, English, Spanish, French, Arabic, German, Dutch) and **49 translations** across 19+ languages
+- **55 reciters** including Yasser Al-Dossari, Badr Al-Turki, Al-Husary, Al-Banna, Maher al-Muaiqly, and more
 - **Offline support**: PWA with Service Worker caching
 - **Auth**: email, Google, and Apple sign-in
 
@@ -115,15 +117,20 @@ Dev server runs at `http://localhost:3001`.
 ```
 mahfuz-app/
 ├── apps/
-│   ├── web/                 Main web app (React + TanStack Start)
-│   └── mobile/              Expo mobile app (planned)
+│   ├── web/                    Main web app (React + TanStack Start)
+│   └── mobile/                 Expo / React Native app
 ├── packages/
-│   ├── shared/              Types, constants, curriculum data
-│   ├── audio-engine/        Playback with word-level sync
-│   ├── api/                 Quran.com API client
-│   ├── gamification/        Badge and achievement system
-│   └── memorization/        SM-2 spaced repetition
-└── tooling/                 Shared ESLint, TypeScript, Tailwind configs
+│   ├── shared/                 Types, constants, curriculum data
+│   ├── audio-engine/           HTML5 audio with word-level sync
+│   ├── audio-engine-mobile/    Expo / React Native audio engine
+│   ├── recitation-engine/      ONNX Runtime Web verse recognition
+│   ├── db/                     Dexie IndexedDB schemas
+│   ├── api/                    Server-side API helpers
+│   ├── api-client/             HTTP client
+│   ├── gamification/           Scoring and achievements
+│   ├── memorization/           Hifz tracking and spaced repetition
+│   └── sdk/                    Public SDK (CJS + ESM)
+└── tooling/                    Shared ESLint, TypeScript, Tailwind configs
 ```
 
 ## Credits
