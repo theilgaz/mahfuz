@@ -577,69 +577,79 @@
 
 /* ── Surah Index ──────────────────────────────────── */
 
-.mu-index-head {
+.mu-index-bar {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 28px;
-  gap: 32px;
-}
-
-.mu-index-title h2 {
-  font-family: var(--mu-ff-display);
-  font-weight: 500;
-  font-size: 36px;
-  letter-spacing: -0.02em;
-  margin: 0 0 6px;
-  color: var(--mu-ink);
+  gap: 16px;
+  margin: 8px 0 4px;
+  border-bottom: 1px solid var(--mu-line);
 }
 
 .mu-index-search {
   position: relative;
-  width: 360px;
-  max-width: 50vw;
+  width: 200px;
+  flex-shrink: 0;
 }
 
 .mu-index-search input {
   width: 100%;
-  background: var(--mu-bg-card);
-  border: 1px solid var(--mu-line);
-  border-radius: 999px;
-  padding: 11px 40px 11px 42px;
+  background: transparent;
+  border: 0;
+  padding: 8px 28px 8px 24px;
   font-family: var(--mu-ff-ui);
-  font-size: 14px;
+  font-size: 13px;
   color: var(--mu-ink);
   outline: none;
-  transition: border-color 0.15s;
 }
 
-.mu-index-search input:focus {
-  border-color: var(--mu-accent);
+.mu-index-search input::placeholder {
+  color: var(--mu-muted);
 }
 
 .mu-is-icon {
   position: absolute;
   top: 50%;
-  left: 14px;
+  left: 2px;
   transform: translateY(-50%);
   color: var(--mu-muted);
   pointer-events: none;
 }
 
 .mu-is-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
+}
+
+.mu-index-search-clear {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--mu-muted);
+}
+
+.mu-index-search-clear:hover {
+  color: var(--mu-ink);
 }
 
 /* Tabs */
 .mu-tabs {
   display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--mu-line);
-  margin-bottom: 8px;
+  gap: 2px;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-width: 0;
 }
 
 .mu-tabs::-webkit-scrollbar {
@@ -649,16 +659,15 @@
 .mu-tab {
   all: unset;
   cursor: pointer;
-  padding: 12px 18px;
-  font-size: 14px;
+  padding: 10px 12px;
+  font-size: 13px;
   white-space: nowrap;
   font-family: var(--mu-ff-ui);
   color: var(--mu-muted);
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  white-space: nowrap;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -5427,14 +5436,17 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
     gap: 32px;
   }
 
-  .mu-index-head {
+  .mu-index-bar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 4px;
   }
 
   .mu-index-search {
     width: 100%;
-    max-width: 100%;
+    order: -1;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--mu-line);
   }
 
   .mu-srow {

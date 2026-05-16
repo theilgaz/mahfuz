@@ -37,9 +37,6 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
   const [tab, setTab] = useState("all");
   const [q, setQ] = useState("");
 
-  const makkahCount = useMemo(() => surahs.filter((s) => s.revelation === "makkah").length, [surahs]);
-  const madinahCount = useMemo(() => surahs.filter((s) => s.revelation === "madinah").length, [surahs]);
-
   const filtered = useMemo(() => {
     let xs = [...surahs];
     if (tab === "mekki") xs = xs.filter((s) => s.revelation === "makkah");
@@ -93,66 +90,44 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
   }, []);
 
   const tabs = [
-    { id: "all", label: t.surahList?.filterAll ?? "Tumu", count: 114, icon: null },
-    { id: "mekki", label: t.surahList?.filterMakki ?? "Mekki", count: makkahCount, icon: "/images/kabe-tab.png" },
-    { id: "medeni", label: t.surahList?.filterMadani ?? "Medeni", count: madinahCount, icon: "/images/nebevi-tab.png" },
-    { id: "alfa", label: t.surahList?.filterAlpha ?? "Alfabetik", count: null, icon: null },
-    { id: "nuzul", label: t.surahList?.filterNuzul ?? "Nuzul", count: null, icon: null },
+    { id: "all", label: t.surahList?.filterAll ?? "Tumu" },
+    { id: "mekki", label: t.surahList?.filterMakki ?? "Mekki" },
+    { id: "medeni", label: t.surahList?.filterMadani ?? "Medeni" },
+    { id: "alfa", label: t.surahList?.filterAlpha ?? "Alfabetik" },
+    { id: "nuzul", label: t.surahList?.filterNuzul ?? "Nuzul" },
   ];
 
   return (
     <section>
-      <div className="mu-index-head">
-        <div className="mu-index-title">
-          <h2>{t.surahList?.title ?? "Sure fihristi"}</h2>
-          <span className="mu-muted" style={{ fontSize: 13 }}>
-            114 {t.surahList?.surahCount ?? "sure"} - {filtered.length} {t.surahList?.showing ?? "gösteriliyor"}
-          </span>
+      <div className="mu-index-bar">
+        <div className="mu-tabs">
+          {tabs.map((tt) => (
+            <button
+              key={tt.id}
+              className={`mu-tab ${tab === tt.id ? "on" : ""}`}
+              onClick={() => setTab(tt.id)}
+            >
+              {tt.label}
+            </button>
+          ))}
         </div>
         <div className="mu-index-search">
           <span className="mu-is-icon">{MuIcons.search}</span>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder={t.surahList?.searchPlaceholder ?? "Sure adi, anlam veya numara"}
+            placeholder={t.surahList?.searchPlaceholder ?? "Ara"}
           />
           {q && (
             <button
               onClick={() => setQ("")}
-              style={{
-                position: "absolute",
-                right: 8,
-                top: "50%",
-                transform: "translateY(-50%)",
-                border: 0,
-                background: "transparent",
-                width: 28,
-                height: 28,
-                borderRadius: "999px",
-                cursor: "pointer",
-                display: "grid",
-                placeItems: "center",
-                color: "var(--mu-muted)",
-              }}
+              className="mu-index-search-clear"
+              aria-label={t.surahList?.clear ?? "Temizle"}
             >
               {MuIcons.close}
             </button>
           )}
         </div>
-      </div>
-
-      <div className="mu-tabs">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            className={`mu-tab ${tab === t.id ? "on" : ""}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.icon && <img src={t.icon} alt="" aria-hidden="true" style={{ width: 16, height: 16, objectFit: "contain" }} />}
-            {t.label}
-            {t.count != null && <span className="mu-tab-count">{t.count}</span>}
-          </button>
-        ))}
       </div>
 
       {tab === "alfa" && alphaGroups.length > 0 && (
