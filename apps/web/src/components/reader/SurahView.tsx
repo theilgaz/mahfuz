@@ -15,11 +15,11 @@ import { cleanImlaei } from "~/lib/strip-diacritics";
 import { AyahBlock } from "./AyahBlock";
 import { SurahSkeleton } from "./SurahSkeleton";
 import { useReadingTracker } from "~/hooks/useReadingTracker";
+import { useSwipeNav } from "~/hooks/useSwipeNav";
 import { useEffect, useRef, useCallback, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { surahSlug } from "~/lib/surah-slugs";
 import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
-import { getSurahDescription } from "~/lib/surah-descriptions";
 import { useTranslation } from "~/hooks/useTranslation";
 import { Ornament } from "~/components/minimal-ui/Ornament";
 import { MuIcons } from "~/components/minimal-ui/icons";
@@ -49,7 +49,30 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const isWbw = readingMode === "wbw";
   const isVerse = readingMode === "verse";
   const isMushaf = readingMode === "mushaf";
+  const isMeal = readingMode === "meal";
+  const primaryMode: "ayet" | "mushaf" = isMushaf || isMeal ? "mushaf" : "ayet";
   const effectiveTajweed = showTajweed && !useBasic && !isWbw;
+
+  const selectPrimary = useCallback(
+    (target: "ayet" | "mushaf") => {
+      if (target === primaryMode) {
+        // Same primary tapped → flip its sub-mode
+        if (target === "ayet") setReadingMode(isWbw ? "verse" : "wbw");
+        else setReadingMode(isMeal ? "mushaf" : "meal");
+      } else {
+        // Switching primary → snap to that primary's main sub-mode
+        setReadingMode(target === "ayet" ? "verse" : "mushaf");
+      }
+    },
+    [primaryMode, isWbw, isMeal, setReadingMode],
+  );
+
+  const flipSubMode = useCallback(() => {
+    if (primaryMode === "ayet") setReadingMode(isWbw ? "verse" : "wbw");
+    else setReadingMode(isMeal ? "mushaf" : "meal");
+  }, [primaryMode, isWbw, isMeal, setReadingMode]);
+
+  const subStep = primaryMode === "ayet" ? (isWbw ? 1 : 0) : isMeal ? 1 : 0;
   const { t, locale } = useTranslation();
   const savePosition = useReadingStore((s) => s.savePosition);
 
@@ -73,8 +96,13 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const firstPage = data?.ayahs[0]?.pageNumber ?? 0;
   useReadingTracker(firstPage);
 
-  const isSurahBookmarked = useBookmarksStore((s) => s.bookmarks.some((b) => b.surahId === surahId && b.ayahNumber === 1));
-  const toggleSurahBookmark = useBookmarksStore((s) => s.toggleBookmark);
+  // Container ref for scoped swipe gestures
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useSwipeNav({
+    target: containerRef,
+    onSwipeLeft: flipSubMode,
+    onSwipeRight: flipSubMode,
+  });
 
   // Active verse tracking
   const [activeAyah, setActiveAyah] = useState(1);
@@ -219,8 +247,6 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const surah = data.surah;
   const surahName = getSurahName(surahId, locale) || surah.nameSimple;
   const surahMeaning = getSurahMeaning(surahId, locale);
-  const surahDesc = getSurahDescription(surahId, locale);
-  const typeLabel = surah.revelation === "makkah" ? "Mekki sure" : "Medeni sure";
 
   const progressPct = surah.ayahCount > 0 ? (activeAyah / surah.ayahCount) * 100 : 0;
 
@@ -268,45 +294,25 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
               </span>
             </div>
 
-            {/* Right: mushaf mode = inline mode seg, other = bookmark + share */}
-            {isMushaf ? (
-              <ModeSegment readingMode={readingMode} setReadingMode={setReadingMode} t={t} />
-            ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <button
-                  className="mu-icon-btn sm"
-                  aria-label={t.reader.bookmark}
-                  style={{ color: isSurahBookmarked ? "var(--mu-accent)" : "var(--mu-ink-3)" }}
-                  onClick={() => toggleSurahBookmark({ surahId, ayahNumber: 1, pageNumber: firstPage || 1 })}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill={isSurahBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M7 4h10v17l-5-3.5L7 21z" />
-                  </svg>
-                </button>
-                <button className="mu-icon-btn sm" aria-label="Share" style={{ color: "var(--mu-ink-3)" }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
-                    <polyline points="16 6 12 2 8 6" />
-                    <line x1="12" y1="2" x2="12" y2="15" />
-                  </svg>
-                </button>
-              </div>
-            )}
+            {/* Right: 2-tier mode switch [Ayet | Mushaf] with sub-mode dots */}
+            <PrimaryModeSwitch
+              primary={primaryMode}
+              subStep={subStep}
+              subLabel={
+                primaryMode === "ayet"
+                  ? subStep === 0 ? t.settings.modeVerse : t.settings.modeWbw
+                  : subStep === 0 ? "Mushaf" : "Meal"
+              }
+              onSelect={selectPrimary}
+            />
           </div>
-
-          {/* Row 2: reading mode switcher (only for non-mushaf modes) */}
-          {!isMushaf && (
-            <div style={{ display: "flex", justifyContent: "center", padding: "0 0 8px" }}>
-              <ModeSegment readingMode={readingMode} setReadingMode={setReadingMode} t={t} />
-            </div>
-          )}
 
           {/* Progress bar */}
           <div style={{ width: "100%", height: 2, background: "var(--mu-line)", borderRadius: 1 }}>
             <div style={{ width: `${progressPct}%`, height: "100%", background: "var(--mu-accent)", borderRadius: 1, transition: "width 0.3s ease" }} />
           </div>
         </div>
-      <div className={`mu-reader${isMushaf ? " mu-reader--mushaf" : ""}`} style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
+      <div ref={containerRef} className={`mu-reader${isMushaf ? " mu-reader--mushaf" : ""}`} style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
         {/* Main content */}
         <div>
           {isMushaf ? (
@@ -314,10 +320,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
               <OrnamentalMushafView
                 surahId={surahId}
                 nameArabic={surah.nameArabic}
-                nameSimple={surahName}
                 nameMeaning={surahMeaning}
-                ayahCount={surah.ayahCount}
-                revelation={surah.revelation}
                 bismillahPre={surah.bismillahPre}
                 ayahs={ayahList}
                 onAyahRef={setAyahRef}
@@ -335,26 +338,48 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
                 </div>
               </footer>
             </>
+          ) : isMeal ? (
+            <>
+              <header className="mu-chap-head mu-chap-head--mini">
+                <div className="mu-chap-ar" dir="rtl">{surah.nameArabic}</div>
+                {surahMeaning && <span className="mu-chap-tr">{surahMeaning}</span>}
+                <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+                  <Ornament size={18} />
+                </div>
+              </header>
+              <ol className="mu-meal-list">
+                {ayahList.map((ayah) => (
+                  <li
+                    key={ayah.ayahNumber}
+                    ref={(el) => setAyahRef(ayah.ayahNumber, el)}
+                    data-ayah={ayah.ayahNumber}
+                    className={`mu-meal-item${activeAyah === ayah.ayahNumber ? " active" : ""}`}
+                  >
+                    <span className="mu-meal-num">{ayah.ayahNumber}</span>
+                    <p className="mu-meal-text">{ayah.translation ?? ""}</p>
+                  </li>
+                ))}
+              </ol>
+              <footer className="mu-chap-foot">
+                <Ornament size={22} />
+                <p className="mu-chap-end">{t.reader.endOfSurah}</p>
+                <div className="mu-chap-nav">
+                  <Link to="/" className="mu-btn ghost">
+                    {t.reader.backToIndex}
+                  </Link>
+                  {surahId < 114 && <NextSurahButton currentSurahId={surahId} />}
+                </div>
+              </footer>
+            </>
           ) : (
             <>
-              {/* Chapter header */}
-              <header className="mu-chap-head">
-                <p className="mu-chap-eyebrow">
-                  {typeLabel} · {surah.ayahCount} ayet · Nuzul {surah.revelationOrder}
-                </p>
-                <div className="mu-chap-ar" dir="rtl">
-                  سُورَةُ {surah.nameArabic}
+              {/* Chapter header — minimal: Arabic name + meaning */}
+              <header className="mu-chap-head mu-chap-head--mini">
+                <div className="mu-chap-ar" dir="rtl">{surah.nameArabic}</div>
+                {surahMeaning && <span className="mu-chap-tr">{surahMeaning}</span>}
+                <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+                  <Ornament size={18} />
                 </div>
-                <h1 className="mu-chap-title">
-                  <span className="mu-chap-name">{surahName}</span>
-                  {surahMeaning && <span className="mu-chap-tr">{surahMeaning}</span>}
-                </h1>
-                <div style={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
-                  <Ornament size={22} />
-                </div>
-                {surahDesc && (
-                  <p className="mu-chap-intro">{surahDesc}</p>
-                )}
               </header>
 
               {/* Bismillah */}
@@ -414,49 +439,44 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   );
 }
 
-// -- Mode segment (shared between mushaf inline and non-mushaf row 2) --
+// -- Primary mode switch: [Ayet | Mushaf] with sub-mode dots underneath --
 
-function ModeSegment({ readingMode, setReadingMode, t }: { readingMode: string; setReadingMode: (m: "verse" | "wbw" | "mushaf") => void; t: ReturnType<typeof useTranslation>["t"] }) {
+function PrimaryModeSwitch({
+  primary,
+  subStep,
+  subLabel,
+  onSelect,
+}: {
+  primary: "ayet" | "mushaf";
+  subStep: 0 | 1;
+  subLabel: string;
+  onSelect: (target: "ayet" | "mushaf") => void;
+}) {
   return (
-    <div className="mu-mode-seg">
-      <button
-        className={`mu-mode-seg-btn${readingMode === "verse" ? " on" : ""}`}
-        onClick={() => setReadingMode("verse")}
-        aria-label={t.settings.modeVerse}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="16" y2="12" />
-          <line x1="3" y1="18" x2="21" y2="18" />
-        </svg>
-        <span className="mu-mode-seg-label">{t.settings.modeVerse}</span>
-      </button>
-      <button
-        className={`mu-mode-seg-btn${readingMode === "wbw" ? " on" : ""}`}
-        onClick={() => setReadingMode("wbw")}
-        aria-label={t.settings.modeWbw}
-      >
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="3" width="7" height="7" rx="1.5" />
-          <rect x="11" y="3" width="7" height="7" rx="1.5" />
-          <rect x="2" y="12" width="7" height="5" rx="1.5" />
-          <rect x="11" y="12" width="7" height="5" rx="1.5" />
-        </svg>
-        <span className="mu-mode-seg-label">{t.settings.modeWbw}</span>
-      </button>
-      <button
-        className={`mu-mode-seg-btn${readingMode === "mushaf" ? " on" : ""}`}
-        onClick={() => setReadingMode("mushaf")}
-        aria-label="Mushaf"
-      >
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="2" width="14" height="16" rx="2" />
-          <line x1="7" y1="6" x2="13" y2="6" />
-          <line x1="7" y1="9" x2="13" y2="9" />
-          <line x1="7" y1="12" x2="11" y2="12" />
-        </svg>
-        <span className="mu-mode-seg-label">Mushaf</span>
-      </button>
+    <div className="mu-mode-pri" aria-label={subLabel}>
+      <div className="mu-mode-pri-row">
+        <button
+          type="button"
+          className={`mu-mode-pri-btn${primary === "ayet" ? " on" : ""}`}
+          onClick={() => onSelect("ayet")}
+          aria-pressed={primary === "ayet"}
+        >
+          Ayet
+        </button>
+        <button
+          type="button"
+          className={`mu-mode-pri-btn${primary === "mushaf" ? " on" : ""}`}
+          onClick={() => onSelect("mushaf")}
+          aria-pressed={primary === "mushaf"}
+        >
+          Mushaf
+        </button>
+      </div>
+      <div className="mu-mode-pri-sub" aria-hidden="true">
+        <span className={`mu-mode-pri-dot${subStep === 0 ? " on" : ""}`} />
+        <span className={`mu-mode-pri-dot${subStep === 1 ? " on" : ""}`} />
+        <span className="mu-mode-pri-sublabel">{subLabel}</span>
+      </div>
     </div>
   );
 }

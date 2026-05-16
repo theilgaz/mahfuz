@@ -1,31 +1,42 @@
 /**
  * Mobil swipe navigasyonu — sol/sağ swipe ile sayfa değiştirme.
+ *
+ * Default: document'e bağlanır. `target` ref verilirse o elemana scoped olur.
  */
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, type RefObject } from "react";
 
 const SWIPE_THRESHOLD = 50;
 
 interface UseSwipeNavOptions {
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
+  /** Hangi elemana scoped olunacak. Verilmezse document. */
+  target?: RefObject<HTMLElement | null>;
+  /** Hook aktif mi (false ise hiç listener bağlanmaz). */
+  enabled?: boolean;
 }
 
-export function useSwipeNav({ onSwipeLeft, onSwipeRight }: UseSwipeNavOptions) {
+const INTERACTIVE_SELECTOR = "button, a, input, textarea, select, [role='button'], [contenteditable='true']";
+
+export function useSwipeNav({ onSwipeLeft, onSwipeRight, target, enabled = true }: UseSwipeNavOptions) {
   const startX = useRef(0);
   const startY = useRef(0);
+  const startedOnInteractive = useRef(false);
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
     startX.current = e.touches[0].clientX;
     startY.current = e.touches[0].clientY;
+    const el = e.target as Element | null;
+    startedOnInteractive.current = !!el?.closest(INTERACTIVE_SELECTOR);
   }, []);
 
   const handleTouchEnd = useCallback(
     (e: TouchEvent) => {
+      if (startedOnInteractive.current) return;
       const dx = e.changedTouches[0].clientX - startX.current;
       const dy = e.changedTouches[0].clientY - startY.current;
 
-      // Yatay hareket dikey hareketten büyükse swipe kabul et
       if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy) * 1.5) {
         if (dx > 0) {
           onSwipeRight();
@@ -38,12 +49,14 @@ export function useSwipeNav({ onSwipeLeft, onSwipeRight }: UseSwipeNavOptions) {
   );
 
   useEffect(() => {
-    document.addEventListener("touchstart", handleTouchStart, { passive: true });
-    document.addEventListener("touchend", handleTouchEnd, { passive: true });
+    if (!enabled) return;
+    const el: Document | HTMLElement = target?.current ?? document;
+    el.addEventListener("touchstart", handleTouchStart as EventListener, { passive: true });
+    el.addEventListener("touchend", handleTouchEnd as EventListener, { passive: true });
 
     return () => {
-      document.removeEventListener("touchstart", handleTouchStart);
-      document.removeEventListener("touchend", handleTouchEnd);
+      el.removeEventListener("touchstart", handleTouchStart as EventListener);
+      el.removeEventListener("touchend", handleTouchEnd as EventListener);
     };
-  }, [handleTouchStart, handleTouchEnd]);
+  }, [handleTouchStart, handleTouchEnd, target, enabled]);
 }

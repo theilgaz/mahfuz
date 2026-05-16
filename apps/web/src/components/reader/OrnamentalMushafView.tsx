@@ -16,10 +16,7 @@ interface AyahData {
 interface OrnamentalMushafViewProps {
   surahId: number;
   nameArabic: string;
-  nameSimple: string;
   nameMeaning: string | null;
-  ayahCount: number;
-  revelation: string;
   bismillahPre: boolean;
   ayahs: AyahData[];
   onAyahRef?: (ayahNumber: number, el: HTMLSpanElement | null) => void;
@@ -30,28 +27,16 @@ const BISMILLAH = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَ
 export const OrnamentalMushafView = memo(function OrnamentalMushafView({
   surahId,
   nameArabic,
-  nameSimple,
   nameMeaning,
-  ayahCount,
-  revelation,
   bismillahPre,
   ayahs,
   onAyahRef,
 }: OrnamentalMushafViewProps) {
   const showBismillah = bismillahPre && surahId !== 9;
-  const juz = ayahs[0]?.juzNumber;
 
   return (
     <article className="mu-omv">
-      <SurahHeader
-        nameArabic={nameArabic}
-        nameSimple={nameSimple}
-        nameMeaning={nameMeaning}
-        surahNumber={surahId}
-        ayahCount={ayahCount}
-        juz={juz}
-        revelation={revelation === "makkah" ? "Mekki" : "Medeni"}
-      />
+      <SurahHeader nameArabic={nameArabic} nameMeaning={nameMeaning} />
 
       <div className="mu-omv-body" dir="rtl" lang="ar">
         {showBismillah && (
@@ -81,43 +66,19 @@ export const OrnamentalMushafView = memo(function OrnamentalMushafView({
   );
 });
 
-/* ─── Swiss-grid surah header ─── */
+/* ─── Minimal surah header — name + meaning only ─── */
 
 function SurahHeader({
   nameArabic,
-  nameSimple,
   nameMeaning,
-  surahNumber,
-  ayahCount,
-  juz,
-  revelation,
 }: {
   nameArabic: string;
-  nameSimple: string;
   nameMeaning: string | null;
-  surahNumber: number;
-  ayahCount: number;
-  juz?: number;
-  revelation: string;
 }) {
   return (
     <header className="mu-omv-sh">
-      <div className="mu-omv-sh-meta">
-        <div>{String(surahNumber).padStart(3, "0")}</div>
-        {juz != null && <div>Cuz {juz}</div>}
-      </div>
-
-      <div className="mu-omv-sh-center">
-        <div className="mu-omv-sh-ar" dir="rtl">{nameArabic}</div>
-        {nameMeaning && (
-          <div className="mu-omv-sh-meaning">{nameMeaning}</div>
-        )}
-      </div>
-
-      <div className="mu-omv-sh-meta" style={{ textAlign: "right" }}>
-        <div>{ayahCount} ayet</div>
-        <div>{revelation}</div>
-      </div>
+      <div className="mu-omv-sh-ar" dir="rtl">{nameArabic}</div>
+      {nameMeaning && <div className="mu-omv-sh-meaning">{nameMeaning}</div>}
     </header>
   );
 }

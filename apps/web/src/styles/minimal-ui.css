@@ -1040,6 +1040,68 @@
   }
 }
 
+/* -- Primary mode switch: [Ayet | Mushaf] + sub-mode dot indicator -- */
+.mu-mode-pri {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.mu-mode-pri-row {
+  display: inline-flex;
+  border: 1px solid var(--mu-line-2, var(--mu-line));
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--mu-bg, transparent);
+}
+.mu-mode-pri-btn {
+  all: unset;
+  cursor: pointer;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-family: var(--mu-ff-ui);
+  font-weight: 500;
+  color: var(--mu-muted);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.mu-mode-pri-btn:hover {
+  color: var(--mu-ink-3);
+}
+.mu-mode-pri-btn.on {
+  color: var(--mu-bg, #fff);
+  background: var(--mu-ink, #14261c);
+}
+.mu-mode-pri-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 4px;
+  height: 12px;
+}
+.mu-mode-pri-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--mu-line-2, var(--mu-line));
+  transition: background 0.15s, transform 0.15s;
+}
+.mu-mode-pri-dot.on {
+  background: var(--mu-accent, var(--mu-ink));
+  transform: scale(1.4);
+}
+.mu-mode-pri-sublabel {
+  font-family: var(--mu-ff-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--mu-muted);
+  text-transform: uppercase;
+  margin-left: 4px;
+}
+@media (max-width: 640px) {
+  .mu-mode-pri-sublabel { display: none; }
+}
+
 @keyframes mu-spin {
   to { transform: rotate(360deg); }
 }
@@ -1050,6 +1112,66 @@
 .mu-chap-head {
   text-align: center;
   padding: 32px 0 48px;
+}
+
+.mu-chap-head--mini {
+  padding: 36px 0 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.mu-chap-head--mini .mu-chap-ar {
+  margin-bottom: 0;
+  font-size: 48px;
+}
+.mu-chap-head--mini .mu-chap-tr {
+  font-style: italic;
+  color: var(--mu-gold, var(--mu-accent));
+  font-size: 16px;
+  letter-spacing: 0.02em;
+}
+
+/* -- Meal sub-view list (Mushaf alt) -- */
+.mu-meal-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 24px;
+  max-width: 60ch;
+  margin-inline: auto;
+}
+.mu-meal-item {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 14px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--mu-line);
+  transition: background 0.2s ease;
+}
+.mu-meal-item:last-child { border-bottom: none; }
+.mu-meal-item.active {
+  background: var(--mu-accent-soft, transparent);
+}
+.mu-meal-num {
+  font-family: var(--mu-ff-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--mu-muted);
+  padding-top: 4px;
+  text-align: right;
+}
+.mu-meal-text {
+  margin: 0;
+  font-family: var(--mu-ff-display);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--mu-ink);
+  text-wrap: pretty;
+}
+@media (max-width: 640px) {
+  .mu-meal-list { padding-inline: 8px; }
+  .mu-meal-item { grid-template-columns: 28px 1fr; gap: 10px; }
+  .mu-meal-text { font-size: 16px; }
 }
 
 .mu-chap-eyebrow {
@@ -5279,26 +5401,12 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 
 /* Swiss-grid surah header */
 .mu-omv-sh {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 48px;
-  padding: 44px 40px 32px;
-  border-bottom: 1px solid var(--mu-line, #e7e2d6);
+  gap: 10px;
+  padding: 44px 40px 28px;
   background: var(--mu-bg, #fbf8f2);
-}
-
-.mu-omv-sh-meta {
-  font-family: var(--mu-ff-mono, 'JetBrains Mono', ui-monospace, monospace);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: var(--mu-muted, #8a9288);
-  text-transform: uppercase;
-  line-height: 1.8;
-}
-
-.mu-omv-sh-center {
-  text-align: center;
 }
 
 .mu-omv-sh-ar {
@@ -5310,10 +5418,9 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 
 .mu-omv-sh-meaning {
   font-family: var(--mu-ff-display, 'Cormorant Garamond', serif);
-  font-size: 14px;
+  font-size: 15px;
   font-style: italic;
   color: var(--mu-gold, #b8912f);
-  margin-top: 10px;
   letter-spacing: 0.02em;
 }
 
@@ -5371,7 +5478,7 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 /* Responsive: tighter padding on mobile */
 @media (max-width: 640px) {
   .mu-omv-sh {
-    gap: 16px;
+    gap: 8px;
     padding: 28px 20px 20px;
   }
   .mu-omv-sh-ar {

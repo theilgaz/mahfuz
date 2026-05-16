@@ -5,7 +5,7 @@ import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 export type Theme = "light" | "sepia" | "dark";
 export type TextStyle = "uthmani" | "basic";
 export type WbwDisplay = "off" | "hover" | "on"; // geriye uyumluluk
-export type ReadingMode = "verse" | "wbw" | "mushaf";
+export type ReadingMode = "verse" | "wbw" | "mushaf" | "meal";
 export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
 export type MushafSizeMode = "standard" | "fill";
@@ -217,7 +217,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     }),
     {
       name: "mahfuz-core-settings",
-      version: 6,
+      version: 7,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
@@ -262,6 +262,9 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           if (persisted.accentColor === "olive" || persisted.accentColor === "yellow") {
             persisted.accentColor = "default";
           }
+        }
+        if (version < 7) {
+          // v6 -> v7: 'meal' reading mode added (Mushaf-alt). Existing values untouched.
         }
         return persisted as any;
       },
