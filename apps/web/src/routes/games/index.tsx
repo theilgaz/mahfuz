@@ -531,7 +531,7 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
             onClick={() => setPeriod(p)}
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
               period === p
-                ? "bg-[var(--color-accent)] text-white"
+                ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                 : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
             }`}
           >
@@ -888,19 +888,19 @@ function GamesPage() {
         <div className="flex rounded-lg border border-[var(--color-border)] overflow-hidden text-xs font-medium">
           <button
             onClick={() => setPageTab("games")}
-            className={`px-3 py-1.5 transition-colors ${pageTab === "games" ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"}`}
+            className={`px-3 py-1.5 transition-colors ${pageTab === "games" ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"}`}
           >
             {t.gamesHub.title}
           </button>
           <button
             onClick={() => setPageTab("achievements")}
-            className={`px-3 py-1.5 transition-colors ${pageTab === "achievements" ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"}`}
+            className={`px-3 py-1.5 transition-colors ${pageTab === "achievements" ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"}`}
           >
             {t.achievements?.tabTitle ?? "Basarimlar"}
           </button>
           <button
             onClick={() => setPageTab("scoreboard")}
-            className={`px-3 py-1.5 transition-colors ${pageTab === "scoreboard" ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"}`}
+            className={`px-3 py-1.5 transition-colors ${pageTab === "scoreboard" ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"}`}
           >
             {t.gamesHub.scoreboard}
           </button>

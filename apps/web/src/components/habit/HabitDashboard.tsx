@@ -86,7 +86,7 @@ function HabitDashboardInner() {
         </button>
 
         {showGoalPicker && (
-          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-sm">
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
             <p className="text-[10px] text-[var(--color-text-secondary)] mb-1.5 px-1 whitespace-nowrap">
               Günlük hedef (sayfa)
             </p>
@@ -100,7 +100,7 @@ function HabitDashboardInner() {
                   }}
                   className={`min-w-7 rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
                     n === dailyTarget
-                      ? "bg-[var(--color-accent)] text-white"
+                      ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                       : "bg-[var(--color-bg)] hover:bg-[var(--color-border)]"
                   }`}
                 >

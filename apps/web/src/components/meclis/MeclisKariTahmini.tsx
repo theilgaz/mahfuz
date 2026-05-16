@@ -127,7 +127,7 @@ export function MeclisKariTahmini({ scoreCorrect, scoreWrong, finished }: Meclis
         <button
           onClick={handlePlay}
           disabled={!!picked}
-          className="w-16 h-16 rounded-full bg-[var(--mu-accent)] text-white text-2xl flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50"
+          className="w-16 h-16 rounded-full bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-2xl flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50"
           aria-label="Çal"
         >
           {isPlaying ? "■" : "▶"}

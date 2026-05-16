@@ -201,7 +201,7 @@ export function BookmarkRow({
         {/* Desktop-only delete button (hover) */}
         <button
           onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 shadow-sm transition-all opacity-0 group-hover:opacity-100 hidden md:flex items-center"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100 hidden md:flex items-center"
           aria-label={t.reader.removeBookmark}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

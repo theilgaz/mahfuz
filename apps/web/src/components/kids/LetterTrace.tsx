@@ -286,7 +286,7 @@ function LetterTraceInner({ letter, onComplete }: LetterTraceProps) {
       </p>
 
       <div
-        className="rounded bg-[var(--color-surface)] shadow-sm w-full"
+        className="rounded bg-[var(--color-surface)] w-full"
       >
         <svg
           ref={svgRef}
@@ -545,9 +545,9 @@ function LetterTraceInner({ letter, onComplete }: LetterTraceProps) {
             key={i}
             className={`flex items-center justify-center rounded-full transition-all duration-200 ${
               completedStrokes[i]
-                ? "h-6 w-6 bg-[var(--color-accent)] text-white"
+                ? "h-6 w-6 bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                 : i === strokeIdx
-                  ? "h-6 w-6 bg-[var(--color-accent)] text-white ring-2 ring-[var(--color-accent)]/30 ring-offset-1"
+                  ? "h-6 w-6 bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] ring-2 ring-[var(--color-accent)]/30 ring-offset-1"
                   : "h-4 w-4 bg-[var(--color-border)]"
             }`}
           >

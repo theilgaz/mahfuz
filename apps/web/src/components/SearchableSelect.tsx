@@ -93,7 +93,7 @@ export function SearchableSelect({
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded border border-[var(--color-border)] bg-[var(--color-surface)]">
           {/* Search input */}
           <div className="border-b border-[var(--color-border)] p-2">
             <div className="flex items-center gap-2 rounded-lg bg-[var(--color-bg)] px-2.5 py-1.5">

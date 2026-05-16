@@ -569,7 +569,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
           <div className="flex gap-2 justify-center">
             <button
               onClick={handleShare}
-              className="px-6 py-2.5 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              className="px-6 py-2.5 rounded-full text-white font-bold text-sm active:scale-95 transition-all"
               style={{ backgroundColor: P }}
             >
               {copied ? t.kelimeTahmini.copied : t.kelimeTahmini.share}
@@ -577,7 +577,7 @@ function GameScreen({ t, mode, onBack }: { t: any; mode: "daily" | "free"; onBac
             {mode === "free" && (
               <button
                 onClick={handleNextWord}
-                className="px-6 py-2.5 rounded-xl border font-bold text-sm active:scale-95 transition-all border-[var(--color-border)] text-[var(--color-text-primary)]"
+                className="px-6 py-2.5 rounded-full border font-bold text-sm active:scale-95 transition-all border-[var(--color-border)] text-[var(--color-text-primary)]"
               >
                 {t.kelimeTahmini.nextWord}
               </button>

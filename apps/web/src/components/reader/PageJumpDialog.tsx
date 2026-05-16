@@ -44,7 +44,7 @@ export function PageJumpDialog({ open, onClose, currentPage }: PageJumpDialogPro
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div className="fixed top-1/3 left-1/2 -translate-x-1/2 z-50 w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded shadow-sm p-5">
+      <div className="fixed top-1/3 left-1/2 -translate-x-1/2 z-50 w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded p-5">
         <h3 className="text-sm font-medium mb-3">{t.reader.pageJumpTitle}</h3>
 
         <div className="flex gap-2 mb-4">
@@ -62,7 +62,7 @@ export function PageJumpDialog({ open, onClose, currentPage }: PageJumpDialogPro
           <button
             onClick={handleGo}
             disabled={!isValid}
-            className="px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white text-sm font-medium disabled:opacity-40 transition-opacity"
+            className="px-4 py-2 rounded-full bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-medium disabled:opacity-40 transition-opacity"
           >
             {t.common.go}
           </button>
@@ -77,9 +77,9 @@ export function PageJumpDialog({ open, onClose, currentPage }: PageJumpDialogPro
                 navigate({ to: "/page/$pageNumber", params: { pageNumber: String(p) }, search: { ayah: undefined } });
                 onClose();
               }}
-              className={`px-2.5 py-1 rounded-lg text-xs transition-colors ${
+              className={`px-2.5 py-1 rounded-full text-xs transition-colors ${
                 p === currentPage
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                   : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >

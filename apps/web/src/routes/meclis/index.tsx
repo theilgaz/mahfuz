@@ -227,7 +227,7 @@ function MeclisLanding() {
                       <button
                         onClick={() => publicJoinMutation.mutate({ code: r.code, password: publicPwd })}
                         disabled={publicPwd.length !== 4 || publicJoinMutation.isPending}
-                        className="px-4 py-2 rounded-lg text-sm font-bold bg-[var(--mu-accent)] text-white disabled:opacity-50"
+                        className="px-4 py-2 rounded-lg text-sm font-bold bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] disabled:opacity-50"
                       >
                         Katıl
                       </button>

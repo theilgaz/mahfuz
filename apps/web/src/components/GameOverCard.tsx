@@ -98,7 +98,7 @@ export function GameOverCard({
       <div className="flex flex-col gap-2">
         <button
           onClick={onRestart}
-          className="px-8 py-3.5 rounded-xl text-white font-bold text-sm transition-all active:scale-95"
+          className="px-8 py-3.5 rounded-full text-white font-bold text-sm transition-all active:scale-95"
           style={{ background: `linear-gradient(135deg, ${P}, ${theme.secondary || P})`, boxShadow: `0 4px 14px ${theme.glow}` }}
         >
           {t.gameScoring.playAgain}

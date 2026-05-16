@@ -193,7 +193,7 @@ function GameScreen({ surahIds, difficulty, onSetup }: { surahIds: number[]; dif
     return (
       <div className="max-w-lg mx-auto px-4 py-10 text-center">
         <p className="text-[var(--color-text-secondary)] text-sm mb-4">Ayet bulunamadi</p>
-        <button onClick={() => setRefreshKey((k) => k + 1)} className="px-5 py-2 rounded-xl text-sm font-bold text-white" style={{ backgroundColor: P }}>
+        <button onClick={() => setRefreshKey((k) => k + 1)} className="px-5 py-2 rounded-full text-sm font-bold text-white" style={{ backgroundColor: P }}>
           {t.fillBlankGame.next}
         </button>
       </div>

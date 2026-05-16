@@ -144,7 +144,7 @@ function FormsQuizPage() {
               setWrongIds([]); setLcCorrectIds([]); setLcQuestions([]);
               setPhase("main");
             }}
-            className="px-4 py-2 rounded bg-[var(--color-accent)] text-white text-sm"
+            className="px-4 py-2 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm"
           >
             {t.alifba.tryAgain}
           </button>

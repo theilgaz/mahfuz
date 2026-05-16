@@ -35,7 +35,7 @@ export function FollowAlongMode({ surahId, onVerseRecognized }: FollowAlongModeP
         className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all ${
           engine.isRecording
             ? "bg-red-500 text-white animate-pulse"
-            : "bg-[var(--color-accent)] text-white"
+            : "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
         }`}
         aria-label={engine.isRecording ? t.recitation.stop : t.recitation.start}
       >

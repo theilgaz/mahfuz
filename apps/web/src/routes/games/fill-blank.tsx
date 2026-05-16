@@ -217,7 +217,7 @@ function GameScreen({
     return (
       <div className="max-w-lg mx-auto px-4 py-10 text-center">
         <p className="text-[var(--color-text-secondary)] text-sm mb-4">Ayet bulunamadi</p>
-        <button onClick={() => setRefreshKey((k) => k + 1)} className="px-5 py-2 rounded-xl text-sm font-bold text-white" style={{ backgroundColor: P }}>
+        <button onClick={() => setRefreshKey((k) => k + 1)} className="px-5 py-2 rounded-full text-sm font-bold text-white" style={{ backgroundColor: P }}>
           {t.fillBlankGame.next}
         </button>
       </div>
@@ -393,7 +393,7 @@ function GameScreen({
         {/* Feedback + Next */}
         {isAnswered && (
           <div
-            className="rounded-xl border px-4 py-3.5 flex items-center justify-between gap-3 game-slide-up"
+            className="rounded-full border px-4 py-3.5 flex items-center justify-between gap-3 game-slide-up"
             style={
               gameState === "correct"
                 ? { backgroundColor: `${P}08`, borderColor: `${P}25`, boxShadow: `0 2px 12px ${THEME.glow}` }
@@ -427,7 +427,7 @@ function GameScreen({
             <button
               ref={nextBtnRef}
               onClick={nextRound}
-              className="relative overflow-hidden shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
+              className="relative overflow-hidden shrink-0 px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
               {gameState === "correct" && (

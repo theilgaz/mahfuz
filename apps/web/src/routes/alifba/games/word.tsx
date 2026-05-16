@@ -121,7 +121,7 @@ function WordGamePage() {
           </Link>
           <button
             onClick={() => { setIndex(0); setSelected(null); setCorrect(0); setDone(false); }}
-            className="px-5 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-medium"
+            className="px-5 py-2.5 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-medium"
           >
             {t.alifba.tryAgain}
           </button>
@@ -160,7 +160,7 @@ function WordGamePage() {
         </p>
         <button
           onClick={playAudio}
-          className={`w-24 h-24 rounded flex items-center justify-center transition-all duration-150 active:scale-95 shadow-sm border ${
+          className={`w-24 h-24 rounded flex items-center justify-center transition-all duration-150 active:scale-95 border ${
             playing
               ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white scale-105"
               : "bg-[var(--color-accent)]/10 border-[var(--color-accent)]/25 text-[var(--color-accent)]"

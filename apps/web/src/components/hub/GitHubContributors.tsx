@@ -103,7 +103,7 @@ function useRepoInfo() {
 
 /** Rank rozeti renkleri */
 const RANK_STYLES = [
-  "bg-[var(--color-accent)] text-white",              // 1 — altın
+  "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]",              // 1 — altın
   "bg-[var(--color-text-secondary)] text-white",      // 2 — gümüş
   "bg-[var(--color-text-secondary)]/60 text-white",   // 3 — bronz
 ] as const;

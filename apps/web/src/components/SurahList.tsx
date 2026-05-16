@@ -128,7 +128,7 @@ export function SurahList({ surahs }: SurahListProps) {
             onClick={() => setSurahListFilter(chip.key)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               surahListFilter === chip.key
-                ? "bg-[var(--color-accent)] text-white"
+                ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                 : "border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             }`}
           >
@@ -142,7 +142,7 @@ export function SurahList({ surahs }: SurahListProps) {
         <div className="ml-auto flex items-center border border-[var(--color-border)] rounded overflow-hidden">
           <button
             onClick={() => setViewMode("list")}
-            className={`p-1.5 transition-colors ${viewMode === "list" ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-secondary)]"}`}
+            className={`p-1.5 transition-colors ${viewMode === "list" ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]" : "text-[var(--color-text-secondary)]"}`}
             aria-label="Liste"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -151,7 +151,7 @@ export function SurahList({ surahs }: SurahListProps) {
           </button>
           <button
             onClick={() => setViewMode("grid")}
-            className={`p-1.5 transition-colors ${viewMode === "grid" ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-text-secondary)]"}`}
+            className={`p-1.5 transition-colors ${viewMode === "grid" ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]" : "text-[var(--color-text-secondary)]"}`}
             aria-label="Grid"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -346,7 +346,7 @@ export function SurahList({ surahs }: SurahListProps) {
                     onClick={() => setActiveCollection(isSelected ? null : key)}
                     className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded text-[11px] font-medium transition-colors ${
                       isSelected
-                        ? "bg-[var(--color-accent)] text-white"
+                        ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                         : "border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
                     }`}
                   >
@@ -366,8 +366,8 @@ export function SurahList({ surahs }: SurahListProps) {
         {/* Cüz butonu */}
         <button
           onClick={() => { setJuzOpen(!juzOpen); if (juzOpen) setActiveCollection(null); }}
-          className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-colors ${
-            juzOpen ? "bg-[var(--color-accent)] text-white" : "bg-[var(--color-accent)]/80 text-white hover:bg-[var(--color-accent)]"
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+            juzOpen ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]" : "bg-[var(--color-accent)]/80 text-white hover:bg-[var(--color-accent)]"
           }`}
           aria-label={t.surahList.goToJuz}
         >

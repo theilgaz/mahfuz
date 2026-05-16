@@ -340,7 +340,7 @@ function ChangelogPage() {
               onClick={() => setTagFilter(chip.key)}
               className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors shrink-0 ${
                 tagFilter === chip.key
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                   : "border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]"
               }`}
             >

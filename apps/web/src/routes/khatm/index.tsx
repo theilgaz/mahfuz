@@ -77,7 +77,7 @@ function HatimPage() {
             onClick={() => { setTab(t); setError(""); }}
             className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-all ${
               tab === t
-                ? "bg-[var(--color-accent)] text-white shadow-sm"
+                ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
@@ -115,7 +115,7 @@ function HatimPage() {
               <div className="flex gap-2 justify-center">
                 <button
                   onClick={() => setTab("create")}
-                  className="px-4 py-2 rounded bg-[var(--color-accent)] text-white text-sm font-medium"
+                  className="px-4 py-2 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-medium"
                 >
                   {tr.khatm.createGroup}
                 </button>
@@ -191,7 +191,7 @@ function HatimPage() {
           <button
             onClick={() => createMutation.mutate()}
             disabled={!createName.trim() || createMutation.isPending}
-            className="w-full py-3 rounded bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-50 transition-opacity"
+            className="w-full py-3 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] font-semibold text-sm disabled:opacity-50 transition-opacity"
           >
             {createMutation.isPending ? tr.khatm.creating : tr.khatm.createGroup}
           </button>
@@ -221,7 +221,7 @@ function HatimPage() {
           <button
             onClick={() => joinMutation.mutate()}
             disabled={joinCode.trim().length !== 8 || joinMutation.isPending}
-            className="w-full py-3 rounded bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-50 transition-opacity"
+            className="w-full py-3 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] font-semibold text-sm disabled:opacity-50 transition-opacity"
           >
             {joinMutation.isPending ? tr.khatm.joining : tr.khatm.joinGroup}
           </button>

@@ -141,7 +141,7 @@ function FillGamePage() {
           </Link>
           <button
             onClick={() => { setIndex(0); setSelected(null); setCorrect(0); setDone(false); }}
-            className="px-5 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-medium"
+            className="px-5 py-2.5 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-medium"
           >
             {t.alifba.tryAgain}
           </button>
@@ -180,7 +180,7 @@ function FillGamePage() {
         <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-secondary)] mb-4">
           {t.alifba.spotGameInstructions}
         </p>
-        <div className="w-40 h-40 rounded bg-[var(--color-accent)]/8 border border-[var(--color-accent)]/20 flex items-center justify-center shadow-sm">
+        <div className="w-40 h-40 rounded bg-[var(--color-accent)]/8 border border-[var(--color-accent)]/20 flex items-center justify-center">
           <span
             className="block text-[6rem] select-none text-center"
             dir="rtl"

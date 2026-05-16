@@ -188,7 +188,7 @@ function MemoryGamePage() {
         <div className="flex items-center justify-between mb-4">
           <Link
             to="/alifba/games"
-            className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-white flex items-center justify-center"
           >
             <svg width="18" height="18" fill="none" stroke="#6B7280" strokeWidth="2" viewBox="0 0 24 24">
               <path d="M15 19l-7-7 7-7" />
@@ -202,7 +202,7 @@ function MemoryGamePage() {
             </span>
 
             {/* Pairs progress */}
-            <div className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 shadow-sm">
+            <div className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5">
               <div className="flex gap-0.5">
                 {Array.from({ length: totalPairs }, (_, i) => (
                   <div

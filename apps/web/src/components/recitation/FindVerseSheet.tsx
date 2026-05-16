@@ -49,7 +49,7 @@ export function FindVerseSheet() {
             </div>
             <button
               onClick={() => handleGo(lastMatch.surah, lastMatch.ayah)}
-              className="px-3 py-2 rounded-lg bg-[var(--color-accent)] text-white text-xs font-medium shrink-0"
+              className="px-3 py-2 rounded-lg bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-xs font-medium shrink-0"
             >
               {t.recitation.goToVerse}
             </button>

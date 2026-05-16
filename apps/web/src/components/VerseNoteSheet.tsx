@@ -61,7 +61,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
       />
 
       {/* Sheet */}
-      <div className="fixed bottom-0 inset-x-0 z-50 max-w-xl mx-auto bg-[var(--color-bg)] border-t border-[var(--color-border)] rounded-t-2xl shadow-sm pb-[env(safe-area-inset-bottom)]">
+      <div className="fixed bottom-0 inset-x-0 z-50 max-w-xl mx-auto bg-[var(--color-bg)] border-t border-[var(--color-border)] rounded-t-2xl pb-[env(safe-area-inset-bottom)]">
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-2">
           <div className="w-10 h-1 rounded-full bg-[var(--color-border)]" />
@@ -114,7 +114,7 @@ export function VerseNoteSheet({ verseKey, verseText, onClose }: Props) {
             <button
               onClick={() => saveMutation.mutate()}
               disabled={!content.trim() || saveMutation.isPending}
-              className="flex-1 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-semibold disabled:opacity-50 transition-opacity"
+              className="flex-1 py-2.5 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-semibold disabled:opacity-50 transition-opacity"
             >
               {saved ? (
                 <span className="flex items-center justify-center gap-1.5">

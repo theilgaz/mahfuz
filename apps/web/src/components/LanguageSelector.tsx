@@ -41,9 +41,9 @@ export function LanguageSelector() {
               <button
                 key={code}
                 onClick={() => setLocale(code)}
-                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-full text-sm font-medium transition-all ${
                   active
-                    ? "bg-[var(--color-accent)] text-white shadow-sm"
+                    ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                     : "bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:bg-[var(--color-border)]"
                 }`}
               >
@@ -57,7 +57,7 @@ export function LanguageSelector() {
         {/* Confirm */}
         <button
           onClick={confirmLocale}
-          className="w-full py-2.5 rounded-xl bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+          className="w-full py-2.5 rounded-full bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-semibold hover:opacity-90 transition-opacity"
         >
           {CONFIRM_LABEL[locale] ?? "Continue"}
         </button>

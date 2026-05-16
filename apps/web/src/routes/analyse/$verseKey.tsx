@@ -409,7 +409,7 @@ function AnalysePage() {
             onClick={() => setTab(tb)}
             className={`flex-1 py-1.5 px-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
               tab === tb
-                ? "bg-[var(--color-accent)] text-white shadow-sm"
+                ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >

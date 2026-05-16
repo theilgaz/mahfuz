@@ -138,7 +138,7 @@ function VoiceQuizPage() {
         </div>
         <button
           onClick={() => setStarted(true)}
-          className="px-8 py-3 rounded bg-[var(--color-accent)] text-white font-medium"
+          className="px-8 py-3 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] font-medium"
         >
           {t.alifba.start}
         </button>
@@ -167,7 +167,7 @@ function VoiceQuizPage() {
               setWrongIds([]); setLcCorrectIds([]); setLcQuestions([]);
               setPhase("main"); setStarted(true);
             }}
-            className="px-4 py-2 rounded bg-[var(--color-accent)] text-white text-sm"
+            className="px-4 py-2 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm"
           >
             {t.alifba.tryAgain}
           </button>

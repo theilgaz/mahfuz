@@ -334,7 +334,7 @@ function WordMeaningPage() {
             </div>
             <button
               onClick={nextRound}
-              className="relative overflow-hidden w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              className="relative overflow-hidden w-full py-3 rounded-full text-white font-bold text-sm active:scale-95 transition-all"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
               <span
@@ -360,7 +360,7 @@ function WordMeaningPage() {
             </div>
             <button
               onClick={nextRound}
-              className="w-full py-3 rounded-xl text-white font-bold text-sm active:scale-95 transition-all"
+              className="w-full py-3 rounded-full text-white font-bold text-sm active:scale-95 transition-all"
               style={{ background: `linear-gradient(135deg, ${P}, ${THEME.secondary})`, boxShadow: `0 2px 10px ${THEME.glow}` }}
             >
               {t.wordMeaningGame.nextQuestion}

@@ -66,7 +66,7 @@ export function StreakCard({ currentStreak, todayPages, dailyTarget, onSetGoal }
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   n === dailyTarget
-                    ? "bg-[var(--color-accent)] text-white"
+                    ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                     : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
               >

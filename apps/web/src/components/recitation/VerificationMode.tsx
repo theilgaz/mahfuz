@@ -91,7 +91,7 @@ export function VerificationMode({ surahId, startAyah = 1, endAyah }: Verificati
         {!engine.isRecording && !isComplete && (
           <button
             onClick={handleStart}
-            className="px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white text-sm font-medium"
+            className="px-4 py-2 rounded-lg bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-medium"
           >
             {t.recitation.start}
           </button>

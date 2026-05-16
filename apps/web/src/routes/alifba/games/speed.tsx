@@ -103,7 +103,7 @@ function SpeedGamePage() {
           <h1 className="text-xl font-semibold mt-3 mb-2">{t.alifba.speedGame}</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">{GAME_DURATION} {t.alifba.speedGameDesc2}</p>
         </div>
-        <button onClick={() => setStarted(true)} className="px-8 py-3 rounded bg-[var(--color-accent)] text-white font-medium">
+        <button onClick={() => setStarted(true)} className="px-8 py-3 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] font-medium">
           {t.alifba.start}
         </button>
       </div>
@@ -121,7 +121,7 @@ function SpeedGamePage() {
           <Link to="/alifba/games" className="px-4 py-2.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
             {t.nav.back}
           </Link>
-          <button onClick={restart} className="px-4 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm">
+          <button onClick={restart} className="px-4 py-2.5 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm">
             {t.alifba.tryAgain}
           </button>
         </div>

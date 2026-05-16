@@ -191,7 +191,7 @@ function LetterDetailPage() {
               navigate({ to: "/alifba/" });
             }
           }}
-          className="mb-3 w-full py-3 rounded bg-[var(--color-accent)] text-white font-medium text-sm hover:opacity-90 transition-colors"
+          className="mb-3 w-full py-3 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] font-medium text-sm hover:opacity-90 transition-colors"
         >
           {t.alifba.markSeen}
         </button>
@@ -230,7 +230,7 @@ function LetterDetailPage() {
         ) : (
           <Link
             to="/alifba/"
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded bg-[var(--color-accent)] text-white transition-colors hover:opacity-90"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] transition-colors hover:opacity-90"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 8H3" />

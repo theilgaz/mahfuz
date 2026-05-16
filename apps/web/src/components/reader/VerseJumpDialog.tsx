@@ -49,7 +49,7 @@ export function VerseJumpDialog({ open, onClose, surahId, ayahCount }: VerseJump
     <>
       <div className="fixed inset-0 z-[100] bg-black/30" onClick={onClose} />
       <div
-        className="fixed top-1/3 left-1/2 -translate-x-1/2 z-[101] w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded shadow-sm p-5"
+        className="fixed top-1/3 left-1/2 -translate-x-1/2 z-[101] w-72 bg-[var(--color-bg)] border border-[var(--color-border)] rounded p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-medium mb-3">{t.reader.verseJumpTitle}</h3>
@@ -70,7 +70,7 @@ export function VerseJumpDialog({ open, onClose, surahId, ayahCount }: VerseJump
           <button
             onClick={handleGo}
             disabled={!isValid}
-            className="px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white text-sm font-medium disabled:opacity-40 transition-opacity"
+            className="px-4 py-2 rounded-full bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-medium disabled:opacity-40 transition-opacity"
           >
             {t.common.go}
           </button>
@@ -93,7 +93,7 @@ export function VerseJumpDialog({ open, onClose, surahId, ayahCount }: VerseJump
                   });
                   onClose();
                 }}
-                className="px-2.5 py-1 rounded-lg text-xs bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+                className="px-2.5 py-1 rounded-full text-xs bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
               >
                 {v}
               </button>

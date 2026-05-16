@@ -281,7 +281,7 @@ function FilterToggle({ active, onClick, label }: { active: boolean; onClick: ()
       aria-pressed={active}
       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
         active
-          ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+          ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] border-[var(--color-accent)]"
           : "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:border-[var(--color-accent)]"
       }`}
     >
@@ -343,7 +343,7 @@ function FilterDropdown({
         aria-expanded={open}
         className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors inline-flex items-center gap-1.5 ${
           active
-            ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
+            ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] border-[var(--color-accent)]"
             : "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:border-[var(--color-accent)]"
         }`}
       >

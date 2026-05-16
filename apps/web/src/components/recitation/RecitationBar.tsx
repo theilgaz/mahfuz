@@ -81,7 +81,7 @@ export function RecitationBar() {
 
   return (
     <div className="fixed bottom-36 left-1/2 -translate-x-1/2 z-30 w-[min(92vw,380px)]">
-      <div className="rounded bg-[var(--color-bg)] border border-[var(--color-border)] shadow-sm overflow-hidden">
+      <div className="rounded bg-[var(--color-bg)] border border-[var(--color-border)] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
           <span className="text-[11px] font-semibold text-[var(--color-accent)] uppercase tracking-wide">
@@ -123,7 +123,7 @@ export function RecitationBar() {
               <p className="text-xs text-red-500 mb-2">{engine.error || engine.micError}</p>
               <button
                 onClick={() => engine.init()}
-                className="text-xs px-3 py-1.5 rounded-lg bg-[var(--color-accent)] text-white"
+                className="text-xs px-3 py-1.5 rounded-lg bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
               >
                 {t.recitation.tryAgain}
               </button>
@@ -139,7 +139,7 @@ export function RecitationBar() {
                 className={`flex items-center justify-center w-12 h-12 rounded-full shrink-0 transition-all ${
                   isListening
                     ? "bg-red-500 text-white animate-pulse"
-                    : "bg-[var(--color-accent)] text-white hover:opacity-90"
+                    : "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] hover:opacity-90"
                 }`}
                 aria-label={isListening ? t.recitation.stop : t.recitation.start}
               >
@@ -204,7 +204,7 @@ export function RecitationBar() {
               {hasResult && (
                 <button
                   onClick={handleGoToVerse}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--color-accent)] text-white text-xs font-medium shrink-0 hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-xs font-medium shrink-0 hover:opacity-90 transition-opacity"
                 >
                   {t.recitation.goToVerse}
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">

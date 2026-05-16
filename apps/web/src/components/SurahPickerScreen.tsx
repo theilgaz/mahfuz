@@ -405,7 +405,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, simpleDifficulty, g
       <button
         onClick={handleStart}
         disabled={startDisabled}
-        className="w-full py-3.5 rounded-xl bg-[var(--color-accent)] text-white font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90 mt-5"
+        className="w-full py-3.5 rounded-xl bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] font-semibold text-sm disabled:opacity-40 transition-opacity hover:opacity-90 mt-5"
       >
         {startButtonLabel}
       </button>

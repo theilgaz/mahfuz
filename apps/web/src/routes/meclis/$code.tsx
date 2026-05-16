@@ -323,7 +323,7 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
             {pwInput.length === 4 && (
               <button
                 onClick={() => { setupMutation.mutate({ password: pwInput }); setPwInput(""); }}
-                className="px-3 py-2 rounded-lg text-xs font-medium bg-[var(--color-accent)] text-white"
+                className="px-3 py-2 rounded-lg text-xs font-medium bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
               >
                 Kaydet
               </button>
@@ -465,7 +465,7 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
             className={`w-full px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
               me.ready
                 ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/40"
-                : "bg-[var(--mu-accent)] text-white hover:opacity-90"
+                : "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] hover:opacity-90"
             }`}
           >
             {me.ready ? <><span>✓</span><span>Hazırım</span><span className="opacity-60 text-xs ml-1">— vazgeç</span></> : "Hazırım"}
@@ -478,7 +478,7 @@ function LobbyView({ state }: { state: MeclisStatePayload }) {
             disabled={!allReady || startMutation.isPending}
             className={`w-full px-4 py-3 rounded-xl text-sm font-bold transition-all ${
               allReady
-                ? "bg-[var(--mu-accent)] text-white hover:opacity-90"
+                ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] hover:opacity-90"
                 : "bg-[var(--color-border)] text-[var(--color-text-secondary)] cursor-not-allowed"
             }`}
           >
@@ -959,7 +959,7 @@ function FinalView({ state }: { state: MeclisStatePayload }) {
         <button
           onClick={() => restartMutation.mutate()}
           disabled={restartMutation.isPending}
-          className="w-full px-4 py-3 rounded-xl text-sm font-bold bg-[var(--mu-accent)] text-white hover:opacity-90 transition-opacity mb-2 disabled:opacity-50"
+          className="w-full px-4 py-3 rounded-xl text-sm font-bold bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] hover:opacity-90 transition-opacity mb-2 disabled:opacity-50"
         >
           {restartMutation.isPending ? "Hazırlanıyor..." : "Aynı kadroyla yeniden oyna"}
         </button>

@@ -14,7 +14,7 @@ import { useTranslation } from "~/hooks/useTranslation";
 const STEP = 0.15;
 
 const BTN =
-  "w-9 h-9 rounded-full bg-[var(--color-surface)] border shadow-sm flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors active:scale-95";
+  "w-9 h-9 rounded-full bg-[var(--color-surface)] border flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors active:scale-95";
 const BTN_ACTIVE =
   "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)]";
 const BTN_IDLE = "border-[var(--color-border)]";

@@ -186,7 +186,7 @@ function GroupDashboardPage() {
                   disabled={toggleJuz.isPending}
                   className={`relative aspect-square rounded text-sm font-semibold transition-all ${
                     done
-                      ? "bg-[var(--color-accent)] text-white shadow-sm"
+                      ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                       : "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/50"
                   }`}
                 >
@@ -215,7 +215,7 @@ function GroupDashboardPage() {
           </span>
           <button
             onClick={copyInviteCode}
-            className="px-3.5 py-2 rounded bg-[var(--color-accent)] text-white text-xs font-semibold transition-all"
+            className="px-3.5 py-2 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-xs font-semibold transition-all"
           >
             {inviteCopied ? (
               <span className="flex items-center gap-1.5">

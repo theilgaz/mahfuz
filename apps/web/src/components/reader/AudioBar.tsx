@@ -143,7 +143,7 @@ export function AudioBar() {
             <button
               onClick={togglePlayPause}
               disabled={isLoading}
-              className="w-9 h-9 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-9 h-9 rounded-full bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
               aria-label={isPlaying ? t.a11y.pause : t.a11y.play}
             >
               {isLoading ? (
@@ -199,7 +199,7 @@ export function AudioBar() {
                 aria-pressed={speed === s}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                   speed === s
-                    ? "bg-[var(--color-accent)] text-white"
+                    ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                     : "text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
                 }`}
               >

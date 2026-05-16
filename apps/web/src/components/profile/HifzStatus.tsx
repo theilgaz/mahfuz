@@ -308,7 +308,7 @@ function VerseDetailSheet({
                 type="button"
                 onClick={handleAddRange}
                 disabled={!rangeFrom || !rangeTo}
-                className="px-3 py-2 text-xs font-medium rounded-lg bg-[var(--color-accent)] text-white disabled:opacity-30 transition-colors shrink-0"
+                className="px-3 py-2 text-xs font-medium rounded-lg bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] disabled:opacity-30 transition-colors shrink-0"
               >
                 +
               </button>
@@ -326,7 +326,7 @@ function VerseDetailSheet({
                 onClick={() => toggleVerse(surahId, v)}
                 className={`aspect-square flex items-center justify-center text-[0.65rem] font-medium rounded-lg transition-colors ${
                   memorizedSet.has(v)
-                    ? "bg-[var(--color-accent)] text-white shadow-sm"
+                    ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                     : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)]/15 active:bg-[var(--color-accent)]/25"
                 }`}
               >
@@ -457,7 +457,7 @@ export function HifzStatus() {
                 onClick={() => setSelectedJuz(null)}
                 className={`px-2.5 py-1 text-[0.65rem] rounded-lg whitespace-nowrap transition-colors shrink-0 ${
                   !selectedJuz
-                    ? "bg-[var(--color-accent)] text-white"
+                    ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                     : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
                 }`}
               >
@@ -479,7 +479,7 @@ export function HifzStatus() {
                     onClick={() => setSelectedJuz(selectedJuz === juz ? null : juz)}
                     className={`px-2.5 py-1 text-[0.65rem] rounded-lg whitespace-nowrap transition-colors shrink-0 ${
                       selectedJuz === juz
-                        ? "bg-[var(--color-accent)] text-white"
+                        ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                         : allComplete
                           ? "bg-[var(--color-accent)]/15 text-[var(--color-accent)]"
                           : hasAny

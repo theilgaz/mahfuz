@@ -121,7 +121,7 @@ export function SurahPicker({
 
       {/* Dropdown */}
       {open && (
-        <div ref={dropdownRef} role="listbox" aria-label={t.surahList.searchPlaceholder} className={`absolute left-1/2 -translate-x-1/2 w-72 rounded bg-[var(--color-bg)] border border-[var(--color-border)] shadow-sm z-50 flex flex-col overflow-hidden ${dropUp ? "bottom-full mb-2 max-h-[40vh]" : "top-full mt-2 max-h-[60vh]"}`}>
+        <div ref={dropdownRef} role="listbox" aria-label={t.surahList.searchPlaceholder} className={`absolute left-1/2 -translate-x-1/2 w-72 rounded bg-[var(--color-bg)] border border-[var(--color-border)] z-50 flex flex-col overflow-hidden ${dropUp ? "bottom-full mb-2 max-h-[40vh]" : "top-full mt-2 max-h-[60vh]"}`}>
           {/* Tab bar: Sure / Cüz */}
           <div role="tablist" className="flex border-b border-[var(--color-border)]">
             <button
@@ -262,7 +262,7 @@ export function SurahPicker({
                     >
                       <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 ${
                         isActive
-                          ? "bg-[var(--color-accent)] text-white"
+                          ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                           : "bg-[var(--color-surface)] text-[var(--color-text-secondary)]"
                       }`}>
                         {juz}
@@ -307,7 +307,7 @@ export function SurahPicker({
                       onClick={() => setExpandedCollection(isSelected ? null : key)}
                       className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
                         isSelected
-                          ? "bg-[var(--color-accent)] text-white"
+                          ? "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)]"
                           : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]"
                       }`}
                     >
