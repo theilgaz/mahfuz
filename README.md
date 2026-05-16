@@ -2,11 +2,11 @@
 
 <br>
 
-<img src="apps/web/public/icons/icon-192.png" width="80" alt="Mahfuz">
+<img src="apps/web/public/icons/meem-logo.svg" width="96" alt="Mahfuz">
 
 # Mahfuz / محفوظ
 
-Read, listen, learn, and memorize the Quran. Together.
+A quiet companion for reading, listening to, learning, and memorizing the Quran, together.
 
 **[mahfuz.ilg.az](https://mahfuz.ilg.az)**
 
@@ -32,10 +32,10 @@ Whether you are reading for the first time or working on your hifz, Mahfuz gives
 
 ### Read
 
-- **Surah view** with verse-by-verse translations, word-by-word breakdown, and tajweed coloring
-- **Mushaf page view** (604 pages) for traditional reading with keyboard and swipe navigation
-- **6 Turkish translations** including Diyanet, Elmalili, Omer Celik, Omer Nasuhi Bilmen, and Ali Fikri Yavuz, plus 18 more across 19 languages
-- **Two text styles**: Uthmani (Medina mushaf script) and simplified Arabic
+- **Two reading modes, Ayet and Mushaf**: swipe horizontally to flip the sub-view (Ayet ⇄ word-by-word, Mushaf ⇄ meal-only)
+- **Mushaf page view** (604 pages) with the traditional scalloped verse-end medallion, keyboard and swipe navigation
+- **6 Turkish translations** including Diyanet, Elmalılı, Ömer Çelik, Ömer Nasuhi Bilmen, and Ali Fikri Yavuz, plus 18 more across 19 languages
+- **Two text styles**: Uthmani (Medina mushaf script) and simplified Arabic, with optional tajweed coloring
 - **Bookmarks** and reading position tracking across sessions
 
 ### Listen
@@ -75,7 +75,7 @@ Plus seven Alifba mini-games for letter recognition, memory, and speed. Global l
 
 ### Everything else
 
-- **3 themes** (Light, Sepia, Dark) with 7 accent colors
+- **3 themes** (Light, Sepia, Dark) with a 5-color burgundy/stone/petrol/green/indigo accent palette
 - **7 UI languages** (Turkish, English, Spanish, French, Arabic, German, Dutch) and **49 translations** across 19+ languages
 - **55 reciters** including Yasser Al-Dossari, Badr Al-Turki, Al-Husary, Al-Banna, Maher al-Muaiqly, and more
 - **Offline support**: PWA with Service Worker caching
