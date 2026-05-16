@@ -99,34 +99,39 @@ export function SurahIndex({ surahs }: SurahIndexProps) {
 
   return (
     <section>
-      <div className="mu-index-bar">
-        <div className="mu-tabs">
-          {tabs.map((tt) => (
-            <button
-              key={tt.id}
-              className={`mu-tab ${tab === tt.id ? "on" : ""}`}
-              onClick={() => setTab(tt.id)}
-            >
-              {tt.label}
-            </button>
-          ))}
-        </div>
-        <div className="mu-index-search">
-          <span className="mu-is-icon">{MuIcons.search}</span>
+      <div className="mu-fihrist-hero">
+        <div className="mu-fihrist-search">
+          <span className="mu-fihrist-search-icon" aria-hidden="true">{MuIcons.search}</span>
           <input
+            type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder={t.surahList?.searchPlaceholder ?? "Ara"}
+            placeholder={t.surahList?.searchPlaceholder ?? "Sure, anlam veya numara ara…"}
+            aria-label={t.surahList?.searchPlaceholder ?? "Ara"}
           />
           {q && (
             <button
               onClick={() => setQ("")}
-              className="mu-index-search-clear"
+              className="mu-fihrist-search-clear"
               aria-label={t.surahList?.clear ?? "Temizle"}
             >
               {MuIcons.close}
             </button>
           )}
+        </div>
+
+        <div className="mu-fihrist-seg" role="tablist" aria-label="Sure filtresi">
+          {tabs.map((tt) => (
+            <button
+              key={tt.id}
+              role="tab"
+              aria-selected={tab === tt.id}
+              className={`mu-fihrist-seg-btn${tab === tt.id ? " on" : ""}`}
+              onClick={() => setTab(tt.id)}
+            >
+              {tt.label}
+            </button>
+          ))}
         </div>
       </div>
 

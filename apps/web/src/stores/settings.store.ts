@@ -9,43 +9,33 @@ export type ReadingMode = "verse" | "wbw" | "mushaf" | "meal";
 export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
 export type MushafSizeMode = "standard" | "fill";
-export type AccentColorId = "default" | "olive" | "teal" | "indigo" | "plum" | "crimson" | "copper";
+export type AccentColorId = "default" | "stone" | "petrol" | "green" | "indigo";
 
 export const ACCENT_COLORS: Record<AccentColorId, { light: { accent: string; soft: string; ink: string }; dark: { accent: string; soft: string; ink: string }; swatch: string }> = {
   default: {
-    light: { accent: "oklch(0.62 0.12 70)", soft: "oklch(0.92 0.04 70)", ink: "oklch(0.35 0.08 65)" },
-    dark:  { accent: "oklch(0.72 0.11 70)", soft: "oklch(0.28 0.05 70)", ink: "oklch(0.88 0.10 70)" },
-    swatch: "#9a7b2d",
+    light: { accent: "oklch(0.45 0.18 14)", soft: "oklch(0.93 0.04 14)", ink: "oklch(0.30 0.13 14)" },
+    dark:  { accent: "oklch(0.62 0.18 14)", soft: "oklch(0.26 0.07 14)", ink: "oklch(0.88 0.12 14)" },
+    swatch: "#a01e3f",
   },
-  olive: {
-    light: { accent: "oklch(0.55 0.12 145)", soft: "oklch(0.92 0.04 145)", ink: "oklch(0.30 0.08 145)" },
-    dark:  { accent: "oklch(0.70 0.12 145)", soft: "oklch(0.28 0.05 145)", ink: "oklch(0.88 0.08 145)" },
-    swatch: "#5a7a2d",
+  stone: {
+    light: { accent: "oklch(0.50 0.03 75)",  soft: "oklch(0.92 0.02 75)",  ink: "oklch(0.30 0.02 75)" },
+    dark:  { accent: "oklch(0.68 0.03 75)",  soft: "oklch(0.28 0.02 75)",  ink: "oklch(0.88 0.02 75)" },
+    swatch: "#7c715a",
   },
-  teal: {
-    light: { accent: "oklch(0.55 0.12 195)", soft: "oklch(0.92 0.04 195)", ink: "oklch(0.30 0.08 195)" },
-    dark:  { accent: "oklch(0.72 0.10 195)", soft: "oklch(0.28 0.05 195)", ink: "oklch(0.88 0.08 195)" },
-    swatch: "#1a8a8a",
+  petrol: {
+    light: { accent: "oklch(0.50 0.11 230)", soft: "oklch(0.92 0.04 230)", ink: "oklch(0.30 0.08 230)" },
+    dark:  { accent: "oklch(0.68 0.10 230)", soft: "oklch(0.28 0.06 230)", ink: "oklch(0.88 0.08 230)" },
+    swatch: "#17739c",
+  },
+  green: {
+    light: { accent: "oklch(0.45 0.10 155)", soft: "oklch(0.92 0.04 155)", ink: "oklch(0.28 0.08 155)" },
+    dark:  { accent: "oklch(0.65 0.10 155)", soft: "oklch(0.26 0.05 155)", ink: "oklch(0.88 0.08 155)" },
+    swatch: "#2d6a4f",
   },
   indigo: {
-    light: { accent: "oklch(0.50 0.15 270)", soft: "oklch(0.92 0.04 270)", ink: "oklch(0.30 0.10 270)" },
-    dark:  { accent: "oklch(0.68 0.13 270)", soft: "oklch(0.28 0.05 270)", ink: "oklch(0.88 0.08 270)" },
-    swatch: "#4a4ab0",
-  },
-  plum: {
-    light: { accent: "oklch(0.52 0.16 320)", soft: "oklch(0.92 0.04 320)", ink: "oklch(0.30 0.10 320)" },
-    dark:  { accent: "oklch(0.70 0.13 320)", soft: "oklch(0.28 0.05 320)", ink: "oklch(0.88 0.08 320)" },
-    swatch: "#8a3a8a",
-  },
-  crimson: {
-    light: { accent: "oklch(0.55 0.18 25)", soft: "oklch(0.92 0.04 25)", ink: "oklch(0.30 0.12 25)" },
-    dark:  { accent: "oklch(0.70 0.14 25)", soft: "oklch(0.28 0.05 25)", ink: "oklch(0.88 0.08 25)" },
-    swatch: "#b03a3a",
-  },
-  copper: {
-    light: { accent: "oklch(0.58 0.14 50)", soft: "oklch(0.92 0.04 50)", ink: "oklch(0.32 0.10 50)" },
-    dark:  { accent: "oklch(0.72 0.12 50)", soft: "oklch(0.28 0.05 50)", ink: "oklch(0.88 0.08 50)" },
-    swatch: "#b06030",
+    light: { accent: "oklch(0.42 0.14 265)", soft: "oklch(0.92 0.04 265)", ink: "oklch(0.28 0.10 265)" },
+    dark:  { accent: "oklch(0.62 0.13 265)", soft: "oklch(0.26 0.06 265)", ink: "oklch(0.88 0.08 265)" },
+    swatch: "#2e3b6e",
   },
 };
 
@@ -217,7 +207,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     }),
     {
       name: "mahfuz-core-settings",
-      version: 7,
+      version: 8,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
@@ -265,6 +255,19 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         }
         if (version < 7) {
           // v6 -> v7: 'meal' reading mode added (Mushaf-alt). Existing values untouched.
+        }
+        if (version < 8) {
+          // v7 -> v8: accent palette reduced to 5 (default/stone/petrol/green/indigo).
+          const map: Record<string, AccentColorId> = {
+            olive: "green",
+            teal: "petrol",
+            plum: "indigo",
+            crimson: "default",
+            copper: "stone",
+          };
+          if (persisted.accentColor && persisted.accentColor in map) {
+            persisted.accentColor = map[persisted.accentColor];
+          }
         }
         return persisted as any;
       },

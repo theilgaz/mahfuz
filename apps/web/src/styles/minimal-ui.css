@@ -1,7 +1,9 @@
 /* =========================================================
-   Mahfuz Minimal UI — serene editorial reader.
-   Type: Fraunces (display serif) + Inter (UI) + Scheherazade New (Arabic).
-   Palette: warm paper, muted ochre accents. Also: sepia + dark.
+   Mahfuz Minimal UI — Apple-vibe serene reader.
+   Type: Fraunces (editorial display) + Inter (UI) + Scheherazade New (Arabic).
+   Palette: warm paper, burgundy accent. Themes: light + sepia + dark.
+   v8: Apple-vibe karari — capsule buttons, tinted primary, hairline-only.
+         Tipografi editorial: Fraunces hero/headings, Inter UI.
 ========================================================= */
 
 /* ── Font imports (Google Fonts) ──────────────────────── */
@@ -36,16 +38,17 @@
   --mu-line: #E8E8E8;
   --mu-line-2: #D4D4D4;
 
-  --mu-accent: oklch(0.62 0.12 70);
-  --mu-accent-soft: oklch(0.92 0.04 70);
-  --mu-accent-ink: oklch(0.35 0.08 65);
+  --mu-accent: oklch(0.45 0.18 14);
+  --mu-accent-soft: oklch(0.93 0.04 14);
+  --mu-accent-ink: oklch(0.30 0.13 14);
 
   --mu-radius: 14px;
-  --mu-shadow-sm: 0 1px 0 rgba(40,30,10,0.04), 0 2px 8px rgba(40,30,10,0.04);
-  --mu-shadow-md: 0 2px 0 rgba(40,30,10,0.04), 0 18px 40px -20px rgba(40,30,10,0.22);
+  /* v8 (Apple-vibe): default surface'larda golge yok. Sadece overlay'lerde lg kullanilir. */
+  --mu-shadow-sm: none;
+  --mu-shadow-md: none;
 
   --mu-ff-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
-  --mu-ff-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --mu-ff-ui: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --mu-ff-ar: 'Scheherazade New', 'Amiri Quran', 'Amiri', 'Noto Naskh Arabic', serif;
   --mu-ff-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
@@ -116,9 +119,9 @@
   --mu-muted: #857C68;
   --mu-line: #2A251D;
   --mu-line-2: #3A3225;
-  --mu-accent: oklch(0.72 0.11 70);
-  --mu-accent-soft: oklch(0.28 0.05 70);
-  --mu-accent-ink: oklch(0.88 0.10 70);
+  --mu-accent: oklch(0.62 0.18 14);
+  --mu-accent-soft: oklch(0.26 0.07 14);
+  --mu-accent-ink: oklch(0.88 0.12 14);
   --mu-shadow-md: 0 2px 0 rgba(0,0,0,0.2), 0 20px 40px -20px rgba(0,0,0,0.6);
   --mu-shadow-lg: 0 4px 0 rgba(0,0,0,0.25), 0 30px 60px -30px rgba(0,0,0,0.7);
   --mu-danger: oklch(0.68 0.16 25);
@@ -137,9 +140,9 @@
     --mu-muted: #857C68;
     --mu-line: #2A251D;
     --mu-line-2: #3A3225;
-    --mu-accent: oklch(0.72 0.11 70);
-    --mu-accent-soft: oklch(0.28 0.05 70);
-    --mu-accent-ink: oklch(0.88 0.10 70);
+    --mu-accent: oklch(0.62 0.18 14);
+    --mu-accent-soft: oklch(0.26 0.07 14);
+    --mu-accent-ink: oklch(0.88 0.12 14);
     --mu-shadow-md: 0 2px 0 rgba(0,0,0,0.2), 0 20px 40px -20px rgba(0,0,0,0.6);
     --mu-shadow-lg: 0 4px 0 rgba(0,0,0,0.25), 0 30px 60px -30px rgba(0,0,0,0.7);
     --mu-danger: oklch(0.68 0.16 25);
@@ -167,9 +170,9 @@
   --font-ui: var(--mu-ff-ui);
 
   /* Ayet sonu madalyonu — vurgu renginden turetilir */
-  --marker-g1: color-mix(in oklab, var(--mu-accent), white 25%);
+  --marker-g1: color-mix(in oklab, var(--mu-accent), white 6%);
   --marker-g2: var(--mu-accent);
-  --marker-g3: color-mix(in oklab, var(--mu-accent), black 30%);
+  --marker-g3: color-mix(in oklab, var(--mu-accent), black 18%);
   --marker-text: color-mix(in oklab, var(--mu-accent), white 85%);
 }
 
@@ -256,8 +259,8 @@
 }
 
 .mu-tnav.on {
-  background: var(--mu-ink);
-  color: var(--mu-bg);
+  background: var(--mu-accent-soft);
+  color: var(--mu-accent-ink);
 }
 
 .mu-tnav-i {
@@ -353,28 +356,42 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 22px;
+  gap: 8px;
+  padding: 12px 22px;
   font-size: 15px;
+  font-weight: 500;
   font-family: var(--mu-ff-ui);
   border-radius: 999px;
-  transition: transform 0.15s, background 0.15s, color 0.15s;
+  transition: background var(--mu-dur-1) var(--mu-ease), color var(--mu-dur-1) var(--mu-ease), transform var(--mu-dur-1) var(--mu-ease);
   line-height: 1;
+  white-space: nowrap;
 }
 
+/* Primary = Tinted (Apple-vibe karari). Accent-soft fill + accent-ink yazi. */
 .mu-btn.primary {
-  background: var(--mu-ink);
-  color: var(--mu-bg);
+  background: var(--mu-accent-soft);
+  color: var(--mu-accent-ink);
 }
 
 .mu-btn.primary:hover {
+  background: color-mix(in oklab, var(--mu-accent-soft), var(--mu-accent) 12%);
+  transform: translateY(-1px);
+}
+
+.mu-btn.secondary {
+  background: var(--mu-bg-soft);
+  color: var(--mu-ink);
+  border: 1px solid var(--mu-line);
+}
+
+.mu-btn.secondary:hover {
+  border-color: var(--mu-line-2);
   transform: translateY(-1px);
 }
 
 .mu-btn.ghost {
   background: transparent;
   color: var(--mu-ink);
-  border: 1px solid var(--mu-line-2);
 }
 
 .mu-btn.ghost:hover {
@@ -382,8 +399,13 @@
 }
 
 .mu-btn.small {
-  padding: 10px 16px;
+  padding: 8px 14px;
   font-size: 13px;
+}
+
+.mu-btn.large {
+  padding: 14px 26px;
+  font-size: 16px;
 }
 
 .mu-btn svg {
@@ -480,23 +502,138 @@
   flex-wrap: wrap;
 }
 
-/* Reading card */
+/* Apple-style centered hero variant */
+.mu-hero--center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+  padding: 96px 0 72px;
+  min-height: min(72vh, 720px);
+  justify-content: center;
+}
+
+.mu-hero--center .mu-eyebrow {
+  margin: 0 0 28px;
+}
+
+.mu-hero--center .mu-eyebrow .mu-eb-line {
+  width: 24px;
+}
+
+.mu-hero--center .mu-display {
+  font-size: clamp(52px, 7vw, 104px);
+  letter-spacing: -0.035em;
+  max-width: 18ch;
+  margin: 0 0 24px;
+}
+
+.mu-hero--center .mu-lede {
+  margin: 0 auto 40px;
+  font-size: 19px;
+  max-width: 38ch;
+}
+
+.mu-hero--center .mu-hero-cta {
+  justify-content: center;
+  margin: 0;
+}
+
+.mu-hero-meta {
+  margin: 18px 0 0;
+  font-family: var(--mu-ff-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mu-muted);
+}
+
+/* Editorial featured surah block */
+.mu-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 56px 0 72px;
+  gap: 6px;
+}
+
+.mu-feature .mu-eyebrow {
+  margin: 0 0 18px;
+}
+
+.mu-feat-arabic {
+  font-family: var(--mu-ff-ar);
+  font-size: clamp(44px, 5vw, 68px);
+  margin: 0 0 8px;
+  line-height: 1;
+  color: var(--mu-ink);
+  font-weight: 400;
+}
+
+.mu-feat-title {
+  font-family: var(--mu-ff-display);
+  font-weight: 500;
+  font-size: clamp(26px, 3vw, 38px);
+  letter-spacing: -0.015em;
+  margin: 0 0 10px;
+  color: var(--mu-ink);
+}
+
+.mu-feat-meta {
+  font-family: var(--mu-ff-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mu-muted);
+  margin: 0 0 24px;
+}
+
+.mu-feat-pbar {
+  width: 180px;
+  height: 2px;
+  background: var(--mu-line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 0 24px;
+}
+
+.mu-feat-pbar span {
+  display: block;
+  height: 100%;
+  background: var(--mu-accent);
+  border-radius: 2px;
+}
+
+.mu-link-arrow {
+  font-size: 15px;
+  color: var(--mu-accent);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mu-ff-ui);
+  transition: gap 0.2s var(--mu-ease);
+}
+
+.mu-link-arrow:hover {
+  gap: 10px;
+}
+
+.mu-link-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Reading card (v8 hairline-only, golge yok) */
 .mu-readcard {
   background: var(--mu-bg-card);
   border: 1px solid var(--mu-line);
-  border-radius: 20px;
+  border-radius: var(--mu-radius-lg);
   padding: 28px;
-  box-shadow: var(--mu-shadow-md);
   position: relative;
   overflow: hidden;
-}
-
-.mu-readcard::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(300px 180px at 100% 0%, color-mix(in oklab, var(--mu-accent), transparent 85%), transparent 70%);
-  pointer-events: none;
 }
 
 .mu-rc-eyebrow {
@@ -575,7 +712,159 @@
   background: var(--mu-line);
 }
 
-/* ── Surah Index ──────────────────────────────────── */
+/* ── Fihrist Hero (centered search + Apple segmented filter) ── */
+
+.mu-fihrist-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 36px 16px 28px;
+}
+
+.mu-fihrist-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 580px;
+  background: var(--mu-bg);
+  border: 1px solid var(--mu-line);
+  border-radius: 28px;
+  padding: 4px 8px 4px 14px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.mu-fihrist-search:hover {
+  border-color: var(--mu-line-2, var(--mu-ink-3));
+}
+
+.mu-fihrist-search:focus-within {
+  border-color: var(--mu-ink-3);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+.mu-fihrist-search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mu-muted);
+  padding-right: 8px;
+  flex-shrink: 0;
+}
+
+.mu-fihrist-search-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.mu-fihrist-search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  padding: 14px 8px;
+  font-family: var(--mu-ff-display, var(--mu-ff-ui));
+  font-size: 17px;
+  color: var(--mu-ink);
+}
+
+.mu-fihrist-search input::placeholder {
+  color: var(--mu-muted);
+}
+
+.mu-fihrist-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.mu-fihrist-search-clear {
+  all: unset;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--mu-bg-soft, rgba(0, 0, 0, 0.05));
+  color: var(--mu-ink-3);
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mu-fihrist-search-clear:hover {
+  background: var(--mu-line);
+  color: var(--mu-ink);
+}
+
+.mu-fihrist-search-clear svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Apple-style segmented control */
+.mu-fihrist-seg {
+  display: inline-flex;
+  background: var(--mu-bg-soft, rgba(0, 0, 0, 0.05));
+  border-radius: 11px;
+  padding: 3px;
+  gap: 0;
+  max-width: 100%;
+}
+
+.mu-fihrist-seg-btn {
+  all: unset;
+  cursor: pointer;
+  padding: 7px 16px;
+  font-family: var(--mu-ff-ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--mu-ink-3);
+  border-radius: 8px;
+  text-align: center;
+  white-space: nowrap;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.mu-fihrist-seg-btn:hover:not(.on) {
+  color: var(--mu-ink);
+}
+
+.mu-fihrist-seg-btn.on {
+  background: var(--mu-bg, #fff);
+  color: var(--mu-ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0.5px 1px rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 640px) {
+  .mu-fihrist-hero {
+    padding: 20px 12px 16px;
+    gap: 12px;
+  }
+  .mu-fihrist-search {
+    border-radius: 22px;
+    padding: 2px 6px 2px 12px;
+  }
+  .mu-fihrist-search input {
+    font-size: 16px;
+    padding: 12px 4px;
+  }
+  .mu-fihrist-seg {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .mu-fihrist-seg::-webkit-scrollbar { display: none; }
+  .mu-fihrist-seg-btn {
+    padding: 7px 12px;
+    flex: 1 0 auto;
+  }
+}
+
+/* ── Surah Index (legacy bar — unused, kept for reference) ──── */
 
 .mu-index-bar {
   display: flex;
@@ -686,7 +975,7 @@
   right: 0;
   bottom: -1px;
   height: 2px;
-  background: var(--mu-ink);
+  background: var(--mu-accent);
 }
 
 .mu-tab-count {
@@ -1069,8 +1358,8 @@
   color: var(--mu-ink-3);
 }
 .mu-mode-pri-btn.on {
-  color: var(--mu-bg, #fff);
-  background: var(--mu-ink, #14261c);
+  color: var(--mu-accent-ink);
+  background: var(--mu-accent-soft);
 }
 .mu-mode-pri-sub {
   display: inline-flex;
@@ -1536,8 +1825,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--mu-ink);
-  color: var(--mu-bg);
+  background: var(--mu-accent-soft);
+  color: var(--mu-accent-ink);
   display: grid;
   place-items: center;
 }
@@ -3683,15 +3972,15 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   display: block;
   width: 100%;
   padding: 14px 0;
-  border-radius: 8px;
-  border: 1px solid var(--mu-ink);
-  background: var(--mu-ink);
-  color: var(--mu-bg);
+  border-radius: 999px;
+  border: 0;
+  background: var(--mu-accent-soft);
+  color: var(--mu-accent-ink);
   font-family: var(--mu-ff-ui);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: background var(--mu-dur-1) var(--mu-ease);
 }
 
 .mu-step-start-btn:hover { opacity: 0.85; }
@@ -3973,13 +4262,22 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 }
 
 .mu-games-hero {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 56px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 24px 0 48px;
-  border-bottom: 1px solid var(--mu-line);
-  margin-bottom: 40px;
+  text-align: center;
+  padding: 64px 0 40px;
+  margin-bottom: 8px;
+}
+
+.mu-games-hero .mu-display {
+  max-width: 18ch;
+  margin: 0 0 16px;
+}
+
+.mu-games-hero .mu-lede {
+  margin: 0 auto;
+  max-width: 36ch;
 }
 
 .mu-games-filters {
@@ -3987,14 +4285,123 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   gap: 4px;
   flex-wrap: wrap;
   border-bottom: 1px solid var(--mu-line);
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
-.mu-games-grid {
+/* App Store-style row list (replaces .mu-games-grid + .mu-gcard) */
+.mu-games-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 64px;
+}
+
+.mu-grow {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-bottom: 64px;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--mu-line);
+  text-decoration: none;
+  color: var(--mu-ink);
+  transition: background var(--mu-dur-1) var(--mu-ease);
+}
+
+.mu-grow:hover {
+  background: color-mix(in oklab, var(--mu-bg-soft), transparent 40%);
+}
+
+.mu-grow-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid var(--mu-line);
+  background: var(--mu-bg-soft);
+  flex-shrink: 0;
+}
+
+.mu-grow-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mu-grow-title {
+  font-family: var(--mu-ff-display);
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--mu-ink);
+  line-height: 1.2;
+}
+
+.mu-grow-desc {
+  font-size: 13px;
+  color: var(--mu-ink-3);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.mu-grow-tag {
+  font-family: var(--mu-ff-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mu-muted);
+  margin-top: 2px;
+}
+
+.mu-grow-chev {
+  color: var(--mu-muted);
+  transition: transform var(--mu-dur-1) var(--mu-ease), color var(--mu-dur-1) var(--mu-ease);
+}
+
+.mu-grow:hover .mu-grow-chev {
+  color: var(--mu-accent);
+  transform: translateX(3px);
+}
+
+@media (min-width: 720px) {
+  .mu-grow {
+    grid-template-columns: 64px 1fr auto;
+    padding: 14px 8px;
+  }
+  .mu-grow-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+  }
+  .mu-grow-desc {
+    -webkit-line-clamp: 2;
+  }
+}
+
+/* Leaderboard wrapper */
+.mu-games-lboard {
+  padding-top: 24px;
+  border-top: 1px solid var(--mu-line);
+}
+
+.mu-games-lboard-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.mu-games-lboard-head .mu-h2 {
+  margin: 0;
+}
+
+.mu-games-foot {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
 }
 
 .mu-gcard {
@@ -5016,8 +5423,8 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 }
 
 .mu-settings-tab.on {
-  background: var(--mu-accent);
-  color: var(--mu-bg);
+  background: var(--mu-accent-soft);
+  color: var(--mu-accent-ink);
 }
 
 .mu-settings-divider {
@@ -5057,8 +5464,8 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 }
 
 .mu-settings-seg-btn.on {
-  background: var(--mu-accent);
-  color: var(--mu-bg);
+  background: var(--mu-accent-soft);
+  color: var(--mu-accent-ink);
 }
 
 .mu-settings-toggle {
@@ -5461,18 +5868,9 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   box-shadow: 0 0 0 2px rgba(63, 122, 78, 0.08);
 }
 
-/* Flower-badge ayah marker */
-.mu-omv-flower-wrap {
+/* Verse-end marker wrapper — keeps the medallion inline with RTL text */
+.mu-omv-marker-wrap {
   white-space: nowrap;
-}
-
-.mu-omv-flower {
-  display: inline-block;
-  vertical-align: middle;
-  width: 1.1em;
-  height: 1.1em;
-  margin: 0 0.25em;
-  filter: drop-shadow(0 1px 2px rgba(20, 40, 30, 0.18));
 }
 
 /* Responsive: tighter padding on mobile */
@@ -5541,6 +5939,24 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   .mu-hero {
     grid-template-columns: 1fr;
     gap: 32px;
+  }
+
+  .mu-hero--center {
+    padding: 48px 0 40px;
+    min-height: 60vh;
+  }
+
+  .mu-hero--center .mu-display {
+    font-size: clamp(40px, 9vw, 64px);
+  }
+
+  .mu-hero--center .mu-lede {
+    font-size: 16px;
+    margin-bottom: 28px;
+  }
+
+  .mu-feature {
+    padding: 40px 0 48px;
   }
 
   .mu-index-bar {
