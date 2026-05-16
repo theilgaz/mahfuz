@@ -71,13 +71,11 @@ export const en: Messages = {
     labsDesc: "Try new features before they're fully ready",
     accentColor: "Accent Color",
     accents: {
-      default: "Default",
-      olive: "Olive",
-      teal: "Teal",
+      default: "Burgundy",
+      stone: "Stone",
+      petrol: "Petrol",
+      green: "Islamic Green",
       indigo: "Indigo",
-      plum: "Plum",
-      crimson: "Crimson",
-      copper: "Copper",
     },
   },
 

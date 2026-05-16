@@ -71,7 +71,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#eef3f2" },
+      { name: "theme-color", content: "#F7F0DD", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#14110C", media: "(prefers-color-scheme: dark)" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
@@ -110,7 +111,7 @@ function NotFound() {
       </p>
       <Link
         to="/"
-        className="px-5 py-2.5 rounded bg-[var(--color-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+        className="px-5 py-2.5 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] text-sm font-medium hover:opacity-90 transition-opacity"
       >
         {t.error.goHome}
       </Link>

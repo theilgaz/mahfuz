@@ -69,13 +69,11 @@ export const tr = {
     labsDesc: "Henüz tamamlanmamış yeni özellikleri dene",
     accentColor: "Vurgu Rengi",
     accents: {
-      default: "Varsayılan",
-      olive: "Zeytin",
-      teal: "Okyanus",
+      default: "Burgundy",
+      stone: "Taş",
+      petrol: "Petrol",
+      green: "Yeşil",
       indigo: "Indigo",
-      plum: "Erik",
-      crimson: "Kırmızı",
-      copper: "Bakır",
     },
   },
 

@@ -12,7 +12,7 @@ export function MahfuzLogo({ className, size }: MahfuzLogoProps) {
 
   return (
     <img
-      src="/icons/meem-logo.png"
+      src="/icons/meem-logo.svg"
       alt="Mahfuz"
       className={className}
       width={s}

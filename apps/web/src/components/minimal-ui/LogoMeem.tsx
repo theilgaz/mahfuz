@@ -13,7 +13,7 @@ export function LogoMeem({ size = 38 }: LogoMeemProps) {
       style={{ width: size, height: size, display: "inline-flex", alignItems: "center", justifyContent: "center" }}
     >
       <img
-        src="/icons/meem-logo.png"
+        src="/icons/meem-logo.svg"
         alt=""
         aria-hidden="true"
         width={size}

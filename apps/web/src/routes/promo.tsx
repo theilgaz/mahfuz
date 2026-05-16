@@ -80,7 +80,7 @@ const SLICES = [
     ink3: "#a09484",
     muted: "#9a9080",
     line: "#2a2820",
-    accent: ACCENT_COLORS.crimson.dark.accent,
+    accent: ACCENT_COLORS.default.dark.accent,
   },
 ] as const;
 
