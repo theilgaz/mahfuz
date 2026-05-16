@@ -4996,23 +4996,200 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
 .mu-account-head {
   display: flex;
   align-items: center;
-  gap: 28px;
-  padding: 32px 0;
-  margin-bottom: 32px;
-  border-bottom: 1px solid var(--mu-line);
+  gap: 20px;
+  padding: 40px 0 28px;
 }
 
 .mu-account-avatar {
-  width: 96px;
-  height: 96px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  background: var(--mu-accent);
-  color: var(--mu-bg);
+  background: var(--mu-accent-soft);
+  color: var(--mu-accent-ink);
   display: grid;
   place-items: center;
   font-family: var(--mu-ff-display);
-  font-size: 42px;
+  font-size: 32px;
   font-weight: 500;
+  flex-shrink: 0;
+}
+
+.mu-account-name {
+  font-family: var(--mu-ff-display);
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: -0.015em;
+  margin: 0 0 4px;
+  color: var(--mu-ink);
+}
+
+.mu-account-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--mu-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mu-account-league {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Inline stat strip (no boxes, mono numbers) */
+.mu-account-strip {
+  display: flex;
+  gap: 28px;
+  padding: 16px 0 24px;
+  border-bottom: 1px solid var(--mu-line);
+  margin-bottom: 24px;
+}
+
+.mu-account-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.mu-account-stat-n {
+  font-family: var(--mu-ff-display);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--mu-ink);
+}
+
+.mu-account-stat-l {
+  font-family: var(--mu-ff-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mu-muted);
+}
+
+/* Apple Settings–style row */
+.mu-prow-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+.mu-prow {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--mu-line);
+  text-decoration: none;
+  color: var(--mu-ink);
+  transition: background var(--mu-dur-1) var(--mu-ease);
+  cursor: pointer;
+}
+
+.mu-prow:hover {
+  background: color-mix(in oklab, var(--mu-bg-soft), transparent 40%);
+}
+
+.mu-prow--feature {
+  background: var(--mu-bg-card);
+  border: 1px solid var(--mu-line);
+  border-radius: var(--mu-radius);
+  margin-bottom: 24px;
+  padding: 16px 18px;
+}
+
+.mu-prow--feature:hover {
+  border-color: var(--mu-line-2);
+  background: var(--mu-bg-card);
+}
+
+.mu-prow-icon {
+  color: var(--mu-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mu-prow-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.mu-prow--feature .mu-prow-icon {
+  color: var(--mu-accent);
+}
+
+.mu-prow-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mu-prow-title {
+  font-family: var(--mu-ff-display);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--mu-ink);
+  line-height: 1.2;
+}
+
+.mu-prow-sub {
+  font-size: 12px;
+  color: var(--mu-muted);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mu-prow-chev {
+  color: var(--mu-muted);
+  transition: transform var(--mu-dur-1) var(--mu-ease), color var(--mu-dur-1) var(--mu-ease);
+}
+
+.mu-prow-chev svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mu-prow:hover .mu-prow-chev {
+  color: var(--mu-accent);
+  transform: translateX(3px);
+}
+
+.mu-account-foot {
+  padding: 24px 0 8px;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .mu-account-head {
+    gap: 16px;
+    padding: 24px 0 20px;
+  }
+  .mu-account-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+  .mu-account-name {
+    font-size: 24px;
+  }
+  .mu-account-strip {
+    gap: 20px;
+    padding: 14px 0 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .mu-account-stat-n {
+    font-size: 19px;
+  }
 }
 
 .mu-account-stats {
