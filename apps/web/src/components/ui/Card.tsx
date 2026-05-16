@@ -13,10 +13,9 @@ export function cardClasses({ padded = true, hover = false, flush = false }: Car
     "bg-[var(--mu-bg-card)] border border-[var(--mu-line)]",
     flush ? "" : "rounded-[var(--mu-radius)]",
     padded && "p-4",
-    "shadow-[var(--mu-shadow-sm)]",
     hover &&
-      "transition-[transform,box-shadow] duration-200 [transition-timing-function:var(--mu-ease)] " +
-        "hover:-translate-y-px hover:shadow-[var(--mu-shadow-md)]",
+      "transition-[transform,border-color] duration-200 [transition-timing-function:var(--mu-ease)] " +
+        "hover:-translate-y-px hover:border-[var(--mu-line-2)]",
   );
 }
 

@@ -18,22 +18,22 @@ const BASE =
   "disabled:opacity-50 disabled:cursor-not-allowed";
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-xs rounded-[var(--mu-radius-sm)]",
-  md: "h-10 px-4 text-sm rounded-[var(--mu-radius-sm)]",
-  lg: "h-12 px-5 text-base rounded-[var(--mu-radius)]",
+  sm: "h-8 px-3.5 text-xs rounded-full",
+  md: "h-10 px-5 text-sm rounded-full",
+  lg: "h-12 px-6 text-base rounded-full",
 };
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--mu-accent)] text-white hover:bg-[color-mix(in_oklab,var(--mu-accent),black_8%)]",
+    "bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] hover:bg-[color-mix(in_oklab,var(--mu-accent-soft),var(--mu-accent)_12%)]",
   secondary:
-    "bg-[var(--mu-bg-soft)] text-[var(--mu-ink)] border border-[var(--mu-line)] hover:bg-[var(--mu-bg-card)]",
+    "bg-[var(--mu-bg-soft)] text-[var(--mu-ink)] border border-[var(--mu-line)] hover:border-[var(--mu-line-2)]",
   ghost:
     "bg-transparent text-[var(--mu-ink)] hover:bg-[var(--mu-bg-soft)]",
   link:
     "bg-transparent text-[var(--mu-accent)] hover:underline underline-offset-4 px-0 h-auto",
   danger:
-    "bg-[var(--mu-danger)] text-white hover:bg-[color-mix(in_oklab,var(--mu-danger),black_8%)]",
+    "bg-[var(--mu-danger-soft)] text-[var(--mu-danger-ink)] hover:bg-[color-mix(in_oklab,var(--mu-danger-soft),var(--mu-danger)_12%)]",
 };
 
 export function buttonClasses({ variant = "primary", size = "md", block }: ButtonClassOpts = {}): string {

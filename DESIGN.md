@@ -27,15 +27,30 @@ veya yeni bir sayfa kurarken once buraya bak. Burada yoksa, ekleyip oyle kullan.
 
 ## 1. Felsefe
 
-Uc kelime: **sessiz, edebi, odakli**.
+Uc kelime: **sessiz, edebi, odakli**. Beslenildigi dil: **Apple-vibe**.
 
 - **Sessiz**: parlak renk, animasyon ve dekor kullaniciyi metne odaklamaktan
   alikoymamali. Kelime vurgusu, golge, accent rengi: hepsi yumusak.
-- **Edebi**: tipografi birinci sinif. Fraunces (Latin display), Inter (UI),
-  Scheherazade New / KFGQPC HAFS (Arapca). Bosluk, satir yuksekligi metin
-  okunabilirligine yatirim olarak gorulur.
+- **Edebi**: Inter UI Latin metni, Scheherazade New / KFGQPC HAFS Arapca.
+  Hero ve sayfa basliklari da sans kullanir; "editorial" agirlik tipografide
+  degil bosluk + kompozisyonda.
 - **Odakli**: bir ekranda en fazla bir ana eylem. Ikincil eylemler tek vurgudan
   daha az isaretlenmis olmali (outline, ghost, link tarzlari).
+
+### 1.1 Apple-vibe karar paketi
+
+Tum bilesenler asagidaki dort eksene **istisnasiz** uyar. Yeni primitif/varyant
+eklerken once buraya bak.
+
+| Eksen        | Karar                                                                  |
+|--------------|------------------------------------------------------------------------|
+| Buton sekli  | **Capsule** her yerde (`border-radius: 999px`). Istisna: içeriği paragraflı "seçim kartı" (full-width, ≥ 56px tall) — bunlar `var(--mu-radius)` ile yuvarlatılır. Kısa CTA, ikon-buton, segmented control, tab: **her zaman** capsule. |
+| Buton birincil | **Tinted**: `--mu-accent-soft` arka plan + `--mu-accent-ink` metin. iOS Tinted tarzi quiet aksiyon. |
+| Yuzey        | **Hairline-only**: 1px `--mu-line` border, golge yok. Yukseltme gerekiyorsa kontrast/yer ile cozulur, shadow ile degil. |
+| Tipografi    | **Fraunces + Inter**: Display = Fraunces editorial serif (hero, basliklar, sure adlari); UI/buton/govde = Inter. Edebi karakter tipografide tasinir. |
+
+**Sonuc**: ekran flat, hairline, tum CTA'lar yumusak burgundy tinted kapsul.
+Goz "rahat", parmak iz birakmaz hissi.
 
 ## 2. Token mimarisi
 
@@ -119,10 +134,15 @@ bir hex literal regresyon sebebidir.
 ### Font aileleri
 | Token              | Aile                          | Kullanim                              |
 |--------------------|-------------------------------|---------------------------------------|
-| `--mu-ff-display`  | Fraunces, Cormorant, Georgia  | Sayfa basligi, hero, sure adi (Latin) |
-| `--mu-ff-ui`       | Inter, system-ui              | Tum UI, gov metni, dugme              |
+| `--mu-ff-display`  | Fraunces, Cormorant, Georgia  | Sayfa basligi, hero, sure adi (Latin). Editorial serif. |
+| `--mu-ff-ui`       | Inter, -apple-system, system-ui | Tum UI, govde metni, dugme          |
 | `--mu-ff-ar`       | Scheherazade New, KFGQPC HAFS | Arapca ayet ve kelime                 |
 | `--mu-ff-mono`     | JetBrains Mono                | Kod, sayisal etiket (skor, sure no)   |
+
+> Apple-vibe (v8) tipografi karari: Fraunces editorial display + Inter UI
+> ikili sistemi. Sans-only deneyi geri alindi — Mahfuz'un edebi karakteri
+> Fraunces ile tasiniyor; Apple-vibe sadelik bosluk, capsule butonlar ve
+> hairline yuzeylerde.
 
 ### Tip skalasi (yeni, eklenmeli)
 
@@ -169,15 +189,24 @@ gibi Tailwind utility'leri ayni olcekte oldugu surece kabul edilir.
 ## 7. Kose ve golge
 
 ```css
---mu-radius-sm: 8px;   /* tag, pill, kucuk dugme */
---mu-radius:    14px;  /* kart, sheet, input (mevcut) */
---mu-radius-lg: 20px;  /* hero kart, modal */
---mu-radius-full: 999px; /* avatar, ikon dugme */
+--mu-radius-sm: 8px;     /* input, tag */
+--mu-radius:    14px;    /* kart, sheet */
+--mu-radius-lg: 20px;    /* modal, hero card */
+--mu-radius-full: 999px; /* avatar, **TUM butonlar** (capsule karari) */
 ```
 
-Mevcut `--mu-shadow-sm` ve `--mu-shadow-md` korunur. Modal/sheet icin daha
-guclu bir golge gerekirse `--mu-shadow-lg` Phase 2'de eklenir. Karta birden
-fazla golge stillemekten kacin.
+**Golge politikasi (v8 Apple-vibe):**
+
+- **Default**: golge yok. Yuzeyler hairline border (`1px solid --mu-line`) ile
+  ayrisir. Karti "yukselmis" hissettirmek icin border + bg-card kombinasyonu
+  yeterli.
+- **Istisna**: kullanici etkilesimi sirasinda gercekten katmanli olan yuzeyler
+  (modal/sheet, dropdown overlay, drag-and-drop). Bunlar `--mu-shadow-lg`
+  kullanir; baska yerde shadow goremezsin.
+- **Hover**: 1px translateY yukselme + border rengi koyulasmasi yeterli.
+  Shadow ekleme. (`hover-shadow` artik yasak.)
+
+Karta birden fazla golge stillemek (cift golge, glow + drop) **yasak**.
 
 ## 8. Hareket
 
@@ -239,28 +268,36 @@ desenler asagidaki primitiflere tasinir.
 | `Skeleton`     | Yuklenme iskeleti                               | Yapilcak |
 | `Toast`        | Gecici bilgi                                    | Yapilcak |
 
-### Buton varyantlari
-- **Primary**: `bg: --mu-accent`, `text: white`. Sayfada en fazla bir.
-- **Secondary**: `bg: --mu-bg-soft`, `text: --mu-ink`, `border: --mu-line`.
+### Buton varyantlari (v8 Apple-vibe: hepsi capsule)
+
+Tum butonlar `border-radius: 999px` (capsule). Tek istisna yok.
+
+- **Primary (tinted)**: `bg: --mu-accent-soft`, `text: --mu-accent-ink`,
+  border yok. iOS Tinted estetigi. Sayfada en fazla bir tane.
+- **Secondary**: `bg: --mu-bg-soft`, `text: --mu-ink`, hairline border.
 - **Ghost**: arka plansiz, `text: --mu-ink`, hover'da `--mu-bg-soft`.
-- **Link**: cizgisiz, `text: --mu-accent`, hover'da alt cizgi.
-- **Danger**: `bg: --mu-danger`, `text: white`. Yalniz yikici eylemde (sil, vazgec).
+- **Link**: cizgisiz, `text: --mu-accent`, hover'da gap genisler (`mu-link-arrow`).
+- **Danger**: `bg: --mu-danger-soft`, `text: --mu-danger-ink`. Tinted Danger.
+  Sadece yikici eylem (sil, vazgec).
 
-Not: `--mu-accent-ink` solid accent dolgu uzerine **degil**, `--mu-accent-soft`
-yumusak yuzeyleri uzerine metin icin. Ornek: bir tag/chip `bg: --mu-accent-soft`,
-`text: --mu-accent-ink`. Solid `--mu-accent` dolgusu icin metin `white`.
+> "Solid accent" doldurulmus buton **kullanmiyoruz**. Sayfada en fazla bir
+> tinted primary olmasi kuralina dikkat et.
 
-Boyutlar: `sm` (32px y), `md` (40px y, varsayilan), `lg` (48px y, hero CTA).
+Boyutlar: `sm` (32px y, 14px text), `md` (40px y, 15px text, varsayilan),
+`lg` (48px y, 16px text, hero CTA).
 
-### Kart deseni
+### Kart deseni (v8 hairline-only)
 ```
 border: 1px solid var(--mu-line)
 border-radius: var(--mu-radius)
 background: var(--mu-bg-card)
 padding: var(--mu-s-4)
-shadow: var(--mu-shadow-sm)  /* opsiyonel */
-hover transform: translateY(-1px), shadow: var(--mu-shadow-md)
+/* SHADOW YOK */
+hover: border-color: var(--mu-line-2); transform: translateY(-1px)
 ```
+
+Hover'da shadow ekleme. Border koyulasmasi + ufak yukselme yeterli his
+verir.
 
 ## 11. Ikonografi
 

@@ -1,5 +1,5 @@
 /**
- * Home page hero section and reading card for the minimal UI.
+ * Home hero — Apple-style monumental centered composition.
  */
 
 import { Link } from "@tanstack/react-router";
@@ -26,50 +26,49 @@ export function HomeHero() {
 
   return (
     <>
-      <section className="mu-hero">
-        <div>
-          <p className="mu-eyebrow">
-            <span className="mu-eb-line" />
-            {t.home?.slogan ?? "15:9"}
-          </p>
-          <h1 className="mu-display">
-            <span>{t.home?.heroTitle ?? "Korunduğu gibi"}</span>
-            <span className="mu-display-accent"> {t.home?.heroAccent ?? "karşında."}</span>
-          </h1>
-          <p className="mu-lede">
-            {t.home?.heroDesc ?? "Kur'an yolculuğuna başla."}
-          </p>
-          <div className="mu-hero-cta">
-            {continueLink ? (
-              <Link {...continueLink} className="mu-btn primary">
-                {t.home?.continueReading ?? "Okumaya devam et"}
-                <span className="mu-btn-sub">
-                  {getSurahName(lastSurah!.id, locale)} - {t.reader?.ayah ?? "ayet"} {lastPosition!.ayahNumber}
-                </span>
-                {MuIcons.arrowRight}
-              </Link>
-            ) : (
-              <Link to="/surah/$surahSlug" params={{ surahSlug: surahSlug(1) }} className="mu-btn primary">
-                {t.home?.startReading ?? "Fatiha'dan başla"}
-                {MuIcons.arrowRight}
-              </Link>
-            )}
-          </div>
+      <section className="mu-hero mu-hero--center">
+        <p className="mu-eyebrow">
+          <span className="mu-eb-line" />
+          {t.home?.slogan ?? "15:9"}
+          <span className="mu-eb-line" />
+        </p>
+        <h1 className="mu-display">
+          <span>{t.home?.heroTitle ?? "Korunduğu gibi"}</span>
+          <span className="mu-display-accent"> {t.home?.heroAccent ?? "karşında."}</span>
+        </h1>
+        <p className="mu-lede">
+          {t.home?.heroDesc ?? "Kur'an yolculuğuna başla."}
+        </p>
+        <div className="mu-hero-cta">
+          {continueLink ? (
+            <Link {...continueLink} className="mu-btn primary">
+              {t.home?.continueReading ?? "Okumaya devam et"}
+              {MuIcons.arrowRight}
+            </Link>
+          ) : (
+            <Link to="/surah/$surahSlug" params={{ surahSlug: surahSlug(1) }} className="mu-btn primary">
+              {t.home?.startReading ?? "Fatiha'dan başla"}
+              {MuIcons.arrowRight}
+            </Link>
+          )}
         </div>
-
-        <div>
-          <ReadingCard />
-        </div>
+        {lastPosition && lastSurah && (
+          <p className="mu-hero-meta">
+            {getSurahName(lastSurah.id, locale)} · {t.reader?.ayah ?? "ayet"} {lastPosition.ayahNumber} / {lastSurah.ayahCount}
+          </p>
+        )}
       </section>
 
       <div className="mu-rule">
         <Ornament />
       </div>
+
+      <FeaturedSurah />
     </>
   );
 }
 
-function ReadingCard() {
+function FeaturedSurah() {
   const { t, locale } = useTranslation();
   const lastPosition = useReadingStore((s) => s.lastPosition);
   const { data: surahs } = useSurahs();
@@ -87,37 +86,29 @@ function ReadingCard() {
   const linkProps = { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(surah.id) } };
 
   return (
-    <div className="mu-readcard">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--mu-accent)" }}>
-        <p className="mu-rc-eyebrow">
-          {lastPosition ? (t.home?.lastRead ?? "Son okunan") : (t.home?.suggested ?? "Önerilen")}
-        </p>
-        <Ornament size={14} />
-      </div>
-      <p className="mu-rc-arabic" dir="rtl">
+    <section className="mu-feature">
+      <p className="mu-eyebrow">
+        {lastPosition ? (t.home?.lastRead ?? "Son okunan") : (t.home?.suggested ?? "Önerilen")}
+      </p>
+      <p className="mu-feat-arabic" dir="rtl">
         سُورَةُ {surah.nameArabic}
       </p>
-      <h3 className="mu-rc-title">
-        {getSurahName(surah.id, locale) || surah.nameSimple}{" "}
-        <span className="mu-muted">- {getSurahMeaning(surah.id, locale)}</span>
-      </h3>
-      <p className="mu-rc-quote">
-        {surah.ayahCount} ayet - {surah.revelation === "makkah" ? "Mekki" : "Medeni"} sure
+      <h2 className="mu-feat-title">
+        {getSurahName(surah.id, locale) || surah.nameSimple}
+        <span className="mu-muted"> — {getSurahMeaning(surah.id, locale)}</span>
+      </h2>
+      <p className="mu-feat-meta">
+        {surah.ayahCount} {t.surahList?.verses ?? "ayet"} · {surah.revelation === "makkah" ? "Mekki" : "Medeni"}
       </p>
-      <div style={{ marginBottom: 18 }}>
-        <div className="mu-rc-pbar">
-          <span style={{ width: `${Math.max(pct, 6)}%` }} />
+      {lastPosition && (
+        <div className="mu-feat-pbar" aria-label={`%${pct}`}>
+          <span style={{ width: `${Math.max(pct, 4)}%` }} />
         </div>
-        <span className="mu-rc-psub">
-          {lastPosition
-            ? `${t.reader?.ayah ?? "Ayet"} ${lastPosition.ayahNumber} / ${surah.ayahCount}`
-            : `${surah.ayahCount} ${t.surahList?.verses ?? "ayet"}`}
-        </span>
-      </div>
-      <Link {...linkProps} className="mu-btn small primary">
-        {lastPosition ? (t.home?.continueBtn ?? "Devam et") : (t.home?.startBtn ?? "Okumaya başla")}{" "}
+      )}
+      <Link {...linkProps} className="mu-link-arrow">
+        {lastPosition ? (t.home?.continueBtn ?? "Devam et") : (t.home?.startBtn ?? "Okumaya başla")}
         {MuIcons.arrowRight}
       </Link>
-    </div>
+    </section>
   );
 }

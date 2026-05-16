@@ -446,9 +446,9 @@ div:not([data-longpress="true"]):not([data-ayah]):has(~ [data-longpress="true"])
 /* Game card with glow hover */
 .game-option-card {
   position: relative;
-  border-radius: 14px;
+  border-radius: 999px;
   border: 1.5px solid transparent;
-  padding: 14px 16px;
+  padding: 12px 18px;
   transition: all 0.2s ease;
   cursor: pointer;
 }

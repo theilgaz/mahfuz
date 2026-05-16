@@ -16,9 +16,7 @@ const GAMES = [
     t: GAME_TITLES["fill-blank"]!,
     tag: "Kur'an",
     s: "Eksik kelimeyi seçerek ayeti doğru tamamla.",
-    d: "orta" as const,
-    time: "5 dk",
-    xp: 80,
+    img: "/images/games/mahfuz-fill-in-the-blank.webp",
     path: "/games/fill-blank",
   },
   {
@@ -26,9 +24,7 @@ const GAMES = [
     t: GAME_TITLES["surah-guess"]!,
     tag: "Sûreler",
     s: "Türkçe anlama bakıp doğru sûreyi seç.",
-    d: "orta" as const,
-    time: "3 dk",
-    xp: 60,
+    img: "/images/games/mahfuz-surah-recognition.webp",
     path: "/games/surah-guess",
   },
   {
@@ -36,9 +32,7 @@ const GAMES = [
     t: GAME_TITLES["word-meaning"]!,
     tag: "Arapça",
     s: "Kur'an Arapçasında sık geçen kelimeleri öğren.",
-    d: "kolay" as const,
-    time: "3 dk",
-    xp: 50,
+    img: "/images/games/mahfuz-word-meaning.webp",
     path: "/games/word-meaning",
   },
   {
@@ -46,9 +40,7 @@ const GAMES = [
     t: GAME_TITLES["verse-chain"]!,
     tag: "Hifz",
     s: "Ayetleri doğru sıraya dizerek zinciri tamamla.",
-    d: "zor" as const,
-    time: "6 dk",
-    xp: 120,
+    img: "/images/games/mahfuz-verse-chain.webp",
     path: "/games/verse-chain",
   },
   {
@@ -56,9 +48,7 @@ const GAMES = [
     t: GAME_TITLES["hexagon"]!,
     tag: "Elifba",
     s: "Arap harflerini Latin karşılıklarıyla eşleştir.",
-    d: "kolay" as const,
-    time: "2 dk",
-    xp: 40,
+    img: "/images/games/mahfuz-hexagon-letters.webp",
     path: "/games/hexagon",
   },
   {
@@ -66,9 +56,7 @@ const GAMES = [
     t: GAME_TITLES["kelime-tahmini"]!,
     tag: "Bulmaca",
     s: "Türkçe ipucundan gizli Arapça kelimeyi 6 denemede bul.",
-    d: "orta" as const,
-    time: "5 dk",
-    xp: 70,
+    img: "/images/games/mahfuz-kelime-tahmini.webp",
     path: "/games/kelime-tahmini",
   },
   {
@@ -76,9 +64,7 @@ const GAMES = [
     t: GAME_TITLES["ayet-2048"]!,
     tag: "Bulmaca",
     s: "Aynı sureleri birleştirerek Tegabun'a (64) ulaş.",
-    d: "zor" as const,
-    time: "4 dk",
-    xp: 100,
+    img: "/images/games/mahfuz-ayet-2048.webp",
     path: "/games/ayah-2048",
   },
   {
@@ -86,14 +72,10 @@ const GAMES = [
     t: GAME_TITLES["word-match"]!,
     tag: "Bulmaca",
     s: "Türkçe anlamla Arapça kelimeyi eşleştir.",
-    d: "kolay" as const,
-    time: "3 dk",
-    xp: 50,
+    img: "/images/games/mahfuz-word-match.webp",
     path: "/games/word-match",
   },
 ];
-
-const DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
 export function GamesPageMinimal() {
   const { t } = useTranslation();
@@ -109,37 +91,19 @@ export function GamesPageMinimal() {
 
   return (
     <div className="mu-games">
-      {/* Top bar with scoreboard + meclis CTAs */}
-      <div className="mu-games-topbar">
-        <Link to="/games/scoreboard" className="mu-games-scoreboard-cta">
-          <span className="mu-gscb-icon" aria-hidden="true">{MuIcons.games}</span>
-          <span className="mu-gscb-label">Skor Tablosu</span>
-          <span className="mu-gscb-arrow" aria-hidden="true">{MuIcons.arrowRight}</span>
-        </Link>
-        <Link to="/meclis" className="mu-games-meclis-cta">
-          <span className="mu-gscb-icon" aria-hidden="true">{MuIcons.usersFour}</span>
-          <span className="mu-gscb-label">Meclis</span>
-          <span className="mu-gscb-arrow" aria-hidden="true">{MuIcons.arrowRight}</span>
-        </Link>
-      </div>
-
-      {/* Hero */}
+      {/* Hero — minimal, centered */}
       <section className="mu-games-hero">
-        <div>
-          <p className="mu-eyebrow">
-            <span className="mu-eb-line" />
-            {t.gamesHub?.title ?? "Oyunlar"} - öğrenirken oyna
-          </p>
-          <h1 className="mu-display">
-            Ayetleri, harfleri,<span className="mu-display-accent"> hafızana nakşet.</span>
-          </h1>
-          <p className="mu-lede">
-            Kısa, odaklı oyunlarla Kur'an Arapçasını ve sûrelerin anlamlarını hatırında tut. Her gün 5 dakika yeter.
-          </p>
-        </div>
-        <div>
-          <StreakCard />
-        </div>
+        <p className="mu-eyebrow">
+          <span className="mu-eb-line" />
+          {t.gamesHub?.title ?? "Oyunlar"}
+          <span className="mu-eb-line" />
+        </p>
+        <h1 className="mu-display">
+          Ayetleri, harfleri,<span className="mu-display-accent"> hafızana nakşet.</span>
+        </h1>
+        <p className="mu-lede">
+          Kısa, odaklı oyunlarla her gün 5 dakika.
+        </p>
       </section>
 
       {/* Filters */}
@@ -155,51 +119,35 @@ export function GamesPageMinimal() {
         ))}
       </div>
 
-      {/* Game grid */}
-      <div className="mu-games-grid">
+      {/* Game list — App Store-style rows */}
+      <ul className="mu-games-list">
         {list.map((g) => (
-          <Link to={g.path as any} key={g.id} style={{ textDecoration: "none", color: "inherit", display: "flex", height: "100%" }}>
-            <article className="mu-gcard" style={{ flex: 1 }}>
-              <div style={{ flex: 1 }}>
-                <div className="mu-gcard-top">
-                  <span className="mu-gcard-tag">{g.tag}</span>
-                  <span className={`mu-gcard-diff diff-${g.d}`}>
-                    <span className="dots">
-                      <i />
-                      <i />
-                      <i />
-                    </span>
-                    {g.d}
-                  </span>
-                </div>
-                <h3>{g.t}</h3>
-                <p className="mu-muted" style={{ fontSize: 13, margin: 0, lineHeight: 1.4 }}>
-                  {g.s}
-                </p>
-              </div>
-              <div className="mu-gcard-foot">
-                <span className="mu-gcard-meta">
-                  <span>{g.time}</span>
-                  <span className="mu-dot">-</span>
-                  <span>+{g.xp} XP</span>
-                </span>
-                <span className="mu-btn small primary" style={{ padding: "8px 12px", fontSize: 12 }}>
-                  Başla {MuIcons.arrowRight}
-                </span>
-              </div>
-            </article>
-          </Link>
+          <li key={g.id}>
+            <Link to={g.path as any} className="mu-grow">
+              <img
+                src={g.img}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
+                className="mu-grow-icon"
+              />
+              <span className="mu-grow-meta">
+                <span className="mu-grow-title">{g.t}</span>
+                <span className="mu-grow-desc">{g.s}</span>
+                <span className="mu-grow-tag">{g.tag}</span>
+              </span>
+              <span className="mu-grow-chev" aria-hidden="true">{MuIcons.chev}</span>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
 
       {/* Leaderboard */}
-      <section style={{ paddingTop: 24, borderTop: "1px solid var(--mu-line)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-            <h2 className="mu-h2" style={{ margin: 0 }}>Skor Tablosu</h2>
-            <span className="mu-muted" style={{ fontSize: 12 }}>Bu sezon · İlk 10</span>
-          </div>
-          <Link to="/games/scoreboard" className="mu-muted" style={{ fontSize: 13, textDecoration: "none" }}>
+      <section className="mu-games-lboard">
+        <div className="mu-games-lboard-head">
+          <h2 className="mu-h2">Skor Tablosu</h2>
+          <Link to="/games/scoreboard" className="mu-link-arrow">
             Tümü {MuIcons.arrowRight}
           </Link>
         </div>
@@ -227,35 +175,11 @@ export function GamesPageMinimal() {
             </li>
           )}
         </ol>
+        <div className="mu-games-foot">
+          <Link to="/meclis" className="mu-link-arrow">Meclis {MuIcons.arrowRight}</Link>
+        </div>
       </section>
     </div>
   );
 }
 
-function StreakCard() {
-  const pattern = [1, 1, 0, 1, 0, 0, 0];
-  return (
-    <div className="mu-streak-card">
-      <div className="mu-streak-top">
-        <div>
-          <p className="mu-rc-eyebrow">Seri</p>
-          <p className="mu-streak-big">
-            2<span>gün</span>
-          </p>
-        </div>
-        <div className="mu-streak-flame">{MuIcons.flame}</div>
-      </div>
-      <div className="mu-streak-days">
-        {DAYS.map((d, i) => (
-          <div key={d} className={`mu-streak-day ${pattern[i] ? "on" : ""}`}>
-            <span className="mu-sd-dot" />
-            <span className="mu-sd-l">{d}</span>
-          </div>
-        ))}
-      </div>
-      <p className="mu-muted" style={{ fontSize: 12, margin: 0 }}>
-        İki gün üst üste! Devam.
-      </p>
-    </div>
-  );
-}
