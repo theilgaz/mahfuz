@@ -21,12 +21,12 @@ export const Route = createFileRoute("/promo")({
 
 const PROMO_VERBS: { id: AccentColorId; label: string }[] = [
   { id: "default", label: "oku." },
-  { id: "olive", label: "dinle." },
-  { id: "teal", label: "ezberle." },
+  { id: "petrol", label: "dinle." },
+  { id: "green", label: "ezberle." },
   { id: "indigo", label: "öğren." },
-  { id: "plum", label: "oyna." },
-  { id: "crimson", label: "paylaş." },
-  { id: "copper", label: "yaşa." },
+  { id: "stone", label: "oyna." },
+  { id: "default", label: "paylaş." },
+  { id: "green", label: "yaşa." },
 ];
 
 const FATIHA_AYAHS = [
