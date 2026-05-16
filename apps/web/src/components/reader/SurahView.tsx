@@ -312,7 +312,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
             <div style={{ width: `${progressPct}%`, height: "100%", background: "var(--mu-accent)", borderRadius: 1, transition: "width 0.3s ease" }} />
           </div>
         </div>
-      <div ref={containerRef} className={`mu-reader${isMushaf ? " mu-reader--mushaf" : ""}`} style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
+      <div ref={containerRef} className={`mu-reader${primaryMode === "mushaf" ? " mu-reader--mushaf" : ""}`} style={{ "--arabic-size": `${arabicFontSize}rem` } as React.CSSProperties}>
         {/* Main content */}
         <div>
           {isMushaf ? (
@@ -427,13 +427,15 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
           )}
         </div>
 
-        {/* Right sidebar */}
-        <SurahSidebar
-          ayahList={ayahList}
-          activeAyah={activeAyah}
-          surahId={surahId}
-          ayahRefs={ayahRefs}
-        />
+        {/* Right sidebar — hidden in Mushaf primary mode (mushaf + meal) */}
+        {primaryMode === "ayet" && (
+          <SurahSidebar
+            ayahList={ayahList}
+            activeAyah={activeAyah}
+            surahId={surahId}
+            ayahRefs={ayahRefs}
+          />
+        )}
       </div>
     </>
   );
