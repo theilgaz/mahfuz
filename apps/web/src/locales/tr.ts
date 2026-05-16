@@ -83,6 +83,7 @@ export const tr = {
     home: "Ana Sayfa",
     continueReading: "Devam Et",
     read: "Oku",
+    fihrist: "Fihrist",
     bookmarks: "İmler",
     hub: "Keşfet",
     hubDesc: "Tecvid, Elif-Ba, Hatim",

@@ -85,6 +85,7 @@ export const en: Messages = {
     home: "Home",
     continueReading: "Continue",
     read: "Read",
+    fihrist: "Index",
     bookmarks: "Bookmarks",
     hub: "Explore",
     hubDesc: "Tajweed, Alifba, Hatim",

@@ -19,6 +19,7 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
 
   const navItems = [
     { name: "home", path: "/", icon: MuIcons.home, label: t.nav?.home ?? "Ana Sayfa" },
+    { name: "fihrist", path: "/fihrist", icon: MuIcons.book, label: t.nav?.fihrist ?? "Fihrist" },
     { name: "discover", path: "/discover", icon: MuIcons.compass, label: t.hub?.title ?? "Kesfet" },
   ];
 

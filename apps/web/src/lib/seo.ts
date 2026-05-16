@@ -47,6 +47,7 @@ function buildMeta({ title, description }: HeadMeta) {
 
 const STATIC: Record<string, HeadMeta> = {
   home: { title: "Ana Sayfa", description: "Günün ayeti, son okudukların ve sure listesi tek bir sade ekranda." },
+  fihrist: { title: "Sure Fihristi", description: "Kuran'ın 114 sûresi — filtre, arama ve alfabetik düzenle." },
   about: { title: "Hakkında", description: "Mahfuz'un amacı, kaynakları ve geliştiricisi hakkında." },
   bookmarks: { title: "Yer İmlerim", description: "Kaydettiğin ayetler tek liste hâlinde — sure veya tarih sırasıyla." },
   changelog: { title: "Değişiklik Kaydı", description: "Mahfuz'a eklenen yeni özellikler ve düzeltmeler." },

@@ -20,6 +20,7 @@ import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as NotesRouteImport } from './routes/notes'
 import { Route as HifzRouteImport } from './routes/hifz'
 import { Route as GamesRouteImport } from './routes/games'
+import { Route as FihristRouteImport } from './routes/fihrist'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
@@ -126,6 +127,11 @@ const HifzRoute = HifzRouteImport.update({
 const GamesRoute = GamesRouteImport.update({
   id: '/games',
   path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FihristRoute = FihristRouteImport.update({
+  id: '/fihrist',
+  path: '/fihrist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiscoverRoute = DiscoverRouteImport.update({
@@ -395,6 +401,7 @@ export interface FileRoutesByFullPath {
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
+  '/fihrist': typeof FihristRoute
   '/games': typeof GamesRouteWithChildren
   '/hifz': typeof HifzRoute
   '/notes': typeof NotesRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
+  '/fihrist': typeof FihristRoute
   '/hifz': typeof HifzRoute
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
@@ -523,6 +531,7 @@ export interface FileRoutesById {
   '/bookmarks': typeof BookmarksRoute
   '/changelog': typeof ChangelogRoute
   '/discover': typeof DiscoverRoute
+  '/fihrist': typeof FihristRoute
   '/games': typeof GamesRouteWithChildren
   '/hifz': typeof HifzRoute
   '/notes': typeof NotesRoute
@@ -590,6 +599,7 @@ export interface FileRouteTypes {
     | '/bookmarks'
     | '/changelog'
     | '/discover'
+    | '/fihrist'
     | '/games'
     | '/hifz'
     | '/notes'
@@ -655,6 +665,7 @@ export interface FileRouteTypes {
     | '/bookmarks'
     | '/changelog'
     | '/discover'
+    | '/fihrist'
     | '/hifz'
     | '/notes'
     | '/premium'
@@ -717,6 +728,7 @@ export interface FileRouteTypes {
     | '/bookmarks'
     | '/changelog'
     | '/discover'
+    | '/fihrist'
     | '/games'
     | '/hifz'
     | '/notes'
@@ -783,6 +795,7 @@ export interface RootRouteChildren {
   BookmarksRoute: typeof BookmarksRoute
   ChangelogRoute: typeof ChangelogRoute
   DiscoverRoute: typeof DiscoverRoute
+  FihristRoute: typeof FihristRoute
   GamesRoute: typeof GamesRouteWithChildren
   HifzRoute: typeof HifzRoute
   NotesRoute: typeof NotesRoute
@@ -901,6 +914,13 @@ declare module '@tanstack/react-router' {
       path: '/games'
       fullPath: '/games'
       preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fihrist': {
+      id: '/fihrist'
+      path: '/fihrist'
+      fullPath: '/fihrist'
+      preLoaderRoute: typeof FihristRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discover': {
@@ -1361,6 +1381,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookmarksRoute: BookmarksRoute,
   ChangelogRoute: ChangelogRoute,
   DiscoverRoute: DiscoverRoute,
+  FihristRoute: FihristRoute,
   GamesRoute: GamesRouteWithChildren,
   HifzRoute: HifzRoute,
   NotesRoute: NotesRoute,
@@ -1404,3 +1425,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
