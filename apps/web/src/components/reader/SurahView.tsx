@@ -4,7 +4,7 @@
  * right sidebar (TOC + font control + bookmarks), footer with nav.
  */
 
-import { useSettingsStore } from "~/stores/settings.store";
+import { useSettingsStore, type ReadingMode } from "~/stores/settings.store";
 import { useShallow } from "zustand/react/shallow";
 import { useReadingStore } from "~/stores/reading.store";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
@@ -53,26 +53,10 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const primaryMode: "ayet" | "mushaf" = isMushaf || isMeal ? "mushaf" : "ayet";
   const effectiveTajweed = showTajweed && !useBasic && !isWbw;
 
-  const selectPrimary = useCallback(
-    (target: "ayet" | "mushaf") => {
-      if (target === primaryMode) {
-        // Same primary tapped → flip its sub-mode
-        if (target === "ayet") setReadingMode(isWbw ? "verse" : "wbw");
-        else setReadingMode(isMeal ? "mushaf" : "meal");
-      } else {
-        // Switching primary → snap to that primary's main sub-mode
-        setReadingMode(target === "ayet" ? "verse" : "mushaf");
-      }
-    },
-    [primaryMode, isWbw, isMeal, setReadingMode],
-  );
-
   const flipSubMode = useCallback(() => {
     if (primaryMode === "ayet") setReadingMode(isWbw ? "verse" : "wbw");
     else setReadingMode(isMeal ? "mushaf" : "meal");
   }, [primaryMode, isWbw, isMeal, setReadingMode]);
-
-  const subStep = primaryMode === "ayet" ? (isWbw ? 1 : 0) : isMeal ? 1 : 0;
   const { t, locale } = useTranslation();
   const savePosition = useReadingStore((s) => s.savePosition);
 
@@ -294,17 +278,8 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
               </span>
             </div>
 
-            {/* Right: 2-tier mode switch [Ayet | Mushaf] with sub-mode dots */}
-            <PrimaryModeSwitch
-              primary={primaryMode}
-              subStep={subStep}
-              subLabel={
-                primaryMode === "ayet"
-                  ? subStep === 0 ? t.settings.modeVerse : t.settings.modeWbw
-                  : subStep === 0 ? "Mushaf" : "Meal"
-              }
-              onSelect={selectPrimary}
-            />
+            {/* Right: view mode dropdown (Ayet / Mushaf groups, 4 modes) */}
+            <ViewModeMenu mode={readingMode} onSelect={setReadingMode} t={t} />
           </div>
 
           {/* Progress bar */}
@@ -441,44 +416,103 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   );
 }
 
-// -- Primary mode switch: [Ayet | Mushaf] with sub-mode dots underneath --
+// -- View mode menu: single button + grouped dropdown (Ayet / Mushaf × 2 sub-modes) --
 
-function PrimaryModeSwitch({
-  primary,
-  subStep,
-  subLabel,
+function ViewModeMenu({
+  mode,
   onSelect,
+  t,
 }: {
-  primary: "ayet" | "mushaf";
-  subStep: 0 | 1;
-  subLabel: string;
-  onSelect: (target: "ayet" | "mushaf") => void;
+  mode: ReadingMode;
+  onSelect: (m: ReadingMode) => void;
+  t: any;
 }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onClick(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey, true);
+    };
+  }, [open]);
+
+  const labels: Record<ReadingMode, string> = {
+    verse: t.settings.modeVerse,
+    wbw: t.settings.modeWbw,
+    mushaf: "Mushaf",
+    meal: "Meal",
+  };
+
+  const groups: { heading: string; items: { mode: ReadingMode; label: string }[] }[] = [
+    { heading: "Ayet", items: [
+      { mode: "verse", label: labels.verse },
+      { mode: "wbw", label: labels.wbw },
+    ]},
+    { heading: "Mushaf", items: [
+      { mode: "mushaf", label: labels.mushaf },
+      { mode: "meal", label: labels.meal },
+    ]},
+  ];
+
   return (
-    <div className="mu-mode-pri" aria-label={subLabel}>
-      <div className="mu-mode-pri-row">
-        <button
-          type="button"
-          className={`mu-mode-pri-btn${primary === "ayet" ? " on" : ""}`}
-          onClick={() => onSelect("ayet")}
-          aria-pressed={primary === "ayet"}
-        >
-          Ayet
-        </button>
-        <button
-          type="button"
-          className={`mu-mode-pri-btn${primary === "mushaf" ? " on" : ""}`}
-          onClick={() => onSelect("mushaf")}
-          aria-pressed={primary === "mushaf"}
-        >
-          Mushaf
-        </button>
-      </div>
-      <div className="mu-mode-pri-sub" aria-hidden="true">
-        <span className={`mu-mode-pri-dot${subStep === 0 ? " on" : ""}`} />
-        <span className={`mu-mode-pri-dot${subStep === 1 ? " on" : ""}`} />
-        <span className="mu-mode-pri-sublabel">{subLabel}</span>
-      </div>
+    <div ref={wrapRef} className="mu-view-menu">
+      <button
+        type="button"
+        className="mu-view-menu-btn"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`${t.settings.readingMode}: ${labels[mode]}`}
+      >
+        <span className="mu-view-menu-btn-text">{labels[mode]}</span>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <path d="M2 4L5 7L8 4" />
+        </svg>
+      </button>
+      {open && (
+        <div role="listbox" className="mu-view-menu-pop">
+          {groups.map((g) => (
+            <div key={g.heading} className="mu-view-menu-group">
+              <p className="mu-view-menu-heading">{g.heading}</p>
+              {g.items.map((it) => {
+                const active = it.mode === mode;
+                return (
+                  <button
+                    key={it.mode}
+                    type="button"
+                    role="option"
+                    aria-selected={active}
+                    onClick={() => {
+                      onSelect(it.mode);
+                      setOpen(false);
+                    }}
+                    className={`mu-view-menu-item${active ? " on" : ""}`}
+                  >
+                    <span className="mu-view-menu-check" aria-hidden="true">
+                      {active ? (
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M2.5 6.5L5 9L9.5 3.5" />
+                        </svg>
+                      ) : null}
+                    </span>
+                    <span>{it.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

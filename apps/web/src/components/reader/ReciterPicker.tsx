@@ -1,5 +1,5 @@
 /**
- * Kâri Seç — full-screen modal.
+ * Kâri Seç — mobilde full-screen, web'de ortalanmış modal.
  * Arama + WBW/tarz/memleket/ses filtreleri.
  * Üstte "Editör'ün Tercihi" featured kâriler, altında tüm liste.
  */
@@ -138,12 +138,18 @@ export function ReciterPicker({ reciters, value, onSelect, onClose }: Props) {
 
   return (
     <div
-      ref={containerRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label={r.reciterPickerTitle ?? "Choose Reciter"}
-      className="fixed inset-0 z-[100] bg-[var(--color-bg)] flex flex-col"
+      className="fixed inset-0 z-[100] flex sm:items-center sm:justify-center sm:bg-black/50 sm:backdrop-blur-sm sm:p-4"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={r.reciterPickerTitle ?? "Choose Reciter"}
+        className="w-full h-full bg-[var(--color-bg)] flex flex-col sm:h-auto sm:max-h-[85vh] sm:w-[min(960px,95vw)] sm:rounded-2xl sm:border sm:border-[var(--color-border)] sm:shadow-2xl sm:overflow-hidden"
+      >
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)]">
         <h2 className="flex-1 text-base font-medium text-[var(--color-text-primary)]">
@@ -216,14 +222,14 @@ export function ReciterPicker({ reciters, value, onSelect, onClose }: Props) {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto pb-12">
+      <div className="flex-1 overflow-y-auto pb-12 sm:pb-4">
         {/* Editor picks — only when no filters/search */}
         {!hasActiveFilters && featured.length > 0 && (
           <section className="px-4 pt-4">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] mb-2">
               {r.reciterPickerEditorPicks ?? "Editor's Picks"}
             </h3>
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
               {featured.map((rc) => (
                 <ReciterCard
                   key={rc.slug}
@@ -253,7 +259,7 @@ export function ReciterPicker({ reciters, value, onSelect, onClose }: Props) {
             grouped.map(([country, rows]) => (
               <div key={country} className="mb-4">
                 <p className="text-[11px] uppercase tracking-wider text-[var(--color-text-secondary)] mb-2">{country}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {rows.map((rc) => (
                     <ReciterRowItem
                       key={rc.slug}
@@ -269,6 +275,7 @@ export function ReciterPicker({ reciters, value, onSelect, onClose }: Props) {
             ))
           )}
         </section>
+      </div>
       </div>
     </div>
   );
