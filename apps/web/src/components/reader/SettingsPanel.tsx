@@ -94,6 +94,17 @@ function WbwIcon({ size, active }: { size: number; active: boolean }) {
   );
 }
 
+function MealIcon({ size, active }: { size: number; active: boolean }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={active ? 1.8 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="5" x2="17" y2="5" />
+      <line x1="3" y1="9" x2="14" y2="9" />
+      <line x1="3" y1="13" x2="17" y2="13" />
+      <line x1="3" y1="17" x2="11" y2="17" />
+    </svg>
+  );
+}
+
 // ── Main Panel ───────────────────────────────────────────
 
 interface SettingsPanelProps {
@@ -193,11 +204,6 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
               t={t}
               onModeChange={handleModeChange}
               currentPath={currentPath}
-              onMushafClick={() => {
-                const pageNum = context?.pageNumber ?? 1;
-                onClose();
-                navigate({ to: "/page/$pageNumber", params: { pageNumber: String(pageNum) }, search: { ayah: undefined } });
-              }}
             />
           ) : (
             <GeneralTab
@@ -224,7 +230,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
 
 // ── Tab 1: Okuma ─────────────────────────────────────────
 
-function ReadingTab({ store, reciterList, translationList, locale, t, onModeChange, currentPath, onMushafClick }: {
+function ReadingTab({ store, reciterList, translationList, locale, t, onModeChange, currentPath }: {
   store: ReturnType<typeof useSettingsStore>;
   reciterList: any;
   translationList: any;
@@ -232,7 +238,6 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
   t: any;
   onModeChange: (mode: ReadingMode) => void;
   currentPath: string;
-  onMushafClick: () => void;
 }) {
   const LANG_ORDER = ["tr", "en", "es", "fr", "ar", "de", "nl"];
   const langOrder = useMemo(() => [locale, ...LANG_ORDER.filter((l) => l !== locale)], [locale]);
@@ -411,6 +416,8 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
           {([
             { value: "verse" as ReadingMode, label: t.settings.modeVerse, icon: VerseIcon, desc: t.settings.verseList },
             { value: "wbw" as ReadingMode, label: t.settings.modeWbw, icon: WbwIcon, desc: t.settings.wordByWord },
+            { value: "meal" as ReadingMode, label: t.settings.translation, icon: MealIcon, desc: t.settings.mealOnly ?? "Yalın meal" },
+            { value: "mushaf" as ReadingMode, label: t.settings.modeMushaf, icon: MushafIcon, desc: t.settings.mushafPage },
           ] as const).map(({ value, label, icon: Icon, desc }) => {
             const active = store.readingMode === value && !currentPath.startsWith("/page/");
             return (
@@ -429,35 +436,14 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
               </button>
             );
           })}
-          <button
-            onClick={onMushafClick}
-            className={`mu-rmode-btn${currentPath.startsWith("/page/") ? " on" : ""}`}
-          >
-            <span className="mu-rmode-icon">
-              <MushafIcon size={20} active={currentPath.startsWith("/page/")} />
-            </span>
-            <span className="mu-rmode-text">
-              <span className="mu-rmode-label">Mushaf</span>
-              <span className="mu-rmode-desc">Sayfa görünümü</span>
-            </span>
-          </button>
         </div>
 
-        {/* Mod bazli secenekler */}
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-          {store.readingMode !== "wbw" && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 12, color: "var(--mu-muted)" }}>{t.settings.translation}</span>
-              <Toggle checked={store.showTranslation} onChange={store.toggleTranslation} />
-            </div>
-          )}
-          {store.readingMode === "wbw" && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 12, color: "var(--mu-muted)" }}>{t.settings.wbwTransliteration}</span>
-              <Toggle checked={store.showTranslit} onChange={store.toggleTranslit} />
-            </div>
-          )}
-        </div>
+        {store.readingMode === "wbw" && (
+          <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 12, color: "var(--mu-muted)" }}>{t.settings.wbwTransliteration}</span>
+            <Toggle checked={store.showTranslit} onChange={store.toggleTranslit} />
+          </div>
+        )}
       </div>
     </div>
   );

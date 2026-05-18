@@ -132,9 +132,9 @@ function SearchPage() {
   );
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ["search", debouncedQuery, translationSlug],
+    queryKey: ["search", debouncedQuery, translationSlug, locale],
     queryFn: () =>
-      searchQuran({ data: { query: debouncedQuery, translationSlug } }),
+      searchQuran({ data: { query: debouncedQuery, translationSlug, locale } }),
     enabled: debouncedQuery.length >= 2,
     staleTime: 60_000,
   });

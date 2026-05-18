@@ -56,8 +56,8 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   }, []);
 
   const { data: results } = useQuery({
-    queryKey: ["search", debouncedQ, translationSlug],
-    queryFn: () => searchQuran({ data: { query: debouncedQ, translationSlug } }),
+    queryKey: ["search", debouncedQ, translationSlug, locale],
+    queryFn: () => searchQuran({ data: { query: debouncedQ, translationSlug, locale } }),
     enabled: open && debouncedQ.length >= 2,
     staleTime: 60_000,
   });
@@ -116,17 +116,22 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             {(results as SearchResult[]).slice(0, 8).map((r) => (
               <li key={`${r.surahId}:${r.ayahNumber}`}>
                 <button onClick={() => openResult(r)}>
-                  <span className="mu-sover-n">
-                    {String(r.surahId).padStart(3, "0")}
-                  </span>
-                  <span className="mu-sover-name">
-                    {getSurahName(r.surahId, locale) || r.surahNameSimple}{" "}
-                    <span className="mu-muted">: {r.ayahNumber}</span>
-                  </span>
-                  <span className="mu-sover-ar" dir="rtl">
-                    {r.textUthmani?.slice(0, 60)}
-                  </span>
-                  <span className="mu-sover-chev">{MuIcons.chev}</span>
+                  <div className="mu-sover-row">
+                    <span className="mu-sover-n">
+                      {String(r.surahId).padStart(3, "0")}
+                    </span>
+                    <span className="mu-sover-name">
+                      {getSurahName(r.surahId, locale) || r.surahNameSimple}{" "}
+                      <span className="mu-muted">: {r.ayahNumber}</span>
+                    </span>
+                    <span className="mu-sover-ar" dir="rtl">
+                      {r.textUthmani?.slice(0, 60)}
+                    </span>
+                    <span className="mu-sover-chev">{MuIcons.chev}</span>
+                  </div>
+                  {r.translation ? (
+                    <div className="mu-sover-meal">{r.translation}</div>
+                  ) : null}
                 </button>
               </li>
             ))}

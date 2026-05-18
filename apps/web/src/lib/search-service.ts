@@ -8,6 +8,7 @@ import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 import { db } from "~/db";
 import { ayahs, surahs, translations, translationSources } from "~/db/quran-schema";
 import { eq, like, and, inArray } from "drizzle-orm";
+import { getSurahName, getSurahMeaning } from "./surah-names-i18n";
 
 export interface SearchResult {
   surahId: number;
@@ -46,8 +47,8 @@ const SURAH_ALIASES: Record<number, string[]> = {
 };
 
 export const searchQuran = createServerFn({ method: "GET" })
-  .inputValidator((input: { query: string; translationSlug?: string; limit?: number }) => input)
-  .handler(async ({ data: { query, translationSlug = DEFAULT_TRANSLATION_SLUG, limit = 30 } }) => {
+  .inputValidator((input: { query: string; translationSlug?: string; limit?: number; locale?: string }) => input)
+  .handler(async ({ data: { query, translationSlug = DEFAULT_TRANSLATION_SLUG, limit = 30, locale = "tr" } }) => {
     if (!query || query.trim().length < 2) return [];
 
     const trimmed = query.trim();
@@ -81,10 +82,23 @@ export const searchQuran = createServerFn({ method: "GET" })
           const allSurahs = await db
             .select({ id: surahs.id, nameSimple: surahs.nameSimple })
             .from(surahs);
-          const exact = allSurahs.find((s) => normalizeForSearch(s.nameSimple) === normalizedName);
+          const locales = locale && locale !== "tr" ? [locale, "tr"] : ["tr"];
+          const namesFor = (id: number, ns: string): string[] => {
+            const out = [ns];
+            for (const loc of locales) {
+              const ln = getSurahName(id, loc);
+              if (ln) out.push(ln);
+            }
+            return out;
+          };
+          const exact = allSurahs.find((s) =>
+            namesFor(s.id, s.nameSimple).some((c) => normalizeForSearch(c) === normalizedName),
+          );
           if (exact) resolvedSurahId = exact.id;
           else {
-            const partial = allSurahs.find((s) => normalizeForSearch(s.nameSimple).startsWith(normalizedName));
+            const partial = allSurahs.find((s) =>
+              namesFor(s.id, s.nameSimple).some((c) => normalizeForSearch(c).startsWith(normalizedName)),
+            );
             if (partial) resolvedSurahId = partial.id;
           }
         }
@@ -237,11 +251,19 @@ export const searchQuran = createServerFn({ method: "GET" })
       }
     }
 
-    // 3) Normalize ile nameSimple eşleşmesi
-    if (surahNameHits.length === 0 && aliasMatches.length === 0 && normalizedQuery.length >= 3) {
+    // 3) Normalize ile nameSimple + i18n adi/anlami eslestir (Turkce ve mevcut locale)
+    if (surahNameHits.length === 0 && aliasMatches.length === 0 && normalizedQuery.length >= 2) {
       const allSurahs = await db.select({ id: surahs.id, nameSimple: surahs.nameSimple, nameArabic: surahs.nameArabic }).from(surahs);
+      const locales = locale && locale !== "tr" ? [locale, "tr"] : ["tr"];
       for (const s of allSurahs) {
-        if (normalizeForSearch(s.nameSimple).includes(normalizedQuery)) {
+        const candidates: string[] = [s.nameSimple];
+        for (const loc of locales) {
+          const localName = getSurahName(s.id, loc);
+          const localMeaning = getSurahMeaning(s.id, loc);
+          if (localName) candidates.push(localName);
+          if (localMeaning) candidates.push(localMeaning);
+        }
+        if (candidates.some((c) => normalizeForSearch(c).includes(normalizedQuery))) {
           surahNameHits.push({ surahId: s.id, surahNameArabic: s.nameArabic, surahNameSimple: s.nameSimple });
         }
       }
