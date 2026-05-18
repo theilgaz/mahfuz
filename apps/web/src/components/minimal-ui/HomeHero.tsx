@@ -1,69 +1,39 @@
 /**
- * Home hero — Apple-style monumental centered composition.
+ * Home — featured surah (continue reading) + günün ayeti + haftalık seri + son yer imleri.
  */
 
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useReadingStore } from "~/stores/reading.store";
+import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useSurahs } from "~/hooks/useQuranQuery";
 import { useTranslation } from "~/hooks/useTranslation";
+import {
+  streakQueryOptions,
+  weeklySummaryQueryOptions,
+  readingGoalQueryOptions,
+} from "~/hooks/useHabitQuery";
 import { getSurahName, getSurahMeaning } from "~/lib/surah-names-i18n";
 import { surahSlug } from "~/lib/surah-slugs";
+import { DailyVerseCard } from "~/components/DailyVerseCard";
+import { WeeklyChart } from "~/components/habit/WeeklyChart";
 import { Ornament } from "./Ornament";
 import { MuIcons } from "./icons";
 
 export function HomeHero() {
-  const { t, locale } = useTranslation();
-  const lastPosition = useReadingStore((s) => s.lastPosition);
-  const { data: surahs } = useSurahs();
-
-  const lastSurah = lastPosition
-    ? surahs.find((s) => s.id === lastPosition.surahId)
-    : null;
-
-  const continueLink = lastPosition && lastSurah
-    ? { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(lastSurah.id) }, search: { ayah: lastPosition.ayahNumber } }
-    : null;
-
   return (
     <>
-      <section className="mu-hero mu-hero--center">
-        <p className="mu-eyebrow">
-          <span className="mu-eb-line" />
-          {t.home?.slogan ?? "15:9"}
-          <span className="mu-eb-line" />
-        </p>
-        <h1 className="mu-display">
-          <span>{t.home?.heroTitle ?? "Korunduğu gibi"}</span>
-          <span className="mu-display-accent"> {t.home?.heroAccent ?? "karşında."}</span>
-        </h1>
-        <p className="mu-lede">
-          {t.home?.heroDesc ?? "Kur'an yolculuğuna başla."}
-        </p>
-        <div className="mu-hero-cta">
-          {continueLink ? (
-            <Link {...continueLink} className="mu-btn primary">
-              {t.home?.continueReading ?? "Okumaya devam et"}
-              {MuIcons.arrowRight}
-            </Link>
-          ) : (
-            <Link to="/surah/$surahSlug" params={{ surahSlug: surahSlug(1) }} className="mu-btn primary">
-              {t.home?.startReading ?? "Fatiha'dan başla"}
-              {MuIcons.arrowRight}
-            </Link>
-          )}
-        </div>
-        {lastPosition && lastSurah && (
-          <p className="mu-hero-meta">
-            {getSurahName(lastSurah.id, locale)} · {t.reader?.ayah ?? "ayet"} {lastPosition.ayahNumber} / {lastSurah.ayahCount}
-          </p>
-        )}
-      </section>
+      <FeaturedSurah />
 
       <div className="mu-rule">
         <Ornament />
       </div>
 
-      <FeaturedSurah />
+      <DailyVerseSection />
+
+      <WeeklyStreakSection />
+
+      <RecentBookmarksSection />
     </>
   );
 }
@@ -109,6 +79,103 @@ function FeaturedSurah() {
         {lastPosition ? (t.home?.continueBtn ?? "Devam et") : (t.home?.startBtn ?? "Okumaya başla")}
         {MuIcons.arrowRight}
       </Link>
+    </section>
+  );
+}
+
+function DailyVerseSection() {
+  return (
+    <section className="mx-auto w-full max-w-2xl px-4 pb-12 text-center">
+      <DailyVerseCard />
+    </section>
+  );
+}
+
+function WeeklyStreakSection() {
+  const { t } = useTranslation();
+  const { data: weekly } = useQuery(weeklySummaryQueryOptions());
+  const { data: goal } = useQuery(readingGoalQueryOptions());
+  const { data: streak } = useQuery(streakQueryOptions());
+
+  if (!weekly || weekly.length === 0) return null;
+
+  const totalPages = weekly.reduce((sum, d) => sum + d.pagesRead, 0);
+  if (totalPages === 0 && (streak?.currentStreak ?? 0) === 0) return null;
+
+  const dailyTarget = goal?.dailyTargetPages ?? 1;
+  const currentStreak = streak?.currentStreak ?? 0;
+
+  return (
+    <section className="mx-auto w-full max-w-2xl px-4 pb-12">
+      <div className="flex items-baseline justify-between mb-3">
+        <p className="mu-eyebrow" style={{ margin: 0 }}>
+          {t.home?.weeklyTitle ?? "Haftalık seri"}
+        </p>
+        {currentStreak > 0 && (
+          <span className="text-xs text-[var(--color-text-secondary)]">
+            {currentStreak} {t.home?.dayStreak ?? "gün"}
+          </span>
+        )}
+      </div>
+      <WeeklyChart days={weekly} dailyTarget={dailyTarget} />
+    </section>
+  );
+}
+
+function RecentBookmarksSection() {
+  const { t, locale } = useTranslation();
+  const bookmarks = useBookmarksStore((s) => s.bookmarks);
+  const { data: surahs } = useSurahs();
+
+  if (!bookmarks || bookmarks.length === 0) return null;
+
+  const recent = [...bookmarks]
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 5);
+
+  return (
+    <section className="mx-auto w-full max-w-2xl px-4 pb-16">
+      <div className="flex items-baseline justify-between mb-3">
+        <p className="mu-eyebrow" style={{ margin: 0 }}>
+          {t.hub?.bookmarks ?? "Yer imleri"}
+        </p>
+        <Link to="/bookmarks" className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--mu-accent-ink)] transition-colors">
+          {t.home?.viewAll ?? "Tümü"}
+        </Link>
+      </div>
+
+      <ul className="rounded border border-[var(--color-border)] divide-y divide-[var(--color-border)] bg-[var(--color-surface)]">
+        {recent.map((bm) => {
+          const surah = surahs.find((s) => s.id === bm.surahId);
+          const name = getSurahName(bm.surahId, locale) || surah?.nameSimple || `${bm.surahId}`;
+          return (
+            <li key={`${bm.surahId}:${bm.ayahNumber}`}>
+              <Link
+                to="/surah/$surahSlug"
+                params={{ surahSlug: surahSlug(bm.surahId) }}
+                search={{ ayah: bm.ayahNumber }}
+                className="flex items-center gap-3 px-3 py-2.5 min-h-[44px] text-sm hover:bg-[var(--color-bg)] transition-colors"
+              >
+                <span className="w-7 h-7 rounded-md bg-[var(--color-bg)] flex items-center justify-center text-[11px] font-medium text-[var(--color-text-secondary)] shrink-0">
+                  {bm.surahId}
+                </span>
+                <span className="flex-1 min-w-0 truncate">
+                  <span className="font-medium">{name}</span>
+                  <span className="text-[var(--color-text-secondary)]"> · {t.common?.verse ?? "Ayet"} {bm.ayahNumber}</span>
+                </span>
+                {surah?.nameArabic && (
+                  <span className="text-sm shrink-0 text-[var(--color-text-secondary)]" dir="rtl" style={{ fontFamily: "var(--font-arabic)" }}>
+                    {surah.nameArabic}
+                  </span>
+                )}
+                <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--color-bg)] text-[var(--color-text-secondary)]">
+                  {bm.pageNumber}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

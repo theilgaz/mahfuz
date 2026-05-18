@@ -12,7 +12,6 @@ import {
   useSetReadingGoal,
 } from "~/hooks/useHabitQuery";
 
-const ANON_USER = "anonymous";
 const TOTAL_PAGES = 604;
 const GOAL_OPTIONS = [1, 2, 3, 5, 10, 20];
 
@@ -25,12 +24,10 @@ export function HabitDashboard() {
 }
 
 function HabitDashboardInner() {
-  const userId = ANON_USER;
-
-  const { data: streak } = useQuery(streakQueryOptions(userId));
-  const { data: hatim } = useQuery(activeHatimQueryOptions(userId));
-  const { data: goal } = useQuery(readingGoalQueryOptions(userId));
-  const setGoalMutation = useSetReadingGoal(userId);
+  const { data: streak } = useQuery(streakQueryOptions());
+  const { data: hatim } = useQuery(activeHatimQueryOptions());
+  const { data: goal } = useQuery(readingGoalQueryOptions());
+  const setGoalMutation = useSetReadingGoal();
 
   const dailyTarget = goal?.dailyTargetPages ?? 1;
   const currentStreak = streak?.currentStreak ?? 0;

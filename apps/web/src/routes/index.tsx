@@ -4,6 +4,11 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { surahsQueryOptions, dailyVerseQueryOptions } from "~/hooks/useQuranQuery";
+import {
+  streakQueryOptions,
+  weeklySummaryQueryOptions,
+  readingGoalQueryOptions,
+} from "~/hooks/useHabitQuery";
 import { HomeHero } from "~/components/minimal-ui/HomeHero";
 import { staticHead } from "~/lib/seo";
 
@@ -12,6 +17,9 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => Promise.all([
     context.queryClient.ensureQueryData(surahsQueryOptions()),
     context.queryClient.prefetchQuery(dailyVerseQueryOptions()),
+    context.queryClient.prefetchQuery(streakQueryOptions()),
+    context.queryClient.prefetchQuery(weeklySummaryQueryOptions()),
+    context.queryClient.prefetchQuery(readingGoalQueryOptions()),
   ]),
   component: HomePage,
   pendingComponent: HomePageSkeleton,

@@ -38,8 +38,8 @@ export function AccountPage({ user }: AccountPageProps) {
   const memorized = useHifzStore((s) => s.memorized);
   const hifzStats = useMemo(() => computeHifzStats(memorized), [memorized]);
 
-  const { data: streak } = useQuery(streakQueryOptions(user.id));
-  const { data: activeHatim } = useQuery(activeHatimQueryOptions(user.id));
+  const { data: streak } = useQuery(streakQueryOptions());
+  const { data: activeHatim } = useQuery(activeHatimQueryOptions());
   const { data: gameStats } = useQuery({
     queryKey: ["my-score-stats"],
     queryFn: () => getMyScoreStats(),

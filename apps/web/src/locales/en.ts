@@ -21,6 +21,7 @@ export const en: Messages = {
     mushafPage: "Mushaf Page",
     verseList: "Verse List",
     translation: "Translation",
+    mealOnly: "Translation only",
     wordByWord: "Word by Word",
     wbwTranslation: "Translation",
     wbwTransliteration: "Transliteration",
@@ -341,6 +342,14 @@ export const en: Messages = {
     heroTitle: "As it was preserved,",
     heroAccent: "before you.",
     heroDesc: "Begin your Quran journey.",
+    lastRead: "Last read",
+    suggested: "Suggested",
+    continueBtn: "Continue",
+    startBtn: "Start reading",
+    startReading: "Start with Al-Fatihah",
+    weeklyTitle: "Weekly streak",
+    dayStreak: "days",
+    viewAll: "View all",
   },
 
   footer: {

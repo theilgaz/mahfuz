@@ -19,6 +19,7 @@ export const tr = {
     mushafPage: "Mushaf Sayfası",
     verseList: "Ayet Listesi",
     translation: "Meal",
+    mealOnly: "Yalın meal",
     wordByWord: "Kelime Kelime",
     wbwTranslation: "Çeviri",
     wbwTransliteration: "Transliterasyon",
@@ -339,6 +340,14 @@ export const tr = {
     heroTitle: "Korunduğu gibi",
     heroAccent: "karşında.",
     heroDesc: "Kur'an yolculuğuna başla.",
+    lastRead: "Son okunan",
+    suggested: "Önerilen",
+    continueBtn: "Devam et",
+    startBtn: "Okumaya başla",
+    startReading: "Fatiha'dan başla",
+    weeklyTitle: "Haftalık seri",
+    dayStreak: "gün",
+    viewAll: "Tümü",
   },
 
   footer: {

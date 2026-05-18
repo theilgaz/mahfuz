@@ -1,5 +1,6 @@
 /**
  * Alışkanlık motoru TanStack Query hook'ları.
+ * userId server tarafında oturumdan türetilir; client'tan parametre geçilmez.
  */
 
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,71 +19,71 @@ import {
 
 export const habitKeys = {
   all: ["habit"] as const,
-  streak: (userId: string) => [...habitKeys.all, "streak", userId] as const,
-  weekly: (userId: string) => [...habitKeys.all, "weekly", userId] as const,
-  hatim: (userId: string) => [...habitKeys.all, "hatim", userId] as const,
-  hatims: (userId: string) => [...habitKeys.all, "hatims", userId] as const,
-  goal: (userId: string) => [...habitKeys.all, "goal", userId] as const,
+  streak: () => [...habitKeys.all, "streak"] as const,
+  weekly: () => [...habitKeys.all, "weekly"] as const,
+  hatim: () => [...habitKeys.all, "hatim"] as const,
+  hatims: () => [...habitKeys.all, "hatims"] as const,
+  goal: () => [...habitKeys.all, "goal"] as const,
 };
 
 // ── Query Options ────────────────────────────────────────
 
-export const streakQueryOptions = (userId: string) =>
+export const streakQueryOptions = () =>
   queryOptions({
-    queryKey: habitKeys.streak(userId),
-    queryFn: () => getStreak({ data: userId }),
-    staleTime: 60_000, // 1 dakika
-  });
-
-export const weeklySummaryQueryOptions = (userId: string) =>
-  queryOptions({
-    queryKey: habitKeys.weekly(userId),
-    queryFn: () => getWeeklySummary({ data: userId }),
+    queryKey: habitKeys.streak(),
+    queryFn: () => getStreak(),
     staleTime: 60_000,
   });
 
-export const activeHatimQueryOptions = (userId: string) =>
+export const weeklySummaryQueryOptions = () =>
   queryOptions({
-    queryKey: habitKeys.hatim(userId),
-    queryFn: () => getActiveHatim({ data: userId }),
+    queryKey: habitKeys.weekly(),
+    queryFn: () => getWeeklySummary(),
     staleTime: 60_000,
   });
 
-export const readingGoalQueryOptions = (userId: string) =>
+export const activeHatimQueryOptions = () =>
   queryOptions({
-    queryKey: habitKeys.goal(userId),
-    queryFn: () => getReadingGoal({ data: userId }),
+    queryKey: habitKeys.hatim(),
+    queryFn: () => getActiveHatim(),
+    staleTime: 60_000,
+  });
+
+export const readingGoalQueryOptions = () =>
+  queryOptions({
+    queryKey: habitKeys.goal(),
+    queryFn: () => getReadingGoal(),
     staleTime: Infinity,
   });
 
-export const completedHatimsQueryOptions = (userId: string) =>
+export const completedHatimsQueryOptions = () =>
   queryOptions({
-    queryKey: habitKeys.hatims(userId),
-    queryFn: () => getCompletedHatims({ data: userId }),
+    queryKey: habitKeys.hatims(),
+    queryFn: () => getCompletedHatims(),
     staleTime: 60_000,
   });
 
 // ── Hooks ────────────────────────────────────────────────
 
-export function useStreak(userId: string) {
-  return useSuspenseQuery(streakQueryOptions(userId));
+export function useStreak() {
+  return useSuspenseQuery(streakQueryOptions());
 }
 
-export function useWeeklySummary(userId: string) {
-  return useSuspenseQuery(weeklySummaryQueryOptions(userId));
+export function useWeeklySummary() {
+  return useSuspenseQuery(weeklySummaryQueryOptions());
 }
 
-export function useActiveHatim(userId: string) {
-  return useSuspenseQuery(activeHatimQueryOptions(userId));
+export function useActiveHatim() {
+  return useSuspenseQuery(activeHatimQueryOptions());
 }
 
-export function useReadingGoal(userId: string) {
-  return useSuspenseQuery(readingGoalQueryOptions(userId));
+export function useReadingGoal() {
+  return useSuspenseQuery(readingGoalQueryOptions());
 }
 
 // ── Mutations ────────────────────────────────────────────
 
-export function useLogReading(userId: string) {
+export function useLogReading() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -92,35 +93,35 @@ export function useLogReading(userId: string) {
       durationSeconds: number;
       startPage?: number;
       endPage?: number;
-    }) => logReadingSession({ data: { userId, ...input } }),
+    }) => logReadingSession({ data: input }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: habitKeys.streak(userId) });
-      queryClient.invalidateQueries({ queryKey: habitKeys.weekly(userId) });
-      queryClient.invalidateQueries({ queryKey: habitKeys.hatim(userId) });
+      queryClient.invalidateQueries({ queryKey: habitKeys.streak() });
+      queryClient.invalidateQueries({ queryKey: habitKeys.weekly() });
+      queryClient.invalidateQueries({ queryKey: habitKeys.hatim() });
     },
   });
 }
 
-export function useStartHatim(userId: string) {
+export function useStartHatim() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => startHatim({ data: userId }),
+    mutationFn: () => startHatim(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: habitKeys.hatim(userId) });
-      queryClient.invalidateQueries({ queryKey: habitKeys.hatims(userId) });
+      queryClient.invalidateQueries({ queryKey: habitKeys.hatim() });
+      queryClient.invalidateQueries({ queryKey: habitKeys.hatims() });
     },
   });
 }
 
-export function useSetReadingGoal(userId: string) {
+export function useSetReadingGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (dailyTargetPages: number) =>
-      setReadingGoal({ data: { userId, dailyTargetPages } }),
+      setReadingGoal({ data: { dailyTargetPages } }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: habitKeys.goal(userId) });
+      queryClient.invalidateQueries({ queryKey: habitKeys.goal() });
     },
   });
 }

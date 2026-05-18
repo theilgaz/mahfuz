@@ -64,7 +64,7 @@ export function DailyVerseCard() {
           </p>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
           {slug && (
             <Link
               to="/surah/$surahSlug"

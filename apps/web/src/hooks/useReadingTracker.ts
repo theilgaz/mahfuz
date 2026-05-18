@@ -14,10 +14,9 @@ import {
 } from "~/lib/hatim-group-service";
 
 const MIN_READING_SECONDS = 10;
-const ANON_USER = "anonymous";
 
 export function useReadingTracker(pageNumber: number) {
-  const logReading = useLogReading(ANON_USER);
+  const logReading = useLogReading();
   const qc = useQueryClient();
   const enteredAt = useRef(Date.now());
   const lastLoggedPage = useRef(-1);
