@@ -23,8 +23,8 @@ import {
   type LeaderboardPeriod,
   type LeagueFilter,
 } from "~/lib/score-service";
-import { LEAGUE_LABELS, LEAGUE_ORDER, type League, seasonKeyFor, seasonRange, formatSeasonName } from "~/lib/league";
-import { LeagueBadge, MedalLeague, RosetteIcon } from "~/components/minimal-ui/LeagueIcons";
+import { LEAGUE_LABELS, LEAGUE_ORDER, seasonKeyFor, seasonRange, formatSeasonName } from "~/lib/league";
+import { LeagueBadge } from "~/components/minimal-ui/LeagueIcons";
 import { Podium } from "~/components/minimal-ui/Podium";
 import { useTranslation } from "~/hooks/useTranslation";
 import { getRecentMeclises } from "~/lib/meclis-service";
@@ -260,42 +260,6 @@ function ScoreboardPage() {
         </div>
       )}
 
-      {/* League ladder — sezon hareket politikası */}
-      <section style={{ paddingTop: 32, marginTop: 32, borderTop: "1px solid var(--mu-line)" }}>
-        <h2 className="mu-h2" style={{ fontSize: 20 }}>Ligler</h2>
-        <p className="mu-muted" style={{ fontSize: 13, marginBottom: 12 }}>
-          Her sezon kapanışında lig içindeki ilk 3 üst lige çıkar, son 3 alt lige iner. 3'ten az aktif oyuncu varsa hareket olmaz.
-        </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
-          {LEAGUE_ORDER.map((lg) => (
-            <div
-              key={lg}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: 12,
-                border: "1px solid var(--mu-line)",
-                borderRadius: 8,
-                background: myLeagueStatus?.league === lg ? "var(--mu-accent-soft)" : undefined,
-                borderColor: myLeagueStatus?.league === lg ? "var(--mu-accent)" : undefined,
-              }}
-            >
-              <MedalLeague league={lg} size={28} />
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: 14, fontWeight: 600 }}>{LEAGUE_LABELS[lg]}</span>
-                <span className="mu-muted" style={{ fontSize: 12 }}>
-                  {myLeagueStatus?.league === lg ? "Senin Ligin" : leagueMoveLabel(lg)}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="mu-muted" style={{ fontSize: 12, marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <RosetteIcon league="altin" size={14} /> Genel sezon ilk 10'una giren oyuncular kokart kazanır.
-        </p>
-      </section>
-
       {/* Son Meclisler */}
       <RecentMeclisesSection />
     </div>
@@ -356,8 +320,3 @@ function RecentMeclisesSection() {
   );
 }
 
-function leagueMoveLabel(lg: League): string {
-  if (lg === "bronz") return "Başlangıç ligi";
-  if (lg === "hafiz") return "En üst lig";
-  return "Terfi & tenzil";
-}
