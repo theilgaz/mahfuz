@@ -16,14 +16,12 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getGlobalLeaderboard,
   getGameLeaderboard,
-  getMyLeagueStatus,
   GAME_TITLES,
   GAME_IDS,
   LEADERBOARD_PERIODS,
   type LeaderboardPeriod,
-  type LeagueFilter,
 } from "~/lib/score-service";
-import { LEAGUE_LABELS, LEAGUE_ORDER, seasonKeyFor, seasonRange, formatSeasonName } from "~/lib/league";
+import { seasonKeyFor, seasonRange, formatSeasonName } from "~/lib/league";
 import { LeagueBadge } from "~/components/minimal-ui/LeagueIcons";
 import { Podium } from "~/components/minimal-ui/Podium";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -48,7 +46,6 @@ function ScoreboardPage() {
     game && GAME_IDS.includes(game) ? game : "global",
   );
   const [period, setPeriod] = useState<LeaderboardPeriod>("season");
-  const [leagueFilter, setLeagueFilter] = useState<LeagueFilter | null>(null);
 
   const periodLabels: Record<LeaderboardPeriod, string> = {
     season: t.gamesHub.periodSeason,
@@ -65,25 +62,15 @@ function ScoreboardPage() {
   const seasonEndLabel = dateFmt.format(new Date(endedAt - 1));
   const nextSeasonStartLabel = fullDateFmt.format(new Date(endedAt));
 
-  const { data: myLeagueStatus } = useQuery({
-    queryKey: ["my-league-status"],
-    queryFn: () => getMyLeagueStatus(),
-    enabled: !!userId,
-    staleTime: 60_000,
-  });
-
-  // Varsayılan: viewer'ın ligi; viewer yoksa "all"
-  const activeLeague: LeagueFilter = leagueFilter ?? myLeagueStatus?.league ?? "all";
-
   const { data: globalBoard } = useQuery({
-    queryKey: ["global-leaderboard", period, activeLeague],
-    queryFn: () => getGlobalLeaderboard({ data: { period, league: activeLeague } }),
+    queryKey: ["global-leaderboard", period],
+    queryFn: () => getGlobalLeaderboard({ data: { period, league: "all" } }),
     staleTime: 60_000,
   });
 
   const { data: gameBoard } = useQuery({
-    queryKey: ["game-leaderboard", activeTab, period, activeLeague],
-    queryFn: () => getGameLeaderboard({ data: { gameId: activeTab, period, league: activeLeague } }),
+    queryKey: ["game-leaderboard", activeTab, period],
+    queryFn: () => getGameLeaderboard({ data: { gameId: activeTab, period, league: "all" } }),
     enabled: activeTab !== "global",
     staleTime: 60_000,
   });
@@ -169,27 +156,6 @@ function ScoreboardPage() {
             {GAME_TITLES[id]}
           </button>
         ))}
-      </div>
-
-      {/* League filter — viewer'ın ligi default, diğer ligler ve "Tümü" seçilebilir */}
-      <div className="mu-sb-periods" style={{ marginTop: 12 }}>
-        {(["all", ...LEAGUE_ORDER] as LeagueFilter[]).map((lg) => {
-          const isMine = myLeagueStatus?.league === lg;
-          return (
-            <button
-              key={lg}
-              className={`mu-sb-period ${activeLeague === lg ? "active" : ""}`}
-              onClick={() => setLeagueFilter(lg)}
-              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-            >
-              {lg !== "all" && <LeagueBadge league={lg} size={12} />}
-              {lg === "all" ? "Tüm Ligler" : LEAGUE_LABELS[lg]}
-              {isMine && (
-                <span className="mu-ybadge" style={{ fontSize: 9, marginLeft: 4 }}>sen</span>
-              )}
-            </button>
-          );
-        })}
       </div>
 
       {/* Top 3 podium */}

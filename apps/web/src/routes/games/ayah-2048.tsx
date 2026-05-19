@@ -612,7 +612,7 @@ function GameScreen({
           {/* Discovery banner */}
           {newlyDiscovered && (
             <div
-              className="absolute left-0 right-0 -bottom-1 p-2 rounded-xl text-center game-bounce-in mx-2"
+              className="absolute left-0 right-0 -bottom-1 z-10 p-2 rounded-xl text-center game-bounce-in mx-2"
               style={{ background: THEME.primary }}
             >
               <div className="text-white/80 text-[10px] leading-none">{tx.surahDiscovered}</div>
@@ -624,7 +624,7 @@ function GameScreen({
 
           {/* Win overlay */}
           {gameState.won && !keepPlaying && !gameState.over && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl">
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 rounded-2xl">
               <div className="p-4 rounded-2xl text-center mx-4 max-w-xs" style={{ background: THEME.surface }}>
                 <div className="text-2xl font-bold text-white mb-1">{tx.win}</div>
                 <div className="text-white/60 text-sm mb-3">
