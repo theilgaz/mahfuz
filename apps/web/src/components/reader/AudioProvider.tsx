@@ -8,6 +8,7 @@ import { AudioEngine } from "@mahfuz/audio-engine";
 import { useAudioStore } from "~/stores/audio.store";
 import { useSettingsStore } from "~/stores/settings.store";
 import { fetchChapterAudioForSlug } from "~/lib/audio-service";
+import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 
 export function AudioProvider() {
   const initEngine = useAudioStore((s) => s.initEngine);
@@ -58,6 +59,37 @@ export function AudioProvider() {
       current.playSurah(chapterId, chapterName, audioData, resumeVerseKey);
     });
   }, [reciterSlug]);
+
+  // ── Auto-continue to next surah on end ──────────────────
+  const playbackState = useAudioStore((s) => s.playbackState);
+  const autoPlayNextSurah = useSettingsStore((s) => s.autoPlayNextSurah);
+  const autoContinuedForRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (playbackState !== "ended") {
+      // Reset guard when leaving "ended" so the next end can trigger again
+      if (playbackState === "playing" || playbackState === "loading") {
+        autoContinuedForRef.current = null;
+      }
+      return;
+    }
+    if (!autoPlayNextSurah) return;
+
+    const { chapterId } = useAudioStore.getState();
+    const currentReciter = useSettingsStore.getState().reciterSlug;
+    if (!chapterId || chapterId >= 114) return;
+    if (autoContinuedForRef.current === chapterId) return;
+    autoContinuedForRef.current = chapterId;
+
+    const nextId = chapterId + 1;
+    fetchChapterAudioForSlug(currentReciter, nextId).then((audioData) => {
+      if (!audioData) return;
+      const latest = useAudioStore.getState();
+      // Bail if user started something else in the meantime
+      if (latest.chapterId !== chapterId && latest.chapterId !== null) return;
+      latest.playSurah(nextId, SURAH_NAMES_TR[nextId] ?? `Sure ${nextId}`, audioData);
+    });
+  }, [playbackState, autoPlayNextSurah]);
 
   return null;
 }

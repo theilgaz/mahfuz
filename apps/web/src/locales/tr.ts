@@ -54,6 +54,8 @@ export const tr = {
     reciterVoiceTeravih: "Teravih",
     reciterCountryUnknown: "Belirtilmemiş",
     reciterEmpty: "Filtreyle eşleşen kâri yok.",
+    autoPlayNextSurah: "Sıradaki sureye geç",
+    autoPlayNextSurahDesc: "Sure bitince otomatik olarak sonrakine devam et",
     resetAll: "Tüm Ayarları Sıfırla",
     language: "Dil",
     searchTranslation: "Meal ara...",

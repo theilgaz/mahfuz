@@ -90,6 +90,7 @@ interface SettingsState {
   labsEnabled: boolean;
   mushafSizeMode: MushafSizeMode;
   accentColor: AccentColorId;
+  autoPlayNextSurah: boolean;
 }
 
 interface SettingsActions {
@@ -114,6 +115,7 @@ interface SettingsActions {
   setLabsEnabled: (enabled: boolean) => void;
   setMushafSizeMode: (mode: MushafSizeMode) => void;
   setAccentColor: (id: AccentColorId) => void;
+  setAutoPlayNextSurah: (on: boolean) => void;
   resetToDefaults: () => void;
 }
 
@@ -137,6 +139,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       labsEnabled: false,
       mushafSizeMode: "standard" as MushafSizeMode,
       accentColor: "default" as AccentColorId,
+      autoPlayNextSurah: false,
 
       // Actions
       setTheme: (theme) => {
@@ -183,6 +186,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         applyAccentToDOM(id, isDark);
         set({ accentColor: id });
       },
+      setAutoPlayNextSurah: (on) => set({ autoPlayNextSurah: on }),
       resetToDefaults: () => {
         document.documentElement.setAttribute("data-theme", "light");
         applyAccentToDOM("default", false);
@@ -202,12 +206,13 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           colorPaletteId: "earth",
           labsEnabled: false,
           accentColor: "default",
+          autoPlayNextSurah: false,
         });
       },
     }),
     {
       name: "mahfuz-core-settings",
-      version: 8,
+      version: 9,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
@@ -267,6 +272,12 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           };
           if (persisted.accentColor && persisted.accentColor in map) {
             persisted.accentColor = map[persisted.accentColor];
+          }
+        }
+        if (version < 9) {
+          // v8 -> v9: autoPlayNextSurah default false
+          if (typeof persisted.autoPlayNextSurah !== "boolean") {
+            persisted.autoPlayNextSurah = false;
           }
         }
         return persisted as any;

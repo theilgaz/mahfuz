@@ -379,6 +379,16 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
               onClose={() => setPickerOpen(false)}
             />
           )}
+
+          {/* ── Sure bitince sıradakine devam ── */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, gap: 12 }}>
+            <span style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+              <span style={{ fontSize: 13, color: "var(--mu-ink)" }}>{t.settings.autoPlayNextSurah}</span>
+              <span style={{ fontSize: 11, color: "var(--mu-muted)", lineHeight: 1.35 }}>{t.settings.autoPlayNextSurahDesc}</span>
+            </span>
+            <Toggle checked={store.autoPlayNextSurah} onChange={() => store.setAutoPlayNextSurah(!store.autoPlayNextSurah)} />
+          </div>
+
           <Divider />
         </>
       )}

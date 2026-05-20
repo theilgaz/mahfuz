@@ -56,6 +56,8 @@ export const en: Messages = {
     reciterVoiceTeravih: "Tarawih",
     reciterCountryUnknown: "Unspecified",
     reciterEmpty: "No reciters match the filter.",
+    autoPlayNextSurah: "Continue to next surah",
+    autoPlayNextSurahDesc: "Automatically play the next surah when this one ends",
     resetAll: "Reset All Settings",
     language: "Language",
     searchTranslation: "Search translation...",
