@@ -116,7 +116,6 @@ function SurahCard({
   const name = getSurahName(surahId, locale);
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       onClick={onOpen}
       className={`p-3 rounded border cursor-pointer active:scale-[0.98] transition-all ${

@@ -3,7 +3,7 @@
  * AudioEngine entegre: play/pause + ilerleme + hız kontrolü.
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useNavigate } from "@tanstack/react-router";
 import { useAudioStore } from "~/stores/audio.store";
@@ -12,6 +12,34 @@ import { surahSlug } from "~/lib/surah-slugs";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2] as const;
+const POSITION_STORAGE_KEY = "mahfuz:audioBarPosition";
+const VIEWPORT_MARGIN = 8;
+
+type Position = { x: number; y: number };
+
+function loadSavedPosition(): Position | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(POSITION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (typeof parsed?.x === "number" && typeof parsed?.y === "number") {
+      return parsed;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function clampToViewport(pos: Position, width: number, height: number): Position {
+  const maxX = Math.max(VIEWPORT_MARGIN, window.innerWidth - width - VIEWPORT_MARGIN);
+  const maxY = Math.max(VIEWPORT_MARGIN, window.innerHeight - height - VIEWPORT_MARGIN);
+  return {
+    x: Math.min(Math.max(VIEWPORT_MARGIN, pos.x), maxX),
+    y: Math.min(Math.max(VIEWPORT_MARGIN, pos.y), maxY),
+  };
+}
 
 export function AudioBar() {
   const {
@@ -47,6 +75,77 @@ export function AudioBar() {
   const [showSpeed, setShowSpeed] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // Sürükle-bırak konum yönetimi
+  const [position, setPosition] = useState<Position | null>(loadSavedPosition);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragOriginRef = useRef<{
+    pointerStartX: number;
+    pointerStartY: number;
+    elementStartX: number;
+    elementStartY: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!position) return;
+    try {
+      window.localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(position));
+    } catch {
+      /* ignore */
+    }
+  }, [position]);
+
+  useEffect(() => {
+    if (!position) return;
+    const onResize = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      setPosition((prev) => (prev ? clampToViewport(prev, el.offsetWidth, el.offsetHeight) : prev));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [position]);
+
+  const handleDragPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    dragOriginRef.current = {
+      pointerStartX: e.clientX,
+      pointerStartY: e.clientY,
+      elementStartX: rect.left,
+      elementStartY: rect.top,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    e.preventDefault();
+  }, []);
+
+  const handleDragPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const origin = dragOriginRef.current;
+    const el = containerRef.current;
+    if (!origin || !el) return;
+    const dx = e.clientX - origin.pointerStartX;
+    const dy = e.clientY - origin.pointerStartY;
+    setPosition(
+      clampToViewport(
+        { x: origin.elementStartX + dx, y: origin.elementStartY + dy },
+        el.offsetWidth,
+        el.offsetHeight,
+      ),
+    );
+  }, []);
+
+  const endDrag = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragOriginRef.current) return;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    dragOriginRef.current = null;
+    setIsDragging(false);
+  }, []);
 
   // Space → play/pause (skip when typing in inputs)
   useEffect(() => {
@@ -92,13 +191,28 @@ export function AudioBar() {
 
   const stateLabel = isLoading ? "Loading" : isPlaying ? "Playing" : "Paused";
 
+  const positioningClass = position
+    ? "fixed z-30 w-[min(90vw,360px)]"
+    : "fixed bottom-18 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]";
+  const positioningStyle = position ? { left: position.x, top: position.y } : undefined;
+
   return (
-    <div className="fixed bottom-18 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]" role="region" aria-label="Audio player">
+    <div
+      ref={containerRef}
+      className={positioningClass}
+      style={positioningStyle}
+      role="region"
+      aria-label="Audio player"
+    >
       {/* Screen reader announcements */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {stateLabel} {verseDisplay} · {speed}x
       </div>
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded px-3 py-2">
+      <div
+        className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded px-3 py-2 ${
+          isDragging ? "shadow-xl" : ""
+        }`}
+      >
         {/* Progress bar */}
         <div className="h-0.5 rounded-full bg-[var(--color-border)] overflow-hidden mb-2" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
           <div
@@ -108,6 +222,29 @@ export function AudioBar() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Sürükleme tutamacı */}
+          <div
+            onPointerDown={handleDragPointerDown}
+            onPointerMove={handleDragPointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            className={`shrink-0 -mx-1 px-1 py-1 select-none touch-none text-[var(--color-text-secondary)] opacity-50 hover:opacity-100 transition-opacity ${
+              isDragging ? "cursor-grabbing" : "cursor-grab"
+            }`}
+            role="button"
+            aria-label="Oynatıcıyı taşı"
+            title="Sürükleyerek taşı"
+          >
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden="true">
+              <circle cx="2" cy="3" r="1" />
+              <circle cx="2" cy="7" r="1" />
+              <circle cx="2" cy="11" r="1" />
+              <circle cx="8" cy="3" r="1" />
+              <circle cx="8" cy="7" r="1" />
+              <circle cx="8" cy="11" r="1" />
+            </svg>
+          </div>
+
           {/* Ayet bilgisi — tıklanınca ilgili ayete git */}
           <button
             onClick={handleVerseClick}
