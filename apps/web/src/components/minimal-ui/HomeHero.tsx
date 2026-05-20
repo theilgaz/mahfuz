@@ -19,6 +19,7 @@ import { DailyVerseCard } from "~/components/DailyVerseCard";
 import { WeeklyChart } from "~/components/habit/WeeklyChart";
 import { Ornament } from "./Ornament";
 import { MuIcons } from "./icons";
+import { HomeShelves } from "./HomeShelves";
 
 export function HomeHero() {
   return (
@@ -31,10 +32,41 @@ export function HomeHero() {
 
       <DailyVerseSection />
 
-      <WeeklyStreakSection />
+      <HomeShelves />
 
-      <RecentBookmarksSection />
+      <ActivityRow />
     </>
+  );
+}
+
+function ActivityRow() {
+  const { data: weekly } = useQuery(weeklySummaryQueryOptions());
+  const { data: streak } = useQuery(streakQueryOptions());
+  const bookmarks = useBookmarksStore((s) => s.bookmarks);
+
+  const totalPages = (weekly ?? []).reduce((sum, d) => sum + d.pagesRead, 0);
+  const hasWeekly =
+    !!weekly && weekly.length > 0 &&
+    (totalPages > 0 || (streak?.currentStreak ?? 0) > 0);
+  const hasBookmarks = !!bookmarks && bookmarks.length > 0;
+
+  if (!hasWeekly && !hasBookmarks) return null;
+
+  return (
+    <section className="mx-auto w-full max-w-2xl px-4 pb-16">
+      <div className="flex flex-col md:flex-row md:items-stretch gap-4">
+        {hasWeekly && (
+          <div className="md:flex-1 min-w-0 flex">
+            <WeeklyStreakSection />
+          </div>
+        )}
+        {hasBookmarks && (
+          <div className="md:flex-1 min-w-0 flex">
+            <RecentBookmarksSection />
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -106,7 +138,7 @@ function WeeklyStreakSection() {
   const currentStreak = streak?.currentStreak ?? 0;
 
   return (
-    <section className="mx-auto w-full max-w-2xl px-4 pb-12">
+    <div className="flex-1 flex flex-col w-full">
       <div className="flex items-baseline justify-between mb-3">
         <p className="mu-eyebrow" style={{ margin: 0 }}>
           {t.home?.weeklyTitle ?? "Haftalık seri"}
@@ -117,8 +149,8 @@ function WeeklyStreakSection() {
           </span>
         )}
       </div>
-      <WeeklyChart days={weekly} dailyTarget={dailyTarget} />
-    </section>
+      <WeeklyChart days={weekly} dailyTarget={dailyTarget} className="flex-1" />
+    </div>
   );
 }
 
@@ -134,7 +166,7 @@ function RecentBookmarksSection() {
     .slice(0, 5);
 
   return (
-    <section className="mx-auto w-full max-w-2xl px-4 pb-16">
+    <div className="flex-1 flex flex-col w-full">
       <div className="flex items-baseline justify-between mb-3">
         <p className="mu-eyebrow" style={{ margin: 0 }}>
           {t.hub?.bookmarks ?? "Yer imleri"}
@@ -144,7 +176,7 @@ function RecentBookmarksSection() {
         </Link>
       </div>
 
-      <ul className="rounded border border-[var(--color-border)] divide-y divide-[var(--color-border)] bg-[var(--color-surface)]">
+      <ul className="flex-1 rounded border border-[var(--color-border)] divide-y divide-[var(--color-border)] bg-[var(--color-surface)]">
         {recent.map((bm) => {
           const surah = surahs.find((s) => s.id === bm.surahId);
           const name = getSurahName(bm.surahId, locale) || surah?.nameSimple || `${bm.surahId}`;
@@ -176,6 +208,6 @@ function RecentBookmarksSection() {
           );
         })}
       </ul>
-    </section>
+    </div>
   );
 }

@@ -167,27 +167,30 @@ export const getStreak = createServerFn({ method: "GET" }).handler(async () => {
   return { currentStreak, longestStreak, todayPages };
 });
 
-// ── Haftalık Özet ────────────────────────────────────────
+// ── Aktivite Heatmap (son 84 gün) ────────────────────────
+
+const HEATMAP_DAYS = 84;
 
 export const getWeeklySummary = createServerFn({ method: "GET" }).handler(async () => {
   const userId = await currentUserId();
   const days: Array<{ date: string; pagesRead: number }> = [];
 
   if (!userId) {
-    for (let i = 6; i >= 0; i--) days.push({ date: dateStr(i), pagesRead: 0 });
+    for (let i = HEATMAP_DAYS - 1; i >= 0; i--) days.push({ date: dateStr(i), pagesRead: 0 });
     return days;
   }
 
-  for (let i = 6; i >= 0; i--) {
+  const startDate = dateStr(HEATMAP_DAYS - 1);
+  const sessions = await db
+    .select({ date: readingSessions.date, pagesRead: readingSessions.pagesRead })
+    .from(readingSessions)
+    .where(and(eq(readingSessions.userId, userId), gte(readingSessions.date, startDate)));
+
+  const byDate = new Map(sessions.map((s) => [s.date, s.pagesRead]));
+  for (let i = HEATMAP_DAYS - 1; i >= 0; i--) {
     const date = dateStr(i);
-    const [session] = await db
-      .select({ pagesRead: readingSessions.pagesRead })
-      .from(readingSessions)
-      .where(and(eq(readingSessions.userId, userId), eq(readingSessions.date, date)));
-
-    days.push({ date, pagesRead: session?.pagesRead ?? 0 });
+    days.push({ date, pagesRead: byDate.get(date) ?? 0 });
   }
-
   return days;
 });
 
