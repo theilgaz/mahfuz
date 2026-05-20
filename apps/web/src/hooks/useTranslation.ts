@@ -17,7 +17,8 @@ function resolveMessagesSync(locale: Locale): Messages | null {
 
   const config = getLocaleConfig(locale);
   if (Object.keys(config.messages).length > 0) {
-    const msgs = config.messages as Messages;
+    const loaded = config.messages;
+    const msgs = locale === "en" ? (loaded as Messages) : deepMerge(locale, tr, loaded);
     resolved.set(locale, msgs);
     return msgs;
   }
@@ -39,8 +40,7 @@ export function useTranslation() {
     let cancelled = false;
     loadLocaleMessages(locale).then((loaded) => {
       if (cancelled) return;
-      const config = getLocaleConfig(locale);
-      const msgs = Object.keys(loaded).length > 0 ? loaded : deepMerge(locale, tr, loaded);
+      const msgs = locale === "en" ? loaded : deepMerge(locale, tr, loaded);
       resolved.set(locale, msgs);
       setMessages(msgs);
     });
