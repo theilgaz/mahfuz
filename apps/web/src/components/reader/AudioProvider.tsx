@@ -4,11 +4,13 @@
  */
 
 import { useEffect, useRef } from "react";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { AudioEngine } from "@mahfuz/audio-engine";
 import { useAudioStore } from "~/stores/audio.store";
 import { useSettingsStore } from "~/stores/settings.store";
 import { fetchChapterAudioForSlug } from "~/lib/audio-service";
 import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
+import { surahSlug } from "~/lib/surah-slugs";
 
 export function AudioProvider() {
   const initEngine = useAudioStore((s) => s.initEngine);
@@ -61,6 +63,8 @@ export function AudioProvider() {
   }, [reciterSlug]);
 
   // ── Auto-continue to next surah on end ──────────────────
+  const navigate = useNavigate();
+  const routerState = useRouterState();
   const playbackState = useAudioStore((s) => s.playbackState);
   const autoPlayNextSurah = useSettingsStore((s) => s.autoPlayNextSurah);
   const autoContinuedForRef = useRef<number | null>(null);
@@ -82,14 +86,21 @@ export function AudioProvider() {
     autoContinuedForRef.current = chapterId;
 
     const nextId = chapterId + 1;
+    const oldSlug = surahSlug(chapterId);
+    const currentPath = routerState.location.pathname;
+    const isOnOldSurahPage = currentPath === `/surah/${oldSlug}`;
+
     fetchChapterAudioForSlug(currentReciter, nextId).then((audioData) => {
       if (!audioData) return;
       const latest = useAudioStore.getState();
       // Bail if user started something else in the meantime
       if (latest.chapterId !== chapterId && latest.chapterId !== null) return;
       latest.playSurah(nextId, SURAH_NAMES_TR[nextId] ?? `Sure ${nextId}`, audioData);
+      if (isOnOldSurahPage) {
+        navigate({ to: "/surah/$surahSlug", params: { surahSlug: surahSlug(nextId) }, search: { ayah: undefined } });
+      }
     });
-  }, [playbackState, autoPlayNextSurah]);
+  }, [playbackState, autoPlayNextSurah, navigate, routerState.location.pathname]);
 
   return null;
 }
