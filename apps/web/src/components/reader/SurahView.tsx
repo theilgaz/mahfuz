@@ -51,7 +51,7 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
   const isMushaf = readingMode === "mushaf";
   const isMeal = readingMode === "meal";
   const primaryMode: "ayet" | "mushaf" = isMushaf || isMeal ? "mushaf" : "ayet";
-  const effectiveTajweed = showTajweed && !useBasic && !isWbw;
+  const effectiveTajweed = showTajweed && !useBasic;
 
   const flipSubMode = useCallback(() => {
     if (primaryMode === "ayet") setReadingMode(isWbw ? "verse" : "wbw");

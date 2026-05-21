@@ -2,12 +2,12 @@
  * Tek ayet bloğu — Arapça metin + meal + yer imi + eylem menüsü.
  */
 
-import { memo, useState, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { memo, useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useBookmarksStore } from "~/stores/bookmarks.store";
 import { useSettingsStore, COLOR_PALETTES } from "~/stores/settings.store";
 import { useAudioStore } from "~/stores/audio.store";
-import { parseTajweed } from "~/lib/tajweed-parser";
+import { parseTajweed, parseTajweedWords } from "~/lib/tajweed-parser";
 import { splitWords } from "~/lib/split-words";
 import { AyahActionMenu } from "./AyahActionMenu";
 import { WordTooltip } from "./WordTooltip";
@@ -74,6 +74,14 @@ export const AyahBlock = memo(function AyahBlock({
   // WBW modunda: kelime kartları; diğer modlarda: tooltip
   const isWbwLayout = readingMode === "wbw" && wbwWords && wbwWords.length > 0;
   const hasTooltip = readingMode === "verse" && wbwWords && wbwWords.length > 0;
+
+  // WBW modunda tajweed renklendirmesi: textTajweed'i kelimelere böl. Kelime
+  // sayısı wbwWords ile eşleşmezse renklendirme kapanır (düz metin gösterilir).
+  const wbwTajweedWords = useMemo(() => {
+    if (!isWbwLayout || !showTajweed || !textTajweed || colorizeWords) return null;
+    const parsed = parseTajweedWords(textTajweed);
+    return parsed.length === wbwWords!.length ? parsed : null;
+  }, [isWbwLayout, showTajweed, textTajweed, colorizeWords, wbwWords]);
 
   // Tooltip state — verse modunda kelimeye tıklayınca
   const [tooltip, setTooltip] = useState<{ word: WbwWord; rect: DOMRect } | null>(null);
@@ -226,7 +234,7 @@ export const AyahBlock = memo(function AyahBlock({
                   color: wordColors && wordPosition !== w.position ? wordColors[i % wordColors.length] : undefined,
                 }}
               >
-                {w.textUthmani}
+                {wbwTajweedWords ? wbwTajweedWords[i] : w.textUthmani}
               </span>
               {w.transliteration && wbwTranslit !== "off" && (
                 <span
