@@ -88,7 +88,7 @@ function applyAll(data: UserSettingsData) {
 export function useSettingsSync(session: Session | null) {
   const userId = session?.user?.id;
   const loadedRef = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const snapshotRef = useRef("");
 
   // Load from DB once on mount

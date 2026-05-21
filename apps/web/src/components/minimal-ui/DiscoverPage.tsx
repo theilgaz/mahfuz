@@ -276,6 +276,7 @@ export function DiscoverPage() {
           <Link
             to="/page/$pageNumber"
             params={{ pageNumber: "1" }}
+            search={{ ayah: undefined }}
             className="mu-quick-tile"
           >
             <span className="mu-quick-icon" aria-hidden="true">{MuIcons.book}</span>

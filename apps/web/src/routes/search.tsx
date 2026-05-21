@@ -336,6 +336,7 @@ function SearchSuggestions({ onSelect, locale, t }: { onSelect: (q: string) => v
               key={s.id}
               to="/surah/$surahSlug"
               params={{ surahSlug: surahSlug(s.id) }}
+              search={{ ayah: undefined }}
               className="flex items-center gap-2 px-3 py-2 rounded bg-[var(--color-surface)] hover:bg-[var(--color-accent)]/8 active:scale-[0.97] text-xs transition-all"
             >
               <span dir="rtl" style={{ fontFamily: "var(--font-arabic)", fontSize: "0.85rem" }}>{s.nameAr}</span>

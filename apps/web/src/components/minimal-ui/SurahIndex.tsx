@@ -185,6 +185,7 @@ function renderSurahRow(
   const linkProps = {
     to: "/surah/$surahSlug" as const,
     params: { surahSlug: surahSlug(surah.id) },
+    search: { ayah: undefined },
   };
   const displayNum = tab === "nuzul" ? surah.revelationOrder : surah.id;
   const isMekki = surah.revelation === "makkah";

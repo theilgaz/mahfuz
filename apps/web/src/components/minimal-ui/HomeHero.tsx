@@ -85,7 +85,7 @@ function FeaturedSurah() {
     ? Math.round((lastPosition.ayahNumber / surah.ayahCount) * 100)
     : 0;
 
-  const linkProps = { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(surah.id) } };
+  const linkProps = { to: "/surah/$surahSlug" as const, params: { surahSlug: surahSlug(surah.id) }, search: { ayah: undefined } };
 
   return (
     <section className="mu-feature">

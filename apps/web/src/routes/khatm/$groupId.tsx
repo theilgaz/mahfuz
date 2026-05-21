@@ -73,7 +73,7 @@ function GroupDashboardPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-6 text-center">
         <p className="text-[var(--color-text-secondary)]">{t.khatm.groupNotFound}</p>
-        <Link to="/khatm/" className="mt-4 inline-block text-[var(--color-accent)] text-sm">
+        <Link to="/khatm" className="mt-4 inline-block text-[var(--color-accent)] text-sm">
           ← {t.khatm.back}
         </Link>
       </div>
@@ -87,7 +87,7 @@ function GroupDashboardPage() {
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
       {/* Header */}
       <div className="flex items-start gap-3 mb-6">
-        <Link to="/khatm/" className="mt-0.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
+        <Link to="/khatm" className="mt-0.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>

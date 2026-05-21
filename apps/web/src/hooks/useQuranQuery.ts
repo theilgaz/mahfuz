@@ -30,6 +30,7 @@ export const quranKeys = {
   tajweed: (surahId: number) => [...quranKeys.all, "tajweed", surahId] as const,
   imlaei: (surahId: number) => [...quranKeys.all, "imlaei", surahId] as const,
   mushafLines: (pageNumber: number) => [...quranKeys.all, "mushafLines", pageNumber] as const,
+  qcfWords: (pageNumber: number) => [...quranKeys.all, "qcfWords", pageNumber] as const,
 };
 
 // ── Query Options ────────────────────────────────────────
@@ -115,6 +116,32 @@ export const mushafLinesQueryOptions = (pageNumber: number) =>
     queryFn: async (): Promise<MushafPageLines> => {
       const res = await fetch(`/mushaf-lines/${pageNumber}.json`);
       if (!res.ok) throw new Error(`Mushaf line data not found for page ${pageNumber}`);
+      return res.json();
+    },
+    staleTime: Infinity,
+  });
+
+export interface QcfWord {
+  /** glyph character */
+  g: string;
+  /** char_type: w=word, e=verse-end */
+  c: "w" | "e";
+  /** verse key, e.g. "1:1" */
+  vk: string;
+  /** word position within the verse */
+  p: number;
+}
+
+export interface QcfPageData {
+  lines: { words: QcfWord[] }[];
+}
+
+export const qcfWordsQueryOptions = (pageNumber: number) =>
+  queryOptions({
+    queryKey: quranKeys.qcfWords(pageNumber),
+    queryFn: async (): Promise<QcfPageData> => {
+      const res = await fetch(`/qcf-words/${pageNumber}.json`);
+      if (!res.ok) throw new Error(`QCF word data not found for page ${pageNumber}`);
       return res.json();
     },
     staleTime: Infinity,

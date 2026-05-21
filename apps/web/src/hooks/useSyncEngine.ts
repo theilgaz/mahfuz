@@ -130,7 +130,7 @@ function collectChanges(): {
 export function useSyncEngine(session: Session | null) {
   const userId = session?.user?.id;
   const initRef = useRef(false);
-  const pushTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const pushTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const snapshotRef = useRef("");
   const lastPullRef = useRef(0);
 

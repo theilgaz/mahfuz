@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/v1/sync")({
           .where(eq(userSettings.userId, userId))
           .limit(1);
 
-        const settings = settingsRow ? JSON.parse(settingsRow.settingsJson) : {};
+        const settings = settingsRow ? JSON.parse(settingsRow.data) : {};
 
         // Reading positions
         const positions = await db
@@ -70,7 +70,7 @@ export const Route = createFileRoute("/api/v1/sync")({
             surahId: b.surahId,
             ayahNumber: b.ayahNumber,
             pageNumber: b.pageNumber ?? 0,
-            createdAt: b.createdAt?.getTime() ?? Date.now(),
+            createdAt: b.createdAt ?? Date.now(),
           })),
           readingPositions: positions.map((p) => ({
             surahId: p.surahId,
@@ -126,7 +126,7 @@ export const Route = createFileRoute("/api/v1/sync")({
             if (bm.deleted) {
               await db
                 .update(bookmarksTable)
-                .set({ deletedAt: new Date() })
+                .set({ deletedAt: Date.now() })
                 .where(
                   and(
                     eq(bookmarksTable.userId, userId),
@@ -142,7 +142,7 @@ export const Route = createFileRoute("/api/v1/sync")({
                   surahId: bm.surahId,
                   ayahNumber: bm.ayahNumber,
                   pageNumber: bm.pageNumber,
-                  createdAt: new Date(bm.createdAt),
+                  createdAt: bm.createdAt,
                 })
                 .onConflictDoNothing();
             }
@@ -157,7 +157,7 @@ export const Route = createFileRoute("/api/v1/sync")({
             .where(eq(userSettings.userId, userId))
             .limit(1);
 
-          const merged = existing ? JSON.parse(existing.settingsJson) : {};
+          const merged = existing ? JSON.parse(existing.data) : {};
           for (const [key, val] of Object.entries(body.settings)) {
             merged[key] = (val as any).value;
           }
@@ -165,12 +165,12 @@ export const Route = createFileRoute("/api/v1/sync")({
           if (existing) {
             await db
               .update(userSettings)
-              .set({ settingsJson: JSON.stringify(merged), updatedAt: new Date() })
+              .set({ data: JSON.stringify(merged), updatedAt: new Date() })
               .where(eq(userSettings.userId, userId));
           } else {
             await db.insert(userSettings).values({
               userId,
-              settingsJson: JSON.stringify(merged),
+              data: JSON.stringify(merged),
               updatedAt: new Date(),
             });
           }

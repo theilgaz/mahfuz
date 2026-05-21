@@ -17,6 +17,7 @@ export const Route = createFileRoute("/surah/$surahSlug")({
   validateSearch: (search: Record<string, unknown>) => ({
     ayah: search.ayah ? Number(search.ayah) : undefined,
   }),
+  // @ts-expect-error TanStack 1.163 SSR validator infers `never` here for param routes with beforeLoad
   beforeLoad: ({ params }) => {
     const { surahSlug: slug } = params;
 
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/surah/$surahSlug")({
     const id = surahIdFromSlug(slug);
     if (!id) throw redirect({ to: "/" });
   },
+  // @ts-expect-error TanStack 1.163 SSR validator infers `never` for loaders on param routes
   loader: ({ params, context }) => {
     const id = surahIdFromSlug(params.surahSlug)!;
     return context.queryClient.ensureQueryData(surahDataQueryOptions(id));

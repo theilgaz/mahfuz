@@ -59,7 +59,7 @@ function MemoryGamePage() {
   const [locked, setLocked] = useState(false);
   const [lastMatchedPair, setLastMatchedPair] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   // Timer
   useEffect(() => {

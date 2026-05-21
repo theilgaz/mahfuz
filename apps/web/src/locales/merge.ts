@@ -9,11 +9,6 @@ function merge(fallback: unknown, partial: unknown): unknown {
   const partialObj = partial as Record<string, unknown>;
   const fallbackObj = fallback as Record<string, unknown>;
 
-  const partialValues = Object.values(partialObj);
-  if (partialValues.length > 0 && partialValues.every((v) => typeof v === "string")) {
-    return partial;
-  }
-
   const result: Record<string, unknown> = { ...fallbackObj };
   for (const key of Object.keys(fallbackObj)) {
     if (key in partialObj) {

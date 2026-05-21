@@ -117,7 +117,7 @@ function VoiceQuizPage() {
   if (!started) {
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 flex flex-col items-center gap-6">
-        <Link to="/alifba/" className="self-start text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors">
+        <Link to="/alifba" className="self-start text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M10 4L6 8l4 4" />
           </svg>
@@ -158,7 +158,7 @@ function VoiceQuizPage() {
           {finalCorrect} / {questions.length} {t.alifba.correct}
         </p>
         <div className="flex gap-3">
-          <Link to="/alifba/" className="px-4 py-2 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
+          <Link to="/alifba" className="px-4 py-2 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
             {t.nav.back}
           </Link>
           <button
@@ -180,7 +180,7 @@ function VoiceQuizPage() {
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       {/* Üst bar */}
       <div className="flex items-center justify-between mb-4">
-        <Link to="/alifba/" className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors">
+        <Link to="/alifba" className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M10 4L6 8l4 4" />
           </svg>

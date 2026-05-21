@@ -46,7 +46,7 @@ function LetterDetailPage() {
     return (
       <div className="max-w-lg mx-auto px-4 py-6 pb-24 text-center text-[var(--color-text-secondary)]">
         {t.alifba.letterNotFound}{" "}
-        <Link to="/alifba/" className="text-[var(--color-accent)]">
+        <Link to="/alifba" className="text-[var(--color-accent)]">
           {t.nav.back}
         </Link>
       </div>
@@ -58,7 +58,7 @@ function LetterDetailPage() {
       {/* Üst bar */}
       <div className="flex items-center justify-between mb-4">
         <Link
-          to="/alifba/"
+          to="/alifba"
           className="flex items-center gap-1 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -188,7 +188,7 @@ function LetterDetailPage() {
             if (nextLetter) {
               navigate({ to: "/alifba/$letterId", params: { letterId: nextLetter.id } });
             } else {
-              navigate({ to: "/alifba/" });
+              navigate({ to: "/alifba" });
             }
           }}
           className="mb-3 w-full py-3 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] font-medium text-sm hover:opacity-90 transition-colors"
@@ -229,7 +229,7 @@ function LetterDetailPage() {
           </Link>
         ) : (
           <Link
-            to="/alifba/"
+            to="/alifba"
             className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded bg-[var(--mu-accent-soft)] text-[var(--mu-accent-ink)] transition-colors hover:opacity-90"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

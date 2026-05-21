@@ -331,6 +331,7 @@ function AppHeader() {
           ) : (
             <Link
               to="/auth/login"
+              search={{ redirect: "" }}
               className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--color-surface)] transition-colors shrink-0"
               aria-label={t.auth?.login || "Login"}
             >

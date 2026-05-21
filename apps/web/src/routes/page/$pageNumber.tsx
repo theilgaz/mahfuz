@@ -27,6 +27,7 @@ export const Route = createFileRoute("/page/$pageNumber")({
   validateSearch: (search: Record<string, unknown>) => ({
     ayah: (search.ayah as string) || undefined,
   }),
+  // @ts-expect-error TanStack 1.163 SSR validator infers `never` for loaders on param routes
   loader: async ({ params, context }) => {
     const pageNumber = parseInt(params.pageNumber, 10);
     if (isNaN(pageNumber) || pageNumber < 1 || pageNumber > TOTAL_PAGES) {

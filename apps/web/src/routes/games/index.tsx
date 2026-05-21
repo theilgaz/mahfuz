@@ -495,7 +495,6 @@ function ScoreboardContent({ userId, t }: { userId?: string; t: T }) {
   const [period, setPeriod] = useState<LeaderboardPeriod>("all");
 
   const periodLabels: Record<LeaderboardPeriod, string> = {
-    week: t.gamesHub.periodWeek,
     season: t.gamesHub.periodSeason,
     all: t.gamesHub.periodAll,
   };

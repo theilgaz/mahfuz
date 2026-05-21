@@ -132,7 +132,7 @@ export const useHifzStore = create<HifzState & HifzActions>()(
           }
           return { memorized };
         }
-        return state as HifzState;
+        return state as unknown as HifzState;
       },
     },
   ),

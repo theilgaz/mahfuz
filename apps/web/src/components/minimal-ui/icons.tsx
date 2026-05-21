@@ -3,7 +3,7 @@
  * Each icon is a React element (not a component) for direct use in JSX.
  */
 
-import { MagnifyingGlass, House, Compass, BookOpen, BookmarkSimple, Play, Pause, CaretLeft, CaretRight, Sun, Moon, GearSix, X, ArrowRight, Trophy, User, Fire, Check, Copy, ShareNetwork, NotePencil, Lock, Microphone, Plus, Minus, Brain, ClockCounterClockwise, UsersThree, Star, GameController, UsersFour } from "@phosphor-icons/react";
+import { MagnifyingGlass, House, Compass, BookOpen, BookmarkSimple, Play, Pause, CaretLeft, CaretRight, Sun, Moon, GearSix, X, ArrowRight, ArrowLeft, Trophy, User, Fire, Check, Copy, ShareNetwork, NotePencil, Lock, Microphone, Plus, Minus, Brain, ClockCounterClockwise, UsersThree, Star, GameController, UsersFour } from "@phosphor-icons/react";
 
 const w = 18;
 const p = { size: w, weight: "light" as const };
@@ -24,6 +24,7 @@ export const MuIcons = {
   settings: <GearSix {...p} />,
   close: <X {...p} />,
   arrowRight: <ArrowRight {...p} />,
+  arrowLeft: <ArrowLeft {...p} />,
   games: <Trophy {...p} />,
   alif: (
     <span style={{ fontFamily: "var(--font-arabic)", fontSize: 18, fontWeight: 700, lineHeight: 1 }}>ا ب</span>

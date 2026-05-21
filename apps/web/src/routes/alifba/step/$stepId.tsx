@@ -46,7 +46,7 @@ function StepPage() {
       <div className="mu-roadmap" style={{ textAlign: "center", paddingTop: 40 }}>
         <p style={{ color: "var(--mu-muted)" }}>
           {"Ad\u0131m bulunamad\u0131."}{" "}
-          <Link to="/alifba/" style={{ color: "var(--mu-accent)" }}>{t.nav.back}</Link>
+          <Link to="/alifba" style={{ color: "var(--mu-accent)" }}>{t.nav.back}</Link>
         </p>
       </div>
     );
@@ -128,7 +128,7 @@ function StepPage() {
   return (
     <div className="mu-roadmap">
       {/* Back */}
-      <Link to="/alifba/" className="mu-letters-back">
+      <Link to="/alifba" className="mu-letters-back">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M10 4L6 8l4 4" /></svg>
         {t.nav.back}
       </Link>

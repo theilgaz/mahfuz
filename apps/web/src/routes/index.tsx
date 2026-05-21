@@ -3,13 +3,15 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
-import { surahsQueryOptions, dailyVerseQueryOptions } from "~/hooks/useQuranQuery";
+import { surahsQueryOptions, dailyVerseQueryOptions, useSurahs } from "~/hooks/useQuranQuery";
 import {
   streakQueryOptions,
   weeklySummaryQueryOptions,
   readingGoalQueryOptions,
 } from "~/hooks/useHabitQuery";
 import { HomeHero } from "~/components/minimal-ui/HomeHero";
+import { SurahIndex } from "~/components/minimal-ui/SurahIndex";
+import { useSettingsStore } from "~/stores/settings.store";
 import { staticHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/")({
@@ -42,6 +44,17 @@ function HomePageSkeleton() {
 }
 
 function HomePage() {
+  const homeView = useSettingsStore((s) => s.homeView);
+  const { data: surahs } = useSurahs();
+
+  if (homeView === "fihrist") {
+    return (
+      <div className="mu-home">
+        <SurahIndex surahs={surahs} />
+      </div>
+    );
+  }
+
   return (
     <div className="mu-home">
       <HomeHero />

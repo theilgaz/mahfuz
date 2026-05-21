@@ -84,6 +84,7 @@ function NotesPage() {
                   <Link
                     to="/analyse/$verseKey"
                     params={{ verseKey: note.verseKey }}
+                    search={{ tab: "meal" }}
                     className="text-xs font-semibold text-[var(--color-accent)] hover:underline"
                   >
                     {note.verseKey}

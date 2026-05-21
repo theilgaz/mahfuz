@@ -53,8 +53,6 @@ export function V0TextRenderer({
           arabicFontSize={arabicFontSize}
           onVerseEndClick={onVerseEndClick}
           verseIndexOffset={verseOffset}
-          fontFamily={fontFamily}
-          verseList={verseList}
         />,
       );
       verseOffset += countEndMarkers(segmentLines);
@@ -82,8 +80,6 @@ export function V0TextRenderer({
         arabicFontSize={arabicFontSize}
         onVerseEndClick={onVerseEndClick}
         verseIndexOffset={verseOffset}
-        fontFamily={fontFamily}
-        verseList={verseList}
       />,
     );
   }

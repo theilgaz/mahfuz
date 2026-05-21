@@ -9,11 +9,13 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { SettingsPanel } from "~/components/reader/SettingsPanel";
 import { surahIdFromSlug } from "~/lib/surah-slugs";
 import { useReadingStore } from "~/stores/reading.store";
+import { useSettingsStore } from "~/stores/settings.store";
 
 export function BottomNav() {
   const pathname = useLocation({ select: (l) => l.pathname });
   const { t } = useTranslation();
   const lastPosition = useReadingStore((s) => s.lastPosition);
+  const homeView = useSettingsStore((s) => s.homeView);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const openSettings = useCallback(() => setSettingsOpen(true), []);
@@ -33,6 +35,8 @@ export function BottomNav() {
     if (!ctx.pageNumber && lastPosition) ctx.pageNumber = lastPosition.pageNumber;
     return ctx;
   }, [pathname, lastPosition]);
+
+  const fihristIsHome = homeView === "fihrist";
 
   const tabs = [
     {
@@ -59,7 +63,7 @@ export function BottomNav() {
         </svg>
       ),
     },
-    {
+    ...(fihristIsHome ? [] : [{
       id: "fihrist",
       label: t.nav.fihrist,
       to: "/fihrist",
@@ -70,7 +74,7 @@ export function BottomNav() {
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
         </svg>
       ),
-    },
+    }]),
     {
       id: "discover",
       label: t.nav.hub,
@@ -83,7 +87,7 @@ export function BottomNav() {
         </svg>
       ),
     },
-  ] as const;
+  ];
 
   return (
     <>

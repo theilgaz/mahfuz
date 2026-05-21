@@ -52,7 +52,7 @@ function GamesHubPage() {
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       <div className="flex items-center justify-between mb-5">
-        <Link to="/alifba/" className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors">
+        <Link to="/alifba" className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M10 4L6 8l4 4" />
           </svg>

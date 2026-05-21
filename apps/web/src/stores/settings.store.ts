@@ -10,6 +10,7 @@ export type SurahListFilter = "all" | "makkah" | "madinah" | "nuzul";
 export type ColorPaletteId = "pastel" | "ocean" | "earth" | "vivid";
 export type MushafSizeMode = "standard" | "fill";
 export type AccentColorId = "default" | "stone" | "petrol" | "green" | "indigo";
+export type HomeView = "welcome" | "fihrist";
 
 export const ACCENT_COLORS: Record<AccentColorId, { light: { accent: string; soft: string; ink: string }; dark: { accent: string; soft: string; ink: string }; swatch: string }> = {
   default: {
@@ -73,7 +74,7 @@ export function applyAccentToDOM(id: AccentColorId, isDark: boolean) {
   }
 }
 
-interface SettingsState {
+export interface SettingsState {
   theme: Theme;
   textStyle: TextStyle;
   translationSlugs: string[];
@@ -91,9 +92,10 @@ interface SettingsState {
   mushafSizeMode: MushafSizeMode;
   accentColor: AccentColorId;
   autoPlayNextSurah: boolean;
+  homeView: HomeView;
 }
 
-interface SettingsActions {
+export interface SettingsActions {
   setTheme: (theme: Theme) => void;
   /** Bir meal ekle/cikar (toggle) */
   toggleTranslationSlug: (slug: string) => void;
@@ -116,8 +118,11 @@ interface SettingsActions {
   setMushafSizeMode: (mode: MushafSizeMode) => void;
   setAccentColor: (id: AccentColorId) => void;
   setAutoPlayNextSurah: (on: boolean) => void;
+  setHomeView: (view: HomeView) => void;
   resetToDefaults: () => void;
 }
+
+export type SettingsStore = SettingsState & SettingsActions;
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
   persist(
@@ -140,6 +145,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       mushafSizeMode: "standard" as MushafSizeMode,
       accentColor: "default" as AccentColorId,
       autoPlayNextSurah: false,
+      homeView: "welcome" as HomeView,
 
       // Actions
       setTheme: (theme) => {
@@ -187,6 +193,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         set({ accentColor: id });
       },
       setAutoPlayNextSurah: (on) => set({ autoPlayNextSurah: on }),
+      setHomeView: (view) => set({ homeView: view }),
       resetToDefaults: () => {
         document.documentElement.setAttribute("data-theme", "light");
         applyAccentToDOM("default", false);
@@ -207,12 +214,13 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           labsEnabled: false,
           accentColor: "default",
           autoPlayNextSurah: false,
+          homeView: "welcome",
         });
       },
     }),
     {
       name: "mahfuz-core-settings",
-      version: 9,
+      version: 10,
       merge: (persisted, current) => ({
         ...current,
         ...(persisted as object),
@@ -278,6 +286,12 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           // v8 -> v9: autoPlayNextSurah default false
           if (typeof persisted.autoPlayNextSurah !== "boolean") {
             persisted.autoPlayNextSurah = false;
+          }
+        }
+        if (version < 10) {
+          // v9 -> v10: homeView default 'welcome'
+          if (persisted.homeView !== "welcome" && persisted.homeView !== "fihrist") {
+            persisted.homeView = "welcome";
           }
         }
         return persisted as any;

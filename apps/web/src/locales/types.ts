@@ -8,8 +8,8 @@ type Widen<T> = T extends string
 /** Full message shape — derived from the Turkish (source) locale. */
 export type Messages = Widen<typeof tr>;
 
-/** Makes every nested key optional while keeping leaf string maps atomic. */
-export type DeepPartial<T> = T extends Record<string, string>
+/** Makes every nested key optional, all the way down to leaf strings. */
+export type DeepPartial<T> = T extends string
   ? T
   : { [K in keyof T]?: DeepPartial<T[K]> };
 

@@ -9,6 +9,7 @@ import { juzHead } from "~/lib/seo";
 
 export const Route = createFileRoute("/juz/$juzId")({
   head: ({ params }) => juzHead(params.juzId),
+  // @ts-expect-error TanStack 1.163 SSR validator infers `never` for beforeLoad on param routes
   beforeLoad: async ({ params }) => {
     const juzNumber = parseInt(params.juzId, 10);
     if (isNaN(juzNumber) || juzNumber < 1 || juzNumber > 30) {

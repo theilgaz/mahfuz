@@ -80,6 +80,9 @@ export const en: Messages = {
       green: "Islamic Green",
       indigo: "Indigo",
     },
+    homeView: "Home Page View",
+    homeViewWelcome: "Welcome",
+    homeViewFihrist: "Index",
   },
 
   nav: {
@@ -161,6 +164,7 @@ export const en: Messages = {
     qaidaExamScore: "Correct",
     qaidaExamPass: "You passed the harakat exam. Next step unlocked!",
     qaidaExamFail: "You need at least {count} correct to pass.",
+    qaidaExamStart: "Start Exam",
     qaidaExamRetry: "Try Again",
     qaidaExamBack: "Back to Qaida",
     qaidaExamCongrats: "Congratulations!",
@@ -468,6 +472,7 @@ export const en: Messages = {
     toc: "Contents",
     fontType: "Font type",
     bookmarksHint: "Use the marker next to a verse to add a bookmark.",
+    ayah: "verse",
   },
 
   error: {
@@ -496,6 +501,8 @@ export const en: Messages = {
     curatedPopular: "Most Read",
     curatedAmma: "Juz Amma",
     curatedTabaraka: "Juz Tabarak",
+    clear: "Clear",
+    nuzul: "Nuzul",
   },
 
   changelog: {
@@ -1035,6 +1042,7 @@ export const en: Messages = {
   },
   learn: {
     startPractice: "Start Practice",
+    startExercises: "Start Exercises",
     nextLesson: "Next Lesson",
     backToQaida: "Back to Qaida",
     lessonComplete: "Lesson Complete!",

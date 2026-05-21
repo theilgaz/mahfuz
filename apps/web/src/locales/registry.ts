@@ -1,8 +1,9 @@
 import { tr } from "./tr";
-import type { LocaleConfig, Messages } from "./types";
+import { deepMerge } from "./merge";
+import type { LocaleConfig, Messages, PartialMessages } from "./types";
 
 /** Dynamic loaders — only TR is bundled, rest are code-split. */
-const localeLoaders: Record<string, () => Promise<Messages>> = {
+const localeLoaders: Record<string, () => Promise<Messages | PartialMessages>> = {
   en: () => import("./en").then((m) => m.en),
   es: () => import("./es").then((m) => m.es),
   fr: () => import("./fr").then((m) => m.fr),
@@ -40,7 +41,7 @@ export function getAllLocaleConfigs(): { code: Locale; config: LocaleConfig }[] 
   return LOCALE_CODES.map((code) => ({ code, config: registry[code] }));
 }
 
-/** Load messages (sync for TR, async for others). */
+/** Load messages (sync for TR, async for others). Partial locales are deep-merged with TR. */
 export async function loadLocaleMessages(locale: Locale): Promise<Messages> {
   const config = registry[locale];
 
@@ -51,8 +52,9 @@ export async function loadLocaleMessages(locale: Locale): Promise<Messages> {
 
   const loader = localeLoaders[locale];
   if (loader) {
-    const messages = await loader();
-    (registry[locale] as { messages: Messages | Record<string, never> }).messages = messages;
+    const raw = await loader();
+    const messages = deepMerge(locale, tr as Messages, raw as PartialMessages);
+    (registry[locale] as { messages: Messages }).messages = messages;
     return messages;
   }
 

@@ -17,7 +17,7 @@ export function useReadingSync(session: Session | null) {
   const recentPositions = useReadingStore((s) => s.recentPositions);
   const dbLoaded = useReadingStore((s) => s._dbLoaded);
   const loadFromDb = useReadingStore((s) => s._loadFromDb);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const prevPositionRef = useRef<string>("");
 
   // Load from DB on mount (once per session)

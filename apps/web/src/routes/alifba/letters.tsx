@@ -36,7 +36,7 @@ function LetterIndexPage() {
     <div className="mu-roadmap">
       {/* Back */}
       <Link
-        to="/alifba/"
+        to="/alifba"
         className="mu-letters-back"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">

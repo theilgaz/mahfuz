@@ -78,6 +78,9 @@ export const tr = {
       green: "Yeşil",
       indigo: "Indigo",
     },
+    homeView: "Ana Sayfa Görünümü",
+    homeViewWelcome: "Karşılama",
+    homeViewFihrist: "Fihrist",
   },
 
   nav: {
@@ -159,6 +162,7 @@ export const tr = {
     qaidaExamScore: "Doğru",
     qaidaExamPass: "Hareke sınavını başarıyla geçtiniz. Sonraki adım açıldı!",
     qaidaExamFail: "Geçmek için en az {count} doğru gerekiyor.",
+    qaidaExamStart: "Sınava gir",
     qaidaExamRetry: "Tekrar Dene",
     qaidaExamBack: "Kaide'ye Dön",
     qaidaExamCongrats: "Tebrikler!",
@@ -466,6 +470,7 @@ export const tr = {
     toc: "İçindekiler",
     fontType: "Yazı tipi",
     bookmarksHint: "Ayet yanındaki işaretçiyle yer imi ekleyin.",
+    ayah: "ayet",
   },
 
   error: {
@@ -494,6 +499,8 @@ export const tr = {
     curatedPopular: "Çok Okunan",
     curatedAmma: "Amme Cüzü",
     curatedTabaraka: "Tebâreke Cüzü",
+    clear: "Temizle",
+    nuzul: "Nüzul",
   },
 
   changelog: {
@@ -1044,6 +1051,7 @@ export const tr = {
   learn: {
     // UI
     startPractice: "Alıştırmaya Başla",
+    startExercises: "Alıştırmalara başla",
     nextLesson: "Sonraki Ders",
     backToQaida: "Kaide'ye Dön",
     lessonComplete: "Ders Tamamlandı!",

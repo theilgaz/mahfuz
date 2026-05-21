@@ -16,10 +16,13 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
   const { t } = useTranslation();
   const theme = useSettingsStore((s) => s.theme);
   const setTheme = useSettingsStore((s) => s.setTheme);
+  const homeView = useSettingsStore((s) => s.homeView);
 
   const navItems = [
     { name: "home", path: "/", icon: MuIcons.home, label: t.nav?.home ?? "Ana Sayfa" },
-    { name: "fihrist", path: "/fihrist", icon: MuIcons.book, label: t.nav?.fihrist ?? "Fihrist" },
+    ...(homeView === "fihrist"
+      ? []
+      : [{ name: "fihrist", path: "/fihrist", icon: MuIcons.book, label: t.nav?.fihrist ?? "Fihrist" }]),
     { name: "discover", path: "/discover", icon: MuIcons.compass, label: t.hub?.title ?? "Kesfet" },
   ];
 
@@ -96,7 +99,7 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
               )}
             </Link>
           ) : (
-            <Link to="/auth/login" className="mu-btn small primary" style={{ fontSize: 13 }}>
+            <Link to="/auth/login" search={{ redirect: "" }} className="mu-btn small primary" style={{ fontSize: 13 }}>
               {t.auth?.login ?? "Giris yap"}
             </Link>
           )}

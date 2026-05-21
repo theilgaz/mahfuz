@@ -5,7 +5,7 @@
 
 import { useMemo, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
-import { useSettingsStore, COLOR_PALETTES, ACCENT_COLORS, type Theme, type TextStyle, type ReadingMode, type ColorPaletteId, type AccentColorId } from "~/stores/settings.store";
+import { useSettingsStore, COLOR_PALETTES, ACCENT_COLORS, type Theme, type TextStyle, type ReadingMode, type ColorPaletteId, type AccentColorId, type HomeView, type SettingsStore } from "~/stores/settings.store";
 import { useQuery } from "@tanstack/react-query";
 import { recitersQueryOptions, translationSourcesQueryOptions, useSurahs } from "~/hooks/useQuranQuery";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -231,7 +231,7 @@ export function SettingsPanel({ open, onClose, context }: SettingsPanelProps) {
 // ── Tab 1: Okuma ─────────────────────────────────────────
 
 function ReadingTab({ store, reciterList, translationList, locale, t, onModeChange, currentPath }: {
-  store: ReturnType<typeof useSettingsStore>;
+  store: SettingsStore;
   reciterList: any;
   translationList: any;
   locale: string;
@@ -462,7 +462,7 @@ function ReadingTab({ store, reciterList, translationList, locale, t, onModeChan
 // ── Tab 2: Genel ─────────────────────────────────────────
 
 function GeneralTab({ store, locale, setLocale, t }: {
-  store: ReturnType<typeof useSettingsStore>;
+  store: SettingsStore;
   locale: string;
   setLocale: (l: Locale) => void;
   t: any;
@@ -544,6 +544,21 @@ function GeneralTab({ store, locale, setLocale, t }: {
             <option key={code} value={code}>{config.displayName}</option>
           ))}
         </select>
+      </div>
+
+      <Divider />
+
+      {/* ── Ana Sayfa Görünümü ── */}
+      <div>
+        <Label>{t.settings.homeView}</Label>
+        <SegmentedControl
+          options={[
+            { value: "welcome", label: t.settings.homeViewWelcome },
+            { value: "fihrist", label: t.settings.homeViewFihrist },
+          ]}
+          value={store.homeView}
+          onChange={(v) => store.setHomeView(v as HomeView)}
+        />
       </div>
 
       <Divider />

@@ -80,6 +80,7 @@ function SimilarVersesTab({ verseKey }: { verseKey: string }) {
           key={v.verseKey}
           to="/analyse/$verseKey"
           params={{ verseKey: v.verseKey }}
+          search={{ tab: "meal" }}
           className="block px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/50 transition-all"
         >
           <div className="flex items-start justify-between gap-2 mb-2">
@@ -256,6 +257,7 @@ function BaglamTab({ verseKey }: { verseKey: string }) {
                 key={rv.verseKey}
                 to="/analyse/$verseKey"
                 params={{ verseKey: rv.verseKey }}
+                search={{ tab: "meal" }}
                 className="flex items-start gap-3 px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 transition-all"
               >
                 <span className="shrink-0 text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-2 py-0.5 rounded-full whitespace-nowrap">
