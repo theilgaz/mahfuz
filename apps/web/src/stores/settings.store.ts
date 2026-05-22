@@ -145,7 +145,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       mushafSizeMode: "standard" as MushafSizeMode,
       accentColor: "default" as AccentColorId,
       autoPlayNextSurah: false,
-      homeView: "welcome" as HomeView,
+      homeView: "fihrist" as HomeView,
 
       // Actions
       setTheme: (theme) => {
@@ -214,7 +214,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           labsEnabled: false,
           accentColor: "default",
           autoPlayNextSurah: false,
-          homeView: "welcome",
+          homeView: "fihrist",
         });
       },
     }),
