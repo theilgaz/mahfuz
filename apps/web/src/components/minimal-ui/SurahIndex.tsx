@@ -201,27 +201,22 @@ function renderSurahRow(
             <span className="mu-srow-latin">
               {getSurahName(surah.id, locale) || surah.nameSimple}
             </span>
+            <span className="mu-dot">·</span>
             <span className="mu-srow-tr">
-              - {getSurahMeaning(surah.id, locale) || surah.nameTranslation}
+              {getSurahMeaning(surah.id, locale) || surah.nameTranslation}
             </span>
           </div>
           <div className="mu-srow-sub">
-            <span className={`mu-chip ${isMekki ? "mu-chip-mekki" : "mu-chip-medeni"}`}>
-              {isMekki ? "Mekki" : "Medeni"}
-            </span>
+            <span>{isMekki ? "Mekki" : "Medeni"}</span>
+            <span className="mu-dot">·</span>
             <span>
               {surah.ayahCount} {t.surahList?.verses ?? "ayet"}
-            </span>
-            <span className="mu-dot">-</span>
-            <span>
-              {t.surahList?.nuzul ?? "Nuzul"} {surah.revelationOrder}
             </span>
           </div>
         </div>
         <div className="mu-srow-ar" aria-hidden="true" dir="rtl">
-          سُورَةُ {surah.nameArabic}
+          {surah.nameArabic}
         </div>
-        <span className="mu-srow-chev">{MuIcons.chev}</span>
       </Link>
     </li>
   );
