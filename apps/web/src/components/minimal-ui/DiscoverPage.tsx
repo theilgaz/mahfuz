@@ -244,6 +244,9 @@ const FEATURED = [
 // (Misver b. Mahreme ve Harise b. Mudarrib rivayetleri)
 const OMER_SURAHS = [2, 4, 5, 9, 22, 24, 33]; // Bakara, Nisa, Maide, Tevbe, Hac, Nur, Ahzab
 
+// Havamim: hm ile baslayan 7 sure; Hz. Ali (r.a.) "Kuran'in gelinleri" demistir
+const HAVAMIM_SURAHS = [40, 41, 42, 43, 44, 45, 46]; // Mu'min/Gafir, Fussilet, Sura, Zuhruf, Duhan, Casiye, Ahkaf
+
 export function DiscoverPage() {
   const { t, locale } = useTranslation();
   const { data: surahs } = useSurahs();
@@ -320,6 +323,31 @@ export function DiscoverPage() {
         </p>
         <div className="flex flex-wrap gap-2">
           {OMER_SURAHS.map((id) => {
+            const surah = surahs.find((x) => x.id === id);
+            if (!surah) return null;
+            return (
+              <Link
+                key={id}
+                to="/surah/$surahSlug"
+                params={{ surahSlug: surahSlug(id) }}
+                search={{ ayah: undefined }}
+                className="mu-nav-chip"
+              >
+                {getSurahName(id, locale) || surah.nameSimple}
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Havâmîm — Hz. Ali'nin Kuran'ın gelinleri dediği sureler */}
+      <section className="mu-disc-section">
+        <h2 className="mu-disc-section-title">{"Kuran'ın gelinleri (Havâmîm)"}</h2>
+        <p className="mu-muted" style={{ margin: "0 0 14px", fontSize: 13.5, lineHeight: 1.55 }}>
+          {"Hz. Ali (r.a.), حم ile başlayan bu yedi sureye Kuran'ın gelinleri demiştir."}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {HAVAMIM_SURAHS.map((id) => {
             const surah = surahs.find((x) => x.id === id);
             if (!surah) return null;
             return (
