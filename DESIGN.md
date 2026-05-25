@@ -113,17 +113,28 @@ Tum tokenlar `apps/web/src/styles/minimal-ui.css`'te tanimli.
 
 ## 4. Tema
 
-Uc tema: `light` (varsayilan), `sepia`, `dark`. `data-theme` attribute'u
-`<html>` veya kok element uzerinde.
+Dort tema: `light` (varsayilan), `sepia`, `dark`, `sakura`. `data-theme`
+attribute'u `<html>` veya kok element uzerinde.
 
-| Boyut                | Light             | Sepia             | Dark               |
-|----------------------|-------------------|-------------------|--------------------|
-| `--mu-bg`            | `#FFFFFF`         | `#F1E8D3`         | `#14110C`          |
-| `--mu-ink`           | `#1C1A15`         | `#2A2212`         | `#F0E8D6`          |
-| Accent (`oklch`)     | `0.62 0.12 70`    | (light degeri)    | `0.72 0.11 70`     |
+| Boyut                | Light             | Sepia             | Dark               | Sakura             |
+|----------------------|-------------------|-------------------|--------------------|--------------------|
+| `--mu-bg`            | `#FFFFFF`         | `#F1E8D3`         | `#14110C`          | `#FBF5EF`          |
+| `--mu-ink`           | `#1C1A15`         | `#2A2212`         | `#F0E8D6`          | `#473340`          |
+| Accent (`oklch`)     | `0.62 0.12 70`    | (light degeri)    | `0.72 0.11 70`     | `0.63 0.14 352`    |
 
 Sistem `prefers-color-scheme: dark` ve `data-theme` set degilse otomatik
 dark'a duser (mevcut davranis korunur).
+
+**Sakura** light bir tema: sicak krem zemin + kiraz cicegi pembe accent (hue 352).
+Renge ek olarak dekoratif katman gelir; `theme === "sakura"` iken `__root.tsx`'te
+global mount edilir:
+
+- Ust suluboya kiraz cicegi cercevesi: `.mu-sky`, gorsel `public/images/sakura-bg.webp`.
+- Dokulen yapraklar: `SakuraDecor` -> `.mu-petals` (`sakura-fall`, reduced-motion'da durur).
+- Fihrist hafif buzlu panel + `.mu-home-stack` z-index ile icerik dekorun ustunde.
+
+Sakura dekor token'lari: `--mu-decor-op` (gorsel opaklik), `--mu-veil-op` (krem perde),
+`--mu-panel` (fihrist zemini), `--mu-petal-fall` (yaprak rengi).
 
 **Kural**: bir bilesen renk seciyorsa token kullanir. Token yoksa once
 DESIGN.md'ye ekle, sonra kullan. Tema gecislerinde test edilmeyen herhangi
