@@ -9,6 +9,7 @@ export const de: PartialMessages = {
       light: "Hell",
       sepia: "Sepia",
       dark: "Dunkel",
+      sakura: "Sakura",
     },
     readingMode: "Lesemodus",
     mushafPage: "Mushaf-Seite",

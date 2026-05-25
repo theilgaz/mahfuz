@@ -9,6 +9,7 @@ export const ar: PartialMessages = {
       light: "فاتح",
       sepia: "بني داكن",
       dark: "داكن",
+      sakura: "ساكورا",
     },
     readingMode: "وضع القراءة",
     mushafPage: "صفحة المصحف",

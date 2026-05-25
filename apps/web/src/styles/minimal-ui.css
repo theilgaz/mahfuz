@@ -129,6 +129,27 @@
   --mu-danger-ink: oklch(0.88 0.12 25);
 }
 
+/* Sakura — light tema, sicak krem zemin + kiraz cicegi pembe vurgu */
+[data-theme="sakura"] {
+  --mu-bg: #FBF5EF;
+  --mu-bg-soft: #F4E8E0;
+  --mu-bg-card: #FCF6F0;
+  --mu-ink: #473340;
+  --mu-ink-2: #5A4150;
+  --mu-ink-3: #735767;
+  --mu-muted: #A78D92;
+  --mu-line: #EDDCD6;
+  --mu-line-2: #E2CAC4;
+  --mu-accent: oklch(0.63 0.14 352);
+  --mu-accent-soft: oklch(0.94 0.035 352);
+  --mu-accent-ink: oklch(0.46 0.13 352);
+  /* Dekor (SakuraDecor) — ust suluboya cerceve + fihrist panel */
+  --mu-decor-op: 0.62;   /* gorsel genel opaklik (sonum) */
+  --mu-veil-op: 0.40;    /* gorsel uzeri krem perde — yuksek = daha silik */
+  --mu-petal-fall: #E7A2BC;
+  --mu-panel: color-mix(in oklab, var(--mu-bg), transparent 34%);
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --mu-bg: #14110C;
@@ -157,7 +178,8 @@
 :root,
 [data-theme="light"],
 [data-theme="dark"],
-[data-theme="sepia"] {
+[data-theme="sepia"],
+[data-theme="sakura"] {
   --color-bg: var(--mu-bg);
   --color-surface: var(--mu-bg-soft);
   --color-text-primary: var(--mu-ink);
@@ -486,6 +508,76 @@
   margin: 0 auto;
   padding: 48px 32px 80px;
   width: 100%;
+}
+
+/* ── Sakura dekoru (yalniz ana sayfa + data-theme="sakura") ── */
+/* Icerik dekorun ustunde kalsin diye z-index ile yukseltilir */
+[data-theme="sakura"] .mu-home-stack {
+  position: relative;
+  z-index: 2;
+}
+
+.mu-sky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  width: 100%;
+  aspect-ratio: 2000 / 1116;
+  background: url("/images/sakura-bg.webp") top center / cover no-repeat;
+  filter: saturate(0.9);
+  -webkit-mask-image: linear-gradient(to bottom, #000 56%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 56%, transparent 100%);
+  transition: opacity 0.4s ease;
+}
+.mu-sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--mu-bg);
+  opacity: var(--mu-veil-op, 0.4);
+}
+[data-theme="sakura"] .mu-sky {
+  opacity: var(--mu-decor-op, 0.62);
+}
+
+.mu-petals {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.mu-petals span {
+  position: absolute;
+  top: -6vh;
+  will-change: transform, opacity;
+  animation: sakura-fall linear infinite;
+}
+.mu-petals svg {
+  display: block;
+}
+@keyframes sakura-fall {
+  0%   { transform: translate3d(0, -8vh, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: var(--op, 0.5); }
+  90%  { opacity: var(--op, 0.5); }
+  100% { transform: translate3d(var(--dx, 40px), 110vh, 0) rotate(var(--rot, 420deg)); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mu-petals span { animation: none; }
+}
+
+/* fihrist listesi — sakura'da hafif buzlu panel */
+[data-theme="sakura"] .mu-home .mu-slist {
+  background: var(--mu-panel);
+  border: 1px solid var(--mu-line);
+  border-radius: 18px;
+  padding: 12px;
+  backdrop-filter: blur(8px) saturate(1.05);
+  box-shadow: 0 1px 0 rgba(71, 51, 64, 0.03), 0 22px 48px -30px rgba(71, 51, 64, 0.35);
 }
 
 .mu-hero {

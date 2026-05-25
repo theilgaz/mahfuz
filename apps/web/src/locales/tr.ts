@@ -11,6 +11,7 @@ export const tr = {
       light: "Aydınlık",
       sepia: "Kur'an",
       dark: "Gece",
+      sakura: "Sakura",
     },
     readingMode: "Okuma Modu",
     modeMushaf: "Mushaf",

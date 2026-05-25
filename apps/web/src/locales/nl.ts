@@ -9,6 +9,7 @@ export const nl: PartialMessages = {
       light: "Licht",
       sepia: "Sepia",
       dark: "Donker",
+      sakura: "Sakura",
     },
     readingMode: "Leesmodus",
     mushafPage: "Mushaf Pagina",

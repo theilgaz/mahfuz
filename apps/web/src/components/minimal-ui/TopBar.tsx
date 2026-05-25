@@ -32,7 +32,7 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
   };
 
   const cycleTheme = () => {
-    const next = theme === "light" ? "sepia" : theme === "sepia" ? "dark" : "light";
+    const next = theme === "light" ? "sepia" : theme === "sepia" ? "dark" : theme === "dark" ? "sakura" : "light";
     setTheme(next);
   };
 
@@ -80,7 +80,7 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
         {/* Right actions */}
         <div className="mu-topright">
           <button className="mu-icon-btn" title="Tema" onClick={cycleTheme}>
-            {theme === "dark" ? MuIcons.sun : MuIcons.moon}
+            {theme === "sakura" ? MuIcons.filterVintage : theme === "dark" ? MuIcons.sun : MuIcons.moon}
           </button>
           <button className="mu-icon-btn mu-icon-btn--settings" title="Ayarlar" onClick={onSettings}>
             {MuIcons.settings}

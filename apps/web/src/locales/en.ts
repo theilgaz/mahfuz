@@ -13,6 +13,7 @@ export const en: Messages = {
       light: "Light",
       sepia: "Sepia",
       dark: "Dark",
+      sakura: "Sakura",
     },
     readingMode: "Reading Mode",
     modeMushaf: "Mushaf",

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DEFAULT_TRANSLATION_SLUG } from "@mahfuz/shared";
 
-export type Theme = "light" | "sepia" | "dark";
+export type Theme = "light" | "sepia" | "dark" | "sakura";
 export type TextStyle = "uthmani" | "basic";
 export type WbwDisplay = "off" | "hover" | "on"; // geriye uyumluluk
 export type ReadingMode = "verse" | "wbw" | "mushaf" | "meal";
