@@ -128,7 +128,7 @@ export function AccountPage({ user }: AccountPageProps) {
       <p className="mu-pf-eyebrow">{t.profile?.activity ?? "Okuma aktivitesi"}</p>
       <div className="mu-pf-card">
         <div className="mu-pf-card-head">
-          <span className="mu-pf-card-title">{t.profile?.lastYear ?? "Son bir yıl"}</span>
+          <span className="mu-pf-card-title">{t.profile?.lastYear ?? "Son 6 ay"}</span>
           {(streak?.currentStreak ?? 0) > 0 && (
             <span className="mu-pf-card-meta">
               {t.profile?.currentStreak ?? "Güncel seri"} <b>{streak?.currentStreak}</b> {t.profile?.dayUnit ?? "gün"}

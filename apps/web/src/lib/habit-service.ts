@@ -194,27 +194,27 @@ export const getWeeklySummary = createServerFn({ method: "GET" }).handler(async 
   return days;
 });
 
-// ── Yillik Aktivite (profil heatmap, son 53 hafta) ───────
+// ── Aktivite heatmap (profil, son 6 ay ~26 hafta) ────────
 
-const YEAR_DAYS = 371;
+const HEATMAP_RANGE_DAYS = 182;
 
 export const getYearActivity = createServerFn({ method: "GET" }).handler(async () => {
   const userId = await currentUserId();
   const days: Array<{ date: string; pagesRead: number }> = [];
 
   if (!userId) {
-    for (let i = YEAR_DAYS - 1; i >= 0; i--) days.push({ date: dateStr(i), pagesRead: 0 });
+    for (let i = HEATMAP_RANGE_DAYS - 1; i >= 0; i--) days.push({ date: dateStr(i), pagesRead: 0 });
     return days;
   }
 
-  const startDate = dateStr(YEAR_DAYS - 1);
+  const startDate = dateStr(HEATMAP_RANGE_DAYS - 1);
   const sessions = await db
     .select({ date: readingSessions.date, pagesRead: readingSessions.pagesRead })
     .from(readingSessions)
     .where(and(eq(readingSessions.userId, userId), gte(readingSessions.date, startDate)));
 
   const byDate = new Map(sessions.map((s) => [s.date, s.pagesRead]));
-  for (let i = YEAR_DAYS - 1; i >= 0; i--) {
+  for (let i = HEATMAP_RANGE_DAYS - 1; i >= 0; i--) {
     const date = dateStr(i);
     days.push({ date, pagesRead: byDate.get(date) ?? 0 });
   }

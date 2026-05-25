@@ -326,7 +326,7 @@ export const en: Messages = {
     goal: "Goal",
     surahComplete: "surahs done",
     activity: "Reading activity",
-    lastYear: "Last year",
+    lastYear: "Last 6 months",
     daysRead: "days read",
     quickAccess: "Quick access",
     stats: "Stats",

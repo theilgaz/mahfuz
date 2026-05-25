@@ -324,7 +324,7 @@ export const tr = {
     goal: "Hedef",
     surahComplete: "sure tam",
     activity: "Okuma aktivitesi",
-    lastYear: "Son bir yıl",
+    lastYear: "Son 6 ay",
     daysRead: "gün okundu",
     quickAccess: "Hızlı erişim",
     stats: "İstatistik",
