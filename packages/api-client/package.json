@@ -1,0 +1,20 @@
+{
+  "name": "@mahfuz/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@mahfuz/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@mahfuz/typescript-config": "workspace:*",
+    "typescript": "^5.7.3"
+  }
+}
