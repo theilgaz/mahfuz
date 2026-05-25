@@ -1,0 +1,16 @@
+{
+  "name": "@mahfuz/audio-engine-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mahfuz/shared": "workspace:*",
+    "expo-av": "~15.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
