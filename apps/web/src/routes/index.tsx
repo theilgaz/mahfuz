@@ -49,7 +49,7 @@ function HomePage() {
 
   return (
     <div className="mu-home">
-      <div className="mu-home-stack">
+      <div className={`mu-home-stack${homeView === "fihrist" ? "" : " mu-home-stack--hero"}`}>
         {homeView === "fihrist" ? <SurahIndex surahs={surahs} /> : <HomeHero />}
       </div>
     </div>
