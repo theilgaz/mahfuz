@@ -11,7 +11,6 @@ import {
 } from "~/hooks/useHabitQuery";
 import { HomeHero } from "~/components/minimal-ui/HomeHero";
 import { SurahIndex } from "~/components/minimal-ui/SurahIndex";
-import { SakuraDecor } from "~/components/minimal-ui/SakuraDecor";
 import { useSettingsStore } from "~/stores/settings.store";
 import { staticHead } from "~/lib/seo";
 
@@ -46,12 +45,10 @@ function HomePageSkeleton() {
 
 function HomePage() {
   const homeView = useSettingsStore((s) => s.homeView);
-  const theme = useSettingsStore((s) => s.theme);
   const { data: surahs } = useSurahs();
 
   return (
     <div className="mu-home">
-      {theme === "sakura" && <SakuraDecor />}
       <div className="mu-home-stack">
         {homeView === "fihrist" ? <SurahIndex surahs={surahs} /> : <HomeHero />}
       </div>

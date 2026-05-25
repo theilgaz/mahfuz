@@ -1,7 +1,7 @@
 /**
- * Sakura temasi dekoru — ust suluboya kiraz cicegi cercevesi + dokulen yapraklar.
- * Yalniz ana sayfada ve data-theme="sakura" iken render edilir (bkz. routes/index.tsx).
- * Gorunurluk/sonum CSS token'lariyla ayarlanir: --mu-decor-op, --mu-veil-op, --mu-petal-fall.
+ * Sakura temasi — dokulen kiraz cicegi yapraklari (tum sayfalarda icerik uzerinden duser).
+ * data-theme="sakura" iken __root.tsx icinde global mount edilir (arkaplan gorseli mu-sky ile birlikte).
+ * Gorunurluk CSS token'lariyla ayarlanir: --mu-petal-fall, --mu-decor-op.
  */
 
 import type { CSSProperties } from "react";
@@ -34,10 +34,8 @@ const PETALS: Petal[] = [
 
 export function SakuraDecor() {
   return (
-    <>
-      <div className="mu-sky" aria-hidden="true" />
-      <div className="mu-petals" aria-hidden="true">
-        {PETALS.map((p, i) => (
+    <div className="mu-petals" aria-hidden="true">
+      {PETALS.map((p, i) => (
           <span
             key={i}
             style={{
@@ -55,7 +53,6 @@ export function SakuraDecor() {
             </svg>
           </span>
         ))}
-      </div>
-    </>
+    </div>
   );
 }

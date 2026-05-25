@@ -63,7 +63,7 @@ function StatsPage() {
   const isEmpty = bookmarks.length === 0 && hifzStats.totalVerses === 0 && recentPositions.length === 0;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
+    <div className="mu-statspage max-w-3xl mx-auto px-4 py-6 pb-24">
       {/* ── Header ──────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-6">
         <Link

@@ -510,8 +510,14 @@
   width: 100%;
 }
 
-/* ── Sakura dekoru (yalniz ana sayfa + data-theme="sakura") ── */
-/* Icerik dekorun ustunde kalsin diye z-index ile yukseltilir */
+/* ── Sakura dekoru (data-theme="sakura") ── */
+/* Arkaplan gorseli (mu-sky) tum sayfalarda icerigin arkasinda kalsin diye
+   icerik katmani (mu-app) sky'in (z 0) uzerine yukseltilir. */
+[data-theme="sakura"] .mu-app {
+  position: relative;
+  z-index: 1;
+}
+/* Ana sayfa icerigi; dusen yapraklar (mu-petals) bunun uzerinden duser */
 [data-theme="sakura"] .mu-home-stack {
   position: relative;
   z-index: 2;
@@ -544,10 +550,11 @@
   opacity: var(--mu-decor-op, 0.62);
 }
 
+/* Yapraklar tum sayfalarda icerigin (mu-app z 1) uzerinden, ust bar / dock altinda duser */
 .mu-petals {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 3;
   pointer-events: none;
   overflow: hidden;
 }
@@ -578,6 +585,28 @@
   padding: 12px;
   backdrop-filter: blur(8px) saturate(1.05);
   box-shadow: 0 1px 0 rgba(71, 51, 64, 0.03), 0 22px 48px -30px rgba(71, 51, 64, 0.35);
+}
+
+/* Ic sayfalar — veriyi arkaplandan ayiran ince buzlu perde (fihrist gibi) */
+[data-theme="sakura"] .mu-reader:not(.mu-reader--mushaf) > div,
+[data-theme="sakura"] .mu-reader:not(.mu-reader--mushaf) .mu-rside,
+[data-theme="sakura"] .mu-discover,
+[data-theme="sakura"] .mu-account,
+[data-theme="sakura"] .mu-games,
+[data-theme="sakura"] .mu-roadmap,
+[data-theme="sakura"] .mu-alifba,
+[data-theme="sakura"] .mu-statspage {
+  background: var(--mu-panel);
+  border: 1px solid var(--mu-line);
+  border-radius: 18px;
+  backdrop-filter: blur(8px) saturate(1.05);
+  box-shadow: 0 1px 0 rgba(71, 51, 64, 0.03), 0 22px 48px -30px rgba(71, 51, 64, 0.35);
+}
+[data-theme="sakura"] .mu-reader:not(.mu-reader--mushaf) > div {
+  padding: 8px 28px 16px;
+}
+[data-theme="sakura"] .mu-reader:not(.mu-reader--mushaf) .mu-rside {
+  padding: 16px 18px;
 }
 
 .mu-hero {

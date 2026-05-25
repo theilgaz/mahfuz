@@ -16,6 +16,7 @@ import { AudioProvider } from "~/components/reader/AudioProvider";
 import { AudioBar } from "~/components/reader/AudioBar";
 import { BottomNav } from "~/components/BottomNav";
 import { TopBar } from "~/components/minimal-ui/TopBar";
+import { SakuraDecor } from "~/components/minimal-ui/SakuraDecor";
 import { Footer } from "~/components/minimal-ui/Footer";
 import { SearchOverlay } from "~/components/minimal-ui/SearchOverlay";
 import { useSettingsStore, applyAccentToDOM } from "~/stores/settings.store";
@@ -531,6 +532,8 @@ function RootDocument({ children }: { children: ReactNode }) {
         <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
         <AudioProvider />
+        {theme === "sakura" && <div className="mu-sky" aria-hidden="true" />}
+        {theme === "sakura" && <SakuraDecor />}
         <main id="main-content" className="mu-app" data-theme={theme}>
           {children}
         </main>
