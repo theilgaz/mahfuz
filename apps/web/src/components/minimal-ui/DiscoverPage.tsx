@@ -240,6 +240,10 @@ const FEATURED = [
   { key: "Play", to: "/games", icon: MuIcons.gameController },
 ] as const;
 
+// Hz. Omer (r.a.) ogrenilmesini tavsiye ettigi sureler
+// (Misver b. Mahreme ve Harise b. Mudarrib rivayetleri)
+const OMER_SURAHS = [2, 4, 5, 9, 22, 24, 33]; // Bakara, Nisa, Maide, Tevbe, Hac, Nur, Ahzab
+
 export function DiscoverPage() {
   const { t, locale } = useTranslation();
   const { data: surahs } = useSurahs();
@@ -305,6 +309,31 @@ export function DiscoverPage() {
               <span className="mu-mood-count">{m.items.length} ayet</span>
             </button>
           ))}
+        </div>
+      </section>
+
+      {/* Hz. Ömer'in tavsiye ettiği sureler */}
+      <section className="mu-disc-section">
+        <h2 className="mu-disc-section-title">{"Hz. Ömer'in tavsiye ettiği sureler"}</h2>
+        <p className="mu-muted" style={{ margin: "0 0 14px", fontSize: 13.5, lineHeight: 1.55 }}>
+          {'Hz. Ömer (r.a.) bu surelerin öğrenilmesini tavsiye etmiştir: "Kuşkusuz farzlar o surelerdedir."'}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {OMER_SURAHS.map((id) => {
+            const surah = surahs.find((x) => x.id === id);
+            if (!surah) return null;
+            return (
+              <Link
+                key={id}
+                to="/surah/$surahSlug"
+                params={{ surahSlug: surahSlug(id) }}
+                search={{ ayah: undefined }}
+                className="mu-nav-chip"
+              >
+                {getSurahName(id, locale) || surah.nameSimple}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
