@@ -53,7 +53,7 @@ function HatimPage() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
+    <div className="mu-khatmpage max-w-3xl mx-auto px-4 py-6 pb-24">
       {/* Başlık */}
       <div className="flex items-center gap-3 mb-5">
         <div className="w-10 h-10 rounded bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">

@@ -84,7 +84,7 @@ function GroupDashboardPage() {
   const overallPct = totalSections > 0 ? Math.round((totalProgress / totalSections) * 100) : 0;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
+    <div className="mu-khatmpage max-w-3xl mx-auto px-4 py-6 pb-24">
       {/* Header */}
       <div className="flex items-start gap-3 mb-6">
         <Link to="/khatm" className="mt-0.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">

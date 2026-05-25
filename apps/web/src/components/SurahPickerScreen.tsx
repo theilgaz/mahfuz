@@ -141,7 +141,7 @@ export function SurahPickerScreen({ gameImg, difficultyOnly, simpleDifficulty, g
   const startDisabled = !difficultyOnly && ((mode === "custom" && selected.size === 0) || (mode === "studied" && studiedIds.length === 0));
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-20">
+    <div className="mu-gamestart max-w-3xl mx-auto px-4 py-6 pb-20">
       {/* Oyun görseli */}
       {gameImg && (
         <div className="flex justify-center mb-4">
