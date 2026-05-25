@@ -7,6 +7,7 @@ import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@ta
 import {
   getStreak,
   getWeeklySummary,
+  getYearActivity,
   getActiveHatim,
   getReadingGoal,
   getCompletedHatims,
@@ -21,6 +22,7 @@ export const habitKeys = {
   all: ["habit"] as const,
   streak: () => [...habitKeys.all, "streak"] as const,
   weekly: () => [...habitKeys.all, "weekly"] as const,
+  year: () => [...habitKeys.all, "year"] as const,
   hatim: () => [...habitKeys.all, "hatim"] as const,
   hatims: () => [...habitKeys.all, "hatims"] as const,
   goal: () => [...habitKeys.all, "goal"] as const,
@@ -39,6 +41,13 @@ export const weeklySummaryQueryOptions = () =>
   queryOptions({
     queryKey: habitKeys.weekly(),
     queryFn: () => getWeeklySummary(),
+    staleTime: 60_000,
+  });
+
+export const yearActivityQueryOptions = () =>
+  queryOptions({
+    queryKey: habitKeys.year(),
+    queryFn: () => getYearActivity(),
     staleTime: 60_000,
   });
 
