@@ -363,7 +363,7 @@ function AnalysePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
+    <div className="mu-analyse max-w-2xl mx-auto px-4 py-6 pb-24">
       {/* Başlık */}
       <div className="flex items-center gap-3 mb-5">
         <Link
@@ -376,12 +376,20 @@ function AnalysePage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
-        <div>
+        <div className="flex-1 min-w-0">
           <h1 className="text-lg font-bold text-[var(--color-text-primary)]">{t.analyse.title}</h1>
           <p className="text-xs text-[var(--color-text-secondary)]">
             {isLoading ? t.common.loading : `${getSurahName(surahId, locale) || data?.surah?.nameSimple || ""} · ${t.analyse.verse.replace("{verseNum}", String(verseNum))}`}
           </p>
         </div>
+        <Link
+          to="/tafsir/$verseKey"
+          params={{ verseKey }}
+          search={{ source: undefined }}
+          className="text-xs px-3 py-1.5 rounded border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-all"
+        >
+          {t.tafsir.title}
+        </Link>
       </div>
 
       {/* Arapça metin */}

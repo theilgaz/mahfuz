@@ -127,6 +127,13 @@
       "when": 1778759226979,
       "tag": "0017_curly_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1779828454621,
+      "tag": "0018_shocking_warbird",
+      "breakpoints": true
     }
   ]
 }

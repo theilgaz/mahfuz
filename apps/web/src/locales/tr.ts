@@ -450,6 +450,7 @@ export const tr = {
     copyTranslation: "Meal",
     copyAll: "Tümü",
     analyse: "Tahlil",
+    tafsir: "Tefsir",
   },
 
   reader: {
@@ -1451,6 +1452,17 @@ export const tr = {
     loadingThemes: "Bu sure için tema verisi yükleniyor...",
     relatedThemes: "Bu ayet {count} temayla ilişkili",
     verse: "{verseNum}. Ayet",
+  },
+  tafsir: {
+    title: "Tefsir",
+    source: "Kaynak",
+    notFound: "Bu ayet için tefsir bulunamadı.",
+    notImported: "Tefsir henüz import edilmemiş. Yöneticiyle iletişime geç.",
+    loading: "Tefsir yükleniyor...",
+    prevAyah: "Önceki ayet",
+    nextAyah: "Sonraki ayet",
+    backToSurah: "Sure'ye dön",
+    openAnalyse: "Detaylı tahlil",
   },
   habit: {
     streakDays: "{count} günlük seri",

@@ -452,6 +452,7 @@ export const en: Messages = {
     copyTranslation: "Translation",
     copyAll: "All",
     analyse: "Analyse",
+    tafsir: "Tafsir",
   },
 
   reader: {
@@ -1432,6 +1433,17 @@ export const en: Messages = {
     loadingThemes: "Loading theme data for this surah...",
     relatedThemes: "This verse is related to {count} themes",
     verse: "Verse {verseNum}",
+  },
+  tafsir: {
+    title: "Tafsir",
+    source: "Source",
+    notFound: "No tafsir found for this verse.",
+    notImported: "Tafsir not imported yet. Contact the admin.",
+    loading: "Loading tafsir...",
+    prevAyah: "Previous verse",
+    nextAyah: "Next verse",
+    backToSurah: "Back to surah",
+    openAnalyse: "Detailed analysis",
   },
   habit: {
     streakDays: "{count}-day streak",

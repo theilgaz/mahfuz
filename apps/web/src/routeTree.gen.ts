@@ -31,6 +31,7 @@ import { Route as MeclisIndexRouteImport } from './routes/meclis/index'
 import { Route as KhatmIndexRouteImport } from './routes/khatm/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as AlifbaIndexRouteImport } from './routes/alifba/index'
+import { Route as TafsirVerseKeyRouteImport } from './routes/tafsir/$verseKey'
 import { Route as SurahSurahSlugRouteImport } from './routes/surah/$surahSlug'
 import { Route as PagePageNumberRouteImport } from './routes/page/$pageNumber'
 import { Route as MeclisCodeRouteImport } from './routes/meclis/$code'
@@ -183,6 +184,11 @@ const GamesIndexRoute = GamesIndexRouteImport.update({
 const AlifbaIndexRoute = AlifbaIndexRouteImport.update({
   id: '/alifba/',
   path: '/alifba/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TafsirVerseKeyRoute = TafsirVerseKeyRouteImport.update({
+  id: '/tafsir/$verseKey',
+  path: '/tafsir/$verseKey',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SurahSurahSlugRoute = SurahSurahSlugRouteImport.update({
@@ -442,6 +448,7 @@ export interface FileRoutesByFullPath {
   '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
+  '/tafsir/$verseKey': typeof TafsirVerseKeyRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
   '/khatm/': typeof KhatmIndexRoute
@@ -506,6 +513,7 @@ export interface FileRoutesByTo {
   '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
+  '/tafsir/$verseKey': typeof TafsirVerseKeyRoute
   '/alifba': typeof AlifbaIndexRoute
   '/games': typeof GamesIndexRoute
   '/khatm': typeof KhatmIndexRoute
@@ -574,6 +582,7 @@ export interface FileRoutesById {
   '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
+  '/tafsir/$verseKey': typeof TafsirVerseKeyRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
   '/khatm/': typeof KhatmIndexRoute
@@ -643,6 +652,7 @@ export interface FileRouteTypes {
     | '/meclis/$code'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
+    | '/tafsir/$verseKey'
     | '/alifba/'
     | '/games/'
     | '/khatm/'
@@ -707,6 +717,7 @@ export interface FileRouteTypes {
     | '/meclis/$code'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
+    | '/tafsir/$verseKey'
     | '/alifba'
     | '/games'
     | '/khatm'
@@ -774,6 +785,7 @@ export interface FileRouteTypes {
     | '/meclis/$code'
     | '/page/$pageNumber'
     | '/surah/$surahSlug'
+    | '/tafsir/$verseKey'
     | '/alifba/'
     | '/games/'
     | '/khatm/'
@@ -833,6 +845,7 @@ export interface RootRouteChildren {
   MeclisCodeRoute: typeof MeclisCodeRoute
   PagePageNumberRoute: typeof PagePageNumberRoute
   SurahSurahSlugRoute: typeof SurahSurahSlugRoute
+  TafsirVerseKeyRoute: typeof TafsirVerseKeyRoute
   AlifbaIndexRoute: typeof AlifbaIndexRoute
   KhatmIndexRoute: typeof KhatmIndexRoute
   MeclisIndexRoute: typeof MeclisIndexRoute
@@ -1004,6 +1017,13 @@ declare module '@tanstack/react-router' {
       path: '/alifba'
       fullPath: '/alifba/'
       preLoaderRoute: typeof AlifbaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tafsir/$verseKey': {
+      id: '/tafsir/$verseKey'
+      path: '/tafsir/$verseKey'
+      fullPath: '/tafsir/$verseKey'
+      preLoaderRoute: typeof TafsirVerseKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/surah/$surahSlug': {
@@ -1427,6 +1447,7 @@ const rootRouteChildren: RootRouteChildren = {
   MeclisCodeRoute: MeclisCodeRoute,
   PagePageNumberRoute: PagePageNumberRoute,
   SurahSurahSlugRoute: SurahSurahSlugRoute,
+  TafsirVerseKeyRoute: TafsirVerseKeyRoute,
   AlifbaIndexRoute: AlifbaIndexRoute,
   KhatmIndexRoute: KhatmIndexRoute,
   MeclisIndexRoute: MeclisIndexRoute,

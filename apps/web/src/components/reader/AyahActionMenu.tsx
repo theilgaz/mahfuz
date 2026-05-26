@@ -207,15 +207,26 @@ export function AyahActionMenu({
           <span className="text-xs font-semibold text-[var(--color-text-primary)]">
             {surahName} {ayahNumber}
           </span>
-          <Link
-            to="/analyse/$verseKey"
-            params={{ verseKey: `${surahId}:${ayahNumber}` }}
-            search={{ tab: "meal" }}
-            onClick={onClose}
-            className="text-[11px] font-medium text-[var(--color-accent)]"
-          >
-            {t.ayahMenu.analyse}
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/tafsir/$verseKey"
+              params={{ verseKey: `${surahId}:${ayahNumber}` }}
+              search={{ source: undefined }}
+              onClick={onClose}
+              className="text-[11px] font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]"
+            >
+              {t.ayahMenu.tafsir}
+            </Link>
+            <Link
+              to="/analyse/$verseKey"
+              params={{ verseKey: `${surahId}:${ayahNumber}` }}
+              search={{ tab: "meal" }}
+              onClick={onClose}
+              className="text-[11px] font-medium text-[var(--color-accent)]"
+            >
+              {t.ayahMenu.analyse}
+            </Link>
+          </div>
         </div>
 
         {/* Actions */}

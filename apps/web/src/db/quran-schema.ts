@@ -96,6 +96,39 @@ export const translations = sqliteTable(
   ],
 );
 
+// ── Tefsir Kaynakları ────────────────────────────────────
+
+export const tafsirSources = sqliteTable("tafsir_sources", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  slug: text("slug").notNull().unique(),
+  language: text("language").notNull(), // tr | en | ar | ...
+  author: text("author").notNull(),
+  name: text("name").notNull(),
+  isDefault: integer("is_default", { mode: "boolean" }).default(false),
+});
+
+// ── Tefsirler ────────────────────────────────────────────
+
+export const tafsirs = sqliteTable(
+  "tafsirs",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    sourceId: integer("source_id")
+      .notNull()
+      .references(() => tafsirSources.id),
+    surahId: integer("surah_id").notNull(),
+    ayahNumber: integer("ayah_number").notNull(),
+    textHtml: text("text_html").notNull(), // paragraf, link destekli
+    textPlain: text("text_plain").notNull(), // arama / preview için
+    groupKey: text("group_key"), // ör. "1-5" — bundled tefsir için
+  },
+  (table) => [
+    index("tafsirs_verse_idx").on(table.surahId, table.ayahNumber),
+    index("tafsirs_source_idx").on(table.sourceId),
+    index("tafsirs_source_verse_idx").on(table.sourceId, table.surahId, table.ayahNumber),
+  ],
+);
+
 // ── Kâriler ──────────────────────────────────────────────
 
 export const reciters = sqliteTable("reciters", {

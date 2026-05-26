@@ -17,6 +17,8 @@
     "import:reciters": "tsx scripts/import-reciters.ts",
     "import:all": "tsx scripts/import-all.ts",
     "import:verify": "tsx scripts/verify-data.ts",
+    "import:tafsir": "tsx scripts/import-tafsirs.ts",
+    "tafsir:fetch-diyanet": "tsx scripts/fetch-tafsir-diyanet.ts",
     "wbw:generate-patch": "tsx scripts/generate-wbw-tr-patch.ts",
     "download:letter-audio": "tsx scripts/download-letter-audio.ts",
     "wbw:fetch-words": "tsx scripts/fetch-arabic-words.ts",
