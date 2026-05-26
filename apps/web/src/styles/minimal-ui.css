@@ -623,6 +623,70 @@
   padding: 16px 18px;
 }
 
+/* Sakura: ic kartlar cam katman (dis panel zaten frosted) */
+[data-theme="sakura"] .mu-quick-tile,
+[data-theme="sakura"] .mu-mood-box,
+[data-theme="sakura"] .mu-feat-card,
+[data-theme="sakura"] .mu-hub-tile {
+  background: color-mix(in oklab, var(--mu-bg-card), transparent 60%);
+  border-color: color-mix(in oklab, var(--mu-line), transparent 30%);
+  box-shadow: none;
+}
+[data-theme="sakura"] .mu-quick-tile::before {
+  opacity: 0.55;
+}
+[data-theme="sakura"] .mu-quick-icon {
+  background: color-mix(in oklab, var(--mu-bg), transparent 45%);
+  border-color: color-mix(in oklab, var(--mu-line), transparent 40%);
+}
+[data-theme="sakura"] .mu-quick-tile:hover,
+[data-theme="sakura"] .mu-mood-box:hover {
+  background: color-mix(in oklab, var(--mu-bg-card), transparent 25%);
+  border-color: var(--mu-accent);
+}
+/* Sakura: bolum baslıklari biraz daha hafif (regular agirlik, ink-2 tonu) */
+[data-theme="sakura"] .mu-disc-section-title {
+  font-weight: 400;
+  color: var(--mu-ink-2, var(--mu-ink));
+}
+/* Sakura: nav-chip'ler de yari saydam, kart sistemi ile tutarli */
+[data-theme="sakura"] .mu-nav-chip {
+  background: color-mix(in oklab, var(--mu-bg), transparent 55%);
+  border-color: color-mix(in oklab, var(--mu-line), transparent 30%);
+  color: var(--mu-ink-2, var(--mu-ink));
+}
+[data-theme="sakura"] .mu-nav-chip:hover {
+  background: color-mix(in oklab, var(--mu-accent-soft), transparent 30%);
+  border-color: var(--mu-line);
+  color: var(--mu-accent-ink);
+}
+
+/* Sakura: section sag ust kosesinde sky gorselinden dal parcasi (watermark) */
+[data-theme="sakura"] .mu-disc-section {
+  position: relative;
+  overflow: hidden;
+}
+[data-theme="sakura"] .mu-disc-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 160px;
+  background: url("/images/sakura-bg.webp") 100% 0% / 900px auto no-repeat;
+  filter: saturate(0.85);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  -webkit-mask-image: linear-gradient(225deg, #000 25%, transparent 78%);
+          mask-image: linear-gradient(225deg, #000 25%, transparent 78%);
+}
+/* Section icindeki gercek icerik watermark uzerinde kalsin */
+[data-theme="sakura"] .mu-disc-section > * {
+  position: relative;
+  z-index: 1;
+}
+
 .mu-hero {
   display: grid;
   grid-template-columns: 1.35fr 1fr;
@@ -1542,6 +1606,19 @@
 }
 .mu-view-menu-btn-text {
   letter-spacing: 0.01em;
+}
+/* Icon-only variant — square ghost button, mode glyph reflects active state */
+.mu-view-menu-btn--icon {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+  border-radius: 10px;
+  color: var(--mu-ink-3, var(--mu-ink));
+  margin-inline-end: 6px;
+}
+.mu-view-menu-btn--icon[aria-expanded="true"] {
+  background: var(--mu-accent-soft, var(--mu-bg-soft));
 }
 .mu-view-menu-pop {
   position: absolute;

@@ -418,6 +418,45 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
 
 // -- View mode menu: single button + grouped dropdown (Ayet / Mushaf × 2 sub-modes) --
 
+function ModeIcon({ mode }: { mode: ReadingMode }) {
+  // Each mode has a distinct glyph so the active state is readable at a glance.
+  switch (mode) {
+    case "verse":
+      // Stacked rows (ayet ayet)
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <path d="M3 4.5h10M3 8h10M3 11.5h7" />
+        </svg>
+      );
+    case "wbw":
+      // 2x2 grid (kelime kelime)
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <rect x="3" y="3" width="4" height="4" rx="0.6" />
+          <rect x="9" y="3" width="4" height="4" rx="0.6" />
+          <rect x="3" y="9" width="4" height="4" rx="0.6" />
+          <rect x="9" y="9" width="4" height="4" rx="0.6" />
+        </svg>
+      );
+    case "mushaf":
+      // Open book
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2.5 4.2c1.4-.5 3.5-.7 5.5.3 2-1 4.1-.8 5.5-.3v7.6c-1.4-.5-3.5-.7-5.5.3-2-1-4.1-.8-5.5-.3V4.2z" />
+          <path d="M8 4.5v7.8" />
+        </svg>
+      );
+    case "meal":
+      // Paragraph / translation lines (one short, one longer accent)
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <path d="M3 4.5h6M3 8h10M3 11.5h8" />
+          <circle cx="12" cy="4.5" r="0.9" fill="currentColor" stroke="none" />
+        </svg>
+      );
+  }
+}
+
 function ViewModeMenu({
   mode,
   onSelect,
@@ -468,16 +507,14 @@ function ViewModeMenu({
     <div ref={wrapRef} className="mu-view-menu">
       <button
         type="button"
-        className="mu-view-menu-btn"
+        className="mu-view-menu-btn mu-view-menu-btn--icon"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`${t.settings.readingMode}: ${labels[mode]}`}
+        title={labels[mode]}
       >
-        <span className="mu-view-menu-btn-text">{labels[mode]}</span>
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-          <path d="M2 4L5 7L8 4" />
-        </svg>
+        <ModeIcon mode={mode} />
       </button>
       {open && (
         <div role="listbox" className="mu-view-menu-pop">

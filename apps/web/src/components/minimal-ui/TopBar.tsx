@@ -14,8 +14,6 @@ interface TopBarProps {
 export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { t } = useTranslation();
-  const theme = useSettingsStore((s) => s.theme);
-  const setTheme = useSettingsStore((s) => s.setTheme);
   const homeView = useSettingsStore((s) => s.homeView);
 
   const navItems = [
@@ -29,11 +27,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
   const isActive = (itemPath: string) => {
     if (itemPath === "/") return path === "/";
     return path.startsWith(itemPath);
-  };
-
-  const cycleTheme = () => {
-    const next = theme === "light" ? "sepia" : theme === "sepia" ? "dark" : theme === "dark" ? "sakura" : "light";
-    setTheme(next);
   };
 
   return (
@@ -79,9 +72,6 @@ export function TopBar({ session, onSearch, onSettings }: TopBarProps) {
 
         {/* Right actions */}
         <div className="mu-topright">
-          <button className="mu-icon-btn" title="Tema" onClick={cycleTheme}>
-            {theme === "sakura" ? MuIcons.filterVintage : theme === "dark" ? MuIcons.sun : MuIcons.moon}
-          </button>
           <button className="mu-icon-btn mu-icon-btn--settings" title="Ayarlar" onClick={onSettings}>
             {MuIcons.settings}
           </button>
