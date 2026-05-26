@@ -159,9 +159,24 @@ const segmentCache = new Map<string, QDCVerseTiming[]>();
 
 async function fetchRawTimings(reciterId: number, chapterId: number): Promise<QDCAudioResponse | null> {
   const url = `${QDC_API}/audio/reciters/${reciterId}/audio_files?chapter=${chapterId}&segments=true`;
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  return res.json();
+  console.log("[audio-service] Fetching timings from:", url);
+  
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error("[audio-service] API error:", res.status, res.statusText);
+      return null;
+    }
+    const data = await res.json();
+    console.log("[audio-service] Received data:", { 
+      hasAudioFiles: !!data.audio_files?.length,
+      url: data.audio_files?.[0]?.audio_url 
+    });
+    return data;
+  } catch (err) {
+    console.error("[audio-service] Fetch failed:", err);
+    return null;
+  }
 }
 
 /**
@@ -258,12 +273,28 @@ async function fetchChapterAudio(
     const data = await fetchRawTimings(reciterId, chapterId);
     const file = data?.audio_files?.[0];
 
-    if (!file) return null;
+    if (!file) {
+      console.error("[audio-service] No audio file in response for reciter:", reciterId, "chapter:", chapterId);
+      return null;
+    }
+    
+    if (!file.audio_url) {
+      console.error("[audio-service] Empty audio_url in response");
+      return null;
+    }
 
     const timings = await fillMissingSegments(file.verse_timings, chapterId, reciterId);
+    const audioUrl = normalizeUrl(file.audio_url);
+    
+    console.log("[audio-service] Chapter audio ready:", {
+      reciterId,
+      chapterId,
+      audioUrl,
+      verseCount: timings.length
+    });
 
     return {
-      audioUrl: normalizeUrl(file.audio_url),
+      audioUrl,
       verseTimings: timings.map((vt) => ({
         verseKey: vt.verse_key,
         from: vt.timestamp_from,
@@ -286,8 +317,12 @@ function buildChapterOnlyAudio(
   chapterId: number,
 ): ChapterAudioData {
   const padded = String(chapterId).padStart(3, "0");
+  const audioUrl = `${baseUrl}/${padded}.mp3`;
+  
+  console.log("[audio-service] Chapter-only audio:", audioUrl);
+  
   return {
-    audioUrl: `${baseUrl}/${padded}.mp3`,
+    audioUrl,
     verseTimings: [],
   };
 }
@@ -299,10 +334,18 @@ export async function fetchChapterAudioForSlug(
   slug: string,
   chapterId: number,
 ): Promise<ChapterAudioData | null> {
+  console.log("[audio-service] Fetching audio for slug:", slug, "chapter:", chapterId);
+  
   const chapterOnlyBase = CHAPTER_ONLY_RECITERS[slug];
   if (chapterOnlyBase) {
+    console.log("[audio-service] Using chapter-only reciter");
     return buildChapterOnlyAudio(chapterOnlyBase, chapterId);
   }
-  const reciterId = SLUG_TO_QDC_ID[slug] ?? FALLBACK_RECITER_ID;
-  return fetchChapterAudio(reciterId, chapterId);
+  
+  const reciterId = SLUG_TO_QDC_ID[slug];
+  if (!reciterId) {
+    console.warn("[audio-service] Unknown reciter slug, falling back to default:", slug);
+  }
+  
+  return fetchChapterAudio(reciterId ?? FALLBACK_RECITER_ID, chapterId);
 }
