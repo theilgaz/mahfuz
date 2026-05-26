@@ -61,6 +61,7 @@ const STATIC: Record<string, HeadMeta> = {
   search: { title: "Arama", description: "Kuran metninde ve çevirilerde tam metin arama." },
   stats: { title: "İstatistikler", description: "Okuma serisi, geçen süre ve hedef ilerlemen." },
   tajweed: { title: "Tecvid", description: "16 tecvid kuralı, örnekleriyle birlikte." },
+  mahfuz: { title: "Mahfûz · Kuran nasıl korunuyor?", description: "Hicr 15:9'un sözü, hafız geleneği ve Kuran metnindeki sayısal denge örnekleri." },
   games: { title: "Oyunlar", description: "Kuran kelime ve sure bilgini sınayan mini oyunlar." },
   "games-scoreboard": { title: "Skor Tablosu", description: "Mahfuz oyunlarındaki en yüksek skorlar." },
   "games-ayah-2048": { title: "Ayah 2048", description: "Sure sıralı 2048 — ayetleri birleştir, kombo yap." },
@@ -136,6 +137,16 @@ export function analyseHead(verseKey: string | undefined) {
   return buildMeta({
     title: `${name} ${a} · Tahlil`,
     description: `${name} suresi ${a}. ayetinin mealleri, kelime kelime morfoloji ve benzer ayetler.`,
+  });
+}
+
+export function tafsirHead(verseKey: string | undefined) {
+  if (!verseKey || !/^\d+:\d+$/.test(verseKey)) return buildMeta({ title: "Tefsir" });
+  const [s, a] = verseKey.split(":").map(Number);
+  const name = SURAH_NAMES_TR[s] ?? `Sure ${s}`;
+  return buildMeta({
+    title: `${name} ${a} · Tefsir`,
+    description: `${name} suresi ${a}. ayetinin Kur'an Yolu tefsiri (Diyanet İşleri Başkanlığı).`,
   });
 }
 

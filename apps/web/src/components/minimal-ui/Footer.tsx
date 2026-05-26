@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useLocaleStore } from "~/stores/locale.store";
 import { LOCALE_CODES, type Locale } from "~/locales/registry";
 import { LogoMeem } from "./LogoMeem";
@@ -23,7 +24,15 @@ export function Footer() {
           <LogoMeem size={24} />
           <span className="mu-brand-latin">Mahfuz</span>
         </div>
-        <p className="mu-foot-meta mu-muted">15:9</p>
+        <p className="mu-foot-meta mu-muted">
+          <Link
+            to="/mahfuz"
+            style={{ all: "unset", cursor: "pointer" }}
+            aria-label="Mahfuz: Kuran'ın korunması"
+          >
+            15:9
+          </Link>
+        </p>
         <div className="mu-foot-langs">
           {LOCALE_CODES.map((code, i) => (
             <span key={code}>

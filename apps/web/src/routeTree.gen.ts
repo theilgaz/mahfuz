@@ -18,6 +18,7 @@ import { Route as PromoRouteImport } from './routes/promo'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as NotesRouteImport } from './routes/notes'
+import { Route as MahfuzRouteImport } from './routes/mahfuz'
 import { Route as HifzRouteImport } from './routes/hifz'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as FihristRouteImport } from './routes/fihrist'
@@ -117,6 +118,11 @@ const PremiumRoute = PremiumRouteImport.update({
 const NotesRoute = NotesRouteImport.update({
   id: '/notes',
   path: '/notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MahfuzRoute = MahfuzRouteImport.update({
+  id: '/mahfuz',
+  path: '/mahfuz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HifzRoute = HifzRouteImport.update({
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/fihrist': typeof FihristRoute
   '/games': typeof GamesRouteWithChildren
   '/hifz': typeof HifzRoute
+  '/mahfuz': typeof MahfuzRoute
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
@@ -469,6 +476,7 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverRoute
   '/fihrist': typeof FihristRoute
   '/hifz': typeof HifzRoute
+  '/mahfuz': typeof MahfuzRoute
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
@@ -534,6 +542,7 @@ export interface FileRoutesById {
   '/fihrist': typeof FihristRoute
   '/games': typeof GamesRouteWithChildren
   '/hifz': typeof HifzRoute
+  '/mahfuz': typeof MahfuzRoute
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
@@ -602,6 +611,7 @@ export interface FileRouteTypes {
     | '/fihrist'
     | '/games'
     | '/hifz'
+    | '/mahfuz'
     | '/notes'
     | '/premium'
     | '/profile'
@@ -667,6 +677,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/fihrist'
     | '/hifz'
+    | '/mahfuz'
     | '/notes'
     | '/premium'
     | '/profile'
@@ -731,6 +742,7 @@ export interface FileRouteTypes {
     | '/fihrist'
     | '/games'
     | '/hifz'
+    | '/mahfuz'
     | '/notes'
     | '/premium'
     | '/profile'
@@ -798,6 +810,7 @@ export interface RootRouteChildren {
   FihristRoute: typeof FihristRoute
   GamesRoute: typeof GamesRouteWithChildren
   HifzRoute: typeof HifzRoute
+  MahfuzRoute: typeof MahfuzRoute
   NotesRoute: typeof NotesRoute
   PremiumRoute: typeof PremiumRoute
   ProfileRoute: typeof ProfileRoute
@@ -900,6 +913,13 @@ declare module '@tanstack/react-router' {
       path: '/notes'
       fullPath: '/notes'
       preLoaderRoute: typeof NotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mahfuz': {
+      id: '/mahfuz'
+      path: '/mahfuz'
+      fullPath: '/mahfuz'
+      preLoaderRoute: typeof MahfuzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hifz': {
@@ -1384,6 +1404,7 @@ const rootRouteChildren: RootRouteChildren = {
   FihristRoute: FihristRoute,
   GamesRoute: GamesRouteWithChildren,
   HifzRoute: HifzRoute,
+  MahfuzRoute: MahfuzRoute,
   NotesRoute: NotesRoute,
   PremiumRoute: PremiumRoute,
   ProfileRoute: ProfileRoute,
