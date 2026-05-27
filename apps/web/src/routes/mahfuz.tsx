@@ -361,8 +361,14 @@ function MahfuzPage() {
         </div>
       </header>
 
-      {/* İçindekiler */}
-      <TableOfContents isEn={isEn} />
+      {/* İçindekiler — mobil/tablet kart */}
+      <div className="lg:hidden">
+        <TableOfContents isEn={isEn} />
+      </div>
+
+      {/* İki sütun: ana içerik + yapışkan TOC sidebar (lg ve üzeri) */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-x-12 lg:items-start">
+        <main>
 
       {/* Anlatım — Mahfûz nedir? */}
       <Section id="sec-promise" eyebrow={isEn ? "The promise" : "Söz"}>
@@ -1050,6 +1056,17 @@ function MahfuzPage() {
         </div>
       </Section>
 
+        </main>
+
+        {/* Yapışkan TOC — sadece lg ve üzeri */}
+        <aside
+          className="hidden lg:block lg:sticky"
+          style={{ top: 24, alignSelf: "start" }}
+        >
+          <TableOfContents isEn={isEn} variant="sidebar" />
+        </aside>
+      </div>
+
       {/* Alt navigasyon */}
       <div style={{ display: "flex", justifyContent: "center", gap: 12, paddingTop: 32, paddingBottom: 24 }}>
         <Link
@@ -1100,7 +1117,7 @@ function Prose({ children }: { children: React.ReactNode }) {
         display: "flex",
         flexDirection: "column",
         gap: 14,
-        maxWidth: "62ch",
+        maxWidth: "72ch",
       }}
     >
       {children}
@@ -1234,31 +1251,56 @@ function VerseQuote({
   );
 }
 
-function TableOfContents({ isEn }: { isEn: boolean }) {
+function TableOfContents({
+  isEn,
+  variant = "card",
+}: {
+  isEn: boolean;
+  variant?: "card" | "sidebar";
+}) {
+  const isCard = variant === "card";
   return (
     <nav
       aria-label={isEn ? "Contents" : "İçindekiler"}
-      style={{
-        marginBottom: 40,
-        padding: "20px 24px",
-        border: "1px solid var(--mu-line)",
-        borderRadius: 12,
-        background: "var(--mu-bg-card)",
-      }}
+      style={
+        isCard
+          ? {
+              marginBottom: 40,
+              padding: "20px 24px",
+              border: "1px solid var(--mu-line)",
+              borderRadius: 12,
+              background: "var(--mu-bg-card)",
+            }
+          : {
+              paddingLeft: 16,
+              borderLeft: "1px solid var(--mu-line)",
+            }
+      }
     >
-      <p className="mu-eyebrow" style={{ marginBottom: 14 }}>
+      <p className="mu-eyebrow" style={{ marginBottom: isCard ? 14 : 16 }}>
         <span className="mu-eb-line" />
         {isEn ? "Contents" : "İçindekiler"}
       </p>
       <ol
-        style={{
-          listStyle: "none",
-          margin: 0,
-          padding: 0,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: "6px 24px",
-        }}
+        style={
+          isCard
+            ? {
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                gap: "6px 24px",
+              }
+            : {
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }
+        }
       >
         {TOC_ITEMS.map((item, i) => (
           <li key={item.id}>
@@ -1274,9 +1316,9 @@ function TableOfContents({ isEn }: { isEn: boolean }) {
                 alignItems: "baseline",
                 textDecoration: "none",
                 color: "var(--mu-ink-2, var(--mu-ink))",
-                fontSize: 13.5,
+                fontSize: isCard ? 13.5 : 12.5,
                 lineHeight: 1.5,
-                padding: "5px 0",
+                padding: isCard ? "5px 0" : "4px 0",
               }}
             >
               <span
