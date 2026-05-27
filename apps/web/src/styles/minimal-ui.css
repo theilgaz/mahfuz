@@ -609,7 +609,8 @@
 [data-theme="sakura"] .mu-alifba,
 [data-theme="sakura"] .mu-statspage,
 [data-theme="sakura"] .mu-khatmpage,
-[data-theme="sakura"] .mu-gamestart {
+[data-theme="sakura"] .mu-gamestart,
+[data-theme="sakura"] .mu-analyse {
   background: var(--mu-panel);
   border: 1px solid var(--mu-line);
   border-radius: 18px;
