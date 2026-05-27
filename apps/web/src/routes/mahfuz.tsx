@@ -6,6 +6,7 @@
  * dünya/âhiret, ceza/mağfiret, hayat/mevt vb).
  */
 
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Ornament } from "~/components/minimal-ui/Ornament";
 import { useTranslation } from "~/hooks/useTranslation";
@@ -187,9 +188,355 @@ const TOC_ITEMS: { id: string; titleTr: string; titleEn: string }[] = [
   { id: "sec-two-seas", titleTr: "Karışmayan iki deniz", titleEn: "Two seas that don't mix" },
   { id: "sec-expanding", titleTr: "Genişleyen sema", titleEn: "Expanding heavens" },
   { id: "sec-iron", titleTr: "Demir", titleEn: "Iron" },
+  { id: "sec-miracles", titleTr: "Mucizeler köşesi", titleEn: "Wonders catalogue" },
   { id: "sec-balance", titleTr: "Denge tablosu", titleEn: "Balance table" },
   { id: "sec-closing", titleTr: "Yani", titleEn: "And so" },
   { id: "sec-references", titleTr: "Kaynaklar", titleEn: "References" },
+];
+
+// ── Mucizeler kataloğu ───────────────────────────────────
+// Sayısal, bilimsel, yapısal ve dilbilimsel örüntüler.
+// Her giriş bir ya da iki ayetle birlikte, dikkat çekilmiş
+// bir uyumu gösterir. İspat değil, gözlem.
+
+type MiracleKind = "numerical" | "scientific" | "structural" | "linguistic";
+
+interface MiracleVerse {
+  ref: string;        // "Hadîd 57:25"
+  arabic: string;
+  trans: string;
+}
+
+interface Miracle {
+  id: string;
+  kind: MiracleKind;
+  titleTr: string;
+  titleEn: string;
+  patternLabelTr: string;
+  patternLabelEn: string;
+  patternValue: string;
+  verses: MiracleVerse[];
+  scienceTr: string;
+  scienceEn: string;
+  references: string[];
+  caveatTr?: string;
+  caveatEn?: string;
+}
+
+const KIND_META: Record<
+  MiracleKind | "all",
+  { tr: string; en: string }
+> = {
+  all: { tr: "Tümü", en: "All" },
+  numerical: { tr: "Sayısal", en: "Numerical" },
+  scientific: { tr: "Bilimsel", en: "Scientific" },
+  structural: { tr: "Yapısal", en: "Structural" },
+  linguistic: { tr: "Dilbilimsel", en: "Linguistic" },
+};
+
+const MIRACLES: Miracle[] = [
+  {
+    id: "iron-melting",
+    kind: "numerical",
+    titleTr: "Demirin indirilmesi ile yumuşatılması arasındaki mesafe",
+    titleEn: "Distance between iron's descent and its softening",
+    patternLabelTr: "Mesafe",
+    patternLabelEn: "Distance",
+    patternValue: "1538",
+    verses: [
+      {
+        ref: "Hadîd 57:25",
+        arabic:
+          "وَأَنزَلْنَا ٱلْحَدِيدَ فِيهِ بَأْسٌ شَدِيدٌ وَمَنَٰفِعُ لِلنَّاسِ",
+        trans:
+          "“Demiri de indirdik; onda büyük bir kuvvet ve insanlar için faydalar vardır.”",
+      },
+      {
+        ref: "Sebe 34:10",
+        arabic: "وَأَلَنَّا لَهُ ٱلْحَدِيدَ",
+        trans: "“Ona (Davud'a) demiri yumuşattık.”",
+      },
+    ],
+    scienceTr:
+      "Demirin erime derecesi 1538 °C'dir. Saf demir bu sıcaklıkta sıvıya geçer; ondan birkaç yüz derece düşükte ise dövülebilir bir yumuşaklığa varır. İki ayet arasındaki kelime sayımı Nevfel'in yöntemine göre bu sayıya çarpıcı biçimde yaklaşır.",
+    scienceEn:
+      "Iron melts at 1538 °C and becomes workably soft a few hundred degrees below that. By Nawfal's counting method, the word-count distance between these two verses lands remarkably close to that figure.",
+    references: ["nawfal"],
+    caveatTr:
+      "Sayım yöntemine bağlıdır (kelime / harf / ayet seçimi sonucu değiştirir). Dikkat çekilmiş bir uyum; ispat değil.",
+    caveatEn:
+      "The exact figure depends on counting method (words vs. letters vs. verses). A pointed observation, not a proof.",
+  },
+  {
+    id: "iron-atomic",
+    kind: "structural",
+    titleTr: "el-Hadîd: 57. sûre, ebcedi 57; “hadîd” ebcedi 26",
+    titleEn: "Al-Hadīd: 57th surah, abjad 57; “hadīd” abjad 26",
+    patternLabelTr: "Sayı eşleşmesi",
+    patternLabelEn: "Number match",
+    patternValue: "57 · 26",
+    verses: [
+      {
+        ref: "Hadîd 57:25",
+        arabic: "وَأَنزَلْنَا ٱلْحَدِيدَ",
+        trans: "“Ve demiri indirdik.”",
+      },
+    ],
+    scienceTr:
+      "Demirin atom numarası 26'dır. “el-Hadîd” kelimesinin (ا-ل-ح-د-ي-د) ebced toplamı 57; başındaki tarif ekini (ا-ل = 31) çıkardığımızda kalan “hadîd” (ح-د-ي-د) = 26.",
+    scienceEn:
+      "Iron's atomic number is 26. The abjad value of “al-ḥadīd” (الحديد) sums to 57 — matching the surah number; remove the definite article (ال = 31) and “ḥadīd” (حديد) sums to 26 — matching the atomic number.",
+    references: ["nucleosynthesis"],
+    caveatTr:
+      "Ebced hesabı bir oyun değil, geleneksel sayısal sistemdir; yine de bu eşleşmeleri 'tasarlanmış' delil olarak değil, dikkat çeken bir hizalanma olarak okuyun.",
+  },
+  {
+    id: "iron-fallen",
+    kind: "scientific",
+    titleTr: "Demirin “indirilmiş” olması",
+    titleEn: "Iron as “sent down”",
+    patternLabelTr: "Kelime seçimi",
+    patternLabelEn: "Word choice",
+    patternValue: "enzelnâ",
+    verses: [
+      {
+        ref: "Hadîd 57:25",
+        arabic: "وَأَنزَلْنَا ٱلْحَدِيدَ فِيهِ بَأْسٌ شَدِيدٌ",
+        trans:
+          "“Demiri de indirdik; onda büyük bir kuvvet vardır…”",
+      },
+    ],
+    scienceTr:
+      "Demir, yıldız füzyonunun son halkasıdır. Yerkabuğundaki tüm demir, milyarlarca yıl önce patlayan süpernovaların saçtığı toz bulutlarından geldi. Mekanizma 1957'de B²FH makalesinde yazıldı. Ayetteki fiil “çıkardık” değil, “indirdik”.",
+    scienceEn:
+      "Iron is the end-point of stellar fusion; every iron atom in Earth's crust came from supernovae that exploded billions of years ago. The mechanism was first written out in 1957 (the B²FH paper). The verb in the verse is not “extracted” but “sent down”.",
+    references: ["nucleosynthesis"],
+  },
+  {
+    id: "sea-land-ratio",
+    kind: "numerical",
+    titleTr: "Bahr / berr oranı — yerkürenin su yüzdesi",
+    titleEn: "Bahr / barr ratio — Earth's water percentage",
+    patternLabelTr: "Oran",
+    patternLabelEn: "Ratio",
+    patternValue: "%71.1",
+    verses: [
+      {
+        ref: "—",
+        arabic: "ٱلْبَحْر · ٱلْبَرّ",
+        trans:
+          "Bahr (deniz): 32 kez · Berr (kara): 13 kez · 32 / 45 ≈ %71.1",
+      },
+    ],
+    scienceTr:
+      "Yerkürenin yüzeyinin yaklaşık %71'i sudur. Bu oran 20. yüzyıl uydu ölçümleriyle netleşti. 7. yüzyıl Arabistan'ında ne küresel harita vardı, ne de tahmine yetecek arka plan.",
+    scienceEn:
+      "Earth's surface is roughly 71% water. That ratio was nailed down only in the 20th century with satellite measurement.",
+    references: ["earth-water", "nawfal"],
+  },
+  {
+    id: "calendar",
+    kind: "numerical",
+    titleTr: "Yevm / Şehr / Eyyâm — takvim sağlaması",
+    titleEn: "Yawm / Shahr / Ayyām — calendar checksum",
+    patternLabelTr: "Sayım",
+    patternLabelEn: "Count",
+    patternValue: "365 · 12 · 30",
+    verses: [
+      {
+        ref: "—",
+        arabic: "يَوْم · شَهْر · أَيَّام",
+        trans:
+          "Yevm tekil: 365 (gün/yıl) · Şehr: 12 (ay/yıl) · Çoğul + ikil gün formları: 30 (gün/ay)",
+      },
+    ],
+    scienceTr:
+      "Üç farklı kelime, üç farklı takvim ölçeği — yıldaki gün, yıldaki ay, aydaki gün — tam denk düşer. Hiçbiri dilbilgisinin zorunlu kıldığı bir sayı değil.",
+    scienceEn:
+      "Three different words land on the three calendar scales — days in a year, months in a year, days in a month. None of these counts is forced by Arabic grammar.",
+    references: ["nawfal"],
+  },
+  {
+    id: "dunya-akhirah",
+    kind: "numerical",
+    titleTr: "Dünya = Âhiret = 115",
+    titleEn: "Dunyā = Ākhirah = 115",
+    patternLabelTr: "Eşit sayım",
+    patternLabelEn: "Equal count",
+    patternValue: "115 · 115",
+    verses: [
+      {
+        ref: "—",
+        arabic: "ٱلدُّنْيَا · ٱلْآخِرَة",
+        trans: "İki dünya, metinde aynı ağırlıkta zikrediliyor.",
+      },
+    ],
+    scienceTr:
+      "İki kefe denk. Metin, geçici olanla kalıcı olanı sayıca eşit tutmuş.",
+    scienceEn:
+      "Two scales in equipoise. The text holds the temporal and the eternal at equal weight.",
+    references: ["nawfal"],
+  },
+  {
+    id: "life-death",
+    kind: "numerical",
+    titleTr: "Hayat = Mevt = 145",
+    titleEn: "Ḥayāh = Mawt = 145",
+    patternLabelTr: "Eşit sayım",
+    patternLabelEn: "Equal count",
+    patternValue: "145 · 145",
+    verses: [
+      {
+        ref: "—",
+        arabic: "ٱلْحَيَاة · ٱلْمَوْت",
+        trans: "Hayatın ve ölümün metindeki ağırlığı eşittir.",
+      },
+    ],
+    scienceTr:
+      "Karşıt iki kavram aynı sayıda — varlığın ve yokluğun dilde eşit pay alması.",
+    scienceEn: "Opposites with equal frequency — being and non-being given equal share in the text.",
+    references: ["nawfal"],
+  },
+  {
+    id: "mercy-punishment",
+    kind: "numerical",
+    titleTr: "Cezâ 117 / Mağfiret 234 — rahmet iki katı",
+    titleEn: "Punishment 117 / Forgiveness 234 — mercy doubles",
+    patternLabelTr: "Oran",
+    patternLabelEn: "Ratio",
+    patternValue: "1 : 2",
+    verses: [
+      {
+        ref: "—",
+        arabic: "جَزَاء · مَغْفِرَة",
+        trans: "Mağfiret, cezânın tam iki katı.",
+      },
+    ],
+    scienceTr:
+      "Sessiz bir tonlama: rahmet, cezâyı niceliksel olarak ikiye katlar.",
+    scienceEn: "A quiet inflection: mercy outweighs punishment by exactly two to one.",
+    references: ["nawfal"],
+  },
+  {
+    id: "man-woman",
+    kind: "numerical",
+    titleTr: "Erkek = Kadın = 24 (tekil)",
+    titleEn: "Man = Woman = 24 (singular)",
+    patternLabelTr: "Eşit sayım",
+    patternLabelEn: "Equal count",
+    patternValue: "24 · 24",
+    verses: [
+      {
+        ref: "—",
+        arabic: "ٱلرَّجُل · ٱلْمَرْأَة",
+        trans: "Tekil hâliyle her iki isim de tam 24 kez.",
+      },
+    ],
+    scienceTr:
+      "Cinsiyet kromozomu çifti — XX / XY — annenin ve babanın eşit payı. Metin “kromozom” demez; sadece iki yarıdan birini diğerinin önüne geçirmez.",
+    scienceEn:
+      "The sex-chromosome pair (XX / XY) splits the parental contribution evenly. The text doesn't say “chromosome”; it simply refuses to over-mention one half of the species.",
+    references: ["nawfal"],
+  },
+  {
+    id: "female-bee",
+    kind: "linguistic",
+    titleTr: "Dişi arı — Nahl 16:68-69",
+    titleEn: "The female bee — An-Naḥl 16:68-69",
+    patternLabelTr: "Dilbilgisi",
+    patternLabelEn: "Grammar",
+    patternValue: "dişil çekim",
+    verses: [
+      {
+        ref: "Nahl 16:68-69",
+        arabic:
+          "أَنِ ٱتَّخِذِى مِنَ ٱلْجِبَالِ بُيُوتًا … ثُمَّ كُلِى مِن كُلِّ ٱلثَّمَرَٰتِ فَٱسْلُكِى سُبُلَ رَبِّكِ",
+        trans:
+          "“Edin (sen dişi)… ye (sen dişi)… yürü (sen dişi)…” — emir kipleri dişil formda.",
+      },
+    ],
+    scienceTr:
+      "Bal yapan, kovanı kuran, nektar toplayan tüm işçi arılar dişidir; erkekler (drone) sadece çiftleşmek için bulunur. Bu Avrupa'da ancak 19. yüzyıl ortasında embriyolojik çalışmalarla kesinleşti. Ayet, 7. yüzyılda iki harflik Arapça morfolojiyle bunu söyler.",
+    scienceEn:
+      "Honey-making and hive-building workers are all female; drones exist only to mate. European naturalists settled this in the mid-19th century. The verse encodes it in two letters of Arabic morphology, twelve centuries earlier.",
+    references: ["bee-biology"],
+  },
+  {
+    id: "two-seas",
+    kind: "scientific",
+    titleTr: "Karışmayan iki deniz — Furkân 25:53, Rahmân 55:19-20",
+    titleEn: "Two seas that don't mix — Al-Furqān 25:53, Ar-Raḥmān 55:19-20",
+    patternLabelTr: "Olgu",
+    patternLabelEn: "Phenomenon",
+    patternValue: "berzah",
+    verses: [
+      {
+        ref: "Rahmân 55:19-20",
+        arabic:
+          "مَرَجَ ٱلْبَحْرَيْنِ يَلْتَقِيَانِ ۞ بَيْنَهُمَا بَرْزَخٌ لَّا يَبْغِيَانِ",
+        trans:
+          "“İki denizi salıverdi, kavuşurlar; aralarında bir engel vardır; sınırı aşmazlar.”",
+      },
+      {
+        ref: "Furkân 25:53",
+        arabic:
+          "وَهُوَ ٱلَّذِى مَرَجَ ٱلْبَحْرَيْنِ هَٰذَا عَذْبٌ فُرَاتٌ وَهَٰذَا مِلْحٌ أُجَاجٌ",
+        trans:
+          "“İki denizi salıveren O'dur: biri tatlı, öteki tuzlu acı…”",
+      },
+    ],
+    scienceTr:
+      "Farklı tuzluluk, sıcaklık ve yoğunluktaki iki su kütlesi karşılaşınca hemen karışmaz: haloklin, piknoklin, termoklin. Cebelitarık'ta Atlantik–Akdeniz; Alaska Körfezi'nde Pasifik–tatlı kıyı suyu. Ölçülebilmesi 20. yüzyıl oşinografisini bekledi.",
+    scienceEn:
+      "Water masses of different salinity, temperature and density don't blend on contact (halocline, pycnocline, thermocline). Visible at the Strait of Gibraltar and the Gulf of Alaska. Properly measured only with 20th-century oceanography.",
+    references: ["halocline"],
+  },
+  {
+    id: "expanding",
+    kind: "scientific",
+    titleTr: "Genişleyen sema — Zâriyât 51:47",
+    titleEn: "Expanding heavens — Adh-Dhāriyāt 51:47",
+    patternLabelTr: "Sürekli kip",
+    patternLabelEn: "Participle",
+    patternValue: "le-mûsi'ûn",
+    verses: [
+      {
+        ref: "Zâriyât 51:47",
+        arabic:
+          "وَٱلسَّمَآءَ بَنَيْنَٰهَا بِأَيْي۟دٍ وَإِنَّا لَمُوسِعُونَ",
+        trans:
+          "“Göğü kudretimizle kurduk; ve şüphesiz biz onu genişleticiyiz.”",
+      },
+    ],
+    scienceTr:
+      "1929'a kadar Avrupa astronomisi durağan evren varsayardı. Hubble'ın kırmızıya kayma verisi galaksilerin uzaklıkla orantılı olarak bizden uzaklaştığını gösterdi — evren genişliyor. Ayetteki kelime ism-i fâil; bitmiş bir eylem değil, süregelen bir genişletme.",
+    scienceEn:
+      "Until Hubble's 1929 redshift data, European astronomy assumed a static universe. The Qur'an's word is participial — an ongoing widening, not a finished act.",
+    references: ["hubble-law"],
+  },
+  {
+    id: "embryo",
+    kind: "structural",
+    titleTr: "Embriyo aşamaları doğru sırada — Mu'minûn 23:12-14",
+    titleEn: "Embryonic stages in correct order — Al-Mu'minūn 23:12-14",
+    patternLabelTr: "Dizilim",
+    patternLabelEn: "Order",
+    patternValue: "nutfe → alaka → mudga → izâm → lahm",
+    verses: [
+      {
+        ref: "Mu'minûn 23:12-14",
+        arabic:
+          "ثُمَّ جَعَلْنَٰهُ نُطْفَةً … ثُمَّ خَلَقْنَا ٱلنُّطْفَةَ عَلَقَةً فَخَلَقْنَا ٱلْعَلَقَةَ مُضْغَةً فَخَلَقْنَا ٱلْمُضْغَةَ عِظَٰمًا فَكَسَوْنَا ٱلْعِظَٰمَ لَحْمًا",
+        trans:
+          "“…nutfe… alaka… mudga… kemikler… kemiklere et giydirdik.”",
+      },
+    ],
+    scienceTr:
+      "Modern embriyoloji: döllenme → implantasyon (yapışkan form) → somit oluşumu → kemikleşme → kas dokusunun kemiği örtmesi. Aynı sıra. Kelime dizisi o sırada düşmek zorunda değildi.",
+    scienceEn:
+      "Modern embryology: fertilisation → implantation → somite formation → ossification → muscle envelopes bone. Same sequence. The Arabic word order is under no grammatical obligation to land here.",
+    references: [],
+  },
 ];
 
 const PAIRS: CountPair[] = [
@@ -979,6 +1326,24 @@ function MahfuzPage() {
         </Prose>
       </Section>
 
+      {/* Mucizeler kataloğu */}
+      <Section id="sec-miracles" eyebrow={isEn ? "Wonders catalogue" : "Mucizeler köşesi"}>
+        <Prose>
+          {isEn ? (
+            <p>
+              A filterable catalogue of patterns the text leaves on the table — numerical,
+              scientific, structural, linguistic. Read them as observations, not proofs.
+            </p>
+          ) : (
+            <p>
+              Metnin masada bıraktığı örüntülerin filtrelenebilir kataloğu — sayısal, bilimsel,
+              yapısal, dilbilimsel. İspat olarak değil, gözlem olarak okuyun.
+            </p>
+          )}
+        </Prose>
+        <MiraclesGrid isEn={isEn} />
+      </Section>
+
       {/* Sayım grid */}
       <Section id="sec-balance" eyebrow={isEn ? "The balance" : "Denge"}>
         <div
@@ -1484,5 +1849,257 @@ function PairCard({ pair }: { pair: CountPair }) {
         {pair.note}
       </p>
     </div>
+  );
+}
+
+// ── Mucizeler ────────────────────────────────────────────
+
+const KIND_ORDER: (MiracleKind | "all")[] = [
+  "all",
+  "numerical",
+  "scientific",
+  "structural",
+  "linguistic",
+];
+
+function MiraclesGrid({ isEn }: { isEn: boolean }) {
+  const [active, setActive] = useState<MiracleKind | "all">("all");
+  const visible = active === "all" ? MIRACLES : MIRACLES.filter((m) => m.kind === active);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 18 }}>
+      <div
+        role="tablist"
+        aria-label={isEn ? "Filter wonders" : "Mucizeleri filtrele"}
+        style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
+      >
+        {KIND_ORDER.map((k) => {
+          const selected = active === k;
+          return (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={selected}
+              onClick={() => setActive(k)}
+              style={{
+                fontFamily: "var(--mu-ff-mono)",
+                fontSize: 11,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                padding: "6px 12px",
+                borderRadius: 999,
+                border: `1px solid ${selected ? "var(--mu-accent)" : "var(--mu-line)"}`,
+                background: selected
+                  ? "color-mix(in srgb, var(--mu-accent) 10%, transparent)"
+                  : "transparent",
+                color: selected ? "var(--mu-accent)" : "var(--mu-ink-2, var(--mu-ink))",
+                cursor: "pointer",
+              }}
+            >
+              {isEn ? KIND_META[k].en : KIND_META[k].tr}
+            </button>
+          );
+        })}
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: 14,
+        }}
+      >
+        {visible.map((m) => (
+          <MiracleCard key={m.id} miracle={m} isEn={isEn} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MiracleCard({ miracle, isEn }: { miracle: Miracle; isEn: boolean }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <article
+      style={{
+        padding: "18px 20px",
+        borderRadius: 12,
+        border: "1px solid var(--mu-line)",
+        background: "var(--mu-bg-card)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+      }}
+    >
+      <header style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <p
+          className="mu-muted"
+          style={{
+            fontFamily: "var(--mu-ff-mono)",
+            fontSize: 10,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+          }}
+        >
+          {isEn ? KIND_META[miracle.kind].en : KIND_META[miracle.kind].tr}
+        </p>
+        <h3
+          style={{
+            fontSize: 15,
+            lineHeight: 1.4,
+            margin: 0,
+            color: "var(--mu-ink)",
+            fontWeight: 500,
+          }}
+        >
+          {isEn ? miracle.titleEn : miracle.titleTr}
+        </h3>
+      </header>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 10,
+          paddingBottom: 10,
+          borderBottom: "1px dashed var(--mu-line)",
+        }}
+      >
+        <span
+          className="mu-muted"
+          style={{
+            fontFamily: "var(--mu-ff-mono)",
+            fontSize: 10.5,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+          }}
+        >
+          {isEn ? miracle.patternLabelEn : miracle.patternLabelTr}
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--mu-ff-mono)",
+            fontSize: 18,
+            color: "var(--mu-accent)",
+            letterSpacing: "0.02em",
+          }}
+        >
+          {miracle.patternValue}
+        </span>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {miracle.verses.map((v, i) => (
+          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <p
+              style={{
+                fontFamily: "var(--mu-ff-ar)",
+                fontSize: 17,
+                lineHeight: 1.85,
+                direction: "rtl",
+                color: "var(--mu-ink)",
+                margin: 0,
+              }}
+            >
+              {v.arabic}
+            </p>
+            <p
+              className="mu-muted"
+              style={{
+                fontSize: 12.5,
+                lineHeight: 1.55,
+                margin: 0,
+                fontStyle: "italic",
+              }}
+            >
+              {v.trans}
+            </p>
+            {v.ref !== "—" && (
+              <p
+                style={{
+                  fontFamily: "var(--mu-ff-mono)",
+                  fontSize: 10,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "var(--mu-muted)",
+                  margin: 0,
+                }}
+              >
+                {v.ref}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        style={{
+          all: "unset",
+          cursor: "pointer",
+          fontFamily: "var(--mu-ff-mono)",
+          fontSize: 11,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          color: "var(--mu-accent)",
+          alignSelf: "flex-start",
+        }}
+      >
+        {open
+          ? isEn
+            ? "Hide note"
+            : "Notu gizle"
+          : isEn
+            ? "Bilim notu →"
+            : "Bilim notu →"}
+      </button>
+
+      {open && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            paddingTop: 4,
+            borderTop: "1px solid var(--mu-line)",
+          }}
+        >
+          <p style={{ fontSize: 13.5, lineHeight: 1.65, color: "var(--mu-ink-2, var(--mu-ink))", margin: 0 }}>
+            {isEn ? miracle.scienceEn : miracle.scienceTr}
+          </p>
+          {miracle.references.length > 0 && (
+            <p style={{ fontSize: 12, margin: 0 }}>
+              {miracle.references.map((rid, i) => (
+                <span key={rid}>
+                  {i > 0 && <span className="mu-muted"> · </span>}
+                  <RefLink id={rid}>
+                    {isEn
+                      ? REFERENCES.find((r) => r.id === rid)?.titleEn
+                      : REFERENCES.find((r) => r.id === rid)?.titleTr}
+                  </RefLink>
+                </span>
+              ))}
+            </p>
+          )}
+          {(miracle.caveatTr || miracle.caveatEn) && (
+            <p
+              className="mu-muted"
+              style={{
+                fontSize: 11.5,
+                lineHeight: 1.6,
+                margin: 0,
+                fontStyle: "italic",
+                padding: "8px 10px",
+                borderRadius: 6,
+                background: "color-mix(in srgb, var(--mu-muted) 8%, transparent)",
+              }}
+            >
+              {isEn ? miracle.caveatEn || miracle.caveatTr : miracle.caveatTr}
+            </p>
+          )}
+        </div>
+      )}
+    </article>
   );
 }
