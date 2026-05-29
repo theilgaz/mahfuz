@@ -14,22 +14,36 @@ import { SURAH_NAMES_TR } from "~/lib/surah-names-tr";
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2] as const;
 const POSITION_STORAGE_KEY = "mahfuz:audioBarPosition";
 const VIEWPORT_MARGIN = 8;
+const SNAP_THRESHOLD = 48;
 
 type Position = { x: number; y: number };
+type DockMode = "default" | "top" | "bottom" | "free";
+type DockState = { mode: DockMode; position: Position | null };
 
-function loadSavedPosition(): Position | null {
-  if (typeof window === "undefined") return null;
+const DEFAULT_DOCK: DockState = { mode: "default", position: null };
+
+function loadSavedDock(): DockState {
+  if (typeof window === "undefined") return DEFAULT_DOCK;
   try {
     const raw = window.localStorage.getItem(POSITION_STORAGE_KEY);
-    if (!raw) return null;
+    if (!raw) return DEFAULT_DOCK;
     const parsed = JSON.parse(raw);
+    // New format: { mode, position }
+    if (parsed?.mode === "top" || parsed?.mode === "bottom") {
+      return { mode: parsed.mode, position: null };
+    }
+    if (parsed?.mode === "free" && typeof parsed?.position?.x === "number" && typeof parsed?.position?.y === "number") {
+      return { mode: "free", position: { x: parsed.position.x, y: parsed.position.y } };
+    }
+    if (parsed?.mode === "default") return DEFAULT_DOCK;
+    // Legacy format: { x, y } → treat as free
     if (typeof parsed?.x === "number" && typeof parsed?.y === "number") {
-      return parsed;
+      return { mode: "free", position: { x: parsed.x, y: parsed.y } };
     }
   } catch {
     /* ignore */
   }
-  return null;
+  return DEFAULT_DOCK;
 }
 
 function clampToViewport(pos: Position, width: number, height: number): Position {
@@ -77,8 +91,9 @@ export function AudioBar() {
   const navigate = useNavigate();
 
   // Sürükle-bırak konum yönetimi
-  const [position, setPosition] = useState<Position | null>(loadSavedPosition);
+  const [dock, setDock] = useState<DockState>(loadSavedDock);
   const [isDragging, setIsDragging] = useState(false);
+  const [pendingSnap, setPendingSnap] = useState<"top" | "bottom" | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragOriginRef = useRef<{
     pointerStartX: number;
@@ -88,24 +103,27 @@ export function AudioBar() {
   } | null>(null);
 
   useEffect(() => {
-    if (!position) return;
     try {
-      window.localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(position));
+      window.localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(dock));
     } catch {
       /* ignore */
     }
-  }, [position]);
+  }, [dock]);
 
   useEffect(() => {
-    if (!position) return;
+    if (dock.mode !== "free" || !dock.position) return;
     const onResize = () => {
       const el = containerRef.current;
       if (!el) return;
-      setPosition((prev) => (prev ? clampToViewport(prev, el.offsetWidth, el.offsetHeight) : prev));
+      setDock((prev) =>
+        prev.mode === "free" && prev.position
+          ? { mode: "free", position: clampToViewport(prev.position, el.offsetWidth, el.offsetHeight) }
+          : prev,
+      );
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [position]);
+  }, [dock.mode, dock.position]);
 
   const handleDragPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -129,22 +147,38 @@ export function AudioBar() {
     if (!origin || !el) return;
     const dx = e.clientX - origin.pointerStartX;
     const dy = e.clientY - origin.pointerStartY;
-    setPosition(
-      clampToViewport(
-        { x: origin.elementStartX + dx, y: origin.elementStartY + dy },
-        el.offsetWidth,
-        el.offsetHeight,
-      ),
+    const next = clampToViewport(
+      { x: origin.elementStartX + dx, y: origin.elementStartY + dy },
+      el.offsetWidth,
+      el.offsetHeight,
     );
+    // Snap detection: use pointer Y for more intuitive edge feel
+    let snap: "top" | "bottom" | null = null;
+    if (e.clientY < SNAP_THRESHOLD) snap = "top";
+    else if (e.clientY > window.innerHeight - SNAP_THRESHOLD) snap = "bottom";
+    setPendingSnap(snap);
+    setDock({ mode: "free", position: next });
   }, []);
 
-  const endDrag = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragOriginRef.current) return;
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    }
-    dragOriginRef.current = null;
-    setIsDragging(false);
+  const endDrag = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!dragOriginRef.current) return;
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+      dragOriginRef.current = null;
+      setIsDragging(false);
+      if (pendingSnap) {
+        setDock({ mode: pendingSnap, position: null });
+        setPendingSnap(null);
+      }
+    },
+    [pendingSnap],
+  );
+
+  const handleResetToDefault = useCallback(() => {
+    setDock(DEFAULT_DOCK);
+    setPendingSnap(null);
   }, []);
 
   // Space → play/pause (skip when typing in inputs)
@@ -191,25 +225,52 @@ export function AudioBar() {
 
   const stateLabel = isLoading ? "Loading" : isPlaying ? "Playing" : "Paused";
 
-  const positioningClass = position
-    ? "fixed z-30 w-[min(90vw,360px)]"
-    : "fixed bottom-18 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]";
-  const positioningStyle = position ? { left: position.x, top: position.y } : undefined;
+  let positioningClass = "fixed z-30 w-[min(90vw,360px)]";
+  let positioningStyle: React.CSSProperties | undefined;
+  let cardRadiusClass = "rounded";
+  let cardBorderClass = "border";
+  if (dock.mode === "default") {
+    positioningClass = "fixed bottom-18 left-1/2 -translate-x-1/2 z-30 w-[min(90vw,360px)]";
+  } else if (dock.mode === "top") {
+    positioningClass = "fixed top-0 inset-x-0 z-30 w-full";
+    cardRadiusClass = "rounded-none";
+    cardBorderClass = "border-x-0 border-t-0 border-b";
+  } else if (dock.mode === "bottom") {
+    positioningClass = "fixed bottom-12 md:bottom-0 inset-x-0 z-30 w-full";
+    cardRadiusClass = "rounded-none";
+    cardBorderClass = "border-x-0 border-b-0 border-t";
+  } else if (dock.mode === "free" && dock.position) {
+    positioningStyle = { left: dock.position.x, top: dock.position.y };
+  }
 
   return (
-    <div
-      ref={containerRef}
-      className={positioningClass}
-      style={positioningStyle}
-      role="region"
-      aria-label="Audio player"
-    >
+    <>
+      {/* Snap zone preview — drag sırasında kenara yaklaşınca görünür */}
+      {isDragging && pendingSnap === "top" && (
+        <div
+          className="fixed top-0 inset-x-0 h-12 z-20 pointer-events-none bg-[var(--mu-accent-soft)]/40 border-b-2 border-[var(--color-accent)]"
+          aria-hidden="true"
+        />
+      )}
+      {isDragging && pendingSnap === "bottom" && (
+        <div
+          className="fixed bottom-12 md:bottom-0 inset-x-0 h-12 z-20 pointer-events-none bg-[var(--mu-accent-soft)]/40 border-t-2 border-[var(--color-accent)]"
+          aria-hidden="true"
+        />
+      )}
+      <div
+        ref={containerRef}
+        className={positioningClass}
+        style={positioningStyle}
+        role="region"
+        aria-label="Audio player"
+      >
       {/* Screen reader announcements */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {stateLabel} {verseDisplay} · {speed}x
       </div>
       <div
-        className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded px-3 py-2 ${
+        className={`bg-[var(--color-surface)] ${cardBorderClass} border-[var(--color-border)] ${cardRadiusClass} px-3 py-2 ${
           isDragging ? "shadow-xl" : ""
         }`}
       >
@@ -228,12 +289,13 @@ export function AudioBar() {
             onPointerMove={handleDragPointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
+            onDoubleClick={handleResetToDefault}
             className={`shrink-0 -mx-1 px-1 py-1 select-none touch-none text-[var(--color-text-secondary)] opacity-50 hover:opacity-100 transition-opacity ${
               isDragging ? "cursor-grabbing" : "cursor-grab"
             }`}
             role="button"
-            aria-label="Oynatıcıyı taşı"
-            title="Sürükleyerek taşı"
+            aria-label="Oynatıcıyı taşı, çift tıklayarak varsayılana döndür"
+            title="Sürükleyerek taşı · çift tıklayarak varsayılana döndür"
           >
             <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden="true">
               <circle cx="2" cy="3" r="1" />
@@ -346,6 +408,7 @@ export function AudioBar() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
