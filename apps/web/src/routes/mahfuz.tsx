@@ -307,7 +307,7 @@ function MahfuzPage() {
   const isEn = locale !== "tr";
 
   return (
-    <div className="mu-home">
+    <div className="mu-home mu-mahfuz">
       {/* Geri linki */}
       <div style={{ marginBottom: 24 }}>
         <Link

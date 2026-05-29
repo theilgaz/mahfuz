@@ -610,12 +610,16 @@
 [data-theme="sakura"] .mu-statspage,
 [data-theme="sakura"] .mu-khatmpage,
 [data-theme="sakura"] .mu-gamestart,
+[data-theme="sakura"] .mu-mahfuz,
 [data-theme="sakura"] .mu-analyse {
   background: var(--mu-panel);
   border: 1px solid var(--mu-line);
   border-radius: 18px;
   backdrop-filter: blur(8px) saturate(1.05);
   box-shadow: 0 1px 0 rgba(71, 51, 64, 0.03), 0 22px 48px -30px rgba(71, 51, 64, 0.35);
+}
+[data-theme="sakura"] .mu-mahfuz {
+  padding: 32px 36px 56px;
 }
 [data-theme="sakura"] .mu-reader:not(.mu-reader--mushaf) > div {
   padding: 8px 28px 16px;
