@@ -543,16 +543,55 @@ function GeneralTab({ store, locale, setLocale, t }: {
       {/* ── Dil ── */}
       <div>
         <Label>{t.settings.language}</Label>
-        <select
+        <div
+          role="radiogroup"
           aria-label={t.settings.language}
-          value={locale}
-          onChange={(e) => setLocale(e.target.value as Locale)}
-          className="mu-settings-select"
+          style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, marginTop: 6 }}
         >
-          {getAllLocaleConfigs().map(({ code, config }) => (
-            <option key={code} value={code}>{config.displayName}</option>
-          ))}
-        </select>
+          {getAllLocaleConfigs().map(({ code, config }) => {
+            const active = locale === code;
+            return (
+              <button
+                key={code}
+                role="radio"
+                aria-checked={active}
+                onClick={() => setLocale(code)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  minHeight: 44,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  border: "1.5px solid",
+                  borderColor: active ? "var(--mu-accent)" : "var(--mu-line)",
+                  background: active ? "var(--mu-accent-soft)" : "transparent",
+                  color: active ? "var(--mu-accent-ink)" : "var(--mu-ink)",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  fontFamily: "var(--mu-ff-ui)",
+                  fontSize: 14,
+                }}
+              >
+                <span dir={config.dir} style={{ fontWeight: active ? 600 : 500 }}>
+                  {config.displayName}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--mu-ff-mono)",
+                    fontSize: 10,
+                    color: "var(--mu-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  {code}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <Divider />

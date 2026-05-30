@@ -6440,6 +6440,12 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
   letter-spacing: 0.05em;
 }
 
+@media (max-width: 640px) {
+  .mu-foot-langs {
+    display: none;
+  }
+}
+
 .mu-reader--mushaf {
   padding: 0 0 48px !important;
   grid-template-columns: 1fr !important;
