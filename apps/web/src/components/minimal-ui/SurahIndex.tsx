@@ -188,11 +188,10 @@ function renderSurahRow(
     search: { ayah: undefined },
   };
   const displayNum = tab === "nuzul" ? surah.revelationOrder : surah.id;
-  const isMekki = surah.revelation === "makkah";
 
   return (
     <li key={surah.id}>
-      <Link {...linkProps} className="mu-srow">
+      <Link {...linkProps} className="mu-srow" data-revelation={surah.revelation}>
         <div className="mu-badge">
           <span className="mu-badge-n">{String(displayNum).padStart(3, "0")}</span>
         </div>
@@ -207,8 +206,6 @@ function renderSurahRow(
             </span>
           </div>
           <div className="mu-srow-sub">
-            <span>{isMekki ? "Mekki" : "Medeni"}</span>
-            <span className="mu-dot">·</span>
             <span>
               {surah.ayahCount} {t.surahList?.verses ?? "ayet"}
             </span>

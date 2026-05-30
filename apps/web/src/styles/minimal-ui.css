@@ -1291,6 +1291,7 @@
 }
 
 .mu-srow {
+  position: relative;
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) auto;
   align-items: center;
@@ -1304,11 +1305,45 @@
   cursor: pointer;
   text-decoration: none;
   color: inherit;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.mu-srow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: right -8% center;
+  background-size: auto 150%;
+  opacity: 0.42;
+  z-index: -1;
+  transition: opacity 0.18s ease, background-position 0.25s ease;
+  mask-image: linear-gradient(to left, #000 30%, transparent 95%);
+  -webkit-mask-image: linear-gradient(to left, #000 30%, transparent 95%);
+}
+
+.mu-srow[data-revelation="makkah"]::before {
+  background-image: url("/images/kabe-watercolor.webp");
+}
+
+.mu-srow[data-revelation="madinah"]::before {
+  background-image: url("/images/nebevi-watercolor.webp");
 }
 
 .mu-srow:hover {
   background: var(--mu-bg-card);
   border-color: var(--mu-accent);
+}
+
+.mu-srow:hover::before {
+  opacity: 0.75;
+  background-position: right 0% center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mu-srow::before { transition: none; }
 }
 
 .mu-badge {
@@ -1454,11 +1489,35 @@
 }
 
 .mu-srow-ar {
+  position: relative;
   font-family: var(--mu-ff-ar);
   font-size: 24px;
   color: var(--mu-ink-2);
   line-height: 1;
   white-space: nowrap;
+  padding: 6px 14px;
+}
+
+.mu-srow-ar::before {
+  content: "";
+  position: absolute;
+  inset: -22px -28px;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse 60% 55% at 50% 55%,
+    var(--mu-bg) 0%,
+    color-mix(in oklab, var(--mu-bg), transparent 18%) 28%,
+    color-mix(in oklab, var(--mu-bg), transparent 55%) 60%,
+    transparent 100%
+  );
+  filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.26s ease;
+  pointer-events: none;
+}
+
+.mu-srow:hover .mu-srow-ar::before {
+  opacity: 1;
 }
 
 .mu-srow-chev {
