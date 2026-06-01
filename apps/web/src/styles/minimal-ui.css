@@ -2038,6 +2038,62 @@
   margin: 0 0 12px;
 }
 
+.mu-rside-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 0 10px;
+}
+
+.mu-rside-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--mu-muted);
+  pointer-events: none;
+}
+
+.mu-rside-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 28px 8px 30px;
+  border: 1px solid var(--mu-line-2);
+  border-radius: 8px;
+  background: var(--mu-bg-soft);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--mu-ink);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.mu-rside-search input::placeholder {
+  color: var(--mu-muted);
+}
+
+.mu-rside-search input:focus {
+  border-color: var(--mu-accent);
+  background: var(--mu-bg);
+}
+
+.mu-rside-search-clear {
+  all: unset;
+  position: absolute;
+  right: 6px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: var(--mu-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.mu-rside-search-clear:hover {
+  background: var(--mu-bg-card);
+  color: var(--mu-ink);
+}
+
 .mu-rside-toc {
   list-style: none;
   padding: 0;

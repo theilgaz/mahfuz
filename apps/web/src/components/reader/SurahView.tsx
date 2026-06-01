@@ -637,6 +637,7 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
   const bookmarks = useBookmarksStore((s) => s.bookmarks);
   const STEP = 0.15;
   const sizeInPx = Math.round(arabicFontSize * 16);
+  const [query, setQuery] = useState("");
 
   const surahBookmarks = bookmarks.filter((b) => b.surahId === surahId);
 
@@ -648,8 +649,22 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
     setTimeout(() => el.classList.remove("mu-flash"), 3000);
   }, [ayahRefs]);
 
-  // Show max ~8 TOC items for short surahs, every Nth for long ones
+  // Show max ~8 TOC items for short surahs, every Nth for long ones.
+  // When a search query is present, filter the full ayah list instead:
+  // numeric query matches by ayah number prefix; text query matches translation.
   const tocItems = useMemo(() => {
+    const trimmed = query.trim();
+    if (trimmed) {
+      const isNumeric = /^\d+$/.test(trimmed);
+      if (isNumeric) {
+        const n = trimmed;
+        return ayahList.filter((a) => String(a.ayahNumber).startsWith(n));
+      }
+      const needle = trimmed.toLocaleLowerCase("tr");
+      return ayahList.filter((a) =>
+        (a.translation ?? "").toLocaleLowerCase("tr").includes(needle),
+      );
+    }
     if (ayahList.length <= 10) return ayahList;
     const step = Math.ceil(ayahList.length / 8);
     const items = [];
@@ -657,16 +672,62 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
       items.push(ayahList[i]);
     }
     return items;
-  }, [ayahList]);
+  }, [ayahList, query]);
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    if (/^\d+$/.test(trimmed)) {
+      const n = parseInt(trimmed, 10);
+      if (ayahList.some((a) => a.ayahNumber === n)) {
+        scrollToAyah(n);
+        return;
+      }
+    }
+    if (tocItems.length > 0) {
+      scrollToAyah(tocItems[0].ayahNumber);
+    }
+  }, [query, ayahList, tocItems, scrollToAyah]);
 
   return (
     <aside className="mu-rside">
       {/* Table of Contents */}
       <div className="mu-rside-block">
         <h3 className="mu-rside-label">{t.reader.toc}</h3>
+        <form className="mu-rside-search" onSubmit={handleSubmit}>
+          <svg className="mu-rside-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M21 21l-4.3-4.3" />
+          </svg>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t.reader.tocSearch}
+            aria-label={t.reader.tocSearch}
+            inputMode="text"
+            enterKeyHint="go"
+          />
+          {query && (
+            <button
+              type="button"
+              className="mu-rside-search-clear"
+              onClick={() => setQuery("")}
+              aria-label="Clear"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </form>
+        {tocItems.length === 0 ? (
+          <p className="mu-rside-hint">{t.reader.tocNoResults}</p>
+        ) : (
         <ul className="mu-rside-toc">
           {tocItems.map((ayah, i) => {
-            const next = tocItems[i + 1]?.ayahNumber ?? Infinity;
+            const next = !query.trim() ? (tocItems[i + 1]?.ayahNumber ?? Infinity) : ayah.ayahNumber + 1;
             const isActive = activeAyah >= ayah.ayahNumber && activeAyah < next;
             return (
             <li key={ayah.ayahNumber} className={isActive ? "on" : ""}>
@@ -684,6 +745,7 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
             );
           })}
         </ul>
+        )}
       </div>
 
       {/* Font size control */}

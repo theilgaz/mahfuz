@@ -489,6 +489,8 @@ export const tr = {
     endOfSurah: "Surenin sonu",
     backToIndex: "Fihriste dön",
     toc: "İçindekiler",
+    tocSearch: "Ayet ara veya numara",
+    tocNoResults: "Sonuç yok",
     fontType: "Yazı tipi",
     bookmarksHint: "Ayet yanındaki işaretçiyle yer imi ekleyin.",
     ayah: "ayet",

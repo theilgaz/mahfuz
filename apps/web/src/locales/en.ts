@@ -491,6 +491,8 @@ export const en: Messages = {
     endOfSurah: "End of surah",
     backToIndex: "Back to index",
     toc: "Contents",
+    tocSearch: "Search verse or number",
+    tocNoResults: "No results",
     fontType: "Font type",
     bookmarksHint: "Use the marker next to a verse to add a bookmark.",
     ayah: "verse",
