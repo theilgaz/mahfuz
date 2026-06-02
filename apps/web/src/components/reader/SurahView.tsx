@@ -412,6 +412,15 @@ export function SurahView({ surahId, highlightAyah }: SurahViewProps) {
           />
         )}
       </div>
+
+      {/* Mobile-only floating TOC button (hidden where sidebar is visible) */}
+      {primaryMode === "ayet" && (
+        <MobileTocFab
+          ayahList={ayahList}
+          activeAyah={activeAyah}
+          ayahRefs={ayahRefs}
+        />
+      )}
     </>
   );
 }
@@ -630,28 +639,13 @@ const FONT_PRESETS = [
   { id: "large", size: 3.0 },
 ] as const;
 
-function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarProps) {
-  const { t } = useTranslation();
-  const arabicFontSize = useSettingsStore((s) => s.arabicFontSize);
-  const setArabicFontSize = useSettingsStore((s) => s.setArabicFontSize);
-  const bookmarks = useBookmarksStore((s) => s.bookmarks);
-  const STEP = 0.15;
-  const sizeInPx = Math.round(arabicFontSize * 16);
+// Shared TOC + search behavior used by both desktop sidebar and mobile bottom sheet.
+function useTocSearch(
+  ayahList: Array<{ ayahNumber: number; translation: string | null }>,
+  scrollToAyah: (n: number) => void,
+) {
   const [query, setQuery] = useState("");
 
-  const surahBookmarks = bookmarks.filter((b) => b.surahId === surahId);
-
-  const scrollToAyah = useCallback((ayahNumber: number) => {
-    const el = ayahRefs.current?.get(ayahNumber);
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    el.classList.add("mu-flash");
-    setTimeout(() => el.classList.remove("mu-flash"), 3000);
-  }, [ayahRefs]);
-
-  // Show max ~8 TOC items for short surahs, every Nth for long ones.
-  // When a search query is present, filter the full ayah list instead:
-  // numeric query matches by ayah number prefix; text query matches translation.
   const tocItems = useMemo(() => {
     const trimmed = query.trim();
     if (trimmed) {
@@ -690,62 +684,109 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
     }
   }, [query, ayahList, tocItems, scrollToAyah]);
 
+  return { query, setQuery, tocItems, handleSubmit };
+}
+
+function TocSearchList({
+  ayahList,
+  activeAyah,
+  scrollToAyah,
+  autoFocus,
+}: {
+  ayahList: Array<{ ayahNumber: number; translation: string | null }>;
+  activeAyah: number;
+  scrollToAyah: (n: number) => void;
+  autoFocus?: boolean;
+}) {
+  const { t } = useTranslation();
+  const { query, setQuery, tocItems, handleSubmit } = useTocSearch(ayahList, scrollToAyah);
+
   return (
-    <aside className="mu-rside">
-      {/* Table of Contents */}
-      <div className="mu-rside-block">
-        <h3 className="mu-rside-label">{t.reader.toc}</h3>
-        <form className="mu-rside-search" onSubmit={handleSubmit}>
-          <svg className="mu-rside-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-4.3-4.3" />
-          </svg>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t.reader.tocSearch}
-            aria-label={t.reader.tocSearch}
-            inputMode="text"
-            enterKeyHint="go"
-          />
-          {query && (
-            <button
-              type="button"
-              className="mu-rside-search-clear"
-              onClick={() => setQuery("")}
-              aria-label="Clear"
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </form>
-        {tocItems.length === 0 ? (
-          <p className="mu-rside-hint">{t.reader.tocNoResults}</p>
-        ) : (
+    <>
+      <form className="mu-rside-search" onSubmit={handleSubmit}>
+        <svg className="mu-rside-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.3-4.3" />
+        </svg>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t.reader.tocSearch}
+          aria-label={t.reader.tocSearch}
+          inputMode="text"
+          enterKeyHint="go"
+          autoFocus={autoFocus}
+        />
+        {query && (
+          <button
+            type="button"
+            className="mu-rside-search-clear"
+            onClick={() => setQuery("")}
+            aria-label="Clear"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </form>
+      {tocItems.length === 0 ? (
+        <p className="mu-rside-hint">{t.reader.tocNoResults}</p>
+      ) : (
         <ul className="mu-rside-toc">
           {tocItems.map((ayah, i) => {
             const next = !query.trim() ? (tocItems[i + 1]?.ayahNumber ?? Infinity) : ayah.ayahNumber + 1;
             const isActive = activeAyah >= ayah.ayahNumber && activeAyah < next;
             return (
-            <li key={ayah.ayahNumber} className={isActive ? "on" : ""}>
-              <button onClick={() => scrollToAyah(ayah.ayahNumber)}>
-                <span className="mu-rside-toc-num">
-                  {String(ayah.ayahNumber).padStart(2, "0")}
-                </span>
-                <span className="mu-rside-toc-text">
-                  {ayah.translation
-                    ? ayah.translation.slice(0, 60) + (ayah.translation.length > 60 ? "..." : "")
-                    : `Ayet ${ayah.ayahNumber}`}
-                </span>
-              </button>
-            </li>
+              <li key={ayah.ayahNumber} className={isActive ? "on" : ""}>
+                <button onClick={() => scrollToAyah(ayah.ayahNumber)}>
+                  <span className="mu-rside-toc-num">
+                    {String(ayah.ayahNumber).padStart(2, "0")}
+                  </span>
+                  <span className="mu-rside-toc-text">
+                    {ayah.translation
+                      ? ayah.translation.slice(0, 60) + (ayah.translation.length > 60 ? "..." : "")
+                      : `Ayet ${ayah.ayahNumber}`}
+                  </span>
+                </button>
+              </li>
             );
           })}
         </ul>
-        )}
+      )}
+    </>
+  );
+}
+
+function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarProps) {
+  const { t } = useTranslation();
+  const arabicFontSize = useSettingsStore((s) => s.arabicFontSize);
+  const setArabicFontSize = useSettingsStore((s) => s.setArabicFontSize);
+  const bookmarks = useBookmarksStore((s) => s.bookmarks);
+  const STEP = 0.15;
+  const sizeInPx = Math.round(arabicFontSize * 16);
+
+  const surahBookmarks = bookmarks.filter((b) => b.surahId === surahId);
+
+  const scrollToAyah = useCallback((ayahNumber: number) => {
+    const el = ayahRefs.current?.get(ayahNumber);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.add("mu-flash");
+    setTimeout(() => el.classList.remove("mu-flash"), 3000);
+  }, [ayahRefs]);
+
+  return (
+    <aside className="mu-rside">
+      {/* Table of Contents */}
+      <div className="mu-rside-block">
+        <h3 className="mu-rside-label">{t.reader.toc}</h3>
+        <TocSearchList
+          ayahList={ayahList}
+          activeAyah={activeAyah}
+          scrollToAyah={scrollToAyah}
+        />
       </div>
 
       {/* Font size control */}
@@ -796,6 +837,103 @@ function SurahSidebar({ ayahList, activeAyah, surahId, ayahRefs }: SurahSidebarP
         )}
       </div>
     </aside>
+  );
+}
+
+// -- Mobile TOC FAB (floating button + bottom sheet) --
+// Mirrors the desktop sidebar's TOC + search so verses are jumpable on phones,
+// where .mu-rside is hidden by responsive CSS.
+
+function MobileTocFab({
+  ayahList,
+  activeAyah,
+  ayahRefs,
+}: {
+  ayahList: Array<{ ayahNumber: number; translation: string | null }>;
+  activeAyah: number;
+  ayahRefs: React.RefObject<Map<number, HTMLElement>>;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKey, true);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey, true);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
+  const scrollToAyah = useCallback((ayahNumber: number) => {
+    const el = ayahRefs.current?.get(ayahNumber);
+    if (!el) return;
+    setOpen(false);
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("mu-flash");
+      setTimeout(() => el.classList.remove("mu-flash"), 3000);
+    });
+  }, [ayahRefs]);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mu-toc-fab"
+        aria-label={t.reader.toc}
+        title={t.reader.toc}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4 6h13" />
+          <path d="M4 12h13" />
+          <path d="M4 18h9" />
+          <circle cx="20" cy="6" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="20" cy="12" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="17" cy="18" r="0.9" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+
+      {open && (
+        <>
+          <div className="mu-toc-sheet-backdrop" onClick={() => setOpen(false)} />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.reader.toc}
+            className="mu-toc-sheet"
+          >
+            <div className="mu-toc-sheet-grip" aria-hidden="true" />
+            <div className="mu-toc-sheet-head">
+              <h3>{t.reader.toc}</h3>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="mu-icon-btn"
+                aria-label={t.settings.close}
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M5 5L13 13M13 5L5 13" />
+                </svg>
+              </button>
+            </div>
+            <div className="mu-toc-sheet-body">
+              <TocSearchList
+                ayahList={ayahList}
+                activeAyah={activeAyah}
+                scrollToAyah={scrollToAyah}
+              />
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
 

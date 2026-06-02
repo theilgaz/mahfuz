@@ -7093,3 +7093,111 @@ a:has(> .mu-roadmap-node):hover .mu-roadmap-node-content {
     radial-gradient(1200px 600px at 100% -200px, rgba(180,140,70,0.08), transparent 60%),
     radial-gradient(900px 500px at -200px 40%, rgba(180,140,70,0.06), transparent 60%);
 }
+
+/* ── Mobile TOC FAB + bottom sheet ──────────────────── */
+/* Visible only where the right sidebar is hidden (≤960px). */
+
+.mu-toc-fab {
+  display: none;
+  position: fixed;
+  right: 16px;
+  bottom: 128px;
+  z-index: 40;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--mu-bg-card);
+  color: var(--mu-ink-2);
+  border: 1px solid var(--mu-line);
+  box-shadow: var(--mu-shadow-md);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+
+.mu-toc-fab:hover {
+  background: var(--mu-bg-soft);
+  color: var(--mu-accent-ink);
+}
+
+.mu-toc-fab:active {
+  transform: scale(0.96);
+}
+
+@media (max-width: 960px) {
+  .mu-toc-fab {
+    display: flex;
+  }
+}
+
+.mu-toc-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: color-mix(in oklab, var(--mu-ink), transparent 70%);
+  backdrop-filter: blur(2px);
+  animation: mu-toc-fade 0.15s ease-out;
+}
+
+.mu-toc-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  max-height: 78vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--mu-bg-card);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  border-top: 1px solid var(--mu-line);
+  box-shadow: var(--mu-shadow-md);
+  animation: mu-toc-slide 0.22s cubic-bezier(.2,.8,.2,1);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+@keyframes mu-toc-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mu-toc-slide {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+
+.mu-toc-sheet-grip {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--mu-line-2);
+  margin: 8px auto 4px;
+}
+
+.mu-toc-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 18px 4px;
+}
+
+.mu-toc-sheet-head h3 {
+  font-family: var(--mu-ff-display);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--mu-ink);
+  margin: 0;
+}
+
+.mu-toc-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 18px 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mu-toc-sheet-body .mu-rside-toc {
+  margin-top: 4px;
+}
