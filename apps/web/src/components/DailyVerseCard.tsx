@@ -8,15 +8,6 @@ import { useTranslation } from "~/hooks/useTranslation";
 import { surahSlug } from "~/lib/surah-slugs";
 import { getSurahName } from "~/lib/surah-names-i18n";
 
-/** Decode HTML entities like &quot; &amp; etc. */
-function decodeEntities(text: string): string {
-  if (!text || !text.includes("&")) return text;
-  const el = typeof document !== "undefined" ? document.createElement("textarea") : null;
-  if (!el) return text.replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'");
-  el.innerHTML = text;
-  return el.value;
-}
-
 export function DailyVerseCard() {
   const { t, locale } = useTranslation();
   const { data, isLoading } = useDailyVerse(locale);
@@ -39,7 +30,7 @@ export function DailyVerseCard() {
 
   const { verse, translation, surah } = data;
   const slug = surah ? surahSlug(surah.id) : "";
-  const translationText = translation ? decodeEntities(translation.text) : null;
+  const translationText = translation?.text ?? null;
 
   return (
     <div className="mu-today-card" style={{ marginBottom: 0 }}>

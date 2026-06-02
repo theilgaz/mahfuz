@@ -11,6 +11,20 @@ import { db } from "~/db";
 import { surahs, ayahs, translations, translationSources, reciters } from "~/db/quran-schema";
 import { eq, and, asc, desc, inArray, ne, sql } from "drizzle-orm";
 
+/** Decode HTML entities (Diyanet meali tirnak icin &quot; gonderiyor). */
+function decodeEntities(text: string): string {
+  if (!text || text.indexOf("&") === -1) return text;
+  return text
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#34;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+}
+
 // ── Sureler ──────────────────────────────────────────────
 
 export const getSurahs = createServerFn({ method: "GET" }).handler(async () => {
@@ -81,10 +95,12 @@ export const getTranslationsForPage = createServerFn({ method: "GET" })
       .orderBy(asc(translations.surahId), asc(translations.ayahNumber));
 
     // Sadece sayfadaki ayet numaralarını filtrele
-    return results.filter((t) => {
-      const nums = ayahNumbers[t.surahId];
-      return nums && nums.includes(t.ayahNumber);
-    });
+    return results
+      .filter((t) => {
+        const nums = ayahNumbers[t.surahId];
+        return nums && nums.includes(t.ayahNumber);
+      })
+      .map((t) => ({ ...t, text: decodeEntities(t.text) }));
   });
 
 export const getTranslationSources = createServerFn({ method: "GET" }).handler(async () => {
@@ -150,7 +166,7 @@ export const getPageData = createServerFn({ method: "GET" })
         const slug = sourceIdToSlug.get(t.sourceId)!;
         let map = translationMaps.get(slug);
         if (!map) { map = new Map(); translationMaps.set(slug, map); }
-        map.set(`${t.surahId}:${t.ayahNumber}`, t.text);
+        map.set(`${t.surahId}:${t.ayahNumber}`, decodeEntities(t.text));
       }
     }
 
@@ -264,7 +280,7 @@ export const getDailyVerse = createServerFn({ method: "GET" })
 
   return {
     verse,
-    translation: translation ?? null,
+    translation: translation ? { ...translation, text: decodeEntities(translation.text) } : null,
     surah: surah ?? null,
   };
 });
@@ -298,6 +314,7 @@ export const getTranslationsForVerse = createServerFn({ method: "GET" })
     // Join with source info for display
     return rows.map((r) => ({
       ...r,
+      text: decodeEntities(r.text),
       source: sources.find((s) => s.id === r.sourceId) ?? null,
     }));
   });
@@ -342,7 +359,7 @@ export const getSurahData = createServerFn({ method: "GET" })
         const slug = sourceIdToSlug.get(t.sourceId)!;
         let map = translationMaps.get(slug);
         if (!map) { map = new Map(); translationMaps.set(slug, map); }
-        map.set(t.ayahNumber, t.text);
+        map.set(t.ayahNumber, decodeEntities(t.text));
       }
     }
 
