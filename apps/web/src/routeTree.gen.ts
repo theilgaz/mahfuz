@@ -15,7 +15,6 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReciteRouteImport } from './routes/recite'
 import { Route as PromoRouteImport } from './routes/promo'
-import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as NotesRouteImport } from './routes/notes'
 import { Route as MahfuzRouteImport } from './routes/mahfuz'
@@ -27,12 +26,14 @@ import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as MeclisIndexRouteImport } from './routes/meclis/index'
 import { Route as KhatmIndexRouteImport } from './routes/khatm/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as AlifbaIndexRouteImport } from './routes/alifba/index'
 import { Route as TafsirVerseKeyRouteImport } from './routes/tafsir/$verseKey'
 import { Route as SurahSurahSlugRouteImport } from './routes/surah/$surahSlug'
+import { Route as ProfilePrivacyRouteImport } from './routes/profile/privacy'
 import { Route as PagePageNumberRouteImport } from './routes/page/$pageNumber'
 import { Route as MeclisCodeRouteImport } from './routes/meclis/$code'
 import { Route as KhatmGroupIdRouteImport } from './routes/khatm/$groupId'
@@ -106,11 +107,6 @@ const PromoRoute = PromoRouteImport.update({
   path: '/promo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
@@ -166,6 +162,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileIndexRoute = ProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MeclisIndexRoute = MeclisIndexRouteImport.update({
   id: '/meclis/',
   path: '/meclis/',
@@ -194,6 +195,11 @@ const TafsirVerseKeyRoute = TafsirVerseKeyRouteImport.update({
 const SurahSurahSlugRoute = SurahSurahSlugRouteImport.update({
   id: '/surah/$surahSlug',
   path: '/surah/$surahSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilePrivacyRoute = ProfilePrivacyRouteImport.update({
+  id: '/profile/privacy',
+  path: '/profile/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PagePageNumberRoute = PagePageNumberRouteImport.update({
@@ -419,7 +425,6 @@ export interface FileRoutesByFullPath {
   '/mahfuz': typeof MahfuzRoute
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
-  '/profile': typeof ProfileRoute
   '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
@@ -447,12 +452,14 @@ export interface FileRoutesByFullPath {
   '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
+  '/profile/privacy': typeof ProfilePrivacyRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/tafsir/$verseKey': typeof TafsirVerseKeyRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
   '/khatm/': typeof KhatmIndexRoute
   '/meclis/': typeof MeclisIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/alifba/exam/$stepId': typeof AlifbaExamStepIdRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
@@ -486,7 +493,6 @@ export interface FileRoutesByTo {
   '/mahfuz': typeof MahfuzRoute
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
-  '/profile': typeof ProfileRoute
   '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
@@ -512,12 +518,14 @@ export interface FileRoutesByTo {
   '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
+  '/profile/privacy': typeof ProfilePrivacyRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/tafsir/$verseKey': typeof TafsirVerseKeyRoute
   '/alifba': typeof AlifbaIndexRoute
   '/games': typeof GamesIndexRoute
   '/khatm': typeof KhatmIndexRoute
   '/meclis': typeof MeclisIndexRoute
+  '/profile': typeof ProfileIndexRoute
   '/alifba/exam/$stepId': typeof AlifbaExamStepIdRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
@@ -553,7 +561,6 @@ export interface FileRoutesById {
   '/mahfuz': typeof MahfuzRoute
   '/notes': typeof NotesRoute
   '/premium': typeof PremiumRoute
-  '/profile': typeof ProfileRoute
   '/promo': typeof PromoRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
@@ -581,12 +588,14 @@ export interface FileRoutesById {
   '/khatm/$groupId': typeof KhatmGroupIdRoute
   '/meclis/$code': typeof MeclisCodeRoute
   '/page/$pageNumber': typeof PagePageNumberRoute
+  '/profile/privacy': typeof ProfilePrivacyRoute
   '/surah/$surahSlug': typeof SurahSurahSlugRoute
   '/tafsir/$verseKey': typeof TafsirVerseKeyRoute
   '/alifba/': typeof AlifbaIndexRoute
   '/games/': typeof GamesIndexRoute
   '/khatm/': typeof KhatmIndexRoute
   '/meclis/': typeof MeclisIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/alifba/exam/$stepId': typeof AlifbaExamStepIdRoute
   '/alifba/games/fill': typeof AlifbaGamesFillRoute
   '/alifba/games/memory': typeof AlifbaGamesMemoryRoute
@@ -623,7 +632,6 @@ export interface FileRouteTypes {
     | '/mahfuz'
     | '/notes'
     | '/premium'
-    | '/profile'
     | '/promo'
     | '/recite'
     | '/search'
@@ -651,12 +659,14 @@ export interface FileRouteTypes {
     | '/khatm/$groupId'
     | '/meclis/$code'
     | '/page/$pageNumber'
+    | '/profile/privacy'
     | '/surah/$surahSlug'
     | '/tafsir/$verseKey'
     | '/alifba/'
     | '/games/'
     | '/khatm/'
     | '/meclis/'
+    | '/profile/'
     | '/alifba/exam/$stepId'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
@@ -690,7 +700,6 @@ export interface FileRouteTypes {
     | '/mahfuz'
     | '/notes'
     | '/premium'
-    | '/profile'
     | '/promo'
     | '/recite'
     | '/search'
@@ -716,12 +725,14 @@ export interface FileRouteTypes {
     | '/khatm/$groupId'
     | '/meclis/$code'
     | '/page/$pageNumber'
+    | '/profile/privacy'
     | '/surah/$surahSlug'
     | '/tafsir/$verseKey'
     | '/alifba'
     | '/games'
     | '/khatm'
     | '/meclis'
+    | '/profile'
     | '/alifba/exam/$stepId'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
@@ -756,7 +767,6 @@ export interface FileRouteTypes {
     | '/mahfuz'
     | '/notes'
     | '/premium'
-    | '/profile'
     | '/promo'
     | '/recite'
     | '/search'
@@ -784,12 +794,14 @@ export interface FileRouteTypes {
     | '/khatm/$groupId'
     | '/meclis/$code'
     | '/page/$pageNumber'
+    | '/profile/privacy'
     | '/surah/$surahSlug'
     | '/tafsir/$verseKey'
     | '/alifba/'
     | '/games/'
     | '/khatm/'
     | '/meclis/'
+    | '/profile/'
     | '/alifba/exam/$stepId'
     | '/alifba/games/fill'
     | '/alifba/games/memory'
@@ -825,7 +837,6 @@ export interface RootRouteChildren {
   MahfuzRoute: typeof MahfuzRoute
   NotesRoute: typeof NotesRoute
   PremiumRoute: typeof PremiumRoute
-  ProfileRoute: typeof ProfileRoute
   PromoRoute: typeof PromoRoute
   ReciteRoute: typeof ReciteRoute
   SearchRoute: typeof SearchRoute
@@ -844,11 +855,13 @@ export interface RootRouteChildren {
   KhatmGroupIdRoute: typeof KhatmGroupIdRoute
   MeclisCodeRoute: typeof MeclisCodeRoute
   PagePageNumberRoute: typeof PagePageNumberRoute
+  ProfilePrivacyRoute: typeof ProfilePrivacyRoute
   SurahSurahSlugRoute: typeof SurahSurahSlugRoute
   TafsirVerseKeyRoute: typeof TafsirVerseKeyRoute
   AlifbaIndexRoute: typeof AlifbaIndexRoute
   KhatmIndexRoute: typeof KhatmIndexRoute
   MeclisIndexRoute: typeof MeclisIndexRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
   AlifbaQuizFormsRoute: typeof AlifbaQuizFormsRoute
   AlifbaQuizVoiceRoute: typeof AlifbaQuizVoiceRoute
   AlifbaStepStepIdRoute: typeof AlifbaStepStepIdRoute
@@ -905,13 +918,6 @@ declare module '@tanstack/react-router' {
       path: '/promo'
       fullPath: '/promo'
       preLoaderRoute: typeof PromoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/premium': {
@@ -991,6 +997,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/meclis/': {
       id: '/meclis/'
       path: '/meclis'
@@ -1031,6 +1044,13 @@ declare module '@tanstack/react-router' {
       path: '/surah/$surahSlug'
       fullPath: '/surah/$surahSlug'
       preLoaderRoute: typeof SurahSurahSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/privacy': {
+      id: '/profile/privacy'
+      path: '/profile/privacy'
+      fullPath: '/profile/privacy'
+      preLoaderRoute: typeof ProfilePrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/page/$pageNumber': {
@@ -1427,7 +1447,6 @@ const rootRouteChildren: RootRouteChildren = {
   MahfuzRoute: MahfuzRoute,
   NotesRoute: NotesRoute,
   PremiumRoute: PremiumRoute,
-  ProfileRoute: ProfileRoute,
   PromoRoute: PromoRoute,
   ReciteRoute: ReciteRoute,
   SearchRoute: SearchRoute,
@@ -1446,11 +1465,13 @@ const rootRouteChildren: RootRouteChildren = {
   KhatmGroupIdRoute: KhatmGroupIdRoute,
   MeclisCodeRoute: MeclisCodeRoute,
   PagePageNumberRoute: PagePageNumberRoute,
+  ProfilePrivacyRoute: ProfilePrivacyRoute,
   SurahSurahSlugRoute: SurahSurahSlugRoute,
   TafsirVerseKeyRoute: TafsirVerseKeyRoute,
   AlifbaIndexRoute: AlifbaIndexRoute,
   KhatmIndexRoute: KhatmIndexRoute,
   MeclisIndexRoute: MeclisIndexRoute,
+  ProfileIndexRoute: ProfileIndexRoute,
   AlifbaQuizFormsRoute: AlifbaQuizFormsRoute,
   AlifbaQuizVoiceRoute: AlifbaQuizVoiceRoute,
   AlifbaStepStepIdRoute: AlifbaStepStepIdRoute,

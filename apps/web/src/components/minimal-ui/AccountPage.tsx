@@ -47,6 +47,8 @@ type QuickPath =
   | "/khatm"
   | "/discover";
 
+type AccountLink = "/profile/privacy";
+
 export function AccountPage({ user }: AccountPageProps) {
   const router = useRouter();
   const { t } = useTranslation();
@@ -195,6 +197,13 @@ export function AccountPage({ user }: AccountPageProps) {
         <span className="mu-pf-premium-cta">{t.profile?.upgrade ?? "Yükselt"}</span>
       </Link>
 
+      <AccountRow
+        to="/profile/privacy"
+        icon={MuIcons.lock}
+        title={t.profile?.privacy ?? "Gizlilik"}
+        hint={t.profile?.privacyHint ?? "Skor tablosunda adının nasıl görüneceğini seç"}
+      />
+
       {/* Sign out */}
       <div className="mu-account-foot">
         <button
@@ -231,6 +240,51 @@ function QuickAction({ to, icon, label, count }: { to: QuickPath; icon: ReactNod
       <span className="mu-pf-qa-ico" aria-hidden="true">{icon}</span>
       <span className="mu-pf-qa-l">{label}</span>
       <span className="mu-pf-qa-c">{count ?? " "}</span>
+    </Link>
+  );
+}
+
+function AccountRow({ to, icon, title, hint }: { to: AccountLink; icon: ReactNode; title: string; hint: string }) {
+  return (
+    <Link
+      to={to}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        textDecoration: "none",
+        color: "inherit",
+        background: "var(--mu-bg-card)",
+        border: "1px solid var(--mu-line)",
+        borderRadius: 16,
+        padding: "14px 16px",
+        marginTop: 10,
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          flexShrink: 0,
+          display: "grid",
+          placeItems: "center",
+          background: "var(--mu-accent-soft)",
+          color: "var(--mu-accent-ink)",
+        }}
+      >
+        {icon}
+      </span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ display: "block", fontFamily: "var(--mu-ff-display)", fontWeight: 500, fontSize: 15, color: "var(--mu-ink)" }}>
+          {title}
+        </span>
+        <span style={{ display: "block", fontSize: 12.5, color: "var(--mu-muted)", marginTop: 1 }}>{hint}</span>
+      </span>
+      <span aria-hidden="true" style={{ color: "var(--mu-muted)", flexShrink: 0 }}>
+        {MuIcons.chev}
+      </span>
     </Link>
   );
 }

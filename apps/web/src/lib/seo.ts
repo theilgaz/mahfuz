@@ -56,6 +56,7 @@ const STATIC: Record<string, HeadMeta> = {
   notes: { title: "Notlarım", description: "Ayetlere düştüğün notlar tek yerde." },
   premium: { title: "Mürşid Plan", description: "Mahfuz'un genişletilmiş özellikleri ve planlar." },
   profile: { title: "Profilim", description: "İstatistiklerin, hifz durumun ve hesap ayarların." },
+  "profile-privacy": { title: "Gizlilik", description: "Skor tablosunda adının nasıl görüneceğini seç." },
   promo: { title: "Mahfuz" },
   recite: { title: "Tilavet", description: "Mikrofonla ayet okuma, doğrulama ve takip modu." },
   search: { title: "Arama", description: "Kuran metninde ve çevirilerde tam metin arama." },
