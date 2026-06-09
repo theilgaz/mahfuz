@@ -84,6 +84,16 @@ export class AudioEngine {
         this.callbacks.onPlaybackStateChange("playing");
       }
     });
+    
+    // Log preload errors (don't propagate to UI)
+    this.preloadAudio.addEventListener("error", () => {
+      const error = this.preloadAudio.error;
+      console.warn("[AudioEngine] Preload failed:", {
+        code: error?.code,
+        message: error?.message,
+        url: this.preloadAudio.src
+      });
+    });
   }
 
   // --- Playlist (verse mode) ---
@@ -106,6 +116,16 @@ export class AudioEngine {
     this.playlist = []; // clear verse playlist
 
     const url = normalizeUrl(data.audioUrl);
+    
+    // Validate URL
+    if (!url || url === AUDIO_CDN) {
+      console.error("[AudioEngine] Invalid or empty chapter audio URL:", data.audioUrl);
+      this.callbacks.onError(new Error("Invalid chapter audio URL"));
+      return;
+    }
+
+    console.log("[AudioEngine] Loading chapter audio:", url, "verses:", data.verseTimings.length);
+    
     this.audio.src = url;
     this.audio.playbackRate = this._speed;
     this.audio.volume = this._volume;
@@ -361,6 +381,15 @@ export class AudioEngine {
     const verse = this.playlist[index];
     const url = normalizeUrl(verse.url);
 
+    // Validate URL
+    if (!url || url === AUDIO_CDN) {
+      console.error("[AudioEngine] Invalid or empty URL for verse:", verse.verseKey);
+      this.callbacks.onError(new Error(`Invalid audio URL for verse ${verse.verseKey}`));
+      return;
+    }
+
+    console.log("[AudioEngine] Loading verse:", verse.verseKey, "URL:", url);
+
     this.stopWordSync();
     this.callbacks.onWordPositionChange(null);
     this.callbacks.onVerseChange(verse.verseKey, index);
@@ -381,8 +410,10 @@ export class AudioEngine {
   private preloadNext(nextIndex: number): void {
     if (nextIndex < this.playlist.length) {
       const nextUrl = normalizeUrl(this.playlist[nextIndex].url);
-      this.preloadAudio.src = nextUrl;
-      this.preloadAudio.load();
+      if (nextUrl && nextUrl !== AUDIO_CDN) {
+        this.preloadAudio.src = nextUrl;
+        this.preloadAudio.load();
+      }
     }
   }
 
@@ -458,9 +489,39 @@ export class AudioEngine {
 
   private handleError = (): void => {
     const error = this.audio.error;
-    this.callbacks.onError(
-      new Error(error?.message ?? "Audio playback error"),
-    );
+    const src = this.audio.src || "(no source)";
+    
+    // Map MediaError codes to readable messages
+    let errorDetails = "Unknown error";
+    if (error) {
+      switch (error.code) {
+        case MediaError.MEDIA_ERR_ABORTED:
+          errorDetails = "Playback aborted";
+          break;
+        case MediaError.MEDIA_ERR_NETWORK:
+          errorDetails = "Network error while loading";
+          break;
+        case MediaError.MEDIA_ERR_DECODE:
+          errorDetails = "Decode error (corrupt or unsupported format)";
+          break;
+        case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+          errorDetails = "Source not supported or not found";
+          break;
+      }
+      if (error.message) {
+        errorDetails += `: ${error.message}`;
+      }
+    }
+    
+    const fullError = new Error(`MEDIA_ELEMENT_ERROR: ${errorDetails}\nURL: ${src}`);
+    console.error("[AudioEngine]", fullError);
+    console.error("[AudioEngine] MediaError details:", { 
+      code: error?.code, 
+      message: error?.message,
+      url: src 
+    });
+    
+    this.callbacks.onError(fullError);
     this.callbacks.onPlaybackStateChange("idle");
   };
 
